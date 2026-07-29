@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Phone,
-  MessageCircle, Mail, User,
+  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User,
 } from "lucide-react";
 import { fetchProperty, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
