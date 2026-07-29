@@ -15,18 +15,17 @@ export type Property = {
   listing_type: "rent" | "sale";
   status: string;
   images: string[];
-  owner_name: string;
-  owner_phone: string;
-  owner_whatsapp: string | null;
-  owner_email: string | null;
   is_featured: boolean;
   created_at: string;
 };
 
+const PUBLIC_COLUMNS =
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+
 export async function fetchProperties(): Promise<Property[]> {
   const { data, error } = await (supabase as any)
     .from("properties")
-    .select("*")
+    .select(PUBLIC_COLUMNS)
     .eq("is_approved", true)
     .order("is_featured", { ascending: false })
     .order("created_at", { ascending: false });
@@ -37,7 +36,7 @@ export async function fetchProperties(): Promise<Property[]> {
 export async function fetchProperty(id: string): Promise<Property | null> {
   const { data, error } = await (supabase as any)
     .from("properties")
-    .select("*")
+    .select(PUBLIC_COLUMNS)
     .eq("id", id)
     .eq("is_approved", true)
     .maybeSingle();
