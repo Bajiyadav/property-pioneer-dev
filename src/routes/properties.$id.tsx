@@ -1,12 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User,
 } from "lucide-react";
 import { fetchProperty, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
+import { submitEnquiry } from "@/lib/enquiries";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 
 export const Route = createFileRoute("/properties/$id")({
   head: ({ params }) => ({
@@ -42,6 +44,7 @@ function PropertyDetail() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+      <PropertyStructuredData property={property} />
       <Link
         to="/properties"
         search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
