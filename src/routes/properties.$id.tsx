@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Phone,
-  MessageCircle, Mail, User,
+  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User,
 } from "lucide-react";
 import { fetchProperty, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
@@ -40,9 +39,6 @@ function PropertyDetail() {
   if (isError || !property) throw notFound();
 
   const saved = has(property.id);
-  const whatsappNumber = (property.owner_whatsapp || property.owner_phone).replace(/[^\d]/g, "");
-  const whatsappMsg = encodeURIComponent(`Hi ${property.owner_name}, I'm interested in "${property.title}" on Nestwise.`);
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMsg}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
@@ -135,29 +131,15 @@ function PropertyDetail() {
                 <User className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">{property.owner_name}</p>
-                <p className="text-xs text-muted-foreground">Listed by owner</p>
+                <p className="text-sm font-semibold text-foreground">Listed by owner</p>
+                <p className="text-xs text-muted-foreground">Contact via enquiry</p>
               </div>
             </div>
 
             <div className="mt-5 grid gap-2">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-foreground transition hover:brightness-110"
-              >
-                <MessageCircle className="h-4 w-4" /> WhatsApp owner
-              </a>
-              <a
-                href={`tel:${property.owner_phone}`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
-              >
-                <Phone className="h-4 w-4" /> Call {property.owner_phone}
-              </a>
               <button
                 onClick={() => setEnquiryOpen((v) => !v)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-secondary"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
               >
                 <Mail className="h-4 w-4" /> Send enquiry
               </button>
