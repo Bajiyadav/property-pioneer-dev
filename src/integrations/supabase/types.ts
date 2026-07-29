@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      enquiries: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          message: string
+          name: string
+          phone: string
+          property_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          name: string
+          phone: string
+          property_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          name?: string
+          phone?: string
+          property_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           address: string
