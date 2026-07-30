@@ -79,9 +79,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Nestwise — Find your next home" },
+      { title: "Urban Rental Flats — Find your next home" },
       { name: "description", content: "Browse curated rental and sale properties across India's best cities." },
-      { property: "og:title", content: "Nestwise — Find your next home" },
+      { property: "og:title", content: "Urban Rental Flats — Find your next home" },
       { property: "og:description", content: "Browse curated rental and sale properties across India's best cities." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -145,7 +145,7 @@ function SiteHeader() {
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
             <Home className="h-4 w-4" strokeWidth={2.5} />
           </span>
-          Nestwise
+          Urban Rental Flats
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link
@@ -173,9 +173,9 @@ function SiteFooter() {
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-        <p className="font-[family-name:var(--font-display)] text-base text-foreground">Nestwise</p>
+        <p className="font-[family-name:var(--font-display)] text-base text-foreground">Urban Rental Flats</p>
         <p>Homes for the way you live now.</p>
-        <p>© {new Date().getFullYear()} Nestwise</p>
+        <p>© {new Date().getFullYear()} Urban Rental Flats</p>
       </div>
     </footer>
   );

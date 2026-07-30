@@ -8,9 +8,9 @@ import { PropertyCard } from "@/components/PropertyCard";
 export const Route = createFileRoute("/properties/")({
   head: () => ({
     meta: [
-      { title: "Browse homes — Nestwise" },
+      { title: "Browse homes — Urban Rental Flats" },
       { name: "description", content: "Search rentals and homes for sale by city, price, and bedrooms." },
-      { property: "og:title", content: "Browse homes — Nestwise" },
+      { property: "og:title", content: "Browse homes — Urban Rental Flats" },
       { property: "og:description", content: "Search rentals and homes for sale by city, price, and bedrooms." },
     ],
   }),
