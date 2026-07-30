@@ -13,7 +13,7 @@ import { TurnstileWidget } from "@/components/TurnstileWidget";
 export const Route = createFileRoute("/properties/$id")({
   head: ({ params }) => ({
     meta: [
-      { title: `Property ${params.id.slice(0, 6)} — Nestwise` },
+      { title: `Property ${params.id.slice(0, 6)} — Urban Rental Flats` },
       { name: "description", content: "View details, photos, and contact the owner directly." },
     ],
   }),

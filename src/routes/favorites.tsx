@@ -8,7 +8,7 @@ import { useFavorites } from "@/lib/useFavorites";
 export const Route = createFileRoute("/favorites")({
   head: () => ({
     meta: [
-      { title: "Your saved homes — Nestwise" },
+      { title: "Your saved homes — Urban Rental Flats" },
       { name: "description", content: "Homes you've saved to revisit later." },
     ],
   }),

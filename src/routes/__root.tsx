@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
-import { Home, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
+import urfLogo from "../assets/urf-logo.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -79,9 +80,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Nestwise — Find your next home" },
+      { title: "Urban Rental Flats — Find your next home" },
       { name: "description", content: "Browse curated rental and sale properties across India's best cities." },
-      { property: "og:title", content: "Nestwise — Find your next home" },
+      { property: "og:title", content: "Urban Rental Flats — Find your next home" },
       { property: "og:description", content: "Browse curated rental and sale properties across India's best cities." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -142,10 +143,9 @@ function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-foreground">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Home className="h-4 w-4" strokeWidth={2.5} />
-          </span>
-          Nestwise
+          <img src={urfLogo.url} alt="Urban Rental Flats logo" className="h-9 w-auto" />
+          <span className="hidden sm:inline">Urban Rental Flats</span>
+          <span className="sm:hidden">URF</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link
@@ -173,9 +173,9 @@ function SiteFooter() {
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-        <p className="font-[family-name:var(--font-display)] text-base text-foreground">Nestwise</p>
+        <p className="font-[family-name:var(--font-display)] text-base text-foreground">Urban Rental Flats</p>
         <p>Homes for the way you live now.</p>
-        <p>© {new Date().getFullYear()} Nestwise</p>
+        <p>© {new Date().getFullYear()} Urban Rental Flats</p>
       </div>
     </footer>
   );
