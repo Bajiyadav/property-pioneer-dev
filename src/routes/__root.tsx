@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
-import { Home, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
+import urfLogo from "../assets/urf-logo.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -142,10 +143,9 @@ function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-foreground">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-            <Home className="h-4 w-4" strokeWidth={2.5} />
-          </span>
-          Urban Rental Flats
+          <img src={urfLogo.url} alt="Urban Rental Flats logo" className="h-9 w-auto" />
+          <span className="hidden sm:inline">Urban Rental Flats</span>
+          <span className="sm:hidden">URF</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link
