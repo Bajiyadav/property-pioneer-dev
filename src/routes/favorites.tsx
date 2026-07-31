@@ -10,6 +10,10 @@ export const Route = createFileRoute("/favorites")({
     meta: [
       { title: "Your saved homes — Urban Rental Flats" },
       { name: "description", content: "Homes you've saved to revisit later." },
+      { property: "og:title", content: "Your saved homes — Urban Rental Flats" },
+      { property: "og:description", content: "Homes you've saved to revisit later on Urban Rental Flats." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: FavoritesPage,
