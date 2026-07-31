@@ -13,12 +13,14 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
 import { Heart } from "lucide-react";
-import urfLogo from "../assets/urf-logo.png.asset.json";
+import { BrandMark } from "@/components/BrandMark";
+import { BRAND } from "@/config/platform";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <BrandMark size="md" className="justify-center" />
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -47,6 +49,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <BrandMark size="md" className="justify-center" />
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
@@ -142,10 +145,8 @@ function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-foreground">
-          <img src={urfLogo.url} alt="Urban Rental Flats logo" className="h-9 w-auto" />
-          <span className="hidden sm:inline">Urban Rental Flats</span>
-          <span className="sm:hidden">URF</span>
+        <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center">
+          <BrandMark responsiveName />
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <Link
@@ -173,9 +174,9 @@ function SiteFooter() {
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-        <p className="font-[family-name:var(--font-display)] text-base text-foreground">Urban Rental Flats</p>
-        <p>Homes for the way you live now.</p>
-        <p>© {new Date().getFullYear()} Urban Rental Flats</p>
+        <BrandMark size="sm" />
+        <p>{BRAND.tagline}</p>
+        <p>© {new Date().getFullYear()} {BRAND.name}</p>
       </div>
     </footer>
   );
