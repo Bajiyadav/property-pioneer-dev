@@ -15,6 +15,10 @@ export const Route = createFileRoute("/properties/$id")({
     meta: [
       { title: `Property ${params.id.slice(0, 6)} — Urban Rental Flats` },
       { name: "description", content: "View details, photos, and contact the owner directly." },
+      { property: "og:title", content: `Property ${params.id.slice(0, 6)} — Urban Rental Flats` },
+      { property: "og:description", content: "View details, photos, and contact the owner directly on Urban Rental Flats." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PropertyDetail,
