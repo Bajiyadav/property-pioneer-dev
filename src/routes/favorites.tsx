@@ -14,7 +14,13 @@ export const Route = createFileRoute("/favorites")({
       { property: "og:description", content: "Homes you've saved to revisit later on Urban Rental Flats." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Your saved homes — Urban Rental Flats" },
+      { name: "twitter:description", content: "Homes you've saved to revisit later on Urban Rental Flats." },
+      { property: "og:url", content: "https://property-pioneer-dev.lovable.app/favorites" },
+      { property: "og:site_name", content: "Urban Rental Flats" },
+      { name: "robots", content: "noindex" },
     ],
+    links: [{ rel: "canonical", href: "https://property-pioneer-dev.lovable.app/favorites" }],
   }),
   component: FavoritesPage,
 });
