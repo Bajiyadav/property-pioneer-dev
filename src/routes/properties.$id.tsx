@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -10,18 +10,70 @@ import { useFavorites } from "@/lib/useFavorites";
 import { submitEnquiry } from "@/lib/enquiries";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 
+const propertyQueryOptions = (id: string) =>
+  queryOptions({ queryKey: ["property", id], queryFn: () => fetchProperty(id) });
+
 export const Route = createFileRoute("/properties/$id")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Property ${params.id.slice(0, 6)} — Urban Rental Flats` },
-      { name: "description", content: "View details, photos, and contact the owner directly." },
-      { property: "og:title", content: `Property ${params.id.slice(0, 6)} — Urban Rental Flats` },
-      { property: "og:description", content: "View details, photos, and contact the owner directly on Urban Rental Flats." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  loader: ({ params, context }) =>
+    context.queryClient.ensureQueryData(propertyQueryOptions(params.id)).catch(() => null),
+  head: ({ params, loaderData }) => {
+    const url = `https://property-pioneer-dev.lovable.app/properties/${params.id}`;
+    if (!loaderData) {
+      return {
+        meta: [
+          { title: "Listing unavailable — Urban Rental Flats" },
+          { name: "description", content: "This listing is no longer available on Urban Rental Flats." },
+          { property: "og:title", content: "Listing unavailable — Urban Rental Flats" },
+          { property: "og:description", content: "This listing is no longer available on Urban Rental Flats." },
+          { property: "og:site_name", content: "Urban Rental Flats" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
+    }
+    const title = `${loaderData.title} — Urban Rental Flats`;
+    const description = `${loaderData.bedrooms} BHK in ${loaderData.city} on Urban Rental Flats. View photos, details, and enquire.`;
+    const image = loaderData.images?.[0];
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        { property: "og:site_name", content: "Urban Rental Flats" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        ...(image && image.startsWith("https://")
+          ? [
+              { property: "og:image", content: image },
+              { name: "twitter:image", content: image },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: PropertyDetail,
+  errorComponent: () => (
+    <div className="mx-auto max-w-2xl px-6 py-20 text-center">
+      <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
+      <p className="mt-2 text-muted-foreground">We couldn't load this listing on Urban Rental Flats.</p>
+      <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
+        Back to browse
+      </Link>
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-2xl px-6 py-20 text-center">
+      <h1 className="text-2xl font-semibold text-foreground">Listing not found</h1>
+      <p className="mt-2 text-muted-foreground">This home is no longer listed on Urban Rental Flats.</p>
+      <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
+        Back to browse
+      </Link>
+    </div>
+  ),
 });
 
 function PropertyDetail() {
