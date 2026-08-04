@@ -7,14 +7,15 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
-import { Heart } from "lucide-react";
+import { Heart, LayoutDashboard, LogIn } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { BRAND } from "@/config/platform";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      router.invalidate();
+      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+    });
+    return () => data.subscription.unsubscribe();
+  }, [router, queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -142,6 +153,22 @@ function RootComponent() {
 }
 
 function SiteHeader() {
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) setSignedIn(Boolean(data.session));
+    });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session));
+    });
+    return () => {
+      active = false;
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -164,6 +191,23 @@ function SiteHeader() {
           >
             <Heart className="h-4 w-4" /> Saved
           </Link>
+          {signedIn === null ? null : signedIn ? (
+            <Link
+              to="/admin"
+              className="rounded-full px-4 py-2 font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground inline-flex items-center gap-1.5"
+              activeProps={{ className: "rounded-full px-4 py-2 font-medium text-foreground bg-secondary inline-flex items-center gap-1.5" }}
+            >
+              <LayoutDashboard className="h-4 w-4" /> Admin
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="rounded-full px-4 py-2 font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground inline-flex items-center gap-1.5"
+              activeProps={{ className: "rounded-full px-4 py-2 font-medium text-foreground bg-secondary inline-flex items-center gap-1.5" }}
+            >
+              <LogIn className="h-4 w-4" /> Sign in
+            </Link>
+          )}
         </nav>
       </div>
     </header>
