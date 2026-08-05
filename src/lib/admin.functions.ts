@@ -2,23 +2,27 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
+// Role check runs through the caller's own RLS-scoped view of user_roles
+// (policy: auth.uid() = user_id), so it cannot be used to probe other users.
+async function isAdmin(context: { supabase: any; userId: string }) {
+  const { data, error } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
   if (error) throw new Error("Could not verify permissions");
-  if (!data) throw new Error("Forbidden");
+  return Boolean(data);
+}
+
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  if (!(await isAdmin(context))) throw new Error("Forbidden");
 }
 
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    return { isAdmin: Boolean(data), userId: context.userId };
+    return { isAdmin: await isAdmin(context as any), userId: context.userId };
   });
 
 export const getAdminOverview = createServerFn({ method: "GET" })
