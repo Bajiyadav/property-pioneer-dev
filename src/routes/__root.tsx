@@ -220,7 +220,7 @@ function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
         <BrandMark size="sm" />
         <p>{BRAND.tagline}</p>
-        <p>© {new Date().getFullYear()} {BRAND.name}</p>
+        <p>© 2022&nbsp;{BRAND.name}</p>
       </div>
     </footer>
   );
