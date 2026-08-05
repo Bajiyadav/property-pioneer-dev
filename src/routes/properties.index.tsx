@@ -5,22 +5,33 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { fetchProperties } from "@/lib/properties";
 import { PropertyCard } from "@/components/PropertyCard";
 
+import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+
 export const Route = createFileRoute("/properties/")({
-  head: () => ({
-    meta: [
-      { title: "Browse homes — Urban Rental Flats" },
-      { name: "description", content: "Search rentals and homes for sale by city, price, and bedrooms." },
-      { property: "og:title", content: "Browse homes — Urban Rental Flats" },
-      { property: "og:description", content: "Search rentals and homes for sale by city, price, and bedrooms." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://property-pioneer-dev.lovable.app/properties" },
-      { property: "og:site_name", content: "Urban Rental Flats" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Browse homes — Urban Rental Flats" },
-      { name: "twitter:description", content: "Search rentals and homes for sale by city, price, and bedrooms." },
-    ],
-    links: [{ rel: "canonical", href: "https://property-pioneer-dev.lovable.app/properties" }],
-  }),
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/properties");
+    const ogImage = getOgImageUrl();
+    const title = `Browse homes — ${APP_NAME}`;
+    const description = "Search rentals and homes for sale by city, price, and bedrooms.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: APP_NAME },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
+        { name: "robots", content: "index, follow" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
   component: PropertiesPage,
 });
 

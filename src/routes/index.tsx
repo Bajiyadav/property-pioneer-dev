@@ -6,22 +6,31 @@ import heroImg from "@/assets/hero.jpg";
 import { fetchProperties } from "@/lib/properties";
 import { PropertyCard } from "@/components/PropertyCard";
 
+import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Urban Rental Flats — Find your next home" },
-      { name: "description", content: "Curated rentals and homes for sale across India. Search by city, price, and bedrooms." },
-      { property: "og:title", content: "Urban Rental Flats — Find your next home" },
-      { property: "og:description", content: "Curated rentals and homes for sale across India." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://property-pioneer-dev.lovable.app/" },
-      { property: "og:site_name", content: "Urban Rental Flats" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Urban Rental Flats — Find your next home" },
-      { name: "twitter:description", content: "Curated rentals and homes for sale across India." },
-    ],
-    links: [{ rel: "canonical", href: "https://property-pioneer-dev.lovable.app/" }],
-  }),
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/");
+    const ogImage = getOgImageUrl();
+    return {
+      meta: [
+        { title: `${APP_NAME} — Find your next home` },
+        { name: "description", content: APP_DESCRIPTION },
+        { property: "og:title", content: `${APP_NAME} — Find your next home` },
+        { property: "og:description", content: APP_DESCRIPTION },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: APP_NAME },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${APP_NAME} — Find your next home` },
+        { name: "twitter:description", content: APP_DESCRIPTION },
+        { name: "twitter:image", content: ogImage },
+        { name: "robots", content: "index, follow" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
   component: Index,
 });
 

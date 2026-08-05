@@ -10,6 +10,8 @@ import { useFavorites } from "@/lib/useFavorites";
 import { submitEnquiry } from "@/lib/enquiries";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
 
+import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
+
 const propertyQueryOptions = (id: string) =>
   queryOptions({ queryKey: ["property", id], queryFn: () => fetchProperty(id) });
 
@@ -17,21 +19,21 @@ export const Route = createFileRoute("/properties/$id")({
   loader: ({ params, context }) =>
     context.queryClient.ensureQueryData(propertyQueryOptions(params.id)).catch(() => null),
   head: ({ params, loaderData }) => {
-    const url = `https://property-pioneer-dev.lovable.app/properties/${params.id}`;
+    const url = getCanonicalUrl(`/properties/${params.id}`);
     if (!loaderData) {
       return {
         meta: [
-          { title: "Listing unavailable — Urban Rental Flats" },
-          { name: "description", content: "This listing is no longer available on Urban Rental Flats." },
-          { property: "og:title", content: "Listing unavailable — Urban Rental Flats" },
-          { property: "og:description", content: "This listing is no longer available on Urban Rental Flats." },
-          { property: "og:site_name", content: "Urban Rental Flats" },
+          { title: `Listing unavailable — ${APP_NAME}` },
+          { name: "description", content: `This listing is no longer available on ${APP_NAME}.` },
+          { property: "og:title", content: `Listing unavailable — ${APP_NAME}` },
+          { property: "og:description", content: `This listing is no longer available on ${APP_NAME}.` },
+          { property: "og:site_name", content: APP_NAME },
           { name: "robots", content: "noindex" },
         ],
       };
     }
-    const title = `${loaderData.title} — Urban Rental Flats`;
-    const description = `${loaderData.bedrooms} BHK in ${loaderData.city} on Urban Rental Flats. View photos, details, and enquire.`;
+    const title = `${loaderData.title} — ${APP_NAME}`;
+    const description = `${loaderData.bedrooms} BHK in ${loaderData.city} on ${APP_NAME}. View photos, details, and enquire.`;
     const image = loaderData.images?.[0];
     return {
       meta: [
@@ -41,7 +43,7 @@ export const Route = createFileRoute("/properties/$id")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { property: "og:url", content: url },
-        { property: "og:site_name", content: "Urban Rental Flats" },
+        { property: "og:site_name", content: APP_NAME },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
@@ -293,12 +295,14 @@ function PropertyStructuredData({
     images: string[];
   };
 }) {
+  const propertyUrl = getCanonicalUrl(`/properties/${property.id}`);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Residence",
     name: property.title,
     description: property.description,
     image: property.images,
+    url: propertyUrl,
     numberOfBedrooms: property.bedrooms,
     numberOfBathroomsTotal: property.bathrooms,
     floorSize: { "@type": "QuantitativeValue", value: property.area_sqft, unitCode: "FTK" },
@@ -312,7 +316,14 @@ function PropertyStructuredData({
       "@type": "Offer",
       price: property.price,
       priceCurrency: "INR",
+      url: propertyUrl,
       availability: "https://schema.org/InStock",
+      seller: {
+        "@type": "Organization",
+        name: APP_NAME,
+        url: APP_URL,
+        logo: APP_LOGO,
+      },
     },
   };
 

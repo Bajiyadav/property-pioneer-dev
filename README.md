@@ -1,141 +1,122 @@
-# Property Connect Hub
+# Urban Rental Flats (URF) — Property Connect Hub
 
-System Prompt: AI Full-Stack Developer
+[![Framework](https://img.shields.io/badge/Framework-TanStack_Start-FF4154?style=flat-square&logo=react)](https://tanstack.com/start)
+[![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=flat-square&logo=react)](https://react.dev/)
+[![Database](https://img.shields.io/badge/Database-Supabase_Postgres-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
+[![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS_v4-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-You are an expert full-stack engineer and software architect. Build a real-estate platform using a modular, API-first architecture. The project must prioritize a rock-solid foundation in Phase 1, ensuring the backend APIs can eventually power mobile apps and external portals without rewriting business logic.
+**Urban Rental Flats (URF)** is a full-stack, modular, API-first real-estate platform designed to connect home seekers across India with curated rental and sale properties.
 
-🛠️ Tech Stack & Architecture
+Built with **TanStack Start**, **React 19**, **Vite 8**, and **Supabase**, the platform combines Server-Side Rendering (SSR) for speed and SEO with robust database-level security (Row & Column Level Security), anti-abuse protections, and an authenticated administrative control panel.
 
-Frontend/Backend: Next.js (App Router), API-first REST endpoints.
+---
 
-Database: PostgreSQL (Prisma or Drizzle ORM).
+## 🌟 Key Features
 
-Media Storage: Cloudinary integration for mobile-friendly uploads.
+### Customer Experience (Public)
+- 🔍 **Real-Time Property Search**: Instant in-memory filtering by city, price range, bedrooms (BHK), listing type (Rent/Sale), and search keywords.
+- 🏡 **Rich Property Detail Pages**: Multi-image photo gallery, specs overview, pricing formatting (Lakhs/Crores for sale, monthly for rent), and `Residence` JSON-LD structured data.
+- ❤️ **Saved Homes Wishlist**: Bookmark favorite listings stored locally in the browser (`localStorage`).
+- 📩 **Protected Lead Enquiry Form**: Direct owner contact form backed by honeypot fields, minimum submission timing checks, Turnstile CAPTCHA, and 5 sliding-window rate limits.
 
-Authentication: Robust, secure user/owner/admin authentication.
+### Admin Dashboard (`/_authenticated/admin`)
+- 📊 **Platform Overview Metrics**: Track total listings, pending approvals, featured properties, and 7-day enquiry activity.
+- ✅ **Listing Moderation**: Toggle approval (`is_approved`) and featured (`is_featured`) status for any property listing.
+- 📥 **Customer Leads Inbox**: Review customer messages, phone numbers, and target property details.
+- 🛡️ **Security Audit Logs**: Track security events (`enquiry.created`, `enquiry.rate_limited`, `enquiry.rejected`) and IP addresses.
 
-Design: Mobile-first, responsive, fast-loading UI with strong SEO.
+---
 
-🚀 Phase 1: MVP Core Foundation (Implement This First)
+## 🛠️ Tech Stack & Architecture
 
-Build the foundational database schema, REST APIs, and responsive frontends for three distinct user roles:
+- **Frontend Core**: React 19, TypeScript, Lucide React, Radix UI Primitives, Sonner Toasts.
+- **Meta-Framework**: TanStack Start (SSR), TanStack React Router (Type-Safe File-Based Routing), Nitro Engine.
+- **Data Caching & RPC**: TanStack React Query, TanStack Start `createServerFn` RPC endpoints.
+- **Database & Auth**: Supabase (Postgres), Row-Level Security (RLS), Column-Level Security (CLS), Supabase Auth JWTs.
+- **Security & Anti-Abuse**: Cloudflare Turnstile, Postgres Sliding-Window Rate Limiter, Honeypot, Timing Protections.
 
-1. Customer Features
+---
 
-Search properties with real-time filtering (by city, price, bedrooms).
+## 📁 Repository Structure
 
-View detailed property pages.
+```text
+property-pioneer-dev/
+├── docs/                      # Comprehensive platform documentation
+│   ├── PROJECT_ANALYSIS.md    # Codebase audit & project structure analysis
+│   ├── ARCHITECTURE.md        # System architecture & Mermaid diagrams
+│   ├── DATABASE.md           # ER diagram, table schemas, RLS & CLS policies
+│   ├── API.md                 # REST endpoints & server functions reference
+│   ├── COMPONENTS.md          # React component tree & props documentation
+│   ├── AUTHENTICATION.md      # Auth/RBAC flows & security primitives
+│   ├── DEPLOYMENT.md          # Operations, build & hosting deployment guide
+│   ├── SECURITY.md            # Security review & vulnerability audit
+│   ├── PERFORMANCE.md         # Core Web Vitals & performance optimization
+│   └── SUMMARY.md             # Health scores, recommendations & scalability
+├── supabase/
+│   └── migrations/            # SQL migration scripts (Tables, RLS, Functions)
+├── src/
+│   ├── config/                # Feature flags, platform constants, RBAC matrix
+│   ├── integrations/supabase/ # Supabase client/admin instances & auth middleware
+│   ├── lib/                   # Domain queries, security primitives, server functions
+│   ├── components/            # Brand components, PropertyCard, Radix UI primitives
+│   └── routes/                # File-based TanStack Router pages & API routes
+├── ARCHITECTURE.md
+├── TODO.md
+├── CHANGELOG.md
+├── package.json
+└── vite.config.ts
+```
 
-Save/bookmark favourite listings.
+---
 
-Contact owners via call, WhatsApp link, and an enquiry form.
+## 🚀 Quickstart & Local Development
 
-2. Owner Features (Mobile-First Dashboard)
+### 1. Prerequisites
+- Node.js >= v20.0.0
+- npm >= v10.0.0
 
-Secure Register/Login.
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/Bajiyadav/property-pioneer-dev.git
+cd property-pioneer-dev
 
-Upload property photos directly from mobile devices to Cloudinary.
+# Install dependencies
+npm install
+```
 
-Create, edit, and delete property listings.
+### 3. Environment Variables (`.env`)
+Create a `.env` file in the project root:
+```env
+VITE_SUPABASE_URL="https://your-supabase-project.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY="your-supabase-publishable-key"
+SUPABASE_URL="https://your-supabase-project.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"
 
-Toggle listing status (Mark as rented/sold).
+# Optional Cloudflare Turnstile CAPTCHA keys
+VITE_TURNSTILE_SITE_KEY=""
+TURNSTILE_SECRET_KEY=""
+```
 
-View customer enquiry logs.
-
-3. Admin Features
-
-Approve or reject pending property listings.
-
-Manage user and owner accounts.
-
-Global property management panel.
-
-Dashboard displaying basic platform statistics.
-
-📈 Future Roadmap Capabilities (Keep Code Extensible)
-
-Design the architecture cleanly so the following features can be layered on seamlessly in future phases:
-
-Phase 2 (Growth): Verified owner badges, KYC verification, premium listings, subscription plans, owner/admin analytics, and multi-channel notifications (Email, WhatsApp, Push).
-
-Phase 3 (Scale): AI-powered tools (description generator, image enhancement, price suggestions), Google Maps integration (nearby schools, transit, hospitals), native mobile apps using the same API backend, digital agreements, and online rent payments.
-
-💻 Development Instructions
-
-API Isolation: Keep all business logic inside Next.js API routes (/api/*). Frontends must strictly consume these APIs.
-
-Database Design: Create clean relational models for Users, Properties, Enquiries, and FavouritedProperties.
-
-UI/UX: Ensure the owner dashboard feels like a native mobile app since most owners manage listings on their phones.
-
-If you'd like to adjust this, let me know:
-
-Which ORM or Database provider (Supabase, Neon, Prisma) you prefer?
-
-Your preferred UI styling library (Tailwind CSS, Shadcn UI)?
-
-If you want to include specific validation rules for property uploads?
-
-I can refine the prompt to match your exact setup.
-
-ORM
-
-Here are the specific ORM prompt additions you can use. Choose the one that matches your preferred database setup:
-
-Option 1: Prisma ORM (Recommended for Type Safety & Visual DB Tool)
-
-Add this block under the Tech Stack & Architecture section of your prompt:
-
-text
-
-*   **ORM:** Prisma ORM with strict TypeScript types.
-*   **Database Schema Requirements:**
-    *   `User` model with roles: CUSTOMER, OWNER, ADMIN.
-    *   `Property` model with fields for title, description, price, city, bedrooms, bathrooms, images (Cloudinary URLs array), status (AVAILABLE, RENTED, SOLD), and isApproved (boolean).
-    *   `Enquiry` model linking Customer details to a specific Property and Owner.
-    *   `Favorite` model handling the many-to-many relationship between Users and Properties.
-*   **Developer Tooling:** Ensure `prisma/schema.prisma` is cleanly commented, and provide seed scripts for initial admin and mock property data.
-
-
-Use code with caution.
-
-Option 2: Drizzle ORM (Recommended for Maximum Performance & Serverless)
-
-Add this block under the Tech Stack & Architecture section of your prompt:
-
-text
-
-*   **ORM:** Drizzle ORM (using `pg-core`) for lightweight, SQL-like syntax and fast execution.
-*   **Database Schema Requirements:**
-    *   Define explicit TypeScript schemas for `users`, `properties`, `enquiries`, and `favorites` tables.
-    *   Use enum types for user roles (customer, owner, admin) and property statuses (available, rented, sold).
-    *   Set up proper foreign key constraints and cascading deletes (e.g., deleting a property deletes its associated enquiries).
-*   **Migrations:** Generate clean migration files using `drizzle-kit` and ensure schemas are optimized for serverless environments (like Neon or Supabase).
-
-
-Ueans
-
-O📝
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://property-pioneer-dev.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/0c5bc094-384b-4f95-a3ef-8f1a56c97aeb).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+### 4. Run Development Server
+```bash
 npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📄 Documentation
+
+For in-depth architectural specifications and subsystem guides, explore the [`/docs`](./docs) directory:
+- [System Architecture](./docs/ARCHITECTURE.md)
+- [Database Schema & ER Diagram](./docs/DATABASE.md)
+- [API & Server Functions](./docs/API.md)
+- [Security Review](./docs/SECURITY.md)
+- [Performance Review](./docs/PERFORMANCE.md)
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.

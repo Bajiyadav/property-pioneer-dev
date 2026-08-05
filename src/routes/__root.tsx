@@ -15,6 +15,7 @@ import { Toaster } from "sonner";
 import { Heart, LayoutDashboard, LogIn } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { BRAND } from "@/config/platform";
+import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -80,31 +81,42 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Urban Rental Flats — Find your next home" },
-      { name: "description", content: "Browse curated rental and sale properties across India's best cities." },
-      { property: "og:title", content: "Urban Rental Flats — Find your next home" },
-      { property: "og:description", content: "Browse curated rental and sale properties across India's best cities." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap",
-      },
-    ],
-  }),
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/");
+    const ogImage = getOgImageUrl();
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: `${APP_NAME} — Find your next home` },
+        { name: "description", content: APP_DESCRIPTION },
+        { property: "og:title", content: `${APP_NAME} — Find your next home` },
+        { property: "og:description", content: APP_DESCRIPTION },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: APP_NAME },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${APP_NAME} — Find your next home` },
+        { name: "twitter:description", content: APP_DESCRIPTION },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [
+        { rel: "canonical", href: canonicalUrl },
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap",
+        },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

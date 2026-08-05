@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { APP_URL } from "@/config/app";
 
 function escapeXml(value: string): string {
   return value
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const origin = new URL(request.url).origin;
+        const origin = APP_URL || new URL(request.url).origin;
 
         const staticPaths = ["/", "/properties", "/favorites"];
         const entries: Array<{ loc: string; lastmod?: string; priority: string }> =

@@ -5,23 +5,33 @@ import { fetchProperties } from "@/lib/properties";
 import { PropertyCard } from "@/components/PropertyCard";
 import { useFavorites } from "@/lib/useFavorites";
 
+import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+
 export const Route = createFileRoute("/favorites")({
-  head: () => ({
-    meta: [
-      { title: "Your saved homes — Urban Rental Flats" },
-      { name: "description", content: "Homes you've saved to revisit later." },
-      { property: "og:title", content: "Your saved homes — Urban Rental Flats" },
-      { property: "og:description", content: "Homes you've saved to revisit later on Urban Rental Flats." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Your saved homes — Urban Rental Flats" },
-      { name: "twitter:description", content: "Homes you've saved to revisit later on Urban Rental Flats." },
-      { property: "og:url", content: "https://property-pioneer-dev.lovable.app/favorites" },
-      { property: "og:site_name", content: "Urban Rental Flats" },
-      { name: "robots", content: "noindex" },
-    ],
-    links: [{ rel: "canonical", href: "https://property-pioneer-dev.lovable.app/favorites" }],
-  }),
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/favorites");
+    const ogImage = getOgImageUrl();
+    const title = `Your saved homes — ${APP_NAME}`;
+    const description = `Homes you've saved to revisit later on ${APP_NAME}.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: APP_NAME },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
+        { name: "robots", content: "noindex" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
   component: FavoritesPage,
 });
 
