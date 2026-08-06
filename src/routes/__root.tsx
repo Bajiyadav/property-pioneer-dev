@@ -229,29 +229,29 @@ function SiteHeader() {
               Rent
             </Link>
 
-            <button
-              onClick={() => setWaitlistCategory("Buy Residential Homes")}
+            <Link
+              to="/buy"
               className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
             >
               Buy
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">VIP Waitlist</span>
-            </button>
+              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">New</span>
+            </Link>
 
-            <button
-              onClick={() => setWaitlistCategory("Commercial & Tech Parks")}
+            <Link
+              to="/commercial"
               className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
             >
               Commercial
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Soon</span>
-            </button>
+              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">New</span>
+            </Link>
 
-            <button
-              onClick={() => setServicesOpen(true)}
+            <Link
+              to="/home-services"
               className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
             >
               Services
               <span className="rounded-full bg-emerald-600/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Live</span>
-            </button>
+            </Link>
 
             <a href="#why-us" className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground">
               About

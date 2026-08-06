@@ -13,9 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BuyRouteImport } from './routes/buy'
+import { Route as CommercialRouteImport } from './routes/commercial'
+import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as HomeServicesRouteImport } from './routes/home-services'
+import { Route as PgHostelsRouteImport } from './routes/pg-hostels'
+import { Route as PlotsRouteImport } from './routes/plots'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as VillasRouteImport } from './routes/villas'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
@@ -50,9 +57,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BuyRoute = BuyRouteImport.update({
+  id: '/buy',
+  path: '/buy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommercialRoute = CommercialRouteImport.update({
+  id: '/commercial',
+  path: '/commercial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FarmLandsRoute = FarmLandsRouteImport.update({
+  id: '/farm-lands',
+  path: '/farm-lands',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeServicesRoute = HomeServicesRouteImport.update({
+  id: '/home-services',
+  path: '/home-services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PgHostelsRoute = PgHostelsRouteImport.update({
+  id: '/pg-hostels',
+  path: '/pg-hostels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlotsRoute = PlotsRouteImport.update({
+  id: '/plots',
+  path: '/plots',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PropertiesRoute = PropertiesRouteImport.update({
@@ -63,6 +100,11 @@ const PropertiesRoute = PropertiesRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VillasRoute = VillasRouteImport.update({
+  id: '/villas',
+  path: '/villas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -149,9 +191,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/buy': typeof BuyRoute
+  '/commercial': typeof CommercialRoute
+  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/home-services': typeof HomeServicesRoute
+  '/pg-hostels': typeof PgHostelsRoute
+  '/plots': typeof PlotsRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
@@ -171,8 +220,15 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/buy': typeof BuyRoute
+  '/commercial': typeof CommercialRoute
+  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/home-services': typeof HomeServicesRoute
+  '/pg-hostels': typeof PgHostelsRoute
+  '/plots': typeof PlotsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
@@ -194,9 +250,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/buy': typeof BuyRoute
+  '/commercial': typeof CommercialRoute
+  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/home-services': typeof HomeServicesRoute
+  '/pg-hostels': typeof PgHostelsRoute
+  '/plots': typeof PlotsRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/villas': typeof VillasRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
@@ -218,9 +281,16 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/auth'
+    | '/buy'
+    | '/commercial'
+    | '/farm-lands'
     | '/favorites'
+    | '/home-services'
+    | '/pg-hostels'
+    | '/plots'
     | '/properties'
     | '/sitemap.xml'
+    | '/villas'
     | '/admin'
     | '/dashboard'
     | '/properties/$id'
@@ -240,8 +310,15 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/auth'
+    | '/buy'
+    | '/commercial'
+    | '/farm-lands'
     | '/favorites'
+    | '/home-services'
+    | '/pg-hostels'
+    | '/plots'
     | '/sitemap.xml'
+    | '/villas'
     | '/admin'
     | '/dashboard'
     | '/properties/$id'
@@ -262,9 +339,16 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/$'
     | '/auth'
+    | '/buy'
+    | '/commercial'
+    | '/farm-lands'
     | '/favorites'
+    | '/home-services'
+    | '/pg-hostels'
+    | '/plots'
     | '/properties'
     | '/sitemap.xml'
+    | '/villas'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/properties/$id'
@@ -286,9 +370,16 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   AuthRoute: typeof AuthRoute
+  BuyRoute: typeof BuyRoute
+  CommercialRoute: typeof CommercialRoute
+  FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
+  HomeServicesRoute: typeof HomeServicesRoute
+  PgHostelsRoute: typeof PgHostelsRoute
+  PlotsRoute: typeof PlotsRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  VillasRoute: typeof VillasRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
@@ -327,11 +418,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buy': {
+      id: '/buy'
+      path: '/buy'
+      fullPath: '/buy'
+      preLoaderRoute: typeof BuyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commercial': {
+      id: '/commercial'
+      path: '/commercial'
+      fullPath: '/commercial'
+      preLoaderRoute: typeof CommercialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/farm-lands': {
+      id: '/farm-lands'
+      path: '/farm-lands'
+      fullPath: '/farm-lands'
+      preLoaderRoute: typeof FarmLandsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
       fullPath: '/favorites'
       preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home-services': {
+      id: '/home-services'
+      path: '/home-services'
+      fullPath: '/home-services'
+      preLoaderRoute: typeof HomeServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pg-hostels': {
+      id: '/pg-hostels'
+      path: '/pg-hostels'
+      fullPath: '/pg-hostels'
+      preLoaderRoute: typeof PgHostelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plots': {
+      id: '/plots'
+      path: '/plots'
+      fullPath: '/plots'
+      preLoaderRoute: typeof PlotsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/properties': {
@@ -346,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/villas': {
+      id: '/villas'
+      path: '/villas'
+      fullPath: '/villas'
+      preLoaderRoute: typeof VillasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -501,9 +641,16 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   AuthRoute: AuthRoute,
+  BuyRoute: BuyRoute,
+  CommercialRoute: CommercialRoute,
+  FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
+  HomeServicesRoute: HomeServicesRoute,
+  PgHostelsRoute: PgHostelsRoute,
+  PlotsRoute: PlotsRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  VillasRoute: VillasRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,

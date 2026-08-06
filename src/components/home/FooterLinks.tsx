@@ -33,11 +33,13 @@ export function FooterLinks() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-foreground">Categories</h3>
             <ul className="mt-3 grid gap-2 text-xs text-muted-foreground">
-              <li><Link to="/properties" search={{ listing: "rent", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">Flats for Rent</Link></li>
-              <li><Link to="/properties" search={{ listing: "sale", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">Houses for Sale</Link></li>
-              <li><Link to="/properties" search={{ q: "PG", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">PG & Hostels</Link></li>
-              <li><Link to="/properties" search={{ q: "Commercial", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">Commercial Spaces</Link></li>
-              <li><Link to="/properties" search={{ q: "Plot", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">Plots & Land</Link></li>
+              <li><Link to="/properties" search={{ listing: "rent", q: "", city: "Hyderabad", minPrice: 0, maxPrice: 0, beds: 0 }} className="hover:text-foreground">Flats for Rent</Link></li>
+              <li><Link to="/buy" className="hover:text-foreground">Residential Homes (Buy)</Link></li>
+              <li><Link to="/commercial" className="hover:text-foreground">Commercial & Tech Parks</Link></li>
+              <li><Link to="/plots" className="hover:text-foreground">Plots & Land</Link></li>
+              <li><Link to="/villas" className="hover:text-foreground">Luxury Gated Villas</Link></li>
+              <li><Link to="/pg-hostels" className="hover:text-foreground">PG & Co-Living</Link></li>
+              <li><Link to="/farm-lands" className="hover:text-foreground">Managed Farm Lands</Link></li>
             </ul>
           </div>
 
@@ -47,8 +49,8 @@ export function FooterLinks() {
             <ul className="mt-3 grid gap-2 text-xs text-muted-foreground">
               <li><Link to="/auth" className="hover:text-foreground">Post Property Free</Link></li>
               <li><Link to="/favorites" className="hover:text-foreground">Saved Homes</Link></li>
-              <li><a href="#services" className="hover:text-foreground">Rental Agreement</a></li>
-              <li><a href="#services" className="hover:text-foreground">Packers & Movers</a></li>
+              <li><Link to="/home-services" className="hover:text-foreground">Digital Rental Agreement</Link></li>
+              <li><Link to="/home-services" className="hover:text-foreground">Packers & Movers</Link></li>
               <li><Link to="/auth" className="hover:text-foreground">Sign In / Register</Link></li>
             </ul>
           </div>
