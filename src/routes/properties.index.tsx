@@ -38,6 +38,8 @@ export const Route = createFileRoute("/properties/")({
 function PropertiesPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/properties" });
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: fetchProperties,
@@ -73,12 +75,42 @@ function PropertiesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-6">
-        <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">Browse homes</h1>
-        <p className="mt-1 text-muted-foreground">
-          {isLoading ? "Loading…" : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available`}
-        </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">Browse Homes in Hyderabad</h1>
+          <p className="mt-1 text-muted-foreground">
+            {isLoading ? "Loading…" : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available with 0% brokerage`}
+          </p>
+        </div>
+
+        {/* View Mode Toggle: Grid vs Map */}
+        <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card p-1 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              viewMode === "grid" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" /> Grid View
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("map")}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              viewMode === "map" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MapPin className="h-3.5 w-3.5" /> Map View
+          </button>
+        </div>
       </div>
+
+      {viewMode === "map" ? (
+        <div className="mb-10">
+          <PropertyMapView properties={filtered} />
+        </div>
+      ) : null}
 
       {/* Filters */}
       <div className="mb-8 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">

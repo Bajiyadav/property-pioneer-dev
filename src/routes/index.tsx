@@ -27,6 +27,8 @@ import { ServiceDetailModal, type ServiceModalData } from "@/components/modals/S
 import { CityExpansionModal, type CityModalData } from "@/components/modals/CityExpansionModal";
 import { OwnerOnboardingModal } from "@/components/modals/OwnerOnboardingModal";
 
+import { UrbanAISearch } from "@/components/home/UrbanAISearch";
+
 export const Route = createFileRoute("/")({
   head: () => {
     const canonicalUrl = getCanonicalUrl("/");
@@ -90,6 +92,11 @@ function Index() {
 
       {/* 2. Real Estate Quote Banner */}
       <QuoteBanner />
+
+      {/* 2.5 Urban AI Natural Language Search */}
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
+        <UrbanAISearch />
+      </div>
 
       {/* 3. Property Categories Grid (Interactive Category Modal) */}
       <PropertyCategories onSelectCategory={(cat) => setActiveCategory(cat)} />

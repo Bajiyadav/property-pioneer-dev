@@ -3,7 +3,7 @@ import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User, CheckCircle2,
+  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User, CheckCircle2, Calendar, FileText,
 } from "lucide-react";
 import { fetchProperty, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
@@ -12,6 +12,8 @@ import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
 import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 import { WhatsAppButton } from "@/components/WhatsAppButton/WhatsAppButton";
+import { ScheduleVisitModal } from "@/components/modals/ScheduleVisitModal";
+import { RentalAgreementModal } from "@/components/modals/RentalAgreementModal";
 
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
 
@@ -86,6 +88,8 @@ function PropertyDetail() {
   const { has, toggle } = useFavorites();
   const [activeImg, setActiveImg] = useState(0);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [agreementOpen, setAgreementOpen] = useState(false);
 
   const { data: property, isLoading, isError } = useQuery({
     queryKey: ["property", id],
@@ -207,6 +211,18 @@ function PropertyDetail() {
             <div className="mt-5 grid gap-2.5">
               <WhatsAppButton propertyId={property.id} className="w-full" />
               <button
+                onClick={() => setScheduleOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110 shadow"
+              >
+                <Calendar className="h-4 w-4" /> Schedule Visit Walkthrough
+              </button>
+              <button
+                onClick={() => setAgreementOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-600/40 bg-emerald-600/10 px-4 py-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-600/20"
+              >
+                <FileText className="h-4 w-4" /> Generate Digital Agreement
+              </button>
+              <button
                 onClick={() => setEnquiryOpen((v) => !v)}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-accent"
               >
@@ -222,6 +238,16 @@ function PropertyDetail() {
             )}
           </div>
         </aside>
+
+        <ScheduleVisitModal
+          propertyTitle={property.title}
+          isOpen={scheduleOpen}
+          onClose={() => setScheduleOpen(false)}
+        />
+        <RentalAgreementModal
+          isOpen={agreementOpen}
+          onClose={() => setAgreementOpen(false)}
+        />
       </div>
     </div>
   );
