@@ -4,8 +4,15 @@ import { ExpansionRoadmap } from "@/components/landing/ExpansionRoadmap";
 import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { LaunchProgress } from "@/components/landing/LaunchProgress";
-import { RichPriorityWaitlistForm } from "@/components/landing/RichPriorityWaitlistForm";
 import { ProductFaq } from "@/components/landing/ProductFaq";
+
+import { HomeServicesCalculator } from "@/components/services/HomeServicesCalculator";
+import { BeforeAfterSlider } from "@/components/services/BeforeAfterSlider";
+import { ExpandableChecklist } from "@/components/services/ExpandableChecklist";
+import { ServiceProcessTimeline } from "@/components/services/ServiceProcessTimeline";
+import { CoverageCityMap } from "@/components/services/CoverageCityMap";
+import { RichServiceBookingForm } from "@/components/services/RichServiceBookingForm";
+
 import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
 
 export const Route = createFileRoute("/home-services")({
@@ -14,9 +21,9 @@ export const Route = createFileRoute("/home-services")({
     const ogImage = getOgImageUrl();
     return {
       meta: [
-        { title: `Home Services & Rental Agreements — ${APP_NAME}` },
-        { name: "description", content: "Instant Digital E-Stamp Rental Agreements, Packers & Movers, Deep House Cleaning, Painting, & Home Loan Pre-Approvals in Hyderabad & India." },
-        { property: "og:title", content: `Home Services & Rental Agreements — ${APP_NAME}` },
+        { title: `Home Services & Digital Agreements — ${APP_NAME}` },
+        { name: "description", content: "Instant Digital E-Stamp Rental Agreements, Packers & Movers, Deep House Cleaning, Painting, & Pre-Approved Home Loans in Hyderabad & India." },
+        { property: "og:title", content: `Home Services & Digital Agreements — ${APP_NAME}` },
         { property: "og:description", content: "Get state-stamped digital rental agreements and verified home services at guaranteed lowest rates." },
         { property: "og:image", content: ogImage },
         { property: "og:url", content: canonicalUrl },
@@ -31,25 +38,43 @@ const SERVICES_FAQS = [
   { q: "Is the Digital Rental Agreement legally valid in Telangana?", a: "Yes! Every agreement includes official State E-Stamp paper, biometric e-signatures, and instant PDF download accepted by IT companies & banks." },
   { q: "How quickly are Packers & Movers assigned?", a: "Movers are confirmed within 15 minutes of booking with 100% price lock guarantee." },
   { q: "What is included in Deep House Cleaning?", a: "Full floor machine scrubbing, bathroom descaling, kitchen degreasing, sofa shampooing, and balcony sanitization." },
+  { q: "When do I need to pay for the service?", a: "Pay zero advance! You pay via UPI or card only after 100% service completion and supervisor inspection." },
 ];
 
 function HomeServicesLandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground space-y-12">
       <ProductHero
-        badge="Tenant & Owner Services Suite"
+        badge="Tenant & Owner Services Engine"
         title="Complete Home Services & Legal Agreements Platform"
         subtitle="Get instant state-stamped digital rental agreements, verified packers & movers, deep home cleaning, wall painting, and pre-approved home loans."
         productType="Home Services"
         bgGradient="from-teal-900/20 via-background to-background"
       />
 
-      <ExpansionRoadmap />
+      {/* Interactive Price Calculator */}
+      <section className="mx-auto max-w-5xl px-4 sm:px-6">
+        <HomeServicesCalculator />
+      </section>
+
+      {/* Visual Transformation Slider */}
+      <BeforeAfterSlider />
+
+      {/* Room-by-Room Checklist */}
+      <ExpandableChecklist />
+
+      {/* 8-Stage Process Timeline */}
+      <ServiceProcessTimeline />
+
+      {/* Coverage Map */}
+      <CoverageCityMap />
+
       <FeatureGrid />
       <ComparisonTable />
       <LaunchProgress />
 
-      <RichPriorityWaitlistForm defaultCategory="Home Services & Agreements" />
+      {/* Rich 10-Field Booking Form */}
+      <RichServiceBookingForm />
 
       <ProductFaq faqs={SERVICES_FAQS} />
     </div>
