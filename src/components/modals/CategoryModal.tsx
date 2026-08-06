@@ -1,8 +1,4 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { Search, MapPin, Sparkles, CheckCircle2, ArrowRight, Bell, ShieldCheck, Landmark, Building, Key } from "lucide-react";
+import { DiscoverDrawer } from "./DiscoverDrawer";
 
 export interface CategoryModalData {
   id: string;
@@ -23,6 +19,10 @@ export function CategoryModal({
   const [joined, setJoined] = useState(false);
 
   if (!data) return null;
+
+  if (data.isLive) {
+    return <DiscoverDrawer data={data} onClose={onClose} />;
+  }
 
   const handleWaitlistSubmit = (e: React.FormEvent) => {
     e.preventDefault();
