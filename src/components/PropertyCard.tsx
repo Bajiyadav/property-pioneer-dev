@@ -8,7 +8,9 @@ import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
   const saved = has(property.id);
-  const cover = property.images[0] ?? "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
+  const cover = (Array.isArray(property.images) && property.images[0])
+    ? property.images[0]
+    : "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
 
   return (
     <Link
@@ -19,13 +21,13 @@ export function PropertyCard({ property }: { property: Property }) {
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={cover}
-          alt={property.title}
+          alt={property.title || "Property"}
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 max-w-[85%]">
           <span className="rounded-full bg-background/90 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground backdrop-blur">
-            For {property.listing_type}
+            For {property.listing_type || "rent"}
           </span>
           {property.status && property.status !== "available" && (
             <PropertyStatus status={property.status} size="sm" />
@@ -52,11 +54,11 @@ export function PropertyCard({ property }: { property: Property }) {
       <div className="flex flex-1 flex-col gap-2 p-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold leading-tight text-foreground">
-            {property.title}
+            {property.title || "Hyderabad Property"}
           </h3>
         </div>
         <p className="flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" /> {property.address}, {property.city}
+          <MapPin className="h-3.5 w-3.5" /> {property.address || "Hyderabad"}, {property.city || "Hyderabad"}
         </p>
         <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1"><BedDouble className="h-4 w-4" />{property.bedrooms} bd</span>
