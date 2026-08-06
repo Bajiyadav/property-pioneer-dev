@@ -4,6 +4,7 @@ import { MapPin, BedDouble, Bath, Maximize, CheckCircle2, ArrowRight, Layers, Na
 import { type Property, formatPrice } from "@/lib/properties";
 
 const HYD_MAP_PINS = [
+  { id: "hyd-000", lat: 17.4475, lng: 78.3890, title: "Luxury Duplex Villa", price: "₹45,000", area: "Vinayak Nagar, Madhapur" },
   { id: "hyd-001", lat: 17.4401, lng: 78.3489, title: "2 BHK Gachibowli", price: "₹32,000", area: "Gachibowli" },
   { id: "hyd-002", lat: 17.4483, lng: 78.3915, title: "1 BHK Madhapur", price: "₹18,500", area: "Madhapur" },
   { id: "hyd-003", lat: 17.4622, lng: 78.3568, title: "3 BHK Kondapur", price: "₹45,000", area: "Kondapur" },

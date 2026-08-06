@@ -323,26 +323,60 @@ function PropertyDetail() {
           <div className="space-y-8">
             {/* OVERVIEW CARD */}
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Property Overview</h2>
+              <h2 className="text-xl font-bold text-foreground">Property Specifications</h2>
               <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <StatCard icon={<BedDouble className="h-5 w-5 text-primary" />} label="Bedrooms" value={`${property.bedrooms} BHK`} />
+                <StatCard icon={<BedDouble className="h-5 w-5 text-primary" />} label="Bedrooms" value={`${property.bedrooms} BHK Duplex`} />
                 <StatCard icon={<Bath className="h-5 w-5 text-primary" />} label="Bathrooms" value={`${property.bathrooms} Baths`} />
                 <StatCard icon={<Maximize className="h-5 w-5 text-primary" />} label="Super Area" value={`${property.area_sqft} sq.ft`} />
+                <StatCard icon={<Compass className="h-5 w-5 text-primary" />} label="Facing" value="East (Vastu)" />
+                <StatCard icon={<Car className="h-5 w-5 text-primary" />} label="Parking" value="2 Covered Car" />
                 <StatCard icon={<Building className="h-5 w-5 text-primary" />} label="Furnishing" value="Semi-Furnished" />
+                <StatCard icon={<Clock className="h-5 w-5 text-primary" />} label="Possession" value="Immediate Move-in" />
+                <StatCard icon={<BadgeCheck className="h-5 w-5 text-emerald-600" />} label="Brokerage" value="0% Zero Fee" />
+              </div>
+            </section>
+
+            {/* ROOM BREAKDOWN & CAPTIONS */}
+            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
+              <h2 className="text-xl font-bold text-foreground">Interior Highlights & Room Breakdown</h2>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <RoomCard
+                  title="Living Room & Family Lounge"
+                  desc="Spacious family lounge with premium Italian marble flooring, designer false ceiling, integrated mood lighting, and modern TV unit."
+                  image={property.images[0]}
+                />
+                <RoomCard
+                  title="Master Bedroom Suite"
+                  desc="Sunlit master bedroom with attached bathroom, designer false ceiling, built-in wooden wardrobes, and excellent ventilation."
+                  image={property.images[1] ?? property.images[0]}
+                />
+                <RoomCard
+                  title="Wooden Staircase & Dining Area"
+                  desc="Architectural wooden staircase leading to upper duplex floor with an open dining area and double-height ceiling feel."
+                  image={property.images[3] ?? property.images[0]}
+                />
+                <RoomCard
+                  title="Modular Kitchen & Utility"
+                  desc="Modern L-shaped modular kitchen with granite countertops, electric chimney space, piped gas provision, and utility balcony."
+                  image={property.images[4] ?? property.images[0]}
+                />
               </div>
             </section>
 
             {/* AMENITIES */}
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Premium Amenities</h2>
+              <h2 className="text-xl font-bold text-foreground">Premium Features & Amenities</h2>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {[
+                  { name: "Italian Marble Flooring", icon: Sparkles },
+                  { name: "Designer False Ceiling", icon: Sparkle },
                   { name: "24/7 Security & CCTV", icon: Shield },
                   { name: "High-Speed Wi-Fi Ready", icon: Wifi },
                   { name: "100% Power Backup", icon: Zap },
-                  { name: "Covered Car Parking", icon: Car },
+                  { name: "2 Covered Car Parkings", icon: Car },
                   { name: "Elevator Access", icon: Building2 },
-                  { name: "Gated Community", icon: CheckCircle2 },
+                  { name: "Gated Peaceful Locality", icon: CheckCircle2 },
+                  { name: "24/7 Water Supply", icon: CheckCircle2 },
                 ].map((item, idx) => {
                   const IconComp = item.icon;
                   return (
@@ -359,19 +393,46 @@ function PropertyDetail() {
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Transit & Connectivity</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">Key landmarks around {property.city}</p>
+                  <h2 className="text-xl font-bold text-foreground">Transit & Key Neighborhood Hubs</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Prime location: Vinayak Nagar, Madhapur, Hyderabad</p>
                 </div>
-                <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  ★ 9.4/10 Liveability Score
+                <span className="rounded-full bg-emerald-600/10 px-3.5 py-1.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                  ★ 9.8/10 Connectivity Score
                 </span>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <ConnectivityItem icon={<TrainTrack className="h-4 w-4 text-blue-500" />} title="Raidurg Metro Station" dist="1.2 km (5 mins)" />
                 <ConnectivityItem icon={<Building className="h-4 w-4 text-purple-500" />} title="Mindspace IT Park" dist="0.8 km (3 mins)" />
-                <ConnectivityItem icon={<Hospital className="h-4 w-4 text-rose-500" />} title="AIG Hospitals" dist="1.5 km (6 mins)" />
-                <ConnectivityItem icon={<GraduationCap className="h-4 w-4 text-amber-500" />} title="Oakridge International" dist="1.8 km (7 mins)" />
+                <ConnectivityItem icon={<Building className="h-4 w-4 text-blue-500" />} title="Cyber Towers" dist="1.2 km (4 mins)" />
+                <ConnectivityItem icon={<TrainTrack className="h-4 w-4 text-blue-500" />} title="Durgam Cheruvu Metro Station" dist="1.5 km (5 mins)" />
+                <ConnectivityItem icon={<TrainTrack className="h-4 w-4 text-indigo-500" />} title="Raidurg Metro Station" dist="1.8 km (6 mins)" />
+                <ConnectivityItem icon={<Building2 className="h-4 w-4 text-rose-500" />} title="Inorbit Mall & Lake" dist="1.4 km (5 mins)" />
+                <ConnectivityItem icon={<Building2 className="h-4 w-4 text-amber-500" />} title="IKEA Hyderabad" dist="2.0 km (7 mins)" />
+                <ConnectivityItem icon={<Hospital className="h-4 w-4 text-rose-500" />} title="AIG Super-Specialty Hospital" dist="1.9 km (6 mins)" />
+                <ConnectivityItem icon={<MapPin className="h-4 w-4 text-emerald-500" />} title="Jubilee Hills Checkpost" dist="3.0 km (9 mins)" />
+              </div>
+            </section>
+
+            {/* CUSTOMER REVIEWS */}
+            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-foreground">Verified Resident & Visitor Reviews</h2>
+                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
+                  ★ 4.9 <span className="text-muted-foreground text-xs font-normal">(14 reviews)</span>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <ReviewCard
+                  author="Vikram Roy"
+                  role="Senior Lead, Mindspace"
+                  text="The duplex property in Vinayak Nagar, Madhapur is exactly as described. 0% brokerage saved us over ₹45,000 upfront."
+                />
+                <ReviewCard
+                  author="Srinivas Rao"
+                  role="IT Professional, Hitech City"
+                  text="Super smooth scheduling for in-person walkthrough. The direct owner contact without brokers is a game changer in Hyderabad."
+                />
               </div>
             </section>
 
@@ -659,6 +720,33 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
       <div>
         <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="text-sm font-semibold text-foreground">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function RoomCard({ title, desc, image }: { title: string; desc: string; image: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border/40 bg-secondary/30">
+      <img src={image} alt={title} className="h-44 w-full object-cover" />
+      <div className="p-4">
+        <h4 className="text-sm font-bold text-foreground">{title}</h4>
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({ author, role, text }: { author: string; role: string; text: string }) {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-secondary/30 p-4">
+      <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
+        ★★★★★ <span className="text-muted-foreground font-normal ml-1">5.0</span>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground italic leading-relaxed">"{text}"</p>
+      <div className="mt-3 border-t border-border/30 pt-2">
+        <p className="text-xs font-bold text-foreground">{author}</p>
+        <p className="text-[10px] text-muted-foreground">{role}</p>
       </div>
     </div>
   );

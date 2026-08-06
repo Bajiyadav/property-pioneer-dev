@@ -46,6 +46,37 @@ export const PUBLIC_PROPERTY_COLUMNS =
 
 export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
+    id: "hyd-000",
+    title: "Luxury Duplex Villa in Vinayak Nagar",
+    description: "Experience elegant duplex living in the heart of Vinayak Nagar, Madhapur. This spacious home offers premium interiors, designer false ceilings, Italian marble flooring, a large family lounge, modern wooden staircase, multiple seating areas, and a peaceful residential atmosphere just 3 minutes from Hyderabad's IT corridor.",
+    price: 45000,
+    city: "Hyderabad",
+    address: "Vinayak Nagar, Madhapur",
+    bedrooms: 3,
+    bathrooms: 3,
+    area_sqft: 2450,
+    property_type: "Villa",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80"
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: new Date().toISOString(),
+  },
+  {
     id: "hyd-001",
     title: "Luxury 2 BHK Apartment in Gachibowli",
     description: "Fully furnished 2 BHK flat near Financial District & DLF Cybercity. 24/7 security, power backup, modular kitchen, and reserved car parking.",
