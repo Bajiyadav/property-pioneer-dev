@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CheckCircle2, Bell } from "lucide-react";
+import { CheckCircle2, Bell, MapPin, ArrowRight, Search } from "lucide-react";
 import { DiscoverDrawer } from "./DiscoverDrawer";
 
 export interface CategoryModalData {

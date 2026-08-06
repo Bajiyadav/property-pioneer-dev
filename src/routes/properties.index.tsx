@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, LayoutGrid, MapPin } from "lucide-react";
 import { fetchProperties } from "@/lib/properties";
 import { PropertyCard } from "@/components/PropertyCard";
+import { PropertyMapView } from "@/components/map/PropertyMapView";
 
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
