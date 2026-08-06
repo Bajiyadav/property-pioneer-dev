@@ -126,6 +126,8 @@ function PropertyDetail() {
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [agreementOpen, setAgreementOpen] = useState(false);
+  const [emiOpen, setEmiOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [comparing, setComparing] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -508,10 +510,24 @@ function PropertyDetail() {
                 </button>
 
                 <button
+                  onClick={() => setEmiOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl border border-purple-500/40 bg-purple-500/10 px-4 py-3 text-xs font-bold text-purple-600 dark:text-purple-400 transition hover:bg-purple-500/20"
+                >
+                  <Scale className="h-4 w-4" /> Home Loan & EMI Calculator
+                </button>
+
+                <button
                   onClick={() => setEnquiryOpen((v) => !v)}
                   className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-xs font-bold text-foreground transition hover:bg-secondary"
                 >
                   <Mail className="h-4 w-4" /> Email Owner Directly
+                </button>
+
+                <button
+                  onClick={() => setReportOpen(true)}
+                  className="w-full text-center text-[11px] font-medium text-muted-foreground hover:text-rose-500 transition pt-2 block"
+                >
+                  🚩 Report inaccurate price or broker spam
                 </button>
               </div>
 
@@ -524,6 +540,19 @@ function PropertyDetail() {
             </div>
           </aside>
         </div>
+
+        {/* MODAL COMPONENTS */}
+        <EmiCalculatorModal
+          isOpen={emiOpen}
+          onClose={() => setEmiOpen(false)}
+          initialPrice={property.listing_type === "sale" ? property.price : property.price * 250}
+        />
+
+        <ReportListingModal
+          isOpen={reportOpen}
+          onClose={() => setReportOpen(false)}
+          propertyTitle={property.title}
+        />
       </main>
 
       {/* LIGHTBOX MODAL */}

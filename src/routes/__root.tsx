@@ -177,6 +177,8 @@ function SiteHeader() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [waitlistCategory, setWaitlistCategory] = useState<string | null>(null);
+  const [servicesOpen, setServicesOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -204,72 +206,96 @@ function SiteHeader() {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300 ${scrolled ? "py-2 shadow-md bg-background/95" : "py-3.5"}`}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center">
-          <BrandMark responsiveName />
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
-          <Link
-            to="/"
-            className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-          >
-            Home
-          </Link>
-          <Link
-            to="/properties"
-            search={{ q: "", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-          >
-            Rent
+    <>
+      <header className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300 ${scrolled ? "py-2 shadow-md bg-background/95" : "py-3.5"}`}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center">
+            <BrandMark responsiveName />
           </Link>
 
-          <span className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-muted-foreground cursor-not-allowed">
-            Buy
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Soon</span>
-          </span>
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+            <Link
+              to="/"
+              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+            >
+              Home
+            </Link>
+            <Link
+              to="/properties"
+              search={{ q: "", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+            >
+              Rent
+            </Link>
 
-          <span className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-muted-foreground cursor-not-allowed">
-            Commercial
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Soon</span>
-          </span>
+            <button
+              onClick={() => setWaitlistCategory("Buy Residential Homes")}
+              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+            >
+              Buy
+              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">VIP Waitlist</span>
+            </button>
 
-          <span className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-muted-foreground cursor-not-allowed">
-            Services
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Soon</span>
-          </span>
+            <button
+              onClick={() => setWaitlistCategory("Commercial & Tech Parks")}
+              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+            >
+              Commercial
+              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">Soon</span>
+            </button>
 
-          <a href="#why-us" className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground">
-            About
-          </a>
-          <a href="#contact" className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground">
-            Contact
-          </a>
-        </nav>
+            <button
+              onClick={() => setServicesOpen(true)}
+              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+            >
+              Services
+              <span className="rounded-full bg-emerald-600/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400">Live</span>
+            </button>
 
-        {/* User Actions & CTAs */}
-        <div className="flex items-center gap-2">
-          <Link
-            to="/favorites"
-            aria-label="Saved Properties"
-            className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition"
-          >
-            <Heart className="h-4 w-4" />
-          </Link>
+            <a href="#why-us" className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground">
+              About
+            </a>
+            <a href="#contact" className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground">
+              Contact
+            </a>
+          </nav>
 
-          <HeaderProfileMenu user={user} />
+          {/* User Actions & CTAs */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/favorites"
+              aria-label="Saved Properties"
+              className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+            >
+              <Heart className="h-4 w-4" />
+            </Link>
 
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-emerald-500"
-          >
-            List Property FREE
-          </Link>
+            <HeaderProfileMenu user={user} />
+
+            <Link
+              to="/auth"
+              className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-emerald-500"
+            >
+              List Property FREE
+            </Link>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Interactive Expansion & Services Modals */}
+      <ExpansionWaitlistModal
+        isOpen={Boolean(waitlistCategory)}
+        onClose={() => setWaitlistCategory(null)}
+        categoryName={waitlistCategory || ""}
+      />
+
+      <HomeServicesModal
+        isOpen={servicesOpen}
+        onClose={() => setServicesOpen(false)}
+        initialService="agreement"
+      />
+    </>
   );
 }
 
