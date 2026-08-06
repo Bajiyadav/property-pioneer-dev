@@ -1,10 +1,29 @@
+import { useState } from "react";
 import { BRAND } from "@/config/platform";
 import urfLogo from "@/assets/urf-logo.png.asset.json";
 
 /**
- * Single source of truth for the Urban Rental Flats identity in the UI.
+ * High-definition SVG Logo Mark for Urban Properties
+ * Guaranteed to render instantly without network latency or missing asset errors.
+ */
+export function UrbanLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
+  return (
+    <div className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-700 p-1.5 shadow-md ring-1 ring-emerald-400/30 text-white ${className}`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+        <path d="M3 21H21" />
+        <path d="M6 21V9L12 4L18 9V21" />
+        <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.25" />
+        <path d="M9 10H10" />
+        <path d="M14 10H15" />
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Single source of truth for the Urban Properties identity in the UI.
  * Every surface (header, footer, empty/error states) renders through this
- * so the name and logo stay consistent as new modules are added.
+ * so the name and logo stay consistent and visible across all environments.
  */
 export function BrandMark({
   size = "md",
@@ -17,19 +36,30 @@ export function BrandMark({
   responsiveName?: boolean;
   className?: string;
 }) {
-  const logoClass = size === "sm" ? "h-7 w-auto" : size === "lg" ? "h-12 w-auto" : "h-9 w-auto";
+  const [imgError, setImgError] = useState(false);
+
+  const logoSizeClass = size === "sm" ? "h-7 w-7" : size === "lg" ? "h-11 w-11" : "h-9 w-9";
+  const imgLogoClass = size === "sm" ? "h-7 w-auto" : size === "lg" ? "h-11 w-auto" : "h-9 w-auto";
   const textClass =
     size === "sm" ? "text-base" : size === "lg" ? "text-2xl" : "text-xl";
 
+  const isLocalHostAsset = urfLogo?.url && urfLogo.url.startsWith("/__l5e/");
+
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <img
-        src={urfLogo.url}
-        alt={`${BRAND.name} logo`}
-        className={logoClass}
-        loading="lazy"
-        decoding="async"
-      />
+    <span className={`inline-flex items-center gap-2.5 ${className}`}>
+      {imgError || isLocalHostAsset ? (
+        <UrbanLogoIcon className={logoSizeClass} />
+      ) : (
+        <img
+          src={urfLogo.url}
+          alt={`${BRAND.name} logo`}
+          className={imgLogoClass}
+          loading="eager"
+          decoding="async"
+          onError={() => setImgError(true)}
+        />
+      )}
+
       {showName &&
         (responsiveName ? (
           <>
