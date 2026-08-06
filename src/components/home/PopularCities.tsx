@@ -24,9 +24,15 @@ const CITY_ROADMAP: CityRoadmap[] = [
   { name: "Warangal", tag: "Kazipet & Hanamkonda Corridor", status: "upcoming", badge: "🚀 Launching Soon" },
 ];
 
-export function PopularCities() {
+export function PopularCities({
+  onSelectCity,
+}: {
+  onSelectCity?: (city: CityRoadmap) => void;
+}) {
   const handleCityClick = (city: CityRoadmap) => {
-    if (city.status === "upcoming") {
+    if (onSelectCity) {
+      onSelectCity(city);
+    } else if (city.status === "upcoming") {
       toast.info(`Urban Properties is launching soon in ${city.name}! Currently live in Hyderabad.`, {
         description: "We are expanding city by city. Register to get notified when we launch in " + city.name + ".",
       });

@@ -1,7 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 
-export function OwnerCTA() {
+export function OwnerCTA({
+  onOpenWizard,
+}: {
+  onOpenWizard?: () => void;
+}) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="relative overflow-hidden rounded-3xl bg-primary p-8 sm:p-12 text-primary-foreground shadow-2xl">
@@ -23,12 +27,13 @@ export function OwnerCTA() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              to="/auth"
+            <button
+              type="button"
+              onClick={onOpenWizard}
               className="inline-flex items-center gap-2 rounded-xl bg-background px-6 py-3 text-sm font-semibold text-foreground transition hover:brightness-110 shadow-lg"
             >
               Post Property FREE <ArrowRight className="h-4 w-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </div>

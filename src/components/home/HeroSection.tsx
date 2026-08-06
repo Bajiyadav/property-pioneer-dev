@@ -9,10 +9,12 @@ export function HeroSection({
   query,
   onQueryChange,
   onSearch,
+  onOpenOwnerWizard,
 }: {
   query: string;
   onQueryChange: (q: string) => void;
   onSearch: (e: React.FormEvent) => void;
+  onOpenOwnerWizard?: () => void;
 }) {
   return (
     <section className="relative isolate overflow-hidden">
@@ -67,12 +69,13 @@ export function HeroSection({
 
           {/* Action Buttons & Post Property Callout */}
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link
-              to="/auth"
+            <button
+              type="button"
+              onClick={onOpenOwnerWizard}
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-500 shadow-md"
             >
               List Property FREE <ArrowRight className="h-4 w-4" />
-            </Link>
+            </button>
             <span className="text-xs text-background/80">
               ⚡ 100% Direct Owner Verification • Zero Brokerage
             </span>

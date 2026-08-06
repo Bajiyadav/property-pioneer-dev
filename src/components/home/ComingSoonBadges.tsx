@@ -12,7 +12,11 @@ const UPCOMING = [
   { title: "Mobile Apps", category: "iOS & Android", desc: "Native mobile app with push alerts, offline maps, and 1-tap WhatsApp.", icon: Smartphone },
 ];
 
-export function ComingSoonBadges() {
+export function ComingSoonBadges({
+  onSelectUpcoming,
+}: {
+  onSelectUpcoming?: (item: typeof UPCOMING[0]) => void;
+}) {
   return (
     <section className="bg-secondary/30 py-12 sm:py-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -28,9 +32,11 @@ export function ComingSoonBadges() {
           {UPCOMING.map((item) => {
             const Icon = item.icon;
             return (
-              <div
+              <button
                 key={item.title}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:border-primary/40"
+                type="button"
+                onClick={() => onSelectUpcoming?.(item)}
+                className="group text-left relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-1 hover:border-primary/40"
               >
                 <div className="flex items-center justify-between">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
@@ -43,7 +49,7 @@ export function ComingSoonBadges() {
                 <p className="mt-3 text-[11px] font-semibold text-muted-foreground uppercase">{item.category}</p>
                 <h3 className="mt-1 text-base font-semibold text-foreground">{item.title}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
-              </div>
+              </button>
             );
           })}
         </div>

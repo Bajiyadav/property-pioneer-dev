@@ -22,6 +22,11 @@ import { NewsletterSection } from "@/components/home/NewsletterSection";
 import { AppSection } from "@/components/home/AppSection";
 import { FooterLinks } from "@/components/home/FooterLinks";
 
+import { CategoryModal, type CategoryModalData } from "@/components/modals/CategoryModal";
+import { ServiceDetailModal, type ServiceModalData } from "@/components/modals/ServiceDetailModal";
+import { CityExpansionModal, type CityModalData } from "@/components/modals/CityExpansionModal";
+import { OwnerOnboardingModal } from "@/components/modals/OwnerOnboardingModal";
+
 export const Route = createFileRoute("/")({
   head: () => {
     const canonicalUrl = getCanonicalUrl("/");
@@ -51,6 +56,13 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+
+  // Interactive Modal States
+  const [activeCategory, setActiveCategory] = useState<CategoryModalData | null>(null);
+  const [activeService, setActiveService] = useState<ServiceModalData | null>(null);
+  const [activeCity, setActiveCity] = useState<CityModalData | null>(null);
+  const [showOwnerWizard, setShowOwnerWizard] = useState(false);
+
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: fetchProperties,
@@ -69,22 +81,31 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* 1. Hero Section (Hyderabad Focus) */}
-      <HeroSection query={q} onQueryChange={setQ} onSearch={handleSearchSubmit} />
+      <HeroSection
+        query={q}
+        onQueryChange={setQ}
+        onSearch={handleSearchSubmit}
+        onOpenOwnerWizard={() => setShowOwnerWizard(true)}
+      />
 
       {/* 2. Real Estate Quote Banner */}
       <QuoteBanner />
 
-      {/* 3. Property Categories Grid */}
-      <PropertyCategories />
+      {/* 3. Property Categories Grid (Interactive Category Modal) */}
+      <PropertyCategories onSelectCategory={(cat) => setActiveCategory(cat)} />
 
       {/* 4. Featured Rentals (Hyderabad Focus) */}
       <FeaturedProperties properties={featured.length > 0 ? featured : properties} isLoading={isLoading} />
 
-      {/* 5. Product Roadmap (Coming Soon Badges) */}
-      <ComingSoonBadges />
+      {/* 5. Product Roadmap (Interactive Coming Soon Cards) */}
+      <ComingSoonBadges
+        onSelectUpcoming={(item) =>
+          setActiveCategory({ id: item.title.toLowerCase(), title: item.title, isLive: false })
+        }
+      />
 
-      {/* 6. Popular Cities & Expansion Hubs */}
-      <PopularCities />
+      {/* 6. Popular Cities & Expansion Hubs (Interactive City Roadmap Modal) */}
+      <PopularCities onSelectCity={(city) => setActiveCity(city)} />
 
       {/* 7. Why Urban Properties (Benefits) */}
       <div id="why-us">
@@ -94,9 +115,9 @@ function Index() {
       {/* 8. Dual-tab How It Works Workflow */}
       <HowItWorks />
 
-      {/* 9. Services Ecosystem */}
+      {/* 9. Services Ecosystem (Interactive Service Detail & Booking Modal) */}
       <div id="services">
-        <Services />
+        <Services onSelectService={(s) => setActiveService(s)} />
       </div>
 
       {/* 10. Interactive India Map & Expansion */}
@@ -108,8 +129,8 @@ function Index() {
       {/* 12. Verified Customer & Owner Stories */}
       <Testimonials />
 
-      {/* 13. Owner CTA Banner */}
-      <OwnerCTA />
+      {/* 13. Owner CTA Banner (Triggers Multi-Step Wizard) */}
+      <OwnerCTA onOpenWizard={() => setShowOwnerWizard(true)} />
 
       {/* 14. Support FAQ Accordion */}
       <div id="contact">
@@ -124,6 +145,14 @@ function Index() {
 
       {/* 17. Startup Footer */}
       <FooterLinks />
+
+      {/* ======================================= */}
+      {/* INTERACTIVE MODALS & DRAWERS            */}
+      {/* ======================================= */}
+      <CategoryModal data={activeCategory} onClose={() => setActiveCategory(null)} />
+      <ServiceDetailModal data={activeService} onClose={() => setActiveService(null)} />
+      <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
+      <OwnerOnboardingModal isOpen={showOwnerWizard} onClose={() => setShowOwnerWizard(false)} />
     </div>
   );
 }

@@ -36,7 +36,11 @@ const JOURNEY_STEPS = [
   { step: "06", title: "Move In", icon: Key, desc: "Start living comfortably" },
 ];
 
-export function Services() {
+export function Services({
+  onSelectService,
+}: {
+  onSelectService?: (service: ServiceItem) => void;
+}) {
   return (
     <section className="relative overflow-hidden bg-secondary/40 py-16 sm:py-24">
       {/* Background Lighting Effects */}
@@ -93,9 +97,11 @@ export function Services() {
           {[...SERVICES, ...SERVICES].map((s, idx) => {
             const Icon = s.icon;
             return (
-              <div
+              <button
                 key={`${s.title}-${idx}`}
-                className="group w-72 shrink-0 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition duration-300 transform-gpu hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/50 hover:shadow-2xl flex flex-col justify-between"
+                type="button"
+                onClick={() => onSelectService?.(s)}
+                className="group w-72 text-left shrink-0 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] transition duration-300 transform-gpu hover:-translate-y-2 hover:scale-[1.03] hover:border-primary/50 hover:shadow-2xl flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -112,10 +118,10 @@ export function Services() {
                 </div>
 
                 <div className="mt-6 border-t border-border/50 pt-4 flex items-center justify-between text-xs font-semibold text-primary transition group-hover:translate-x-1">
-                  <span>Explore Service</span>
+                  <span>Explore & Book Service</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
