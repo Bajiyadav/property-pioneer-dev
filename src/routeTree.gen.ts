@@ -20,6 +20,10 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
+import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
+import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
+import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_authenticated/dashboard/customer'
+import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
 import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
@@ -81,6 +85,30 @@ const PropertiesIdRoute = PropertiesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PropertiesRoute,
 } as any)
+const AuthenticatedDashboardAdminRoute =
+  AuthenticatedDashboardAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardAgentRoute =
+  AuthenticatedDashboardAgentRouteImport.update({
+    id: '/agent',
+    path: '/agent',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardCustomerRoute =
+  AuthenticatedDashboardCustomerRouteImport.update({
+    id: '/customer',
+    path: '/customer',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardOwnerRoute =
+  AuthenticatedDashboardOwnerRouteImport.update({
+    id: '/owner',
+    path: '/owner',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   id: '/api/public/enquiries',
   path: '/api/public/enquiries',
@@ -125,9 +153,13 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
+  '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
+  '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -142,9 +174,13 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
+  '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
+  '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
+  '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -162,9 +198,13 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
+  '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
+  '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
+  '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -185,6 +225,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/properties/$id'
     | '/properties/'
+    | '/dashboard/admin'
+    | '/dashboard/agent'
+    | '/dashboard/customer'
+    | '/dashboard/owner'
     | '/api/public/enquiries'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -202,6 +246,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/properties/$id'
     | '/properties'
+    | '/dashboard/admin'
+    | '/dashboard/agent'
+    | '/dashboard/customer'
+    | '/dashboard/owner'
     | '/api/public/enquiries'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -221,6 +269,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/properties/$id'
     | '/properties/'
+    | '/_authenticated/dashboard/admin'
+    | '/_authenticated/dashboard/agent'
+    | '/_authenticated/dashboard/customer'
+    | '/_authenticated/dashboard/owner'
     | '/api/public/enquiries'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -324,6 +376,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesIdRouteImport
       parentRoute: typeof PropertiesRoute
     }
+    '/_authenticated/dashboard/admin': {
+      id: '/_authenticated/dashboard/admin'
+      path: '/admin'
+      fullPath: '/dashboard/admin'
+      preLoaderRoute: typeof AuthenticatedDashboardAdminRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/agent': {
+      id: '/_authenticated/dashboard/agent'
+      path: '/agent'
+      fullPath: '/dashboard/agent'
+      preLoaderRoute: typeof AuthenticatedDashboardAgentRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/customer': {
+      id: '/_authenticated/dashboard/customer'
+      path: '/customer'
+      fullPath: '/dashboard/customer'
+      preLoaderRoute: typeof AuthenticatedDashboardCustomerRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/owner': {
+      id: '/_authenticated/dashboard/owner'
+      path: '/owner'
+      fullPath: '/dashboard/owner'
+      preLoaderRoute: typeof AuthenticatedDashboardOwnerRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/api/public/enquiries': {
       id: '/api/public/enquiries'
       path: '/api/public/enquiries'
@@ -369,14 +449,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardAdminRoute: typeof AuthenticatedDashboardAdminRoute
+  AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRoute
+  AuthenticatedDashboardCustomerRoute: typeof AuthenticatedDashboardCustomerRoute
+  AuthenticatedDashboardOwnerRoute: typeof AuthenticatedDashboardOwnerRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardAdminRoute: AuthenticatedDashboardAdminRoute,
+    AuthenticatedDashboardAgentRoute: AuthenticatedDashboardAgentRoute,
+    AuthenticatedDashboardCustomerRoute: AuthenticatedDashboardCustomerRoute,
+    AuthenticatedDashboardOwnerRoute: AuthenticatedDashboardOwnerRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =

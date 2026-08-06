@@ -1,0 +1,70 @@
+import { Link } from "@tanstack/react-router";
+import { Wrench, ArrowLeft, Home, PhoneCall, AlertTriangle, RefreshCw } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
+
+export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: () => void }) {
+  const requestId = `REQ-${Date.now().toString(36).toUpperCase()}-UP`;
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12 text-center">
+      <div className="max-w-md space-y-6">
+        <BrandMark responsiveName className="justify-center" />
+
+        <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-amber-500/10 text-amber-500 ring-8 ring-amber-500/5">
+          <Wrench className="h-10 w-10" />
+        </div>
+
+        <div>
+          <span className="rounded-full bg-amber-500/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+            🚧 We're Fixing Something
+          </span>
+          <h1 className="mt-4 text-2xl font-extrabold text-foreground sm:text-3xl">
+            The page is temporarily unavailable
+          </h1>
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+            Our engineering team has been notified. We are resolving this short interruption to get you back to your property search.
+          </p>
+        </div>
+
+        {/* Error Request ID & Stack snippet */}
+        <div className="rounded-2xl border border-border/60 bg-card p-4 text-left font-mono text-[11px]">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Reference Code:</span>
+            <span className="font-bold text-foreground">{requestId}</span>
+          </div>
+          {error?.message && (
+            <p className="mt-2 text-rose-500 dark:text-rose-400 truncate">
+              {error.message}
+            </p>
+          )}
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          {reset && (
+            <button
+              onClick={reset}
+              className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110"
+            >
+              <RefreshCw className="h-4 w-4" /> Try Again
+            </button>
+          )}
+
+          <button
+            onClick={() => window.history.back()}
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
+          >
+            <ArrowLeft className="h-4 w-4" /> Go Back
+          </button>
+
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
+          >
+            <Home className="h-4 w-4" /> Home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

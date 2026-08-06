@@ -17,6 +17,9 @@ import { BrandMark } from "@/components/BrandMark";
 import { BRAND } from "@/config/platform";
 import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 import { supabase } from "@/integrations/supabase/client";
+import { HeaderProfileMenu } from "@/components/navigation/HeaderProfileMenu";
+import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
+import { CustomErrorBoundary } from "@/components/errors/CustomErrorBoundary";
 
 function NotFoundComponent() {
   return (
@@ -125,7 +128,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+  errorComponent: CustomErrorBoundary,
 });
 
 function RootShell({ children }: { children: ReactNode }) {
@@ -163,6 +166,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <SiteFooter />
+        <DemoModeSwitcher />
       </div>
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
@@ -171,15 +175,20 @@ function RootComponent() {
 
 function SiteHeader() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
-      if (active) setSignedIn(Boolean(data.session));
+      if (active) {
+        setSignedIn(Boolean(data.session));
+        setUser(data.session?.user ?? null);
+      }
     });
     const { data } = supabase.auth.onAuthStateChange((_event, session) => {
       setSignedIn(Boolean(session));
+      setUser(session?.user ?? null);
     });
 
     const handleScroll = () => {
@@ -250,21 +259,7 @@ function SiteHeader() {
             <Heart className="h-4 w-4" />
           </Link>
 
-          {signedIn === null ? null : signedIn ? (
-            <Link
-              to="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary px-3.5 py-2 text-xs font-semibold text-foreground transition hover:bg-accent"
-            >
-              <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
-            </Link>
-          ) : (
-            <Link
-              to="/auth"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground transition hover:bg-secondary"
-            >
-              <LogIn className="h-3.5 w-3.5" /> Login
-            </Link>
-          )}
+          <HeaderProfileMenu user={user} />
 
           <Link
             to="/auth"
