@@ -37,7 +37,7 @@ export function ComingSoonBadges() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                    Coming Soon
+                    🚀 Launching Q4 2026
                   </span>
                 </div>
                 <p className="mt-3 text-[11px] font-semibold text-muted-foreground uppercase">{item.category}</p>

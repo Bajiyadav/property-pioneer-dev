@@ -1,50 +1,97 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin } from "lucide-react";
+import { MapPin, Sparkles, Rocket } from "lucide-react";
+import { toast } from "sonner";
 
-const TARGET_CITIES = [
-  { name: "Jaipur", tag: "Coaching Hub & IT", count: "1,200+ Listings" },
-  { name: "Lucknow", tag: "Gomti Nagar & Hazratganj", count: "950+ Listings" },
-  { name: "Indore", tag: "Vijay Nagar & Super Corridor", count: "1,100+ Listings" },
-  { name: "Hyderabad", tag: "Hitech City & Gachibowli", count: "2,400+ Listings" },
-  { name: "Bangalore", tag: "Koramangala & Whitefield", count: "3,100+ Listings" },
-  { name: "Chennai", tag: "OMR & Velachery", count: "1,800+ Listings" },
-  { name: "Pune", tag: "Kharadi & Hinjewadi", count: "2,100+ Listings" },
-  { name: "Vizag", tag: "Beach Road & Gajuwaka", count: "750+ Listings" },
-  { name: "Vijayawada", tag: "Benz Circle & Enikepadu", count: "620+ Listings" },
-  { name: "Tirupati", tag: "Renigunta & Alipiri", count: "480+ Listings" },
-  { name: "Warangal", tag: "Kazipet & Hanamkonda", count: "410+ Listings" },
-  { name: "Guntur", tag: "Amaravati & Brodipet", count: "390+ Listings" },
+interface CityRoadmap {
+  name: string;
+  tag: string;
+  status: "live" | "upcoming";
+  badge: string;
+}
+
+const CITY_ROADMAP: CityRoadmap[] = [
+  { name: "Hyderabad", tag: "Hitech City, Gachibowli & Kondapur", status: "live", badge: "● Live Market" },
+  { name: "Bangalore", tag: "Koramangala, Whitefield & Indiranagar", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Chennai", tag: "OMR, Velachery & Anna Nagar", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Pune", tag: "Kharadi, Hinjewadi & Baner", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Mumbai", tag: "Bandra, BKC & Powai", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Delhi NCR", tag: "Gurugram, Noida & Saket", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Visakhapatnam", tag: "Beach Road, MVP Colony & Gajuwaka", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Vijayawada", tag: "Benz Circle, Enikepadu & Amaravati", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Jaipur", tag: "Malviya Nagar, Vaishali & Jagatpura", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Lucknow", tag: "Gomti Nagar & Hazratganj", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Indore", tag: "Vijay Nagar & Super Corridor", status: "upcoming", badge: "🚀 Launching Soon" },
+  { name: "Warangal", tag: "Kazipet & Hanamkonda Corridor", status: "upcoming", badge: "🚀 Launching Soon" },
 ];
 
 export function PopularCities() {
+  const handleCityClick = (city: CityRoadmap) => {
+    if (city.status === "upcoming") {
+      toast.info(`Urban Properties is launching soon in ${city.name}! Currently live in Hyderabad.`, {
+        description: "We are expanding city by city. Register to get notified when we launch in " + city.name + ".",
+      });
+    }
+  };
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Target Cities & Expansion</p>
-        <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">Popular Real Estate Hubs</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Find rental flats, PGs, and properties in top Tier-2, Tier-3, and Metro cities across India.</p>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+          <Rocket className="h-3.5 w-3.5" /> Pan-India Expansion Roadmap
+        </span>
+        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Expanding Across India</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Launching with Hyderabad as our first market, Urban Properties is rapidly expanding to every major real estate hub.
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {TARGET_CITIES.map((city) => (
-          <Link
-            key={city.name}
-            to="/properties"
-            search={{ q: "", city: city.name, listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
-          >
-            <div className="flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-secondary text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                <MapPin className="h-5 w-5" />
+        {CITY_ROADMAP.map((city) => {
+          const isLive = city.status === "live";
+          return isLive ? (
+            <Link
+              key={city.name}
+              to="/properties"
+              search={{ q: "", city: city.name, listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+              className="group flex items-center justify-between rounded-2xl border border-emerald-500/40 bg-card p-4 shadow-md transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-600 text-white">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">
+                    {city.name}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">{city.tag}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">{city.name}</h3>
-                <p className="text-[11px] text-muted-foreground">{city.tag}</p>
+              <span className="rounded-full bg-emerald-600/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                {city.badge}
+              </span>
+            </Link>
+          ) : (
+            <button
+              key={city.name}
+              type="button"
+              onClick={() => handleCityClick(city)}
+              className="group flex items-center justify-between rounded-2xl border border-border bg-card/60 p-4 shadow-sm text-left transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:bg-card"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">{city.name}</h3>
+                  <p className="text-[11px] text-muted-foreground">{city.tag}</p>
+                </div>
               </div>
-            </div>
-            <span className="text-[10px] font-semibold text-muted-foreground">{city.count}</span>
-          </Link>
-        ))}
+              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+                {city.badge}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
