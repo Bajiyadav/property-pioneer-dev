@@ -51,7 +51,14 @@ function PropertiesPage() {
   const filtered = useMemo(() => {
     const q = search.q.toLowerCase().trim();
     return all.filter((p) => {
-      if (q && ![p.title, p.city, p.address, p.description].some((s) => s.toLowerCase().includes(q))) return false;
+      if (
+        q &&
+        ![p.title, p.city, p.address, p.description]
+          .filter((s): s is string => Boolean(s))
+          .some((s) => s.toLowerCase().includes(q))
+      ) {
+        return false;
+      }
       if (search.city && p.city !== search.city) return false;
       if (search.listing && p.listing_type !== search.listing) return false;
       if (search.beds > 0 && p.bedrooms < search.beds) return false;

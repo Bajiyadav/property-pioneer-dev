@@ -15,7 +15,11 @@ function CustomerDashboard() {
     queryFn: fetchProperties,
   });
 
-  const hyderabadRentals = properties.filter((p) => p.city.toLowerCase() === "hyderabad" || p.address.toLowerCase().includes("hyderabad"));
+  const hyderabadRentals = properties.filter(
+    (p) =>
+      (p.city && p.city.toLowerCase().includes("hyderabad")) ||
+      (p.address && p.address.toLowerCase().includes("hyderabad"))
+  );
   const recommended = hyderabadRentals.length > 0 ? hyderabadRentals : properties;
 
   return (
