@@ -85,28 +85,22 @@ function CustomerDashboardPage() {
             </Link>
           </div>
 
-          {/* Saved Homes Quick Preview */}
+          {/* Saved Homes / Recommended Preview */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-foreground">Your Saved Favorites ({savedHomes.length})</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                {savedHomes.length > 0 ? `Your Saved Favorites (${savedHomes.length})` : `Recommended Hyderabad Homes (${properties.slice(0, 3).length})`}
+              </h2>
               <button onClick={() => setActiveTab("saved")} className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
                 View All <ArrowRight className="h-3 w-3" />
               </button>
             </div>
 
-            {savedHomes.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-border/80 bg-card p-8 text-center">
-                <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 text-sm font-bold text-foreground">No saved homes yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Click the heart icon on any property card to save it for later.</p>
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {savedHomes.slice(0, 3).map((p) => (
-                  <PropertyCard key={p.id} property={p} />
-                ))}
-              </div>
-            )}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {(savedHomes.length > 0 ? savedHomes.slice(0, 3) : properties.slice(0, 3)).map((p) => (
+                <PropertyCard key={p.id} property={p} />
+              ))}
+            </div>
           </div>
         </div>
       )}
