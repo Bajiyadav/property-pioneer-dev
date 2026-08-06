@@ -83,7 +83,7 @@ export const LISTING_BOOSTS = [
 ] as const;
 
 export const BRAND = {
-  name: "Urban Rental Flats",
-  shortName: "URF",
-  tagline: "Homes for the way you live now.",
+  name: "Urban Properties",
+  shortName: "UP",
+  tagline: "India's next-generation real estate ecosystem.",
 } as const;

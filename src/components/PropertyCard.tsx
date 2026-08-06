@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Heart, MapPin, BedDouble, Bath, Maximize } from "lucide-react";
 import { type Property, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
+import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
+import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
@@ -21,15 +23,14 @@ export function PropertyCard({ property }: { property: Property }) {
           loading="lazy"
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
-        <div className="absolute left-3 top-3 flex gap-2">
-          <span className="rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground backdrop-blur">
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 max-w-[85%]">
+          <span className="rounded-full bg-background/90 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground backdrop-blur">
             For {property.listing_type}
           </span>
-          {property.is_featured && (
-            <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
-              Featured
-            </span>
+          {property.status && property.status !== "available" && (
+            <PropertyStatus status={property.status} size="sm" />
           )}
+          <PropertyBadges property={property} size="sm" />
         </div>
         <button
           type="button"
@@ -62,7 +63,7 @@ export function PropertyCard({ property }: { property: Property }) {
           <span className="inline-flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms} ba</span>
           <span className="inline-flex items-center gap-1"><Maximize className="h-4 w-4" />{property.area_sqft} ft²</span>
         </div>
-        <div className="mt-auto pt-3">
+        <div className="mt-auto pt-3 flex items-center justify-between">
           <span className="font-[family-name:var(--font-display)] text-xl font-semibold text-foreground">
             {formatPrice(property.price, property.listing_type)}
           </span>

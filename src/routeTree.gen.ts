@@ -17,9 +17,15 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
+import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
+import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
+import { Route as ApiPublicPropertiesIdSaveRouteImport } from './routes/api/public/properties.$id.save'
+import { Route as ApiPublicPropertiesIdScheduleVisitRouteImport } from './routes/api/public/properties.$id.schedule-visit'
+import { Route as ApiPublicPropertiesIdShareRouteImport } from './routes/api/public/properties.$id.share'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,6 +66,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -75,6 +86,36 @@ const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   path: '/api/public/enquiries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPropertiesIdContactRoute =
+  ApiPublicPropertiesIdContactRouteImport.update({
+    id: '/api/public/properties/$id/contact',
+    path: '/api/public/properties/$id/contact',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPropertiesIdReportRoute =
+  ApiPublicPropertiesIdReportRouteImport.update({
+    id: '/api/public/properties/$id/report',
+    path: '/api/public/properties/$id/report',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPropertiesIdSaveRoute =
+  ApiPublicPropertiesIdSaveRouteImport.update({
+    id: '/api/public/properties/$id/save',
+    path: '/api/public/properties/$id/save',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPropertiesIdScheduleVisitRoute =
+  ApiPublicPropertiesIdScheduleVisitRouteImport.update({
+    id: '/api/public/properties/$id/schedule-visit',
+    path: '/api/public/properties/$id/schedule-visit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPropertiesIdShareRoute =
+  ApiPublicPropertiesIdShareRouteImport.update({
+    id: '/api/public/properties/$id/share',
+    path: '/api/public/properties/$id/share',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -84,9 +125,15 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
+  '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
+  '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
+  '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,9 +142,15 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
+  '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
+  '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
+  '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,9 +162,15 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
+  '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
+  '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
+  '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,9 +182,15 @@ export interface FileRouteTypes {
     | '/properties'
     | '/sitemap.xml'
     | '/admin'
+    | '/dashboard'
     | '/properties/$id'
     | '/properties/'
     | '/api/public/enquiries'
+    | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/report'
+    | '/api/public/properties/$id/save'
+    | '/api/public/properties/$id/schedule-visit'
+    | '/api/public/properties/$id/share'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,9 +199,15 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/sitemap.xml'
     | '/admin'
+    | '/dashboard'
     | '/properties/$id'
     | '/properties'
     | '/api/public/enquiries'
+    | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/report'
+    | '/api/public/properties/$id/save'
+    | '/api/public/properties/$id/schedule-visit'
+    | '/api/public/properties/$id/share'
   id:
     | '__root__'
     | '/'
@@ -147,9 +218,15 @@ export interface FileRouteTypes {
     | '/properties'
     | '/sitemap.xml'
     | '/_authenticated/admin'
+    | '/_authenticated/dashboard'
     | '/properties/$id'
     | '/properties/'
     | '/api/public/enquiries'
+    | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/report'
+    | '/api/public/properties/$id/save'
+    | '/api/public/properties/$id/schedule-visit'
+    | '/api/public/properties/$id/share'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,6 +238,11 @@ export interface RootRouteChildren {
   PropertiesRoute: typeof PropertiesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
+  ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
+  ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
+  ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
+  ApiPublicPropertiesIdScheduleVisitRoute: typeof ApiPublicPropertiesIdScheduleVisitRoute
+  ApiPublicPropertiesIdShareRoute: typeof ApiPublicPropertiesIdShareRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -221,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/properties/': {
       id: '/properties/'
       path: '/'
@@ -242,15 +331,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEnquiriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/properties/$id/contact': {
+      id: '/api/public/properties/$id/contact'
+      path: '/api/public/properties/$id/contact'
+      fullPath: '/api/public/properties/$id/contact'
+      preLoaderRoute: typeof ApiPublicPropertiesIdContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/properties/$id/report': {
+      id: '/api/public/properties/$id/report'
+      path: '/api/public/properties/$id/report'
+      fullPath: '/api/public/properties/$id/report'
+      preLoaderRoute: typeof ApiPublicPropertiesIdReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/properties/$id/save': {
+      id: '/api/public/properties/$id/save'
+      path: '/api/public/properties/$id/save'
+      fullPath: '/api/public/properties/$id/save'
+      preLoaderRoute: typeof ApiPublicPropertiesIdSaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/properties/$id/schedule-visit': {
+      id: '/api/public/properties/$id/schedule-visit'
+      path: '/api/public/properties/$id/schedule-visit'
+      fullPath: '/api/public/properties/$id/schedule-visit'
+      preLoaderRoute: typeof ApiPublicPropertiesIdScheduleVisitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/properties/$id/share': {
+      id: '/api/public/properties/$id/share'
+      path: '/api/public/properties/$id/share'
+      fullPath: '/api/public/properties/$id/share'
+      preLoaderRoute: typeof ApiPublicPropertiesIdShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -279,6 +405,12 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesRoute: PropertiesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
+  ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
+  ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,
+  ApiPublicPropertiesIdSaveRoute: ApiPublicPropertiesIdSaveRoute,
+  ApiPublicPropertiesIdScheduleVisitRoute:
+    ApiPublicPropertiesIdScheduleVisitRoute,
+  ApiPublicPropertiesIdShareRoute: ApiPublicPropertiesIdShareRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

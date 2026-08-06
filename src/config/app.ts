@@ -7,14 +7,14 @@ function getAppUrl(): string {
   if (envUrl && typeof envUrl === "string" && envUrl.trim() !== "") {
     return envUrl.trim().replace(/\/+$/, "");
   }
-  return "https://urbanrentalflats.in";
+  return "https://urbanproperties.in";
 }
 
 export const APP_URL = getAppUrl();
-export const APP_NAME = "Urban Rental Flats";
-export const APP_SHORT_NAME = "URF";
+export const APP_NAME = "Urban Properties";
+export const APP_SHORT_NAME = "UP";
 export const APP_DESCRIPTION =
-  "Curated rentals and homes for sale across India. Search by city, price, and bedrooms.";
+  "India's next-generation real estate platform for Rent, Buy, Commercial, Villas, Apartments, PG & Plots in Tier-2, Tier-3 & Metro cities.";
 export const APP_LOGO = `${APP_URL}/favicon.ico`;
 export const APP_OG_IMAGE = `${APP_URL}/hero.jpg`;
 

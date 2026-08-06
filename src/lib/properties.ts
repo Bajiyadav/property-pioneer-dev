@@ -1,47 +1,20 @@
-import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import {
+  type Property,
+  type PropertyStatus,
+  type VerificationStatus,
+  fetchPublicProperties,
+  fetchPublicPropertyById,
+} from "@/modules/property/propertyService";
 
-export type Property = {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  city: string;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  area_sqft: number;
-  property_type: string;
-  listing_type: "rent" | "sale";
-  status: string;
-  images: string[];
-  is_featured: boolean;
-  created_at: string;
-};
-
-const PUBLIC_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+export type { Property, PropertyStatus, VerificationStatus };
 
 export async function fetchProperties(): Promise<Property[]> {
-  const { data, error } = await (supabase as any)
-    .from("properties")
-    .select(PUBLIC_COLUMNS)
-    .eq("is_approved", true)
-    .order("is_featured", { ascending: false })
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as Property[];
+  return fetchPublicProperties();
 }
 
 export async function fetchProperty(id: string): Promise<Property | null> {
-  const { data, error } = await (supabase as any)
-    .from("properties")
-    .select(PUBLIC_COLUMNS)
-    .eq("id", id)
-    .eq("is_approved", true)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as Property | null) ?? null;
+  return fetchPublicPropertyById(id);
 }
 
 export function formatPrice(price: number, listingType: "rent" | "sale"): string {
@@ -51,6 +24,24 @@ export function formatPrice(price: number, listingType: "rent" | "sale"): string
   if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
   if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
   return `₹${inr.format(n)}`;
+}
+
+export async function fetchOwnerContact(
+  propertyId: string,
+  turnstileToken?: string
+): Promise<{ ok: boolean; whatsappUrl?: string; error?: string }> {
+  try {
+    const res = await fetch(`/api/public/properties/${propertyId}/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { ok: false, error: data.error || "Failed to generate contact request." };
+    return { ok: true, whatsappUrl: data.whatsappUrl };
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Network error." };
+  }
 }
 
 // silence unused Database import when strict

@@ -3,12 +3,15 @@ import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User,
+  ArrowLeft, BedDouble, Bath, Maximize, MapPin, Heart, Mail, User, CheckCircle2,
 } from "lucide-react";
 import { fetchProperty, formatPrice } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
 import { submitEnquiry } from "@/lib/enquiries";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
+import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
+import { WhatsAppButton } from "@/components/WhatsAppButton/WhatsAppButton";
 
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
 
@@ -61,7 +64,7 @@ export const Route = createFileRoute("/properties/$id")({
   errorComponent: () => (
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
-      <p className="mt-2 text-muted-foreground">We couldn't load this listing on Urban Rental Flats.</p>
+      <p className="mt-2 text-muted-foreground">We couldn't load this listing on Urban Properties.</p>
       <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
         Back to browse
       </Link>
@@ -70,7 +73,7 @@ export const Route = createFileRoute("/properties/$id")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Listing not found</h1>
-      <p className="mt-2 text-muted-foreground">This home is no longer listed on Urban Rental Flats.</p>
+      <p className="mt-2 text-muted-foreground">This home is no longer listed on Urban Properties.</p>
       <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
         Back to browse
       </Link>
@@ -155,6 +158,10 @@ function PropertyDetail() {
             <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground">
               {property.property_type}
             </span>
+            {property.status && property.status !== "available" && (
+              <PropertyStatus status={property.status} size="lg" />
+            )}
+            <PropertyBadges property={property} size="lg" />
           </div>
           <h1 className="mt-3 text-3xl font-semibold text-foreground sm:text-4xl">{property.title}</h1>
           <p className="mt-2 flex items-center gap-1 text-muted-foreground">
@@ -188,21 +195,22 @@ function PropertyDetail() {
             <div className="my-5 h-px bg-border" />
 
             <div className="flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-full bg-secondary">
-                <User className="h-5 w-5 text-foreground" />
+              <div className="grid h-11 w-11 place-items-center rounded-full bg-emerald-500/10 text-emerald-600">
+                <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Listed by owner</p>
-                <p className="text-xs text-muted-foreground">Contact via enquiry</p>
+                <p className="text-sm font-semibold text-foreground">Direct Owner Listing</p>
+                <p className="text-xs text-muted-foreground">Verified & Safe Inquiry</p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-2">
+            <div className="mt-5 grid gap-2.5">
+              <WhatsAppButton propertyId={property.id} className="w-full" />
               <button
                 onClick={() => setEnquiryOpen((v) => !v)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-accent"
               >
-                <Mail className="h-4 w-4" /> Send enquiry
+                <Mail className="h-4 w-4" /> Send email enquiry
               </button>
             </div>
 

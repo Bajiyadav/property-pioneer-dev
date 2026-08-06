@@ -1,12 +1,26 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Search, MapPin, Sparkles } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
 import { fetchProperties } from "@/lib/properties";
-import { PropertyCard } from "@/components/PropertyCard";
-
 import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+
+import { HeroSection } from "@/components/home/HeroSection";
+import { QuoteBanner } from "@/components/home/QuoteBanner";
+import { PropertyCategories } from "@/components/home/PropertyCategories";
+import { FeaturedProperties } from "@/components/home/FeaturedProperties";
+import { ComingSoonBadges } from "@/components/home/ComingSoonBadges";
+import { PopularCities } from "@/components/home/PopularCities";
+import { WhyUrbanProperties } from "@/components/home/WhyUrbanProperties";
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { Services } from "@/components/home/Services";
+import { IndiaMapSection } from "@/components/home/IndiaMapSection";
+import { NearbyPlaces } from "@/components/home/NearbyPlaces";
+import { Testimonials } from "@/components/home/Testimonials";
+import { OwnerCTA } from "@/components/home/OwnerCTA";
+import { FAQSection } from "@/components/home/FAQSection";
+import { NewsletterSection } from "@/components/home/NewsletterSection";
+import { AppSection } from "@/components/home/AppSection";
+import { FooterLinks } from "@/components/home/FooterLinks";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -14,16 +28,16 @@ export const Route = createFileRoute("/")({
     const ogImage = getOgImageUrl();
     return {
       meta: [
-        { title: `${APP_NAME} — Find your next home` },
+        { title: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
         { name: "description", content: APP_DESCRIPTION },
-        { property: "og:title", content: `${APP_NAME} — Find your next home` },
+        { property: "og:title", content: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
         { property: "og:description", content: APP_DESCRIPTION },
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: ogImage },
         { property: "og:site_name", content: APP_NAME },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${APP_NAME} — Find your next home` },
+        { name: "twitter:title", content: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
         { name: "twitter:description", content: APP_DESCRIPTION },
         { name: "twitter:image", content: ogImage },
         { name: "robots", content: "index, follow" },
@@ -42,101 +56,74 @@ function Index() {
     queryFn: fetchProperties,
   });
 
-  const featured = properties.filter((p) => p.is_featured).slice(0, 6);
-  const cities = Array.from(new Set(properties.map((p) => p.city))).slice(0, 6);
+  const featured = properties.filter((p) => p.is_featured);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate({
+      to: "/properties",
+      search: { q, city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 },
+    });
+  };
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img src={heroImg} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
-        </div>
-        <div className="mx-auto max-w-6xl px-6 pb-24 pt-20 sm:pt-28 sm:pb-32">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-background/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-foreground backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" /> Handpicked listings across India
-            </span>
-            <h1 className="mt-5 text-4xl font-semibold leading-[1.05] text-background sm:text-6xl">
-              Find a home that <em className="not-italic text-[color:var(--primary-glow)]">feels right.</em>
-            </h1>
-            <p className="mt-5 max-w-lg text-base text-background/85 sm:text-lg">
-              Browse curated rentals and homes for sale — from cozy studios to hillside villas.
-            </p>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* 1. Hero Section (Hyderabad Focus) */}
+      <HeroSection query={q} onQueryChange={setQ} onSearch={handleSearchSubmit} />
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                navigate({ to: "/properties", search: { q, city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 } });
-              }}
-              className="mt-8 flex flex-col gap-2 rounded-2xl bg-background p-2 shadow-[var(--shadow-lift)] sm:flex-row sm:items-center"
-            >
-              <div className="flex flex-1 items-center gap-2 px-3">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search by city, area, or keyword"
-                  className="w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-              <button
-                type="submit"
-                className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
-              >
-                Search homes
-              </button>
-            </form>
+      {/* 2. Real Estate Quote Banner */}
+      <QuoteBanner />
 
-            {cities.length > 0 && (
-              <div className="mt-6 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-background/80">Popular:</span>
-                {cities.map((city) => (
-                  <Link
-                    key={city}
-                    to="/properties"
-                    search={{ q: "", city, listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-                    className="inline-flex items-center gap-1 rounded-full bg-background/90 px-3 py-1 text-sm text-foreground backdrop-blur transition hover:bg-background"
-                  >
-                    <MapPin className="h-3.5 w-3.5" />
-                    {city}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+      {/* 3. Property Categories Grid */}
+      <PropertyCategories />
 
-      {/* Featured */}
-      <section className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-primary">Featured</p>
-            <h2 className="mt-1 text-3xl font-semibold text-foreground sm:text-4xl">Homes worth a second look</h2>
-          </div>
-          <Link
-            to="/properties"
-            search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="hidden text-sm font-semibold text-foreground underline-offset-4 hover:underline sm:inline"
-          >
-            View all →
-          </Link>
-        </div>
+      {/* 4. Featured Rentals (Hyderabad Focus) */}
+      <FeaturedProperties properties={featured.length > 0 ? featured : properties} isLoading={isLoading} />
 
-        {isLoading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-muted" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((p) => <PropertyCard key={p.id} property={p} />)}
-          </div>
-        )}
-      </section>
+      {/* 5. Product Roadmap (Coming Soon Badges) */}
+      <ComingSoonBadges />
+
+      {/* 6. Popular Cities & Expansion Hubs */}
+      <PopularCities />
+
+      {/* 7. Why Urban Properties (Benefits) */}
+      <div id="why-us">
+        <WhyUrbanProperties />
+      </div>
+
+      {/* 8. Dual-tab How It Works Workflow */}
+      <HowItWorks />
+
+      {/* 9. Services Ecosystem */}
+      <div id="services">
+        <Services />
+      </div>
+
+      {/* 10. Interactive India Map & Expansion */}
+      <IndiaMapSection />
+
+      {/* 11. Nearby Landmarks Explorer */}
+      <NearbyPlaces />
+
+      {/* 12. Verified Customer & Owner Stories */}
+      <Testimonials />
+
+      {/* 13. Owner CTA Banner */}
+      <OwnerCTA />
+
+      {/* 14. Support FAQ Accordion */}
+      <div id="contact">
+        <FAQSection />
+      </div>
+
+      {/* 15. Newsletter Subscription */}
+      <NewsletterSection />
+
+      {/* 16. Mobile App Banner */}
+      <AppSection />
+
+      {/* 17. Startup Footer */}
+      <FooterLinks />
     </div>
   );
 }

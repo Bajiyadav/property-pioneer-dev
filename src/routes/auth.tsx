@@ -82,12 +82,28 @@ function AuthPage() {
         }
 
         toast.success("Account created successfully.");
-        navigate({ to: "/admin", replace: true });
+        const dest = role === "owner" ? "/admin" : "/dashboard";
+        navigate({ to: dest as any, replace: true });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: signData, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+
+        // Determine destination by fetching user role or meta
+        let targetRoute = "/dashboard";
+        if (signData.user) {
+          const { data: roleRow } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", signData.user.id)
+            .maybeSingle();
+          const userRole = roleRow?.role || signData.user.user_metadata?.user_role || "customer";
+          if (userRole === "admin" || userRole === "owner") {
+            targetRoute = "/admin";
+          }
+        }
+
         toast.success("Signed in successfully.");
-        navigate({ to: "/admin", replace: true });
+        navigate({ to: targetRoute as any, replace: true });
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Authentication error occurred.");
