@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { HeaderProfileMenu } from "@/components/navigation/HeaderProfileMenu";
 import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
 import { CustomErrorBoundary } from "@/components/errors/CustomErrorBoundary";
+import { ExpansionWaitlistModal } from "@/components/modals/ExpansionWaitlistModal";
+import { HomeServicesModal } from "@/components/modals/HomeServicesModal";
 
 function NotFoundComponent() {
   return (
