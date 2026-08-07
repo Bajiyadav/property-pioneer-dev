@@ -61,6 +61,8 @@ jobs:
         run: |
           # VITE_* is inlined into the client bundle. Anything secret behind that
           # prefix is public by construction.
+          # Only a VITE_-prefixed secret is a leak. .env.example documents the
+          # server-side SUPABASE_SERVICE_ROLE_KEY by name, which is fine.
           if grep -rnE 'VITE_[A-Z_]*(SECRET|SERVICE_ROLE|PRIVATE|PASSWORD)' src .env.example 2>/dev/null; then
             echo "::error::A secret-looking value is exposed behind a VITE_ prefix"; exit 1
           fi
