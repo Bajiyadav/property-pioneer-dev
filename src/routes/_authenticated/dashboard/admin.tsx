@@ -47,7 +47,7 @@ import {
   TrendAreaChart,
 } from "@/components/dashboard/DashboardCharts";
 import { countBy, relativeTime, seededSeries } from "@/lib/dashboard-data";
-import { updateAdminProperty } from "@/lib/admin.functions";
+import { getAdminProperties, updateAdminProperty } from "@/lib/admin.functions";
 import { displayName } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/_authenticated/dashboard/admin")({
@@ -191,6 +191,16 @@ function AdminDashboard({ user }: { user: User | null }) {
     refetch,
   } = useQuery({ queryKey: ["property-feed"], queryFn: fetchPropertyFeed });
 
+  // The public feed is filtered by RLS to `is_approved = true`, so it can never
+  // contain anything awaiting moderation. The queue therefore reads through the
+  // service-role server function, which sees unapproved rows too.
+  const fetchAdminProperties = useServerFn(getAdminProperties);
+  const { data: adminRows, isError: adminRowsError } = useQuery({
+    queryKey: ["admin", "properties"],
+    queryFn: () => fetchAdminProperties({}),
+    retry: false,
+  });
+
   // Moderation writes through the same RLS-bypassing server function the secure
   // portal uses. It requires SUPABASE_SERVICE_ROLE_KEY on the server — when that
   // is absent the mutation fails loudly rather than showing a false success.
@@ -201,6 +211,7 @@ function AdminDashboard({ user }: { user: User | null }) {
     mutationFn: (vars: { id: string; is_approved: boolean }) =>
       updateProperty({ data: { id: vars.id, is_approved: vars.is_approved } }),
     onSuccess: (_res, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
       queryClient.invalidateQueries({ queryKey: ["property-feed"] });
       toast.success(vars.is_approved ? "Listing approved and published" : "Listing rejected");
     },
@@ -212,7 +223,7 @@ function AdminDashboard({ user }: { user: User | null }) {
       ),
   });
 
-  const moderate = (property: Property, approved: boolean) =>
+  const moderate = (property: { id: string }, approved: boolean) =>
     moderation.mutate({ id: property.id, is_approved: approved });
 
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
@@ -220,7 +231,11 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const owners = USERS.filter((u) => u.role === "Owner");
   const agents = USERS.filter((u) => u.role === "Agent");
-  const pendingApprovals = useMemo(() => properties.slice(0, 3), [properties]);
+  /** Genuinely unapproved listings, straight from the service-role view. */
+  const pendingApprovals = useMemo(
+    () => (adminRows ?? []).filter((p) => !p.is_approved),
+    [adminRows],
+  );
   const verificationQueue = useMemo(
     () => properties.filter((p) => p.property_verification_status !== "verified").slice(0, 4),
     [properties],
@@ -485,7 +500,13 @@ function AdminDashboard({ user }: { user: User | null }) {
             title={`Pending approvals (${pendingApprovals.length})`}
             subtitle="Listings awaiting moderator review"
           />
-          {isLoading ? (
+          {adminRowsError ? (
+            <ErrorState
+              title="Moderation queue unavailable"
+              message="The admin listing feed could not be loaded. This needs SUPABASE_SERVICE_ROLE_KEY on the server and an admin role on your account."
+              onRetry={() => queryClient.invalidateQueries({ queryKey: ["admin", "properties"] })}
+            />
+          ) : !adminRows ? (
             <LoadingSkeleton rows={3} />
           ) : pendingApprovals.length === 0 ? (
             <EmptyState
