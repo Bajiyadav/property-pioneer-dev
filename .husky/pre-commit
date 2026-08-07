@@ -1,0 +1,3 @@
+# Fast gate on staged files only — full type + test runs happen in pre-push/CI
+# so committing stays quick enough that people don't reach for --no-verify.
+npx lint-staged

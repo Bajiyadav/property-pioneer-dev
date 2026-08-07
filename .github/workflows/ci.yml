@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  quality:
+    name: Lint · Types · Unit tests · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install (locked)
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests with coverage
+        run: npm run test:coverage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+      - name: Build
+        run: npm run build
+        env:
+          # Build-time public config. Real values come from repo secrets; the
+          # fallbacks keep forked PRs building instead of failing on a missing var.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder' }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL || 'https://property-pioneer-dev.vercel.app' }}
+
+      - name: Bundle size report
+        run: |
+          echo "### Bundle size" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          find .output/public/assets -name '*.js' -exec du -h {} + 2>/dev/null \
+            | sort -rh | head -15 >> "$GITHUB_STEP_SUMMARY" || echo "no assets" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          TOTAL=$(du -sk .output/public 2>/dev/null | cut -f1)
+          echo "Total client payload: ${TOTAL} KB" >> "$GITHUB_STEP_SUMMARY"
+          # Guard against a runaway bundle; tune as the app grows.
+          if [ "${TOTAL:-0}" -gt 15000 ]; then
+            echo "::error::Client bundle ${TOTAL}KB exceeds the 15MB budget"; exit 1
+          fi
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+
+      - name: npm audit (fail on high or critical)
+        run: |
+          npm audit --audit-level=high --omit=dev || {
+            echo "::error::High or critical vulnerabilities found"; exit 1; }
+
+      - name: License compliance
+        run: |
+          npx --yes license-checker-rspack --production --summary > licenses.txt 2>/dev/null || true
+          cat licenses.txt >> "$GITHUB_STEP_SUMMARY" || true
+          # Copyleft licences are incompatible with a closed-source SaaS.
+          if grep -Eiq '(^|[^A-Za-z])(GPL-2|GPL-3|AGPL)' licenses.txt 2>/dev/null; then
+            echo "::error::Copyleft licence detected in production dependencies"; exit 1
+          fi
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run E2E against the deployed target
+        run: npm run test:e2e
+        env:
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL || 'https://property-pioneer-dev.vercel.app' }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

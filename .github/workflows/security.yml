@@ -1,0 +1,85 @@
+name: Security
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  schedule:
+    - cron: "0 3 * * 1" # Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  secrets:
+    name: Secret scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 } # full history so rotated-but-committed keys are caught
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - uses: github/codeql-action/analyze@v3
+
+  dependencies:
+    name: Vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+      - name: npm audit
+        run: npm audit --audit-level=critical
+      - name: OWASP dependency review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+        with:
+          fail-on-severity: high
+
+  hygiene:
+    name: Secret-handling hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No secrets behind a VITE_ prefix
+        run: |
+          # VITE_* is inlined into the client bundle. Anything secret behind that
+          # prefix is public by construction.
+          if grep -rnE 'VITE_[A-Z_]*(SECRET|SERVICE_ROLE|PRIVATE|PASSWORD)' src .env.example 2>/dev/null; then
+            echo "::error::A secret-looking value is exposed behind a VITE_ prefix"; exit 1
+          fi
+          echo "✓ no secrets behind VITE_"
+
+      - name: .env must not be tracked
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "::error::.env is tracked in git"; exit 1
+          fi
+          echo "✓ .env untracked"
+
+      - name: Server-only modules never imported from client code
+        run: |
+          # A *.server.ts import from a component would ship service-role code
+          # to the browser. Server functions must be the only bridge.
+          BAD=$(grep -rln 'from "@/lib/.*\.server"' src/modules src/shared src/app 2>/dev/null \
+                | grep -v '\.server\.' || true)
+          if [ -n "$BAD" ]; then
+            echo "::error::client-side import of a server-only module:"; echo "$BAD"; exit 1
+          fi
+          echo "✓ server/client boundary intact"

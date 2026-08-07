@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  release:
+    name: Semantic version + changelog
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Derive the next version from Conventional Commits
+        id: version
+        run: |
+          LAST=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          RANGE="${LAST}..HEAD"; [ "$LAST" = "v0.0.0" ] && RANGE="HEAD"
+          LOG=$(git log $RANGE --pretty=format:%s%n%b)
+
+          MAJOR=$(echo "$LAST" | sed 's/v//' | cut -d. -f1)
+          MINOR=$(echo "$LAST" | sed 's/v//' | cut -d. -f2)
+          PATCH=$(echo "$LAST" | sed 's/v//' | cut -d. -f3)
+
+          if echo "$LOG" | grep -qE 'BREAKING CHANGE|^[a-z]+(\(.+\))?!:'; then
+            MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0; BUMP=major
+          elif echo "$LOG" | grep -qE '^feat(\(.+\))?:'; then
+            MINOR=$((MINOR+1)); PATCH=0; BUMP=minor
+          elif echo "$LOG" | grep -qE '^(fix|perf|refactor)(\(.+\))?:'; then
+            PATCH=$((PATCH+1)); BUMP=patch
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"; echo "No release-worthy commits."; exit 0
+          fi
+
+          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "next=$NEXT"  >> "$GITHUB_OUTPUT"
+          echo "last=$LAST"  >> "$GITHUB_OUTPUT"
+          echo "bump=$BUMP"  >> "$GITHUB_OUTPUT"
+
+      - name: Build release notes
+        if: steps.version.outputs.skip != 'true'
+        run: |
+          LAST='${{ steps.version.outputs.last }}'; NEXT='${{ steps.version.outputs.next }}'
+          RANGE="${LAST}..HEAD"; [ "$LAST" = "v0.0.0" ] && RANGE="HEAD"
+          {
+            echo "## ${NEXT} — $(date +%Y-%m-%d)"
+            echo
+            for pair in "feat:Features" "fix:Fixes" "perf:Performance" "refactor:Refactoring" "docs:Documentation"; do
+              t="${pair%%:*}"; label="${pair##*:}"
+              body=$(git log $RANGE --pretty=format:'- %s (%h)' --grep="^${t}")
+              [ -n "$body" ] && { echo "### ${label}"; echo "$body"; echo; }
+            done
+            MIG=$(git diff --name-only $RANGE -- supabase/migrations | sed 's/^/- /')
+            [ -n "$MIG" ] && { echo "### Migration notes"; echo "$MIG"; echo; echo "Apply with \`supabase db push\` before promoting."; echo; }
+          } > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+          touch CHANGELOG.md
+          cat RELEASE_NOTES.md CHANGELOG.md > CHANGELOG.new && mv CHANGELOG.new CHANGELOG.md
+
+      - name: Tag, commit changelog, publish release
+        if: steps.version.outputs.skip != 'true'
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+        run: |
+          NEXT='${{ steps.version.outputs.next }}'
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version "${NEXT#v}" --no-git-tag-version
+          git add CHANGELOG.md package.json package-lock.json
+          git commit -m "chore(release): ${NEXT} [skip ci]"
+          git tag "$NEXT"
+          git push origin HEAD:main --tags
+          gh release create "$NEXT" --title "$NEXT" --notes-file RELEASE_NOTES.md

@@ -1,0 +1,3 @@
+# The expensive checks, once, before code leaves the machine.
+npm run typecheck
+npm run test

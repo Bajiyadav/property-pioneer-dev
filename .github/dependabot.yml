@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    target-branch: develop
+    labels: [dependencies]
+    commit-message: { prefix: "chore(deps)" }
+    groups:
+      # One PR per ecosystem keeps review load sane.
+      react: { patterns: ["react", "react-dom", "@types/react*"] }
+      tanstack: { patterns: ["@tanstack/*"] }
+      radix: { patterns: ["@radix-ui/*"] }
+      tooling:
+        { patterns: ["eslint*", "prettier*", "typescript*", "vite*", "vitest*", "@playwright/*"] }
+    ignore:
+      # Majors need a human and a migration plan.
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }
+    labels: [ci]
+    commit-message: { prefix: "ci(deps)" }

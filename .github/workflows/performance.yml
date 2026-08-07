@@ -1,0 +1,29 @@
+name: Performance
+
+on:
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+
+      - name: Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            ${{ secrets.E2E_BASE_URL || 'https://property-pioneer-dev.vercel.app' }}/
+            ${{ secrets.E2E_BASE_URL || 'https://property-pioneer-dev.vercel.app' }}/properties?q=&city=&listing=&minPrice=0&maxPrice=0&beds=0
+            ${{ secrets.E2E_BASE_URL || 'https://property-pioneer-dev.vercel.app' }}/auth?redirect=
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true

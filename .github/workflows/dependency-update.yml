@@ -1,0 +1,62 @@
+name: Dependency Maintenance
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # Monday 05:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Weekly dependency + hygiene PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm }
+      - run: npm ci
+
+      - name: Apply non-breaking updates
+        run: npm update --save
+
+      - name: Security patches
+        run: npm audit fix || true
+
+      - name: Detect unused dependencies
+        run: |
+          npx --yes depcheck --json > depcheck.json 2>/dev/null || true
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          try: d = json.load(open("depcheck.json"))
+          except Exception: raise SystemExit
+          print("### Unused dependencies")
+          print("\n".join(f"- {x}" for x in d.get("dependencies", [])) or "- none")
+          print("### Missing dependencies")
+          print("\n".join(f"- {k}" for k in d.get("missing", {})) or "- none")
+          PY
+
+      - name: Verify the updates actually build
+        run: |
+          npm run lint && npm run typecheck && npm run test && npm run build
+
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/weekly-dependency-update
+          base: develop
+          commit-message: "chore(deps): weekly dependency and security update"
+          title: "chore(deps): weekly dependency and security update"
+          delete-branch: true
+          labels: dependencies
+          body: |
+            Automated weekly maintenance.
+
+            - `npm update --save` (non-breaking ranges only)
+            - `npm audit fix`
+            - Unused/missing dependency report in the run summary
+
+            Lint, typecheck, unit tests and build all passed before this PR was opened.
+            Major-version bumps are deliberately excluded — those need a human.
