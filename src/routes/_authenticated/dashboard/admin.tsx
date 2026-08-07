@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -46,6 +47,7 @@ import {
   TrendAreaChart,
 } from "@/components/dashboard/DashboardCharts";
 import { countBy, relativeTime, seededSeries } from "@/lib/dashboard-data";
+import { updateAdminProperty } from "@/lib/admin.functions";
 import { displayName } from "@/lib/auth-session";
 
 export const Route = createFileRoute("/_authenticated/dashboard/admin")({
@@ -188,6 +190,30 @@ function AdminDashboard({ user }: { user: User | null }) {
     isError,
     refetch,
   } = useQuery({ queryKey: ["property-feed"], queryFn: fetchPropertyFeed });
+
+  // Moderation writes through the same RLS-bypassing server function the secure
+  // portal uses. It requires SUPABASE_SERVICE_ROLE_KEY on the server — when that
+  // is absent the mutation fails loudly rather than showing a false success.
+  const updateProperty = useServerFn(updateAdminProperty);
+  const queryClient = useQueryClient();
+
+  const moderation = useMutation({
+    mutationFn: (vars: { id: string; is_approved: boolean }) =>
+      updateProperty({ data: { id: vars.id, is_approved: vars.is_approved } }),
+    onSuccess: (_res, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["property-feed"] });
+      toast.success(vars.is_approved ? "Listing approved and published" : "Listing rejected");
+    },
+    onError: (err) =>
+      toast.error(
+        err instanceof Error && /environment variable/i.test(err.message)
+          ? "Moderation is unavailable: SUPABASE_SERVICE_ROLE_KEY is not configured."
+          : `Could not update the listing: ${err instanceof Error ? err.message : "unknown error"}`,
+      ),
+  });
+
+  const moderate = (property: Property, approved: boolean) =>
+    moderation.mutate({ id: property.id, is_approved: approved });
 
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
@@ -483,14 +509,16 @@ function AdminDashboard({ user }: { user: User | null }) {
                   </div>
                   <div className="flex flex-none gap-2">
                     <button
-                      onClick={() => toast.success(`Approved: ${p.title}`)}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-500"
+                      disabled={moderation.isPending}
+                      onClick={() => moderate(p, true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-500 disabled:opacity-50"
                     >
                       <BadgeCheck className="h-3.5 w-3.5" /> Approve
                     </button>
                     <button
-                      onClick={() => toast.error(`Rejected: ${p.title}`)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary"
+                      disabled={moderation.isPending}
+                      onClick={() => moderate(p, false)}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary disabled:opacity-50"
                     >
                       <XCircle className="h-3.5 w-3.5" /> Reject
                     </button>
@@ -559,10 +587,12 @@ function AdminDashboard({ user }: { user: User | null }) {
                   className: "text-right",
                   render: (p: Property) => (
                     <button
-                      onClick={() => toast.success(`Verification completed for ${p.title}`)}
-                      className="rounded-xl bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground"
+                      disabled={moderation.isPending}
+                      onClick={() => moderate(p, true)}
+                      title="Marks the listing approved. Document-level verification flags require the pending enterprise-schema migration."
+                      className="rounded-xl bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground disabled:opacity-50"
                     >
-                      Verify
+                      Verify &amp; approve
                     </button>
                   ),
                 },
