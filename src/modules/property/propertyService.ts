@@ -1,12 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-/**
- * The generated `Database` types don't yet carry the verification columns that
- * `PUBLIC_PROPERTY_COLUMNS` selects, so these reads go through an untyped
- * client and are narrowed to `Property` at the boundary below.
- */
-const db = supabase as unknown as SupabaseClient;
+/** Typed client — `Database` is generated from the live schema. */
+const db = supabase;
 
 export type PropertyStatus =
   "draft" | "pending" | "available" | "reserved" | "rented" | "sold" | "archived" | "rejected";
@@ -28,6 +23,8 @@ export type Property = {
   status: PropertyStatus;
   images: string[];
   is_featured: boolean;
+  /** Moderation gate — RLS only exposes approved listings publicly. */
+  is_approved?: boolean;
   owner_verification_status?: VerificationStatus;
   property_verification_status?: VerificationStatus;
   verified_by?: string;

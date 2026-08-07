@@ -24,10 +24,21 @@ export async function fetchProperty(id: string): Promise<Property | null> {
   return fetchPublicPropertyById(id);
 }
 
-export function formatPrice(price: number, listingType: "rent" | "sale"): string {
+/**
+ * `listing_type` is a free-text column in Postgres, so anything read from the
+ * database arrives as `string`. Narrow it once here rather than casting at each
+ * call site — an unknown value formats as a sale price instead of throwing.
+ */
+export type ListingType = "rent" | "sale";
+
+export function toListingType(value: string | null | undefined): ListingType {
+  return value === "rent" ? "rent" : "sale";
+}
+
+export function formatPrice(price: number, listingType: ListingType | string): string {
   const n = Number(price);
   const inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
-  if (listingType === "rent") return `₹${inr.format(n)}/mo`;
+  if (toListingType(String(listingType)) === "rent") return `₹${inr.format(n)}/mo`;
   if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
   if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
   return `₹${inr.format(n)}`;

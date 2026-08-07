@@ -1,86 +1,92 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+/**
+ * Generated from the live `iyttetfaavokzyexvqam` schema.
+ *
+ * Regenerate after any migration:
+ *   supabase gen types typescript --project-id <ref> > src/integrations/supabase/types.ts
+ *
+ * Keeping this in sync is what lets the data layer drop its `as unknown as
+ * SupabaseClient` escapes — an untyped client silently accepts a column that
+ * does not exist.
+ */
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5";
-  };
+  __InternalSupabase: { PostgrestVersion: "14.5" };
   public: {
     Tables: {
       audit_logs: {
         Row: {
-          actor_id: string | null;
-          created_at: string;
-          details: Json;
-          event: string;
           id: string;
-          ip_address: string | null;
+          event: string;
           outcome: string;
-          subject_id: string | null;
+          actor_id: string | null;
           subject_type: string | null;
+          subject_id: string | null;
+          ip_address: string | null;
           user_agent: string | null;
+          details: Json;
+          created_at: string;
         };
         Insert: {
-          actor_id?: string | null;
-          created_at?: string;
-          details?: Json;
-          event: string;
           id?: string;
-          ip_address?: string | null;
+          event?: string;
           outcome?: string;
-          subject_id?: string | null;
+          actor_id?: string | null;
           subject_type?: string | null;
+          subject_id?: string | null;
+          ip_address?: string | null;
           user_agent?: string | null;
+          details?: Json;
+          created_at?: string;
         };
         Update: {
-          actor_id?: string | null;
-          created_at?: string;
-          details?: Json;
-          event?: string;
           id?: string;
-          ip_address?: string | null;
+          event?: string;
           outcome?: string;
-          subject_id?: string | null;
+          actor_id?: string | null;
           subject_type?: string | null;
+          subject_id?: string | null;
+          ip_address?: string | null;
           user_agent?: string | null;
+          details?: Json;
+          created_at?: string;
         };
         Relationships: [];
       };
       enquiries: {
         Row: {
-          created_at: string;
           id: string;
-          ip_address: string | null;
-          message: string;
+          property_id: string;
           name: string;
           phone: string;
-          property_id: string;
+          message: string;
+          ip_address: string | null;
           user_agent: string | null;
+          created_at: string;
         };
         Insert: {
-          created_at?: string;
           id?: string;
-          ip_address?: string | null;
-          message: string;
-          name: string;
-          phone: string;
-          property_id: string;
-          user_agent?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          ip_address?: string | null;
-          message?: string;
+          property_id?: string;
           name?: string;
           phone?: string;
-          property_id?: string;
+          message?: string;
+          ip_address?: string | null;
           user_agent?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          property_id?: string;
+          name?: string;
+          phone?: string;
+          message?: string;
+          ip_address?: string | null;
+          user_agent?: string | null;
+          created_at?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "enquiries_property_id_fkey";
+            foreignKeyName: "property_id_fkey";
             columns: ["property_id"];
             isOneToOne: false;
             referencedRelation: "properties";
@@ -88,242 +94,226 @@ export type Database = {
           },
         ];
       };
-      properties: {
+      favorites: {
         Row: {
-          address: string;
-          area_sqft: number;
-          bathrooms: number;
-          bedrooms: number;
-          city: string;
-          created_at: string;
-          description: string;
           id: string;
-          images: string[];
-          is_approved: boolean;
-          is_featured: boolean;
-          listing_type: Database["public"]["Enums"]["listing_type"];
-          owner_email: string | null;
-          owner_name: string;
-          owner_phone: string;
-          owner_whatsapp: string | null;
-          price: number;
-          property_type: Database["public"]["Enums"]["property_type"];
-          status: Database["public"]["Enums"]["property_status"];
+          user_id: string;
+          property_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          property_id?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          property_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
           title: string;
+          body: string | null;
+          kind: string;
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          body?: string | null;
+          kind?: string;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          body?: string | null;
+          kind?: string;
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          full_name: string | null;
+          phone: string | null;
+          avatar_url: string | null;
+          created_at: string;
           updated_at: string;
         };
         Insert: {
-          address: string;
-          area_sqft?: number;
-          bathrooms?: number;
-          bedrooms?: number;
-          city: string;
-          created_at?: string;
-          description: string;
           id?: string;
-          images?: string[];
-          is_approved?: boolean;
-          is_featured?: boolean;
-          listing_type?: Database["public"]["Enums"]["listing_type"];
-          owner_email?: string | null;
-          owner_name: string;
-          owner_phone: string;
-          owner_whatsapp?: string | null;
-          price: number;
-          property_type?: Database["public"]["Enums"]["property_type"];
-          status?: Database["public"]["Enums"]["property_status"];
-          title: string;
+          full_name?: string | null;
+          phone?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
           updated_at?: string;
         };
         Update: {
-          address?: string;
-          area_sqft?: number;
-          bathrooms?: number;
-          bedrooms?: number;
-          city?: string;
-          created_at?: string;
-          description?: string;
           id?: string;
+          full_name?: string | null;
+          phone?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      properties: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          price: number;
+          city: string;
+          address: string;
+          bedrooms: number;
+          bathrooms: number;
+          area_sqft: number;
+          property_type: string;
+          listing_type: string;
+          status: string;
+          images: string[];
+          owner_id: string | null;
+          owner_name: string | null;
+          owner_phone: string | null;
+          owner_email: string | null;
+          is_approved: boolean;
+          is_featured: boolean;
+          owner_verification_status: string | null;
+          property_verification_status: string | null;
+          verified_by: string | null;
+          verified_at: string | null;
+          verification_notes: string | null;
+          phone_verified: boolean | null;
+          email_verified: boolean | null;
+          id_verified: boolean | null;
+          is_zero_brokerage: boolean | null;
+          is_premium: boolean | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title?: string;
+          description?: string;
+          price?: number;
+          city?: string;
+          address?: string;
+          bedrooms?: number;
+          bathrooms?: number;
+          area_sqft?: number;
+          property_type?: string;
+          listing_type?: string;
+          status?: string;
           images?: string[];
+          owner_id?: string | null;
+          owner_name?: string | null;
+          owner_phone?: string | null;
+          owner_email?: string | null;
           is_approved?: boolean;
           is_featured?: boolean;
-          listing_type?: Database["public"]["Enums"]["listing_type"];
-          owner_email?: string | null;
-          owner_name?: string;
-          owner_phone?: string;
-          owner_whatsapp?: string | null;
-          price?: number;
-          property_type?: Database["public"]["Enums"]["property_type"];
-          status?: Database["public"]["Enums"]["property_status"];
+          owner_verification_status?: string | null;
+          property_verification_status?: string | null;
+          verified_by?: string | null;
+          verified_at?: string | null;
+          verification_notes?: string | null;
+          phone_verified?: boolean | null;
+          email_verified?: boolean | null;
+          id_verified?: boolean | null;
+          is_zero_brokerage?: boolean | null;
+          is_premium?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
           title?: string;
+          description?: string;
+          price?: number;
+          city?: string;
+          address?: string;
+          bedrooms?: number;
+          bathrooms?: number;
+          area_sqft?: number;
+          property_type?: string;
+          listing_type?: string;
+          status?: string;
+          images?: string[];
+          owner_id?: string | null;
+          owner_name?: string | null;
+          owner_phone?: string | null;
+          owner_email?: string | null;
+          is_approved?: boolean;
+          is_featured?: boolean;
+          owner_verification_status?: string | null;
+          property_verification_status?: string | null;
+          verified_by?: string | null;
+          verified_at?: string | null;
+          verification_notes?: string | null;
+          phone_verified?: boolean | null;
+          email_verified?: boolean | null;
+          id_verified?: boolean | null;
+          is_zero_brokerage?: boolean | null;
+          is_premium?: boolean | null;
+          created_at?: string;
           updated_at?: string;
         };
         Relationships: [];
       };
       user_roles: {
         Row: {
-          created_at: string;
           id: string;
-          role: Database["public"]["Enums"]["app_role"];
           user_id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          created_at: string;
         };
         Insert: {
-          created_at?: string;
           id?: string;
-          role: Database["public"]["Enums"]["app_role"];
-          user_id: string;
+          user_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          created_at?: string;
         };
         Update: {
-          created_at?: string;
           id?: string;
-          role?: Database["public"]["Enums"]["app_role"];
           user_id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          created_at?: string;
         };
         Relationships: [];
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
+    Views: { [_ in never]: never };
     Functions: {
       has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"];
-          _user_id: string;
-        };
+        Args: { _user_id: string; _role: Database["public"]["Enums"]["app_role"] };
         Returns: boolean;
       };
     };
     Enums: {
-      app_role: "admin" | "moderator" | "user";
-      listing_type: "rent" | "sale";
-      property_status: "available" | "rented" | "sold";
-      property_type: "apartment" | "house" | "villa" | "studio" | "penthouse";
+      app_role: "admin" | "moderator" | "user" | "customer" | "owner" | "agent";
     };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+    CompositeTypes: { [_ in never]: never };
   };
 };
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
-      }
-      ? R
-      : never
-    : never;
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
-      }
-      ? I
-      : never
-    : never;
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
-      }
-      ? U
-      : never
-    : never;
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
-
-export const Constants = {
-  public: {
-    Enums: {
-      app_role: ["admin", "moderator", "user"],
-      listing_type: ["rent", "sale"],
-      property_status: ["available", "rented", "sold"],
-      property_type: ["apartment", "house", "villa", "studio", "penthouse"],
-    },
-  },
-} as const;

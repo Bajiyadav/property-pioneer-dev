@@ -1,3 +1,6 @@
+import { toListingType } from "@/lib/properties";
+import type { Property, PropertyStatus } from "@/modules/property/propertyService";
+
 /**
  * Server-only owner listing operations.
  *
@@ -7,18 +10,10 @@
  * only ever touch their own listings even though RLS is bypassed here.
  */
 
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-/**
- * The checked-in `Database` types predate this schema: they have no `owner_id`
- * column and model `property_type` / `status` as narrower enums than the live
- * `text` columns actually are. Owner writes therefore go through an untyped
- * client and are validated by zod at the server-function boundary instead.
- * Regenerating types from the new project will let this cast go away.
- */
-async function adminDb(): Promise<SupabaseClient> {
+/** Service-role client. Types are generated from the live schema, so no cast. */
+async function adminDb() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as unknown as SupabaseClient;
+  return supabaseAdmin;
 }
 
 export interface OwnerListingInput {
@@ -39,6 +34,33 @@ export interface OwnerListingInput {
 const OWNER_COLUMNS =
   "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_approved,is_featured,created_at";
 
+/**
+ * Rows come back with `listing_type` as free-text, so normalise once here at the
+ * data-access boundary rather than making every consumer cast.
+ */
+const PROPERTY_STATUSES: PropertyStatus[] = [
+  "draft",
+  "pending",
+  "available",
+  "reserved",
+  "rented",
+  "sold",
+  "archived",
+  "rejected",
+];
+
+function toPropertyStatus(value: string): PropertyStatus {
+  return (PROPERTY_STATUSES as string[]).includes(value) ? (value as PropertyStatus) : "available";
+}
+
+function normaliseRow(row: { listing_type: string; status: string }): Property {
+  return {
+    ...row,
+    listing_type: toListingType(row.listing_type),
+    status: toPropertyStatus(row.status),
+  } as Property;
+}
+
 export async function listOwnerProperties(ownerId: string) {
   const db = await adminDb();
   const { data, error } = await db
@@ -48,7 +70,7 @@ export async function listOwnerProperties(ownerId: string) {
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error(error.message);
-  return data ?? [];
+  return (data ?? []).map(normaliseRow);
 }
 
 export async function createOwnerProperty(ownerId: string, input: OwnerListingInput) {
