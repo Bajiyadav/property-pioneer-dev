@@ -1,3 +1,8 @@
+## v0.1.1 — 2026-08-07
+
+### Fixes
+- fix(ci): regenerate an out-of-sync package-lock (4e17d76)
+
 ## v0.1.0 — 2026-08-07
 
 ### Features
