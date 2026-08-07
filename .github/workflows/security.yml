@@ -28,6 +28,10 @@ jobs:
     name: CodeQL
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Code scanning upload requires GitHub Advanced Security, which is not
+    # available on a free private repo. Kept wired and non-blocking so it starts
+    # reporting the moment the plan allows it, instead of sitting permanently red.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3

@@ -122,8 +122,9 @@ jobs:
       - name: Health check
         run: |
           URL="${{ secrets.PRODUCTION_URL || 'https://property-pioneer-dev.vercel.app' }}"
-          for path in "/" "/properties?q=&city=&listing=&minPrice=0&maxPrice=0&beds=0" "/auth?redirect=" "/sitemap.xml"; do
-            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$URL$path")
+          PATHS=("/" "/properties?q=&city=&listing=&minPrice=0&maxPrice=0&beds=0" "/auth?redirect=" "/sitemap.xml")
+          for path in "${PATHS[@]}"; do
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${URL}${path}")
             echo "$path -> $CODE"
             [ "$CODE" -ge 400 ] && { echo "::error::$path returned $CODE"; exit 1; }
           done

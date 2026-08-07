@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getClientIp, getUserAgent, jsonResponse } from "@/lib/security.server";
-import { logAuditEvent } from "@/modules/audit/auditLogger";
+import { logAuditEvent } from "@/modules/audit/auditLogger.server";
 
 export const Route = createFileRoute("/api/public/properties/$id/schedule-visit")({
   server: {
