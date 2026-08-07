@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  CheckCircle2,
+  Info,
   ArrowRight,
   ArrowLeft,
   Upload,
@@ -46,8 +46,13 @@ export function OwnerOnboardingModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    toast.success("Property submitted for 2-hour review!", {
-      description: "Our Hyderabad verification team will verify owner PII and publish listing.",
+    // This wizard collects details but does not yet write to `properties` —
+    // owner-scoped inserts need the owner_id column and RLS policy from
+    // migration 20260807120000. Until that ships, do NOT claim the listing was
+    // submitted: a false success would leave owners believing they are live.
+    toast.info("Details captured — listing submission isn't live yet", {
+      description:
+        "Owner self-publishing is being enabled. Our team will contact you to complete this listing.",
     });
   };
 
@@ -80,16 +85,14 @@ export function OwnerOnboardingModal({
 
         {submitted ? (
           <div className="py-8 text-center space-y-4">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-600/10 text-emerald-600">
-              <CheckCircle2 className="h-8 w-8" />
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary">
+              <Info className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">
-              Listing Submitted Successfully!
-            </h3>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Your property listing for{" "}
-              <strong className="text-foreground">{formData.title || "Hyderabad Apartment"}</strong>{" "}
-              has been submitted. Our team will verify owner details within 2 hours.
+            <h3 className="text-xl font-semibold text-foreground">Thanks — we have your details</h3>
+            <p className="mx-auto max-w-md text-xs text-muted-foreground">
+              Owner self-publishing isn't switched on yet, so{" "}
+              <strong className="text-foreground">{formData.title || "your property"}</strong> has
+              not been listed. Our Hyderabad team will contact you to complete it.
             </p>
             <button
               onClick={() => {
