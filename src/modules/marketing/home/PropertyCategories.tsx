@@ -1,6 +1,6 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { Key, Home, Building2, Building, Castle, Trees, Compass, ArrowRight } from "lucide-react";
-import type { CategoryModalData } from "@/components/modals/CategoryModal";
+import type { CategoryModalData } from "@/shared/components/dialogs/CategoryModal";
 
 interface CategoryCard {
   id: string;

@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProductHero } from "@/components/landing/ProductHero";
-import { ExpansionRoadmap } from "@/components/landing/ExpansionRoadmap";
-import { FeatureGrid } from "@/components/landing/FeatureGrid";
-import { ComparisonTable } from "@/components/landing/ComparisonTable";
-import { LaunchProgress } from "@/components/landing/LaunchProgress";
-import { RichPriorityWaitlistForm } from "@/components/landing/RichPriorityWaitlistForm";
-import { ProductFaq } from "@/components/landing/ProductFaq";
-import { LivePlatformStats } from "@/components/landing/LivePlatformStats";
-import { DocumentationCenter } from "@/components/landing/DocumentationCenter";
-import { MobileAppPreview } from "@/components/landing/MobileAppPreview";
-import { RelatedServicesSection } from "@/components/landing/RelatedServicesSection";
-import { CoverageCityMap } from "@/components/services/CoverageCityMap";
+import { ProductHero } from "@/modules/marketing/landing/ProductHero";
+import { ExpansionRoadmap } from "@/modules/marketing/landing/ExpansionRoadmap";
+import { FeatureGrid } from "@/modules/marketing/landing/FeatureGrid";
+import { ComparisonTable } from "@/modules/marketing/landing/ComparisonTable";
+import { LaunchProgress } from "@/modules/marketing/landing/LaunchProgress";
+import { RichPriorityWaitlistForm } from "@/modules/marketing/landing/RichPriorityWaitlistForm";
+import { ProductFaq } from "@/modules/marketing/landing/ProductFaq";
+import { LivePlatformStats } from "@/modules/marketing/landing/LivePlatformStats";
+import { DocumentationCenter } from "@/modules/marketing/landing/DocumentationCenter";
+import { MobileAppPreview } from "@/modules/marketing/landing/MobileAppPreview";
+import { RelatedServicesSection } from "@/modules/marketing/landing/RelatedServicesSection";
+import { CoverageCityMap } from "@/modules/marketing/services/CoverageCityMap";
 import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
 
 export const Route = createFileRoute("/buy")({

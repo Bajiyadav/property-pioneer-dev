@@ -48,10 +48,10 @@ import { TurnstileWidget } from "@/components/TurnstileWidget";
 import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
 import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 import { WhatsAppButton } from "@/components/WhatsAppButton/WhatsAppButton";
-import { ScheduleVisitModal } from "@/components/modals/ScheduleVisitModal";
-import { RentalAgreementModal } from "@/components/modals/RentalAgreementModal";
-import { EmiCalculatorModal } from "@/components/modals/EmiCalculatorModal";
-import { ReportListingModal } from "@/components/modals/ReportListingModal";
+import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
+import { RentalAgreementModal } from "@/shared/components/dialogs/RentalAgreementModal";
+import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
+import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
 
 const propertyQueryOptions = (id: string) =>

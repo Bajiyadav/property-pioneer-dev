@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Menu, X, LogOut, Home, CheckCircle2 } from "
 import { toast } from "sonner";
 import { type UserRole } from "@/config/roles";
 import { BrandMark } from "@/components/BrandMark";
-import { Breadcrumbs } from "@/components/dashboard/DashboardKit";
+import { Breadcrumbs } from "@/modules/dashboard/components/DashboardKit";
 import { displayName, initialsFor } from "@/lib/auth-session";
 import { supabase } from "@/integrations/supabase/client";
 

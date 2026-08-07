@@ -25,11 +25,11 @@ import {
 } from "@/config/app";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { HeaderProfileMenu } from "@/components/navigation/HeaderProfileMenu";
+import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
 import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
-import { CustomErrorBoundary } from "@/components/errors/CustomErrorBoundary";
-import { ExpansionWaitlistModal } from "@/components/modals/ExpansionWaitlistModal";
-import { HomeServicesModal } from "@/components/modals/HomeServicesModal";
+import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
+import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
+import { HomeServicesModal } from "@/shared/components/dialogs/HomeServicesModal";
 
 function NotFoundComponent() {
   return (

@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProductHero } from "@/components/landing/ProductHero";
-import { FeatureGrid } from "@/components/landing/FeatureGrid";
-import { ComparisonTable } from "@/components/landing/ComparisonTable";
-import { LaunchProgress } from "@/components/landing/LaunchProgress";
-import { ProductFaq } from "@/components/landing/ProductFaq";
+import { ProductHero } from "@/modules/marketing/landing/ProductHero";
+import { FeatureGrid } from "@/modules/marketing/landing/FeatureGrid";
+import { ComparisonTable } from "@/modules/marketing/landing/ComparisonTable";
+import { LaunchProgress } from "@/modules/marketing/landing/LaunchProgress";
+import { ProductFaq } from "@/modules/marketing/landing/ProductFaq";
 
-import { HomeServicesCalculator } from "@/components/services/HomeServicesCalculator";
-import { ServiceProcessTimeline } from "@/components/services/ServiceProcessTimeline";
-import { CoverageCityMap } from "@/components/services/CoverageCityMap";
-import { RichServiceBookingForm } from "@/components/services/RichServiceBookingForm";
+import { HomeServicesCalculator } from "@/modules/marketing/services/HomeServicesCalculator";
+import { ServiceProcessTimeline } from "@/modules/marketing/services/ServiceProcessTimeline";
+import { CoverageCityMap } from "@/modules/marketing/services/CoverageCityMap";
+import { RichServiceBookingForm } from "@/modules/marketing/services/RichServiceBookingForm";
 
 import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
 

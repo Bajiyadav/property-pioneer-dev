@@ -4,30 +4,36 @@ import { useState } from "react";
 import { fetchProperties } from "@/lib/properties";
 import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
-import { HeroSection } from "@/components/home/HeroSection";
-import { QuoteBanner } from "@/components/home/QuoteBanner";
-import { PropertyCategories } from "@/components/home/PropertyCategories";
-import { FeaturedProperties } from "@/components/home/FeaturedProperties";
-import { ComingSoonBadges } from "@/components/home/ComingSoonBadges";
-import { PopularCities } from "@/components/home/PopularCities";
-import { WhyUrbanProperties } from "@/components/home/WhyUrbanProperties";
-import { HowItWorks } from "@/components/home/HowItWorks";
-import { Services } from "@/components/home/Services";
-import { IndiaMapSection } from "@/components/home/IndiaMapSection";
-import { NearbyPlaces } from "@/components/home/NearbyPlaces";
-import { Testimonials } from "@/components/home/Testimonials";
-import { OwnerCTA } from "@/components/home/OwnerCTA";
-import { FAQSection } from "@/components/home/FAQSection";
-import { NewsletterSection } from "@/components/home/NewsletterSection";
-import { AppSection } from "@/components/home/AppSection";
-import { FooterLinks } from "@/components/home/FooterLinks";
+import { HeroSection } from "@/modules/marketing/home/HeroSection";
+import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
+import { PropertyCategories } from "@/modules/marketing/home/PropertyCategories";
+import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
+import { ComingSoonBadges } from "@/modules/marketing/home/ComingSoonBadges";
+import { PopularCities } from "@/modules/marketing/home/PopularCities";
+import { WhyUrbanProperties } from "@/modules/marketing/home/WhyUrbanProperties";
+import { HowItWorks } from "@/modules/marketing/home/HowItWorks";
+import { Services } from "@/modules/marketing/home/Services";
+import { IndiaMapSection } from "@/modules/marketing/home/IndiaMapSection";
+import { NearbyPlaces } from "@/modules/marketing/home/NearbyPlaces";
+import { Testimonials } from "@/modules/marketing/home/Testimonials";
+import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
+import { FAQSection } from "@/modules/marketing/home/FAQSection";
+import { NewsletterSection } from "@/modules/marketing/home/NewsletterSection";
+import { AppSection } from "@/modules/marketing/home/AppSection";
+import { FooterLinks } from "@/modules/marketing/home/FooterLinks";
 
-import { CategoryModal, type CategoryModalData } from "@/components/modals/CategoryModal";
-import { ServiceDetailModal, type ServiceModalData } from "@/components/modals/ServiceDetailModal";
-import { CityExpansionModal, type CityModalData } from "@/components/modals/CityExpansionModal";
-import { OwnerOnboardingModal } from "@/components/modals/OwnerOnboardingModal";
+import { CategoryModal, type CategoryModalData } from "@/shared/components/dialogs/CategoryModal";
+import {
+  ServiceDetailModal,
+  type ServiceModalData,
+} from "@/shared/components/dialogs/ServiceDetailModal";
+import {
+  CityExpansionModal,
+  type CityModalData,
+} from "@/shared/components/dialogs/CityExpansionModal";
+import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
 
-import { UrbanAISearch } from "@/components/home/UrbanAISearch";
+import { UrbanAISearch } from "@/modules/marketing/home/UrbanAISearch";
 
 export const Route = createFileRoute("/")({
   head: () => {

@@ -23,8 +23,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
-import { DashboardLayout, type NavItem } from "@/components/dashboard/DashboardLayout";
-import { RequireRole } from "@/components/dashboard/RequireRole";
+import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
+import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import {
   ActivityTimeline,
   CardSkeleton,
@@ -40,16 +40,18 @@ import {
   SectionHeader,
   StatusPill,
   type TimelineItem,
-} from "@/components/dashboard/DashboardKit";
+} from "@/modules/dashboard/components/DashboardKit";
 import {
   CategoryBarChart,
   DonutChart,
   DualLineChart,
   TrendAreaChart,
-} from "@/components/dashboard/DashboardCharts";
+} from "@/modules/dashboard/components/DashboardCharts";
 import { countBy, relativeTime, seededSeries } from "@/lib/dashboard-data";
 import { getAdminProperties, updateAdminProperty } from "@/lib/admin.functions";
 import { displayName } from "@/lib/auth-session";
+import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
+import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -63,106 +65,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "audit", label: "Audit Logs", icon: ScrollText },
   { id: "settings", label: "Settings", icon: Settings },
-];
-
-const SEARCH_PARAMS = {
-  q: "",
-  city: "Hyderabad",
-  listing: "rent",
-  minPrice: 0,
-  maxPrice: 0,
-  beds: 0,
-} as const;
-
-interface PlatformUser {
-  id: string;
-  name: string;
-  email: string;
-  role: "Customer" | "Owner" | "Agent" | "Admin";
-  status: "Active" | "Suspended" | "Pending";
-  joined: string;
-}
-
-const USERS: PlatformUser[] = [
-  {
-    id: "U-1",
-    name: "Kavitha Reddy",
-    email: "kavitha@example.in",
-    role: "Customer",
-    status: "Active",
-    joined: "12 Mar 2026",
-  },
-  {
-    id: "U-2",
-    name: "Suresh Reddy",
-    email: "suresh@example.in",
-    role: "Owner",
-    status: "Active",
-    joined: "04 Feb 2026",
-  },
-  {
-    id: "U-3",
-    name: "Anitha Rao",
-    email: "anitha@example.in",
-    role: "Owner",
-    status: "Pending",
-    joined: "28 Jul 2026",
-  },
-  {
-    id: "U-4",
-    name: "Rahul Verma",
-    email: "rahul@example.in",
-    role: "Agent",
-    status: "Active",
-    joined: "19 Jan 2026",
-  },
-  {
-    id: "U-5",
-    name: "Divya Nair",
-    email: "divya@example.in",
-    role: "Customer",
-    status: "Active",
-    joined: "02 Jun 2026",
-  },
-  {
-    id: "U-6",
-    name: "Vikram Singh",
-    email: "vikram@example.in",
-    role: "Agent",
-    status: "Suspended",
-    joined: "15 Apr 2026",
-  },
-];
-
-const AUDIT: TimelineItem[] = [
-  {
-    id: "au1",
-    title: "property.approved",
-    detail: "3BHK Kondapur approved by admin@urbanproperties.in",
-    time: "12 min ago",
-    tone: "success",
-  },
-  {
-    id: "au2",
-    title: "user.role_granted",
-    detail: "Agent role granted to rahul@example.in",
-    time: "1 hour ago",
-    tone: "info",
-  },
-  {
-    id: "au3",
-    title: "enquiry.rate_limited",
-    detail: "IP 49.37.x.x exceeded the hourly enquiry cap",
-    time: "3 hours ago",
-    tone: "warning",
-  },
-  {
-    id: "au4",
-    title: "auth.failed",
-    detail: "5 failed sign-ins for unknown@example.in",
-    time: "Yesterday",
-    tone: "danger",
-  },
 ];
 
 export function AdminDashboardPage() {
@@ -767,133 +669,5 @@ function AdminDashboard({ user }: { user: User | null }) {
         </div>
       )}
     </DashboardLayout>
-  );
-}
-
-function UserTable({ users }: { users: PlatformUser[] }) {
-  return (
-    <DataTable
-      rows={users}
-      getKey={(u) => u.id}
-      empty={
-        <EmptyState
-          icon={<Users className="h-6 w-6" />}
-          title="No accounts match"
-          hint="Try a different role filter or search term."
-        />
-      }
-      columns={[
-        {
-          key: "name",
-          header: "User",
-          render: (u: PlatformUser) => (
-            <div>
-              <p className="font-bold text-foreground">{u.name}</p>
-              <p className="text-[11px] text-muted-foreground">{u.email}</p>
-            </div>
-          ),
-        },
-        {
-          key: "role",
-          header: "Role",
-          render: (u: PlatformUser) => <StatusPill label={u.role} tone="info" />,
-        },
-        {
-          key: "joined",
-          header: "Joined",
-          render: (u: PlatformUser) => (
-            <span className="whitespace-nowrap text-muted-foreground">{u.joined}</span>
-          ),
-        },
-        {
-          key: "status",
-          header: "Status",
-          className: "text-right",
-          render: (u: PlatformUser) => (
-            <StatusPill
-              label={u.status}
-              tone={
-                u.status === "Active" ? "success" : u.status === "Pending" ? "warning" : "danger"
-              }
-            />
-          ),
-        },
-      ]}
-    />
-  );
-}
-
-function PropertyTable({
-  properties,
-  isLoading,
-  isError,
-  onRetry,
-}: {
-  properties: Property[];
-  isLoading: boolean;
-  isError: boolean;
-  onRetry: () => void;
-}) {
-  if (isLoading) return <LoadingSkeleton rows={4} />;
-  if (isError) return <ErrorState onRetry={onRetry} />;
-
-  return (
-    <DataTable
-      rows={properties}
-      getKey={(p) => p.id}
-      empty={
-        <EmptyState
-          icon={<Building2 className="h-6 w-6" />}
-          title="No properties found"
-          hint="Listings appear here once owners publish them."
-        />
-      }
-      columns={[
-        {
-          key: "title",
-          header: "Listing",
-          render: (p: Property) => (
-            <Link
-              to="/properties/$id"
-              params={{ id: p.id }}
-              search={SEARCH_PARAMS}
-              className="font-bold text-foreground hover:text-primary"
-            >
-              {p.title}
-            </Link>
-          ),
-        },
-        {
-          key: "city",
-          header: "City",
-          render: (p: Property) => <span className="text-muted-foreground">{p.city}</span>,
-        },
-        {
-          key: "type",
-          header: "Type",
-          render: (p: Property) => <span className="text-muted-foreground">{p.property_type}</span>,
-        },
-        {
-          key: "price",
-          header: "Price",
-          render: (p: Property) => (
-            <span className="whitespace-nowrap font-bold text-foreground">
-              {formatPrice(p.price, p.listing_type)}
-            </span>
-          ),
-        },
-        {
-          key: "status",
-          header: "Status",
-          className: "text-right",
-          render: (p: Property) => (
-            <StatusPill
-              label={p.is_featured ? "Featured" : "Live"}
-              tone={p.is_featured ? "info" : "success"}
-            />
-          ),
-        },
-      ]}
-    />
   );
 }

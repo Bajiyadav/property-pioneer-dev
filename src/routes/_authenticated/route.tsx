@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { BrandMark } from "@/components/BrandMark";
-import { CustomErrorBoundary } from "@/components/errors/CustomErrorBoundary";
+import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 export const Route = createFileRoute("/_authenticated")({

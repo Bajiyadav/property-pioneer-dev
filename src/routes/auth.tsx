@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole, setActiveRole } from "@/config/roles";
-import { EnterprisePasswordForm } from "@/components/auth/EnterprisePasswordForm";
+import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
 import { ShieldCheck, Globe, MessageCircle, Github } from "lucide-react";
 
 const authSearchSchema = z.object({
