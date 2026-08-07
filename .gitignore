@@ -37,3 +37,8 @@ dist-ssr
 .env.local
 .env.*.local
 !.env.example
+
+# Test + coverage output
+coverage/
+playwright-report/
+test-results/

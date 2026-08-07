@@ -1,0 +1,8 @@
+# Default owner for everything.
+*                         @Bajiyadav
+
+# Blast-radius areas — always review these closely.
+/supabase/                @Bajiyadav
+/.github/workflows/       @Bajiyadav
+/src/lib/*.server.ts      @Bajiyadav
+/src/integrations/        @Bajiyadav
