@@ -5,7 +5,11 @@ export const Route = createFileRoute("/$")({
   head: () => ({
     meta: [
       { title: "Page not found — Urban Rental Flats" },
-      { name: "description", content: "This page doesn't exist on Urban Rental Flats. Browse homes for rent and sale across India." },
+      {
+        name: "description",
+        content:
+          "This page doesn't exist on Urban Rental Flats. Browse homes for rent and sale across India.",
+      },
       { property: "og:title", content: "Page not found — Urban Rental Flats" },
       { property: "og:description", content: "This page doesn't exist on Urban Rental Flats." },
       { property: "og:type", content: "website" },

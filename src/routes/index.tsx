@@ -102,7 +102,10 @@ function Index() {
       <PropertyCategories onSelectCategory={(cat) => setActiveCategory(cat)} />
 
       {/* 4. Featured Rentals (Hyderabad Focus) */}
-      <FeaturedProperties properties={featured.length > 0 ? featured : properties} isLoading={isLoading} />
+      <FeaturedProperties
+        properties={featured.length > 0 ? featured : properties}
+        isLoading={isLoading}
+      />
 
       {/* 5. Product Roadmap (Interactive Coming Soon Cards) */}
       <ComingSoonBadges

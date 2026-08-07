@@ -23,12 +23,14 @@ export function SearchBar({
       (pos) => {
         setLocating(false);
         onQueryChange("Near My Location");
-        toast.success(`Location detected (${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)})`);
+        toast.success(
+          `Location detected (${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)})`,
+        );
       },
       () => {
         setLocating(false);
         toast.error("Unable to retrieve your location.");
-      }
+      },
     );
   };
 

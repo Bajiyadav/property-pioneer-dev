@@ -18,6 +18,17 @@ const PER_IP_CONTACT: RateLimitRule = {
   max: 10,
 };
 
+// Count recent contact requests for a given IP from audit_logs
+async function countRecentContactRequests(ip: string, sinceIso: string): Promise<number> {
+  const { count } = await supabase
+    .from("audit_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("event", "contact.requested")
+    .eq("ip_address", ip)
+    .gte("created_at", sinceIso);
+  return count ?? 0;
+}
+
 export const Route = createFileRoute("/api/public/properties/$id/contact")({
   server: {
     handlers: {
@@ -27,7 +38,9 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         const propertyId = params.id;
 
         // 1. Rate limiting check
-        const rateLimitResult = await checkRateLimits(ip, [PER_IP_CONTACT]);
+        const rateLimitResult = await checkRateLimits([
+          { rule: PER_IP_CONTACT, count: (since) => countRecentContactRequests(ip, since) },
+        ]);
         if (!rateLimitResult.allowed) {
           await recordAudit({
             event: "contact.rejected",
@@ -64,7 +77,7 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         }
 
         // 3. Fetch property & owner phone server-side
-        const { data: property, error } = await (supabase as any)
+        const { data: property, error } = await supabase
           .from("properties")
           .select("id, title, price, listing_type, address, city, owner_phone")
           .eq("id", propertyId)

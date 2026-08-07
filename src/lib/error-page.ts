@@ -1,7 +1,11 @@
-export function renderErrorPage(error?: any): string {
+export function renderErrorPage(error?: unknown): string {
   const isDev = process.env.NODE_ENV !== "production";
-  const errorMessage = error?.message || error?.toString() || "Unknown server exception";
-  const stackTrace = error?.stack || "";
+  const thrown = error as { message?: unknown; stack?: unknown } | undefined;
+  const errorMessage =
+    (typeof thrown?.message === "string" && thrown.message) ||
+    (error != null ? String(error) : "") ||
+    "Unknown server exception";
+  const stackTrace = typeof thrown?.stack === "string" ? thrown.stack : "";
   const requestId = `ERR-${Date.now().toString(36).toUpperCase()}-UP`;
 
   return `<!doctype html>
@@ -22,6 +26,7 @@ export function renderErrorPage(error?: any): string {
       button, a { padding: 0.625rem 1.25rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 700; cursor: pointer; text-decoration: none; border: 1px solid transparent; transition: all 0.2s; }
       .btn-primary { background: var(--primary); color: #ffffff; }
       .btn-secondary { background: #1f2937; color: var(--text); border-color: #374151; }
+      .copyright { margin: 1.5rem 0 0; font-size: 0.75rem; color: var(--muted); }
     </style>
   </head>
   <body>
@@ -34,14 +39,16 @@ export function renderErrorPage(error?: any): string {
         isDev && (errorMessage || stackTrace)
           ? `<div class="code-box"><strong>[DEV DIAGNOSTICS]</strong>\nError: ${errorMessage}\n\nStack Trace:\n${stackTrace}</div>`
           : errorMessage
-          ? `<div class="code-box">Error Summary: ${errorMessage}</div>`
-          : ""
+            ? `<div class="code-box">Error Summary: ${errorMessage}</div>`
+            : ""
       }
 
       <div class="actions">
         <button class="btn-primary" onclick="location.reload()">Try Again</button>
         <a class="btn-secondary" href="/">Return to Home</a>
       </div>
+
+      <p class="copyright">© 2022 Urban Properties. All Rights Reserved.</p>
     </div>
   </body>
 </html>`;

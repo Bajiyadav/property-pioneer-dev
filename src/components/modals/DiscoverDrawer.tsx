@@ -1,7 +1,27 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Link } from "@tanstack/react-router";
-import { Search, MapPin, Sparkles, CheckCircle2, ArrowRight, Train, Briefcase, GraduationCap, Stethoscope, Star, ShieldCheck, Heart, MessageSquare } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Sparkles,
+  CheckCircle2,
+  ArrowRight,
+  Train,
+  Briefcase,
+  GraduationCap,
+  Stethoscope,
+  Star,
+  ShieldCheck,
+  Heart,
+  MessageSquare,
+} from "lucide-react";
 import type { CategoryModalData } from "./CategoryModal";
 
 const HYD_LOCALITIES = [
@@ -48,7 +68,8 @@ export function DiscoverDrawer({
             Discover {data.title} in Hyderabad
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground leading-relaxed max-w-2xl mt-1">
-            Explore curated, direct-owner {data.title.toLowerCase()} listings across top Hyderabad tech corridors and residential hubs.
+            Explore curated, direct-owner {data.title.toLowerCase()} listings across top Hyderabad
+            tech corridors and residential hubs.
           </DialogDescription>
         </DialogHeader>
 
@@ -67,16 +88,28 @@ export function DiscoverDrawer({
                 <Link
                   key={loc.name}
                   to="/properties"
-                  search={{ q: loc.name, city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+                  search={{
+                    q: loc.name,
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
                   onClick={onClose}
                   className="group flex flex-col justify-between rounded-xl border border-border bg-secondary/40 p-3 text-left transition duration-300 hover:border-primary hover:bg-card hover:shadow-md"
                 >
                   <div>
-                    <h5 className="text-xs font-semibold text-foreground group-hover:text-primary transition">{loc.name}</h5>
-                    <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{loc.tag}</p>
+                    <h5 className="text-xs font-semibold text-foreground group-hover:text-primary transition">
+                      {loc.name}
+                    </h5>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
+                      {loc.tag}
+                    </p>
                   </div>
                   <span className="mt-2 text-[10px] font-bold text-primary flex items-center gap-0.5">
-                    {loc.count} <ArrowRight className="h-3 w-3 transition group-hover:translate-x-1" />
+                    {loc.count}{" "}
+                    <ArrowRight className="h-3 w-3 transition group-hover:translate-x-1" />
                   </span>
                 </Link>
               ))}
@@ -85,13 +118,22 @@ export function DiscoverDrawer({
 
           {/* Budget Shortcuts */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">Filter By Monthly Budget</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">
+              Filter By Monthly Budget
+            </h4>
             <div className="flex flex-wrap gap-2">
               {BUDGET_RANGES.map((b) => (
                 <Link
                   key={b.label}
                   to="/properties"
-                  search={{ q: "", city: "Hyderabad", listing: "rent", minPrice: b.minPrice || 0, maxPrice: b.maxPrice || 0, beds: 0 }}
+                  search={{
+                    q: "",
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: b.minPrice || 0,
+                    maxPrice: b.maxPrice || 0,
+                    beds: 0,
+                  }}
                   onClick={onClose}
                   className="rounded-xl border border-border bg-card px-4 py-2.5 text-xs font-semibold text-foreground transition hover:border-primary hover:bg-primary hover:text-primary-foreground shadow-sm"
                 >
@@ -103,11 +145,20 @@ export function DiscoverDrawer({
 
           {/* Micro-Location Shortcuts */}
           <div className="rounded-2xl border border-border bg-secondary/30 p-5">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">Micro-Location Shortcuts</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">
+              Micro-Location Shortcuts
+            </h4>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Link
                 to="/properties"
-                search={{ q: "Metro", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+                search={{
+                  q: "Metro",
+                  city: "Hyderabad",
+                  listing: "rent",
+                  minPrice: 0,
+                  maxPrice: 0,
+                  beds: 0,
+                }}
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-xl bg-card p-3 text-xs font-semibold text-foreground border border-border/60 hover:border-primary"
               >
@@ -115,7 +166,14 @@ export function DiscoverDrawer({
               </Link>
               <Link
                 to="/properties"
-                search={{ q: "IT Park", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+                search={{
+                  q: "IT Park",
+                  city: "Hyderabad",
+                  listing: "rent",
+                  minPrice: 0,
+                  maxPrice: 0,
+                  beds: 0,
+                }}
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-xl bg-card p-3 text-xs font-semibold text-foreground border border-border/60 hover:border-primary"
               >
@@ -123,7 +181,14 @@ export function DiscoverDrawer({
               </Link>
               <Link
                 to="/properties"
-                search={{ q: "College", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+                search={{
+                  q: "College",
+                  city: "Hyderabad",
+                  listing: "rent",
+                  minPrice: 0,
+                  maxPrice: 0,
+                  beds: 0,
+                }}
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-xl bg-card p-3 text-xs font-semibold text-foreground border border-border/60 hover:border-primary"
               >
@@ -131,7 +196,14 @@ export function DiscoverDrawer({
               </Link>
               <Link
                 to="/properties"
-                search={{ q: "Hospital", city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+                search={{
+                  q: "Hospital",
+                  city: "Hyderabad",
+                  listing: "rent",
+                  minPrice: 0,
+                  maxPrice: 0,
+                  beds: 0,
+                }}
                 onClick={onClose}
                 className="flex items-center gap-2 rounded-xl bg-card p-3 text-xs font-semibold text-foreground border border-border/60 hover:border-primary"
               >
@@ -147,7 +219,14 @@ export function DiscoverDrawer({
             </div>
             <Link
               to="/properties"
-              search={{ q: data.title, city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+              search={{
+                q: data.title,
+                city: "Hyderabad",
+                listing: "rent",
+                minPrice: 0,
+                maxPrice: 0,
+                beds: 0,
+              }}
               onClick={onClose}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110 shadow-lg"
             >

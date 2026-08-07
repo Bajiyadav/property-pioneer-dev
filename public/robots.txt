@@ -13,5 +13,7 @@ Allow: /
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /dashboard/
+Disallow: /admin
 
-Sitemap: /sitemap.xml
+Sitemap: https://urbanproperties.in/sitemap.xml

@@ -13,7 +13,8 @@ export function AppSection() {
               Search & Manage Homes On The Go
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Download the Urban Properties mobile app for instant push notifications, native map view, and offline saved searches.
+              Download the Urban Properties mobile app for instant push notifications, native map
+              view, and offline saved searches.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">

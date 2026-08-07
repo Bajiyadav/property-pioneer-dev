@@ -1,14 +1,15 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * The generated `Database` types don't yet carry the verification columns that
+ * `PUBLIC_PROPERTY_COLUMNS` selects, so these reads go through an untyped
+ * client and are narrowed to `Property` at the boundary below.
+ */
+const db = supabase as unknown as SupabaseClient;
+
 export type PropertyStatus =
-  | "draft"
-  | "pending"
-  | "available"
-  | "reserved"
-  | "rented"
-  | "sold"
-  | "archived"
-  | "rejected";
+  "draft" | "pending" | "available" | "reserved" | "rented" | "sold" | "archived" | "rejected";
 
 export type VerificationStatus = "pending" | "verified" | "rejected" | "suspended";
 
@@ -48,7 +49,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-000",
     title: "Luxury Duplex Villa in Vinayak Nagar",
-    description: "Experience elegant duplex living in the heart of Vinayak Nagar, Madhapur. This spacious home offers premium interiors, designer false ceilings, Italian marble flooring, a large family lounge, modern wooden staircase, multiple seating areas, and a peaceful residential atmosphere just 3 minutes from Hyderabad's IT corridor.",
+    description:
+      "Experience elegant duplex living in the heart of Vinayak Nagar, Madhapur. This spacious home offers premium interiors, designer false ceilings, Italian marble flooring, a large family lounge, modern wooden staircase, multiple seating areas, and a peaceful residential atmosphere just 3 minutes from Hyderabad's IT corridor.",
     price: 45000,
     city: "Hyderabad",
     address: "Vinayak Nagar, Madhapur",
@@ -64,7 +66,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&auto=format&fit=crop&q=80",
     ],
     is_featured: true,
     owner_verification_status: "verified",
@@ -79,7 +81,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-001",
     title: "Luxury 2 BHK Apartment in Gachibowli",
-    description: "Fully furnished 2 BHK flat near Financial District & DLF Cybercity. 24/7 security, power backup, modular kitchen, and reserved car parking.",
+    description:
+      "Fully furnished 2 BHK flat near Financial District & DLF Cybercity. 24/7 security, power backup, modular kitchen, and reserved car parking.",
     price: 32000,
     city: "Hyderabad",
     address: "Financial District, Gachibowli",
@@ -89,7 +92,9 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     property_type: "Apartment",
     listing_type: "rent",
     status: "available",
-    images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80",
+    ],
     is_featured: true,
     owner_verification_status: "verified",
     property_verification_status: "verified",
@@ -103,7 +108,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-002",
     title: "Modern 1 BHK Flat in Madhapur",
-    description: "East-facing 1 BHK apartment walking distance from Cyber Towers & Durgam Cheruvu Metro Station. Includes AC, fridge, and high-speed Wi-Fi.",
+    description:
+      "East-facing 1 BHK apartment walking distance from Cyber Towers & Durgam Cheruvu Metro Station. Includes AC, fridge, and high-speed Wi-Fi.",
     price: 22000,
     city: "Hyderabad",
     address: "Near Cyber Towers, Madhapur",
@@ -113,7 +119,9 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     property_type: "Apartment",
     listing_type: "rent",
     status: "available",
-    images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80",
+    ],
     is_featured: true,
     owner_verification_status: "verified",
     property_verification_status: "verified",
@@ -127,7 +135,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-003",
     title: "Spacious 3 BHK Gated Community in Kondapur",
-    description: "Premium 3 BHK flat in a gated community with swimming pool, gym, clubhouse, and children play area near Botanical Garden.",
+    description:
+      "Premium 3 BHK flat in a gated community with swimming pool, gym, clubhouse, and children play area near Botanical Garden.",
     price: 48000,
     city: "Hyderabad",
     address: "Botanical Garden Road, Kondapur",
@@ -137,7 +146,9 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     property_type: "Apartment",
     listing_type: "rent",
     status: "available",
-    images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
+    ],
     is_featured: true,
     owner_verification_status: "verified",
     property_verification_status: "verified",
@@ -151,7 +162,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-004",
     title: "Studio Apartment in Hitech City",
-    description: "Cozy 1 Studio flat for IT professionals. Fully furnished with Smart TV, sofa, balcony view, and daily housekeeping optional.",
+    description:
+      "Cozy 1 Studio flat for IT professionals. Fully furnished with Smart TV, sofa, balcony view, and daily housekeeping optional.",
     price: 18500,
     city: "Hyderabad",
     address: "Mindspace Road, Hitech City",
@@ -161,31 +173,9 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     property_type: "Studio",
     listing_type: "rent",
     status: "available",
-    images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80"],
-    is_featured: false,
-    owner_verification_status: "verified",
-    property_verification_status: "verified",
-    phone_verified: true,
-    email_verified: true,
-    id_verified: true,
-    is_zero_brokerage: true,
-    is_premium: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "hyd-005",
-    title: "Executive Luxury PG in Kukatpally",
-    description: "Single & sharing air-conditioned rooms for gents and ladies with 3-times North/South Indian food, laundry, and 24/7 security.",
-    price: 8500,
-    city: "Hyderabad",
-    address: "KPHB 5th Phase, Kukatpally",
-    bedrooms: 1,
-    bathrooms: 1,
-    area_sqft: 350,
-    property_type: "PG",
-    listing_type: "rent",
-    status: "available",
-    images: ["https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&auto=format&fit=crop&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80",
+    ],
     is_featured: false,
     owner_verification_status: "verified",
     property_verification_status: "verified",
@@ -199,7 +189,8 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-006",
     title: "Semi-Furnished 2 BHK in Miyapur",
-    description: "Quiet residential 2 BHK flat near Miyapur Metro Station & JNTU Road. Well ventilated with wardrobe, lights, fans, and gas pipeline.",
+    description:
+      "Quiet residential 2 BHK flat near Miyapur Metro Station & JNTU Road. Well ventilated with wardrobe, lights, fans, and gas pipeline.",
     price: 24000,
     city: "Hyderabad",
     address: "Metro Corridor, Miyapur",
@@ -209,7 +200,9 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     property_type: "Apartment",
     listing_type: "rent",
     status: "available",
-    images: ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&auto=format&fit=crop&q=80"],
+    images: [
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&auto=format&fit=crop&q=80",
+    ],
     is_featured: false,
     owner_verification_status: "verified",
     property_verification_status: "verified",
@@ -224,7 +217,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
 
 export async function fetchPublicProperties(): Promise<Property[]> {
   try {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from("properties")
       .select(PUBLIC_PROPERTY_COLUMNS)
       .eq("is_approved", true)
@@ -242,7 +235,7 @@ export async function fetchPublicProperties(): Promise<Property[]> {
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {
   const fallback = HYDERABAD_FALLBACK_PROPERTIES.find((p) => p.id === id);
   if (fallback) return fallback;
-  const { data, error } = await (supabase as any)
+  const { data, error } = await db
     .from("properties")
     .select(PUBLIC_PROPERTY_COLUMNS)
     .eq("id", id)
@@ -265,7 +258,7 @@ export function isPropertyVerified(property: Property): boolean {
 
 export function isNewlyListed(property: Property): boolean {
   const daysOld = Math.floor(
-    (Date.now() - new Date(property.created_at).getTime()) / (1000 * 60 * 60 * 24)
+    (Date.now() - new Date(property.created_at).getTime()) / (1000 * 60 * 60 * 24),
   );
   return daysOld <= 7;
 }

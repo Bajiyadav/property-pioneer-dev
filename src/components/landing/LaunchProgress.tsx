@@ -18,7 +18,9 @@ export function LaunchProgress() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               <Activity className="h-3.5 w-3.5" /> Engineering & System Health
             </span>
-            <h2 className="mt-2 text-xl font-extrabold text-foreground sm:text-2xl">Production Launch Readiness</h2>
+            <h2 className="mt-2 text-xl font-extrabold text-foreground sm:text-2xl">
+              Production Launch Readiness
+            </h2>
           </div>
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">

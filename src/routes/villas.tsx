@@ -6,6 +6,11 @@ import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { LaunchProgress } from "@/components/landing/LaunchProgress";
 import { RichPriorityWaitlistForm } from "@/components/landing/RichPriorityWaitlistForm";
 import { ProductFaq } from "@/components/landing/ProductFaq";
+import { LivePlatformStats } from "@/components/landing/LivePlatformStats";
+import { DocumentationCenter } from "@/components/landing/DocumentationCenter";
+import { MobileAppPreview } from "@/components/landing/MobileAppPreview";
+import { RelatedServicesSection } from "@/components/landing/RelatedServicesSection";
+import { CoverageCityMap } from "@/components/services/CoverageCityMap";
 import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
 
 export const Route = createFileRoute("/villas")({
@@ -15,9 +20,16 @@ export const Route = createFileRoute("/villas")({
     return {
       meta: [
         { title: `Luxury Gated Villas — ${APP_NAME}` },
-        { name: "description", content: "Explore luxury 3, 4, & 5 BHK gated community villas in Jubilee Hills, Gachibowli, Kokapet, Manikonda, & Gandipet with private pools and 0% brokerage." },
+        {
+          name: "description",
+          content:
+            "Explore luxury 3, 4, & 5 BHK gated community villas in Jubilee Hills, Gachibowli, Kokapet, Manikonda, & Gandipet with private pools and 0% brokerage.",
+        },
         { property: "og:title", content: `Luxury Gated Villas — ${APP_NAME}` },
-        { property: "og:description", content: "Explore luxury gated villas in Hyderabad premier residential enclaves." },
+        {
+          property: "og:description",
+          content: "Explore luxury gated villas in Hyderabad premier residential enclaves.",
+        },
         { property: "og:image", content: ogImage },
         { property: "og:url", content: canonicalUrl },
       ],
@@ -28,14 +40,23 @@ export const Route = createFileRoute("/villas")({
 });
 
 const VILLAS_FAQS = [
-  { q: "Which villa communities in Hyderabad are featured?", a: "We feature luxury gated villas in Jubilee Hills, Kokapet, Gandipet, Financial District, Tellapur, and Mokila." },
-  { q: "Do these villas include private pools and clubhouses?", a: "Yes, featured luxury villas include private swimming pools, landscaped gardens, 50,000 sq.ft clubhouses, and 3-tier security." },
-  { q: "Are villa rental agreements available?", a: "Yes, both luxury villa rentals and outright purchases are supported with zero broker fees." },
+  {
+    q: "Which villa communities in Hyderabad are featured?",
+    a: "We feature luxury gated villas in Jubilee Hills, Kokapet, Gandipet, Financial District, Tellapur, and Mokila.",
+  },
+  {
+    q: "Do these villas include private pools and clubhouses?",
+    a: "Yes, featured luxury villas include private swimming pools, landscaped gardens, 50,000 sq.ft clubhouses, and 3-tier security.",
+  },
+  {
+    q: "Are villa rental agreements available?",
+    a: "Yes, both luxury villa rentals and outright purchases are supported with zero broker fees.",
+  },
 ];
 
 function VillasLandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground space-y-12">
       <ProductHero
         badge="Luxury Estates Engine"
         title="Experience Elite Gated Villa Living"
@@ -44,13 +65,16 @@ function VillasLandingPage() {
         bgGradient="from-purple-900/20 via-background to-background"
       />
 
+      <LivePlatformStats />
       <ExpansionRoadmap />
       <FeatureGrid />
       <ComparisonTable />
+      <CoverageCityMap />
       <LaunchProgress />
-
+      <DocumentationCenter productTitle="Luxury Villas Engine" />
+      <MobileAppPreview />
       <RichPriorityWaitlistForm defaultCategory="Luxury Gated Villas" />
-
+      <RelatedServicesSection />
       <ProductFaq faqs={VILLAS_FAQS} />
     </div>
   );

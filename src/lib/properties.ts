@@ -28,7 +28,7 @@ export function formatPrice(price: number, listingType: "rent" | "sale"): string
 
 export async function fetchOwnerContact(
   propertyId: string,
-  turnstileToken?: string
+  turnstileToken?: string,
 ): Promise<{ ok: boolean; whatsappUrl?: string; error?: string }> {
   try {
     const res = await fetch(`/api/public/properties/${propertyId}/contact`, {
@@ -39,8 +39,8 @@ export async function fetchOwnerContact(
     const data = await res.json();
     if (!res.ok) return { ok: false, error: data.error || "Failed to generate contact request." };
     return { ok: true, whatsappUrl: data.whatsappUrl };
-  } catch (err: any) {
-    return { ok: false, error: err.message || "Network error." };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Network error." };
   }
 }
 

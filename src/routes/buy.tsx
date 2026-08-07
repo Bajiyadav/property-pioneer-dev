@@ -6,6 +6,11 @@ import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { LaunchProgress } from "@/components/landing/LaunchProgress";
 import { RichPriorityWaitlistForm } from "@/components/landing/RichPriorityWaitlistForm";
 import { ProductFaq } from "@/components/landing/ProductFaq";
+import { LivePlatformStats } from "@/components/landing/LivePlatformStats";
+import { DocumentationCenter } from "@/components/landing/DocumentationCenter";
+import { MobileAppPreview } from "@/components/landing/MobileAppPreview";
+import { RelatedServicesSection } from "@/components/landing/RelatedServicesSection";
+import { CoverageCityMap } from "@/components/services/CoverageCityMap";
 import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
 
 export const Route = createFileRoute("/buy")({
@@ -14,10 +19,17 @@ export const Route = createFileRoute("/buy")({
     const ogImage = getOgImageUrl();
     return {
       meta: [
-        { title: `Buy Residential Homes — ${APP_NAME}` },
-        { name: "description", content: "Buy verified residential apartments, villas, and independent houses in Hyderabad & India with zero brokerage, pre-approved bank loans, and legal title verification." },
+        { title: `Buy Residential Homes & Flats — ${APP_NAME}` },
+        {
+          name: "description",
+          content:
+            "Buy 100% verified 2, 3 & 4 BHK apartments, gated community villas, and independent houses in Hyderabad with pre-approved bank loans and zero brokerage.",
+        },
         { property: "og:title", content: `Buy Residential Homes — ${APP_NAME}` },
-        { property: "og:description", content: "Buy verified residential apartments, villas, and independent houses in Hyderabad with 0% brokerage." },
+        {
+          property: "og:description",
+          content: "Buy verified homes directly from property owners with zero broker commission.",
+        },
         { property: "og:image", content: ogImage },
         { property: "og:url", content: canonicalUrl },
       ],
@@ -28,31 +40,45 @@ export const Route = createFileRoute("/buy")({
 });
 
 const BUY_FAQS = [
-  { q: "When will the Buy portal launch fully in Hyderabad?", a: "The Buy portal is currently onboarding verified property owners in Madhapur, Gachibowli, Kondapur, and Hitech City. Early access members get priority 48-hour alerts before public listings." },
-  { q: "Are pre-approved bank loans available?", a: "Yes, we partner directly with SBI, HDFC, ICICI, and Axis Bank to provide pre-approved home loans starting at 8.35% p.a. interest with zero processing fee margins." },
-  { q: "Will legal title deed verification be included?", a: "Every listed property includes a 100% verified legal title report, encumbrance certificate audit, and HMDA/DTCP approval checks." },
-  { q: "How does 0% brokerage work for home buyers?", a: "Buyers connect directly with verified property owners or builder reps without paying traditional 2% to 3% broker commissions." },
-  { q: "Can I schedule in-person site visits before public launch?", a: "Yes! Priority Access Members can request private walkthrough site visits with verified owners." },
+  {
+    q: "How are properties on the Buy module verified for legal title clearance?",
+    a: "Every listed residential home undergoes legal title deed audits, HMDA/GHMC municipal plan check, and RERA registration validation.",
+  },
+  {
+    q: "Are pre-approved bank loans available for listed homes?",
+    a: "Yes, our banking partners (SBI, HDFC, ICICI, Axis) provide instant home loan eligibility up to 80% with digital pre-approval letters.",
+  },
+  {
+    q: "Do I have to pay any brokerage fees to Urban Properties?",
+    a: "No! Urban Properties operates on a 100% zero brokerage model for buyers. You interact directly with verified property owners.",
+  },
+  {
+    q: "Which areas in Hyderabad have active residential listings?",
+    a: "Active listings cover Madhapur, Hitech City, Gachibowli, Kondapur, Financial District, Jubilee Hills, Manikonda, and Tellapur.",
+  },
 ];
 
 function BuyLandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground space-y-12">
       <ProductHero
-        badge="Residential Sales Engine"
-        title="Own Your Dream Property With 100% Confidence"
-        subtitle="Urban Properties is building India's most trusted home buying platform with verified sellers, legal title deed audits, bank loan pre-approvals, and AI fair market pricing."
-        productType="Residential Homes"
+        badge="Buy Residential Homes Engine"
+        title="Buy Verified Homes Directly from Property Owners"
+        subtitle="Explore 100% title-cleared 2, 3 & 4 BHK apartments, gated community villas, and independent houses across Hyderabad and Tier-1 growth hubs."
+        productType="Buy Residential Homes"
         bgGradient="from-emerald-900/20 via-background to-background"
       />
 
+      <LivePlatformStats />
       <ExpansionRoadmap />
       <FeatureGrid />
       <ComparisonTable />
+      <CoverageCityMap />
       <LaunchProgress />
-      
-      <RichPriorityWaitlistForm defaultCategory="Residential Homes (Buy)" />
-
+      <DocumentationCenter productTitle="Residential Buy Engine" />
+      <MobileAppPreview />
+      <RichPriorityWaitlistForm defaultCategory="Buy Residential Homes" />
+      <RelatedServicesSection />
       <ProductFaq faqs={BUY_FAQS} />
     </div>
   );

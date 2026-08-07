@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { AlertTriangle, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,7 +57,8 @@ export function ReportListingModal({
             </div>
             <h3 className="text-base font-extrabold text-foreground">Report Received</h3>
             <p className="text-xs text-muted-foreground">
-              Our safety team will audit this property within 2 hours. Thank you for keeping Urban Properties 100% genuine.
+              Our safety team will audit this property within 2 hours. Thank you for keeping Urban
+              Properties 100% genuine.
             </p>
             <button
               onClick={() => {
@@ -81,7 +88,9 @@ export function ReportListingModal({
             </div>
 
             <div>
-              <label className="block font-bold text-foreground mb-1">Additional Details (Optional)</label>
+              <label className="block font-bold text-foreground mb-1">
+                Additional Details (Optional)
+              </label>
               <textarea
                 rows={3}
                 value={comments}

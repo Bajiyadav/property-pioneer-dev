@@ -1,28 +1,25 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { FileText, Truck, Sparkles, Paintbrush, Landmark, CheckCircle2, Phone, ArrowRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { FileText, Paintbrush, Landmark, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-export type ServiceType = "agreement" | "movers" | "cleaning" | "painting" | "loan";
+export type ServiceType = "agreement" | "painting" | "loan";
 
-const SERVICES_DATA: Record<ServiceType, { title: string; price: string; desc: string; icon: any }> = {
+const SERVICES_DATA: Record<
+  ServiceType,
+  { title: string; price: string; desc: string; icon: React.ElementType }
+> = {
   agreement: {
     title: "Digital E-Stamp Rental Agreement",
     price: "₹499 (State Stamped)",
     desc: "100% Legally valid digital rental agreement with Govt E-Stamp, biometric e-signature, and instant PDF delivery.",
     icon: FileText,
-  },
-  movers: {
-    title: "Packers & Movers Booking",
-    price: "From ₹2,499",
-    desc: "Verified local & intercity packing, loading, and damage-free transit in Hyderabad & pan-India.",
-    icon: Truck,
-  },
-  cleaning: {
-    title: "Deep House Cleaning & Polish",
-    price: "From ₹1,199",
-    desc: "Full home deep cleaning, bathroom sanitization, marble floor polishing, and kitchen degreasing.",
-    icon: Sparkles,
   },
   painting: {
     title: "Wall Painting & Waterproofing",
@@ -101,7 +98,9 @@ export function HomeServicesModal({
                 }`}
               >
                 <IconComp className="h-3.5 w-3.5" />
-                <span className="whitespace-nowrap">{key === "agreement" ? "Rental Agreement" : item.title.split(" ")[0]}</span>
+                <span className="whitespace-nowrap">
+                  {key === "agreement" ? "Rental Agreement" : item.title.split(" ")[0]}
+                </span>
               </button>
             );
           })}
@@ -114,7 +113,10 @@ export function HomeServicesModal({
             </div>
             <h3 className="text-base font-extrabold text-foreground">Service Request Confirmed!</h3>
             <p className="text-xs text-muted-foreground">
-              Our service coordinator will call <span className="font-bold text-foreground">{phone}</span> within 15 minutes to finalize details for <span className="font-bold text-foreground">{activeData.title}</span>.
+              Our service coordinator will call{" "}
+              <span className="font-bold text-foreground">{phone}</span> within 15 minutes to
+              finalize details for{" "}
+              <span className="font-bold text-foreground">{activeData.title}</span>.
             </p>
             <button
               onClick={() => {
@@ -135,7 +137,9 @@ export function HomeServicesModal({
                   {activeData.price}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{activeData.desc}</p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                {activeData.desc}
+              </p>
             </div>
 
             <div>
@@ -151,9 +155,13 @@ export function HomeServicesModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1">Mobile Number for Callback</label>
+              <label className="block text-xs font-bold text-foreground mb-1">
+                Mobile Number for Callback
+              </label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">+91</span>
+                <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">
+                  +91
+                </span>
                 <input
                   type="tel"
                   required
@@ -171,7 +179,8 @@ export function HomeServicesModal({
               disabled={loading}
               className="w-full rounded-2xl bg-emerald-600 py-3 text-xs font-extrabold text-white shadow-md transition hover:bg-emerald-500 flex items-center justify-center gap-2"
             >
-              {loading ? "Submitting Request…" : `Book ${activeData.title}`} <ArrowRight className="h-4 w-4" />
+              {loading ? "Submitting Request…" : `Book ${activeData.title}`}{" "}
+              <ArrowRight className="h-4 w-4" />
             </button>
           </form>
         )}

@@ -14,8 +14,12 @@ export function FeaturedProperties({
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Handpicked Listings</p>
-            <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">Featured Properties</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Handpicked Listings
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">
+              Featured Properties
+            </h2>
           </div>
           <Link
             to="/properties"

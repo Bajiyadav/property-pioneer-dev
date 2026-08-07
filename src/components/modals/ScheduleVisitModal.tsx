@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Calendar, Clock, MapPin, CheckCircle2, User, Phone, Video } from "lucide-react";
 
@@ -53,7 +59,12 @@ export function ScheduleVisitModal({
             </div>
             <h4 className="text-base font-semibold text-foreground">Visit Confirmed!</h4>
             <p className="text-xs text-muted-foreground">
-              The property owner has been notified. You will receive an SMS reminder before your visit on <strong className="text-foreground">{date} at {time}</strong>.
+              The property owner has been notified. You will receive an SMS reminder before your
+              visit on{" "}
+              <strong className="text-foreground">
+                {date} at {time}
+              </strong>
+              .
             </p>
             <button
               type="button"

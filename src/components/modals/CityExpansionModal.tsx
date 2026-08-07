@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { MapPin, Bell, CheckCircle2, Rocket, Building, Compass } from "lucide-react";
 
@@ -36,9 +42,13 @@ export function CityExpansionModal({
       <DialogContent className="sm:max-w-xl bg-card border-border p-6 rounded-3xl shadow-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-              data.status === "live" ? "bg-emerald-600/10 text-emerald-600 dark:text-emerald-400" : "bg-primary/10 text-primary"
-            }`}>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                data.status === "live"
+                  ? "bg-emerald-600/10 text-emerald-600 dark:text-emerald-400"
+                  : "bg-primary/10 text-primary"
+              }`}
+            >
               {data.badge}
             </span>
             <span className="text-xs text-muted-foreground">Pan-India Expansion</span>
@@ -53,22 +63,35 @@ export function CityExpansionModal({
 
         <div className="mt-4 space-y-5">
           <div className="rounded-2xl border border-border bg-secondary/30 p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">Roadmap & Target Corridors</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground mb-3">
+              Roadmap & Target Corridors
+            </h4>
             <div className="grid grid-cols-2 gap-2 text-xs text-foreground">
-              <span className="flex items-center gap-1.5"><Building className="h-4 w-4 text-primary" /> IT & Commercial Parks</span>
-              <span className="flex items-center gap-1.5"><Compass className="h-4 w-4 text-primary" /> High-Demand Residential</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Direct Owner Verification</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> 0% Brokerage Guarantee</span>
+              <span className="flex items-center gap-1.5">
+                <Building className="h-4 w-4 text-primary" /> IT & Commercial Parks
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Compass className="h-4 w-4 text-primary" /> High-Demand Residential
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Direct Owner Verification
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> 0% Brokerage Guarantee
+              </span>
             </div>
           </div>
 
           {joined ? (
             <div className="rounded-xl bg-emerald-600/10 p-4 text-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
-              <CheckCircle2 className="h-5 w-5" /> You're on the launch list for {data.name}! We'll notify you on day one.
+              <CheckCircle2 className="h-5 w-5" /> You're on the launch list for {data.name}! We'll
+              notify you on day one.
             </div>
           ) : (
             <form onSubmit={handleWaitlist} className="space-y-3">
-              <p className="text-xs font-semibold text-foreground">Get Notified When Urban Properties Launches in {data.name}</p>
+              <p className="text-xs font-semibold text-foreground">
+                Get Notified When Urban Properties Launches in {data.name}
+              </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"

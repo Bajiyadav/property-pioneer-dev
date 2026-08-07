@@ -35,11 +35,13 @@ export function HeroSection({
           </div>
 
           <h1 className="mt-5 text-4xl font-semibold leading-[1.1] text-background sm:text-6xl">
-            Discover Homes You'll Love <em className="not-italic text-[color:var(--primary-glow)]">Across India</em>
+            Discover Homes You'll Love{" "}
+            <em className="not-italic text-[color:var(--primary-glow)]">Across India</em>
           </h1>
 
           <p className="mt-4 text-base text-background/85 sm:text-lg leading-relaxed max-w-2xl">
-            Starting with Hyderabad and expanding city by city, Urban Properties connects you with verified homes, trusted owners, and a premium real estate experience.
+            Starting with Hyderabad and expanding city by city, Urban Properties connects you with
+            verified homes, trusted owners, and a premium real estate experience.
           </p>
 
           {/* Quick Category Filter Tabs */}
@@ -55,7 +57,14 @@ export function HeroSection({
           {/* Trending Searches */}
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-background/90">
             <span className="font-semibold text-background/70">🔥 Trending in Hyderabad:</span>
-            {["Gachibowli", "Madhapur", "Kondapur", "Hitech City", "Miyapur", "Financial District"].map((loc) => (
+            {[
+              "Gachibowli",
+              "Madhapur",
+              "Kondapur",
+              "Hitech City",
+              "Miyapur",
+              "Financial District",
+            ].map((loc) => (
               <button
                 key={loc}
                 type="button"

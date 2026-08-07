@@ -31,7 +31,11 @@ export function WhatsAppButton({
       disabled={loading}
       className={`inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-60 ${className}`}
     >
-      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <MessageSquare className="h-4 w-4" />
+      )}
       {loading ? "Connecting…" : "Chat on WhatsApp"}
     </button>
   );

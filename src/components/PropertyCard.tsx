@@ -8,9 +8,10 @@ import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
   const saved = has(property.id);
-  const cover = (Array.isArray(property.images) && property.images[0])
-    ? property.images[0]
-    : "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
+  const cover =
+    Array.isArray(property.images) && property.images[0]
+      ? property.images[0]
+      : "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
 
   return (
     <Link
@@ -58,12 +59,22 @@ export function PropertyCard({ property }: { property: Property }) {
           </h3>
         </div>
         <p className="flex items-center gap-1 text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" /> {property.address || "Hyderabad"}, {property.city || "Hyderabad"}
+          <MapPin className="h-3.5 w-3.5" /> {property.address || "Hyderabad"},{" "}
+          {property.city || "Hyderabad"}
         </p>
         <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><BedDouble className="h-4 w-4" />{property.bedrooms} bd</span>
-          <span className="inline-flex items-center gap-1"><Bath className="h-4 w-4" />{property.bathrooms} ba</span>
-          <span className="inline-flex items-center gap-1"><Maximize className="h-4 w-4" />{property.area_sqft} ft²</span>
+          <span className="inline-flex items-center gap-1">
+            <BedDouble className="h-4 w-4" />
+            {property.bedrooms} bd
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Bath className="h-4 w-4" />
+            {property.bathrooms} ba
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Maximize className="h-4 w-4" />
+            {property.area_sqft} ft²
+          </span>
         </div>
         <div className="mt-auto pt-3 flex items-center justify-between">
           <span className="font-[family-name:var(--font-display)] text-xl font-semibold text-foreground">

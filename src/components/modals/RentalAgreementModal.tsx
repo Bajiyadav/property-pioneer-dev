@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { FileText, CheckCircle2, ShieldCheck, Download, IndianRupee, Printer } from "lucide-react";
 
@@ -51,13 +57,27 @@ export function RentalAgreementModal({
               <div className="text-center border-b border-border/60 pb-2 font-semibold font-sans text-sm">
                 LEGAL RENTAL AGREEMENT DRAFT
               </div>
-              <p><strong>Tenant:</strong> {tenantName}</p>
-              <p><strong>Landlord / Owner:</strong> {ownerName}</p>
-              <p><strong>Monthly Rent:</strong> ₹{rent.toLocaleString()}/month</p>
-              <p><strong>Refundable Security Deposit:</strong> ₹{deposit.toLocaleString()}</p>
-              <p><strong>Lock-in Period:</strong> 11 Months</p>
-              <p><strong>Notice Period:</strong> {noticeMonths} Month(s)</p>
-              <p className="text-[10px] text-muted-foreground pt-2">Includes standard Telangana stamp duty registration terms.</p>
+              <p>
+                <strong>Tenant:</strong> {tenantName}
+              </p>
+              <p>
+                <strong>Landlord / Owner:</strong> {ownerName}
+              </p>
+              <p>
+                <strong>Monthly Rent:</strong> ₹{rent.toLocaleString()}/month
+              </p>
+              <p>
+                <strong>Refundable Security Deposit:</strong> ₹{deposit.toLocaleString()}
+              </p>
+              <p>
+                <strong>Lock-in Period:</strong> 11 Months
+              </p>
+              <p>
+                <strong>Notice Period:</strong> {noticeMonths} Month(s)
+              </p>
+              <p className="text-[10px] text-muted-foreground pt-2">
+                Includes standard Telangana stamp duty registration terms.
+              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
@@ -97,7 +117,9 @@ export function RentalAgreementModal({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-foreground">Landlord / Owner Name</label>
+                <label className="text-[11px] font-semibold text-foreground">
+                  Landlord / Owner Name
+                </label>
                 <input
                   type="text"
                   required
@@ -111,7 +133,9 @@ export function RentalAgreementModal({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[11px] font-semibold text-foreground">Monthly Rent (₹)</label>
+                <label className="text-[11px] font-semibold text-foreground">
+                  Monthly Rent (₹)
+                </label>
                 <input
                   type="number"
                   required
@@ -121,7 +145,9 @@ export function RentalAgreementModal({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-foreground">Security Deposit (₹)</label>
+                <label className="text-[11px] font-semibold text-foreground">
+                  Security Deposit (₹)
+                </label>
                 <input
                   type="number"
                   required

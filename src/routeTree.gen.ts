@@ -13,13 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as CommercialRouteImport } from './routes/commercial'
 import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HomeServicesRouteImport } from './routes/home-services'
-import { Route as PgHostelsRouteImport } from './routes/pg-hostels'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlotsRouteImport } from './routes/plots'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as VillasRouteImport } from './routes/villas'
@@ -27,6 +30,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
 import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_authenticated/dashboard/customer'
@@ -57,6 +61,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuyRoute = BuyRouteImport.update({
   id: '/buy',
   path: '/buy',
@@ -77,19 +86,29 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HomeServicesRoute = HomeServicesRouteImport.update({
   id: '/home-services',
   path: '/home-services',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PgHostelsRoute = PgHostelsRouteImport.update({
-  id: '/pg-hostels',
-  path: '/pg-hostels',
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlotsRoute = PlotsRouteImport.update({
   id: '/plots',
   path: '/plots',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PropertiesRoute = PropertiesRouteImport.update({
@@ -127,6 +146,12 @@ const PropertiesIdRoute = PropertiesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => PropertiesRoute,
 } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardAdminRoute =
   AuthenticatedDashboardAdminRouteImport.update({
     id: '/admin',
@@ -191,13 +216,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/help': typeof HelpRoute
   '/home-services': typeof HomeServicesRoute
-  '/pg-hostels': typeof PgHostelsRoute
+  '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
@@ -210,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -220,17 +249,19 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/help': typeof HelpRoute
   '/home-services': typeof HomeServicesRoute
-  '/pg-hostels': typeof PgHostelsRoute
+  '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -238,6 +269,7 @@ export interface FileRoutesByTo {
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -250,13 +282,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/auth': typeof AuthRoute
+  '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
+  '/help': typeof HelpRoute
   '/home-services': typeof HomeServicesRoute
-  '/pg-hostels': typeof PgHostelsRoute
+  '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
@@ -269,6 +304,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -281,13 +317,16 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/auth'
+    | '/blog'
     | '/buy'
     | '/commercial'
     | '/farm-lands'
     | '/favorites'
+    | '/help'
     | '/home-services'
-    | '/pg-hostels'
+    | '/notifications'
     | '/plots'
+    | '/profile'
     | '/properties'
     | '/sitemap.xml'
     | '/villas'
@@ -300,6 +339,7 @@ export interface FileRouteTypes {
     | '/dashboard/customer'
     | '/dashboard/owner'
     | '/api/public/enquiries'
+    | '/dashboard/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -310,17 +350,19 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/auth'
+    | '/blog'
     | '/buy'
     | '/commercial'
     | '/farm-lands'
     | '/favorites'
+    | '/help'
     | '/home-services'
-    | '/pg-hostels'
+    | '/notifications'
     | '/plots'
+    | '/profile'
     | '/sitemap.xml'
     | '/villas'
     | '/admin'
-    | '/dashboard'
     | '/properties/$id'
     | '/properties'
     | '/dashboard/admin'
@@ -328,6 +370,7 @@ export interface FileRouteTypes {
     | '/dashboard/customer'
     | '/dashboard/owner'
     | '/api/public/enquiries'
+    | '/dashboard'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -339,13 +382,16 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/$'
     | '/auth'
+    | '/blog'
     | '/buy'
     | '/commercial'
     | '/farm-lands'
     | '/favorites'
+    | '/help'
     | '/home-services'
-    | '/pg-hostels'
+    | '/notifications'
     | '/plots'
+    | '/profile'
     | '/properties'
     | '/sitemap.xml'
     | '/villas'
@@ -358,6 +404,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/customer'
     | '/_authenticated/dashboard/owner'
     | '/api/public/enquiries'
+    | '/_authenticated/dashboard/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -370,13 +417,16 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   AuthRoute: typeof AuthRoute
+  BlogRoute: typeof BlogRoute
   BuyRoute: typeof BuyRoute
   CommercialRoute: typeof CommercialRoute
   FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
+  HelpRoute: typeof HelpRoute
   HomeServicesRoute: typeof HomeServicesRoute
-  PgHostelsRoute: typeof PgHostelsRoute
+  NotificationsRoute: typeof NotificationsRoute
   PlotsRoute: typeof PlotsRoute
+  ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VillasRoute: typeof VillasRoute
@@ -418,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/buy': {
       id: '/buy'
       path: '/buy'
@@ -446,6 +503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/home-services': {
       id: '/home-services'
       path: '/home-services'
@@ -453,11 +517,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pg-hostels': {
-      id: '/pg-hostels'
-      path: '/pg-hostels'
-      fullPath: '/pg-hostels'
-      preLoaderRoute: typeof PgHostelsRouteImport
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plots': {
@@ -465,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/plots'
       fullPath: '/plots'
       preLoaderRoute: typeof PlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/properties': {
@@ -515,6 +586,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/properties/$id'
       preLoaderRoute: typeof PropertiesIdRouteImport
       parentRoute: typeof PropertiesRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/admin': {
       id: '/_authenticated/dashboard/admin'
@@ -594,6 +672,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRoute
   AuthenticatedDashboardCustomerRoute: typeof AuthenticatedDashboardCustomerRoute
   AuthenticatedDashboardOwnerRoute: typeof AuthenticatedDashboardOwnerRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -602,6 +681,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardAgentRoute: AuthenticatedDashboardAgentRoute,
     AuthenticatedDashboardCustomerRoute: AuthenticatedDashboardCustomerRoute,
     AuthenticatedDashboardOwnerRoute: AuthenticatedDashboardOwnerRoute,
+    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =
@@ -641,13 +721,16 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   AuthRoute: AuthRoute,
+  BlogRoute: BlogRoute,
   BuyRoute: BuyRoute,
   CommercialRoute: CommercialRoute,
   FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
+  HelpRoute: HelpRoute,
   HomeServicesRoute: HomeServicesRoute,
-  PgHostelsRoute: PgHostelsRoute,
+  NotificationsRoute: NotificationsRoute,
   PlotsRoute: PlotsRoute,
+  ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VillasRoute: VillasRoute,

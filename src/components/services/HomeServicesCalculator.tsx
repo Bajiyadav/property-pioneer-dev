@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Calculator, Check, ArrowRight } from "lucide-react";
+import { Calculator, Check, ArrowRight } from "lucide-react";
 
 const PROPERTY_TYPES = [
   { id: "apartment", label: "Apartment / Flat", basePrice: 2499 },
@@ -9,16 +9,16 @@ const PROPERTY_TYPES = [
 ];
 
 const SERVICES = [
-  { id: "full_cleaning", name: "Full Home Deep Cleaning", priceMultiplier: 1.0 },
-  { id: "kitchen_bath", name: "Kitchen & Bathroom Deep Clean", priceMultiplier: 0.6 },
-  { id: "packers", name: "Packers & Movers Relocation", priceMultiplier: 1.8 },
   { id: "agreement", name: "Digital E-Stamp Agreement", priceMultiplier: 0.2 },
+  { id: "painting", name: "Wall Painting & Waterproofing", priceMultiplier: 1.6 },
+  { id: "legal", name: "Legal Title Verification", priceMultiplier: 0.8 },
+  { id: "tenant_check", name: "Tenant Background Verification", priceMultiplier: 0.4 },
 ];
 
 export function HomeServicesCalculator() {
   const [propertyType, setPropertyType] = useState("apartment");
   const [bhk, setBhk] = useState(2);
-  const [selectedServices, setSelectedServices] = useState<string[]>(["full_cleaning"]);
+  const [selectedServices, setSelectedServices] = useState<string[]>(["agreement"]);
 
   const base = PROPERTY_TYPES.find((p) => p.id === propertyType)?.basePrice || 2499;
   const bhkMultiplier = 1 + (bhk - 1) * 0.35;
@@ -46,15 +46,21 @@ export function HomeServicesCalculator() {
           <Calculator className="h-5 w-5" />
         </span>
         <div>
-          <h3 className="text-lg font-extrabold text-foreground">Interactive Instant Price Estimator</h3>
-          <p className="text-xs text-muted-foreground">Select your property size and services for 100% price lock guarantee.</p>
+          <h3 className="text-lg font-extrabold text-foreground">
+            Interactive Instant Price Estimator
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Select your property size and services for 100% price lock guarantee.
+          </p>
         </div>
       </div>
 
       <div className="mt-6 space-y-6">
         {/* Property Type Selector */}
         <div>
-          <label className="block text-xs font-bold text-foreground mb-2">1. Select Property Type</label>
+          <label className="block text-xs font-bold text-foreground mb-2">
+            1. Select Property Type
+          </label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 text-xs font-bold">
             {PROPERTY_TYPES.map((pt) => (
               <button
@@ -77,7 +83,9 @@ export function HomeServicesCalculator() {
         <div>
           <div className="flex justify-between text-xs font-bold text-foreground mb-2">
             <span>2. Size / Rooms</span>
-            <span className="text-teal-600 dark:text-teal-400">{bhk} BHK / {bhk * 400 + 200} sq.ft</span>
+            <span className="text-teal-600 dark:text-teal-400">
+              {bhk} BHK / {bhk * 400 + 200} sq.ft
+            </span>
           </div>
           <input
             type="range"
@@ -99,7 +107,9 @@ export function HomeServicesCalculator() {
 
         {/* Services Checkboxes */}
         <div>
-          <label className="block text-xs font-bold text-foreground mb-2">3. Included Service Modules</label>
+          <label className="block text-xs font-bold text-foreground mb-2">
+            3. Included Service Modules
+          </label>
           <div className="grid gap-2 sm:grid-cols-2 text-xs">
             {SERVICES.map((s) => {
               const active = selectedServices.includes(s.id);
@@ -115,7 +125,9 @@ export function HomeServicesCalculator() {
                   }`}
                 >
                   <span>{s.name}</span>
-                  <div className={`grid h-5 w-5 place-items-center rounded-full ${active ? "bg-teal-600 text-white" : "bg-muted text-transparent"}`}>
+                  <div
+                    className={`grid h-5 w-5 place-items-center rounded-full ${active ? "bg-teal-600 text-white" : "bg-muted text-transparent"}`}
+                  >
                     <Check className="h-3 w-3" />
                   </div>
                 </button>
@@ -127,9 +139,12 @@ export function HomeServicesCalculator() {
         {/* Price Output Display */}
         <div className="rounded-2xl border border-teal-600/30 bg-teal-600/10 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Estimated Total Price (100% Price Lock)</span>
+            <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
+              Estimated Total Price (100% Price Lock)
+            </span>
             <p className="font-[family-name:var(--font-display)] text-3xl font-black text-foreground">
-              ₹{estimatedPrice.toLocaleString("en-IN")} <span className="text-xs text-muted-foreground font-normal">+ taxes</span>
+              ₹{estimatedPrice.toLocaleString("en-IN")}{" "}
+              <span className="text-xs text-muted-foreground font-normal">+ taxes</span>
             </p>
           </div>
           <a

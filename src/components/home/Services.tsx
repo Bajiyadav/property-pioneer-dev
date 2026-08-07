@@ -1,39 +1,107 @@
 import {
-  Truck, Palette, Landmark, ShieldCheck, FileText, Paintbrush, Sparkles, Zap, Wrench, Wifi, Armchair, Tv, UserCheck, Building, Key, Home, ArrowRight
+  Landmark,
+  ShieldCheck,
+  FileText,
+  Paintbrush,
+  Sparkles,
+  Zap,
+  Wrench,
+  Wifi,
+  Armchair,
+  Tv,
+  UserCheck,
+  Building,
+  Key,
+  Home,
+  ArrowRight,
 } from "lucide-react";
 
 interface ServiceItem {
   title: string;
   desc: string;
-  icon: any;
+  icon: React.ElementType;
   status: string;
   badgeColor?: string;
 }
 
 const SERVICES: ServiceItem[] = [
-  { title: "Packers & Movers", desc: "Hassle-free home relocation at guaranteed lowest prices with damage protection.", icon: Truck, status: "🚀 Launching Q4 2026" },
-  { title: "Rental Agreement", desc: "Digital legal agreement with e-stamping delivered online in 10 minutes.", icon: FileText, status: "● Live in Hyderabad", badgeColor: "bg-emerald-600" },
-  { title: "Interior Design", desc: "Custom modular kitchens and luxury interiors from verified design pros.", icon: Palette, status: "🚀 Launching Q4 2026" },
-  { title: "Home Loans", desc: "Compare best interest rates from top partner banks with pre-approval.", icon: Landmark, status: "🚀 Launching Q4 2026" },
-  { title: "Legal Verification", desc: "Property title check and legal document verification assistance.", icon: ShieldCheck, status: "● Live in Hyderabad", badgeColor: "bg-emerald-600" },
-  { title: "Home Painting", desc: "Professional painting services with 1-year service warranty.", icon: Paintbrush, status: "Available Soon" },
-  { title: "Deep Cleaning", desc: "Full home deep cleaning, kitchen & bathroom sanitization.", icon: Sparkles, status: "Available Soon" },
-  { title: "Electrician Services", desc: "On-demand verified electricians for wiring, fixtures, and appliances.", icon: Zap, status: "Available Soon" },
-  { title: "Plumbing Services", desc: "Instant plumber booking for leaks, fittings, and bathroom upgrades.", icon: Wrench, status: "Available Soon" },
-  { title: "Internet Setup", desc: "High-speed optical fiber broadband setup on move-in day.", icon: Wifi, status: "Available Soon" },
-  { title: "Furniture Rental", desc: "Rent living room, bedroom & study furniture packages monthly.", icon: Armchair, status: "Available Soon" },
-  { title: "Appliance Rental", desc: "Rent refrigerators, ACs, washing machines, and smart TVs.", icon: Tv, status: "Available Soon" },
-  { title: "Tenant Verification", desc: "Instant Aadhaar, PAN, and police verification reports for owners.", icon: UserCheck, status: "● Live in Hyderabad", badgeColor: "bg-emerald-600" },
-  { title: "Property Management", desc: "End-to-end property maintenance, rent collection & tenant management.", icon: Building, status: "Available Soon" },
+  {
+    title: "Rental Agreement",
+    desc: "Digital legal agreement with e-stamping delivered online in 10 minutes.",
+    icon: FileText,
+    status: "● Live in Hyderabad",
+    badgeColor: "bg-emerald-600",
+  },
+  {
+    title: "Home Loans",
+    desc: "Compare best interest rates from top partner banks with pre-approval.",
+    icon: Landmark,
+    status: "🚀 Launching Q4 2026",
+  },
+  {
+    title: "Legal Verification",
+    desc: "Property title check and legal document verification assistance.",
+    icon: ShieldCheck,
+    status: "● Live in Hyderabad",
+    badgeColor: "bg-emerald-600",
+  },
+  {
+    title: "Home Painting",
+    desc: "Professional painting services with 1-year service warranty.",
+    icon: Paintbrush,
+    status: "Available Soon",
+  },
+  {
+    title: "Electrician Services",
+    desc: "On-demand verified electricians for wiring, fixtures, and appliances.",
+    icon: Zap,
+    status: "Available Soon",
+  },
+  {
+    title: "Plumbing Services",
+    desc: "Instant plumber booking for leaks, fittings, and bathroom upgrades.",
+    icon: Wrench,
+    status: "Available Soon",
+  },
+  {
+    title: "Internet Setup",
+    desc: "High-speed optical fiber broadband setup on move-in day.",
+    icon: Wifi,
+    status: "Available Soon",
+  },
+  {
+    title: "Furniture Rental",
+    desc: "Rent living room, bedroom & study furniture packages monthly.",
+    icon: Armchair,
+    status: "Available Soon",
+  },
+  {
+    title: "Appliance Rental",
+    desc: "Rent refrigerators, ACs, washing machines, and smart TVs.",
+    icon: Tv,
+    status: "Available Soon",
+  },
+  {
+    title: "Tenant Verification",
+    desc: "Instant Aadhaar, PAN, and police verification reports for owners.",
+    icon: UserCheck,
+    status: "● Live in Hyderabad",
+    badgeColor: "bg-emerald-600",
+  },
+  {
+    title: "Property Management",
+    desc: "End-to-end property maintenance, rent collection & tenant management.",
+    icon: Building,
+    status: "Available Soon",
+  },
 ];
 
 const JOURNEY_STEPS = [
   { step: "01", title: "Find Your Home", icon: Home, desc: "Browse 100% verified listings" },
   { step: "02", title: "Rental Agreement", icon: FileText, desc: "Instant 10-min e-stamping" },
-  { step: "03", title: "Packers & Movers", icon: Truck, desc: "Safe home relocation" },
-  { step: "04", title: "Interior Design", icon: Palette, desc: "Custom modular setup" },
-  { step: "05", title: "Deep Cleaning", icon: Sparkles, desc: "Sanitized move-in ready" },
-  { step: "06", title: "Move In", icon: Key, desc: "Start living comfortably" },
+  { step: "03", title: "Legal Verification", icon: ShieldCheck, desc: "Title & document checks" },
+  { step: "04", title: "Home Painting", icon: Paintbrush, desc: "Move-in ready finish" },
+  { step: "05", title: "Move In", icon: Key, desc: "Start living comfortably" },
 ];
 
 export function Services({
@@ -57,22 +125,30 @@ export function Services({
             Everything You Need Beyond Finding a Home
           </h2>
           <p className="mt-3 text-sm text-muted-foreground sm:text-base leading-relaxed">
-            Urban Properties is more than a property platform. We help you move, settle, and live comfortably with trusted home services.
+            Urban Properties is more than a property platform. We help you move, settle, and live
+            comfortably with trusted home services.
           </p>
         </div>
 
         {/* Visual Customer Journey Stepper Flow */}
         <div className="mb-16 rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
           <div className="text-center mb-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">The Seamless Move-In Journey</p>
-            <h3 className="text-lg font-semibold text-foreground mt-1">From Search to Living Comfortably</h3>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              The Seamless Move-In Journey
+            </p>
+            <h3 className="text-lg font-semibold text-foreground mt-1">
+              From Search to Living Comfortably
+            </h3>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-            {JOURNEY_STEPS.map((item, idx) => {
+            {JOURNEY_STEPS.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.step} className="relative flex flex-col items-center text-center p-3 rounded-2xl bg-secondary/50 border border-border/50">
+                <div
+                  key={item.step}
+                  className="relative flex flex-col items-center text-center p-3 rounded-2xl bg-secondary/50 border border-border/50"
+                >
                   <span className="text-[10px] font-bold text-primary">{item.step}</span>
                   <div className="mt-2 grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
@@ -108,7 +184,9 @@ export function Services({
                     <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary transition duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-lg">
                       <Icon className="h-6 w-6" />
                     </div>
-                    <span className={`rounded-full ${s.badgeColor || "bg-primary/10 text-primary"} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider`}>
+                    <span
+                      className={`rounded-full ${s.badgeColor || "bg-primary/10 text-primary"} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider`}
+                    >
                       {s.status}
                     </span>
                   </div>

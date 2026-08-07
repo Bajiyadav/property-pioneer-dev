@@ -179,8 +179,7 @@ export const FEATURES: Record<FeatureKey, FeatureDefinition> = Object.fromEntrie
  * Lets staging enable a module without a rebuild of the component tree.
  */
 function runtimeOverrides(): Set<string> {
-  const raw =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_FEATURES) || "";
+  const raw = (typeof import.meta !== "undefined" && import.meta.env?.VITE_FEATURES) || "";
   return new Set(
     String(raw)
       .split(",")

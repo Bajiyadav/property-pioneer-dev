@@ -16,15 +16,16 @@ export const Route = createFileRoute("/sitemap.xml")({
         const origin = APP_URL || new URL(request.url).origin;
 
         const staticPaths = ["/", "/properties", "/favorites"];
-        const entries: Array<{ loc: string; lastmod?: string; priority: string }> =
-          staticPaths.map((p) => ({
+        const entries: Array<{ loc: string; lastmod?: string; priority: string }> = staticPaths.map(
+          (p) => ({
             loc: `${origin}${p}`,
             priority: p === "/" ? "1.0" : "0.8",
-          }));
+          }),
+        );
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data } = await (supabaseAdmin as any)
+          const { data } = await supabaseAdmin
             .from("properties")
             .select("id, updated_at")
             .eq("is_approved", true)

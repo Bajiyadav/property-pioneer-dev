@@ -36,5 +36,26 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // shadcn/ui primitives intentionally co-locate their `cva` variant maps and
+    // context hooks with the component. Fast Refresh handles these fine.
+    files: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            "badgeVariants",
+            "buttonVariants",
+            "navigationMenuTriggerStyle",
+            "toggleVariants",
+            "useFormField",
+            "useSidebar",
+          ],
+        },
+      ],
+    },
+  },
   eslintPluginPrettier,
 );

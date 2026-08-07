@@ -1,11 +1,15 @@
-import { Calendar, CheckCircle2, Navigation, Sparkles, ShieldCheck, CreditCard, Star } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const STAGES = [
   { step: "01", label: "Instant Booking", desc: "Select date & time slot in 30 seconds." },
-  { step: "02", label: "Automated Confirmation", desc: "SMS & WhatsApp confirmation sent instantly." },
+  {
+    step: "02",
+    label: "Automated Confirmation",
+    desc: "SMS & WhatsApp confirmation sent instantly.",
+  },
   { step: "03", label: "Expert Assigned", desc: "Background-checked professional assigned." },
   { step: "04", label: "Live GPS Tracking", desc: "Track technician arrival on live map." },
-  { step: "05", label: "Service Starts", desc: "Eco-friendly machine deep cleaning begins." },
+  { step: "05", label: "Service Starts", desc: "Certified professional begins on-site work." },
   { step: "06", label: "Quality Audit", desc: "Supervisor inspects all checklist points." },
   { step: "07", label: "Post-Service Pay", desc: "Pay via UPI/Card after 100% satisfaction." },
   { step: "08", label: "Rate Experience", desc: "Share feedback & unlock referral reward." },
@@ -21,12 +25,17 @@ export function ServiceProcessTimeline() {
         <h2 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">
           8-Step Seamless Home Service Journey
         </h2>
-        <p className="mt-1 text-xs text-muted-foreground">From instant booking to live GPS tracking & post-service payment.</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          From instant booking to live GPS tracking & post-service payment.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STAGES.map((s, idx) => (
-          <div key={idx} className="relative rounded-2xl border border-border/60 bg-card p-5 shadow-sm space-y-2">
+          <div
+            key={idx}
+            className="relative rounded-2xl border border-border/60 bg-card p-5 shadow-sm space-y-2"
+          >
             <span className="text-xs font-black text-teal-600 dark:text-teal-400 bg-teal-600/10 px-2.5 py-1 rounded-full">
               STEP {s.step}
             </span>

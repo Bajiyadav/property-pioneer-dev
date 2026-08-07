@@ -13,14 +13,6 @@ interface RegionHub {
 
 const REGIONS: RegionHub[] = [
   {
-    id: "south",
-    name: "South India Hubs",
-    cities: ["Hyderabad", "Bangalore", "Chennai", "Vizag", "Vijayawada", "Tirupati", "Warangal", "Guntur"],
-    totalProperties: "8,500+ Properties",
-    description: "Hitech Corridor, Koramangala, OMR, Beach Road, and Amaravati expansion hubs.",
-    popularAreas: ["Gachibowli", "Whitefield", "Velachery", "Benz Circle", "Alipiri"],
-  },
-  {
     id: "north",
     name: "North India Hubs",
     cities: ["Jaipur", "Lucknow", "Delhi NCR", "Chandigarh", "Noida", "Gurugram"],
@@ -39,7 +31,7 @@ const REGIONS: RegionHub[] = [
 ];
 
 export function IndiaMapSection() {
-  const [selectedRegion, setSelectedRegion] = useState<string>("south");
+  const [selectedRegion, setSelectedRegion] = useState<string>(REGIONS[0].id);
   const activeHub = REGIONS.find((r) => r.id === selectedRegion) || REGIONS[0];
 
   return (
@@ -48,8 +40,12 @@ export function IndiaMapSection() {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
           <Compass className="h-3.5 w-3.5" /> Interactive Expansion Map
         </span>
-        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Pan-India Real Estate Network</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Select a regional hub to explore verified rental flats, commercial spaces, and plots.</p>
+        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
+          Pan-India Real Estate Network
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Select a regional hub to explore verified rental flats, commercial spaces, and plots.
+        </p>
       </div>
 
       {/* Region Selector Tabs */}
@@ -77,10 +73,14 @@ export function IndiaMapSection() {
               <CheckCircle2 className="h-4 w-4" /> Live Market Coverage
             </div>
             <h3 className="mt-2 text-2xl font-semibold text-foreground">{activeHub.name}</h3>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{activeHub.description}</p>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              {activeHub.description}
+            </p>
 
             <div className="mt-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Top Cities Covered:</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                Top Cities Covered:
+              </h4>
               <div className="mt-2 flex flex-wrap gap-2">
                 {activeHub.cities.map((city) => (
                   <Link
@@ -96,10 +96,15 @@ export function IndiaMapSection() {
             </div>
 
             <div className="mt-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">High-Demand Localities:</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                High-Demand Localities:
+              </h4>
               <div className="mt-2 flex flex-wrap gap-2">
                 {activeHub.popularAreas.map((area) => (
-                  <span key={area} className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted-foreground">
+                  <span
+                    key={area}
+                    className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted-foreground"
+                  >
                     📍 {area}
                   </span>
                 ))}
@@ -110,12 +115,21 @@ export function IndiaMapSection() {
           <div className="mt-8 flex items-center gap-4">
             <Link
               to="/properties"
-              search={{ q: "", city: activeHub.cities[0], listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+              search={{
+                q: "",
+                city: activeHub.cities[0],
+                listing: "",
+                minPrice: 0,
+                maxPrice: 0,
+                beds: 0,
+              }}
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-semibold text-primary-foreground transition hover:brightness-110"
             >
               Browse {activeHub.name} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <span className="text-xs font-semibold text-muted-foreground">{activeHub.totalProperties}</span>
+            <span className="text-xs font-semibold text-muted-foreground">
+              {activeHub.totalProperties}
+            </span>
           </div>
         </div>
 
@@ -128,9 +142,13 @@ export function IndiaMapSection() {
             </span>
           </div>
           <div className="mt-12">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">Expansion Status</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              Expansion Status
+            </p>
             <h4 className="text-xl font-semibold text-foreground mt-1">Urban Properties Network</h4>
-            <p className="text-xs text-muted-foreground mt-1">Direct Verified Owners across Tier-1, Tier-2, and Tier-3 urban growth corridors.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Direct Verified Owners across Tier-1, Tier-2, and Tier-3 urban growth corridors.
+            </p>
           </div>
         </div>
       </div>

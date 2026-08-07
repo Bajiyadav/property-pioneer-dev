@@ -1,13 +1,29 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/BrandMark";
 import { APP_NAME } from "@/config/app";
+import { getDashboardRoute, isUserRole, setActiveRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/components/auth/EnterprisePasswordForm";
 import { ShieldCheck, Globe, MessageCircle, Github } from "lucide-react";
 
+const authSearchSchema = z.object({
+  /** Where to send the user after a successful sign-in. */
+  redirect: fallback(z.string(), "").default(""),
+});
+
+/** Only allow same-origin, absolute in-app paths — never an external URL. */
+function safeRedirect(target: string): string | null {
+  if (!target.startsWith("/") || target.startsWith("//")) return null;
+  if (target.startsWith("/auth")) return null;
+  return target;
+}
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: zodValidator(authSearchSchema),
   head: () => ({
     meta: [
       { title: `Sign in — ${APP_NAME}` },
@@ -25,6 +41,7 @@ type AccountRole = "customer" | "owner" | "agent";
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [role, setRole] = useState<AccountRole>("customer");
 
@@ -35,9 +52,19 @@ function AuthPage() {
   }, [navigate]);
 
   const handleSuccess = (userObj: { name: string; email: string; phone: string; role: string }) => {
-    localStorage.setItem("demo_user_role", userObj.role);
-    toast.success(`Welcome ${userObj.name}! Authenticated as ${userObj.role.toUpperCase()}`);
-    navigate({ to: `/dashboard/${userObj.role}` as any, replace: true });
+    // The active role drives dashboard dispatch and the header menu, so persist
+    // it in every environment — not just dev.
+    const destRole = isUserRole(userObj.role) ? userObj.role : "customer";
+    setActiveRole(destRole);
+
+    toast.success(`Welcome ${userObj.name}! Signed in as ${destRole.toUpperCase()}`);
+
+    const target = redirect ? safeRedirect(redirect) : null;
+    if (target) {
+      navigate({ href: target, replace: true });
+      return;
+    }
+    navigate({ to: getDashboardRoute(destRole), search: { tab: "overview" }, replace: true });
   };
 
   return (
@@ -85,7 +112,9 @@ function AuthPage() {
       {/* Account Role Selector */}
       {mode === "signup" && (
         <div className="mt-4 w-full">
-          <label className="block text-xs font-bold text-foreground mb-1 text-center">Select Account Persona</label>
+          <label className="block text-xs font-bold text-foreground mb-1 text-center">
+            Select Account Persona
+          </label>
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             {[
               { id: "customer", label: "Tenant / Buyer" },

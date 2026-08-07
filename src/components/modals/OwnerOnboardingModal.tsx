@@ -1,7 +1,23 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CheckCircle2, ArrowRight, ArrowLeft, Upload, Building, MapPin, IndianRupee, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  Upload,
+  Building,
+  MapPin,
+  IndianRupee,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 export function OwnerOnboardingModal({
   isOpen,
@@ -49,7 +65,8 @@ export function OwnerOnboardingModal({
             List Your Property for FREE
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Upload property details in 2 minutes and receive direct WhatsApp leads from verified tenants.
+            Upload property details in 2 minutes and receive direct WhatsApp leads from verified
+            tenants.
           </DialogDescription>
         </DialogHeader>
 
@@ -66,9 +83,13 @@ export function OwnerOnboardingModal({
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-600/10 text-emerald-600">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">Listing Submitted Successfully!</h3>
+            <h3 className="text-xl font-semibold text-foreground">
+              Listing Submitted Successfully!
+            </h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Your property listing for <strong className="text-foreground">{formData.title || "Hyderabad Apartment"}</strong> has been submitted. Our team will verify owner details within 2 hours.
+              Your property listing for{" "}
+              <strong className="text-foreground">{formData.title || "Hyderabad Apartment"}</strong>{" "}
+              has been submitted. Our team will verify owner details within 2 hours.
             </p>
             <button
               onClick={() => {
@@ -85,7 +106,9 @@ export function OwnerOnboardingModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {step === 1 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Step 1: Basic Property Info</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                  Step 1: Basic Property Info
+                </h4>
                 <div>
                   <label className="text-xs font-medium text-foreground">Property Title</label>
                   <input
@@ -127,7 +150,9 @@ export function OwnerOnboardingModal({
 
             {step === 2 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Step 2: Property Type & Size</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                  Step 2: Property Type & Size
+                </h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs font-medium text-foreground">Property Type</label>
@@ -139,14 +164,15 @@ export function OwnerOnboardingModal({
                       <option value="Apartment">Apartment / Flat</option>
                       <option value="Independent House">Independent House</option>
                       <option value="Villa">Villa</option>
-                      <option value="PG">PG / Hostel</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-foreground">Bedrooms</label>
                     <select
                       value={formData.bedrooms}
-                      onChange={(e) => setFormData({ ...formData, bedrooms: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bedrooms: Number(e.target.value) })
+                      }
                       className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
                     >
                       <option value={1}>1 BHK / Studio</option>
@@ -161,7 +187,9 @@ export function OwnerOnboardingModal({
 
             {step === 3 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Step 3: Rent & Security Deposit</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                  Step 3: Rent & Security Deposit
+                </h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs font-medium text-foreground">Monthly Rent (₹)</label>
@@ -174,12 +202,16 @@ export function OwnerOnboardingModal({
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-foreground">Security Deposit (₹)</label>
+                    <label className="text-xs font-medium text-foreground">
+                      Security Deposit (₹)
+                    </label>
                     <input
                       type="number"
                       required
                       value={formData.deposit}
-                      onChange={(e) => setFormData({ ...formData, deposit: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deposit: Number(e.target.value) })
+                      }
                       className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
                     />
                   </div>
@@ -189,9 +221,13 @@ export function OwnerOnboardingModal({
 
             {step === 4 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Step 4: Contact & Phone Verification</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                  Step 4: Contact & Phone Verification
+                </h4>
                 <div>
-                  <label className="text-xs font-medium text-foreground">Mobile Phone (WhatsApp Leads)</label>
+                  <label className="text-xs font-medium text-foreground">
+                    Mobile Phone (WhatsApp Leads)
+                  </label>
                   <input
                     type="tel"
                     required
@@ -200,19 +236,32 @@ export function OwnerOnboardingModal({
                     placeholder="10-digit mobile number"
                     className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
                   />
-                  <p className="text-[10px] text-muted-foreground mt-1">Your phone number is kept private and only shared securely via server contact requests.</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Your phone number is kept private and only shared securely via server contact
+                    requests.
+                  </p>
                 </div>
               </div>
             )}
 
             {step === 5 && (
               <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">Step 5: Review & Publish</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
+                  Step 5: Review & Publish
+                </h4>
                 <div className="rounded-2xl border border-border bg-secondary/30 p-4 text-xs space-y-1 text-foreground">
-                  <p><strong>Title:</strong> {formData.title || "2 BHK Flat"}</p>
-                  <p><strong>Location:</strong> {formData.locality}, {formData.city}</p>
-                  <p><strong>Type:</strong> {formData.bedrooms} BHK {formData.propertyType}</p>
-                  <p><strong>Rent:</strong> ₹{formData.rent}/mo (Deposit: ₹{formData.deposit})</p>
+                  <p>
+                    <strong>Title:</strong> {formData.title || "2 BHK Flat"}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {formData.locality}, {formData.city}
+                  </p>
+                  <p>
+                    <strong>Type:</strong> {formData.bedrooms} BHK {formData.propertyType}
+                  </p>
+                  <p>
+                    <strong>Rent:</strong> ₹{formData.rent}/mo (Deposit: ₹{formData.deposit})
+                  </p>
                 </div>
               </div>
             )}
@@ -227,7 +276,9 @@ export function OwnerOnboardingModal({
                 >
                   <ArrowLeft className="h-3.5 w-3.5" /> Back
                 </button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
 
               {step < 5 ? (
                 <button

@@ -40,7 +40,7 @@ import {
   Shield,
   TrainTrack,
 } from "lucide-react";
-import { fetchProperty, formatPrice } from "@/lib/properties";
+import { fetchProperty, formatPrice, type Property } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
 import { submitEnquiry } from "@/lib/enquiries";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
@@ -49,6 +49,8 @@ import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
 import { WhatsAppButton } from "@/components/WhatsAppButton/WhatsAppButton";
 import { ScheduleVisitModal } from "@/components/modals/ScheduleVisitModal";
 import { RentalAgreementModal } from "@/components/modals/RentalAgreementModal";
+import { EmiCalculatorModal } from "@/components/modals/EmiCalculatorModal";
+import { ReportListingModal } from "@/components/modals/ReportListingModal";
 
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
 
@@ -66,7 +68,10 @@ export const Route = createFileRoute("/properties/$id")({
           { title: `Listing unavailable — ${APP_NAME}` },
           { name: "description", content: `This listing is no longer available on ${APP_NAME}.` },
           { property: "og:title", content: `Listing unavailable — ${APP_NAME}` },
-          { property: "og:description", content: `This listing is no longer available on ${APP_NAME}.` },
+          {
+            property: "og:description",
+            content: `This listing is no longer available on ${APP_NAME}.`,
+          },
           { property: "og:site_name", content: APP_NAME },
           { name: "robots", content: "noindex" },
         ],
@@ -101,8 +106,14 @@ export const Route = createFileRoute("/properties/$id")({
   errorComponent: () => (
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
-      <p className="mt-2 text-muted-foreground">We couldn't load this listing on Urban Properties.</p>
-      <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
+      <p className="mt-2 text-muted-foreground">
+        We couldn't load this listing on Urban Properties.
+      </p>
+      <Link
+        to="/properties"
+        search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+        className="mt-6 inline-block text-sm font-medium text-primary underline"
+      >
         Back to browse
       </Link>
     </div>
@@ -110,8 +121,14 @@ export const Route = createFileRoute("/properties/$id")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Listing not found</h1>
-      <p className="mt-2 text-muted-foreground">This home is no longer listed on Urban Properties.</p>
-      <Link to="/properties" search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }} className="mt-6 inline-block text-sm font-medium text-primary underline">
+      <p className="mt-2 text-muted-foreground">
+        This home is no longer listed on Urban Properties.
+      </p>
+      <Link
+        to="/properties"
+        search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+        className="mt-6 inline-block text-sm font-medium text-primary underline"
+      >
         Back to browse
       </Link>
     </div>
@@ -131,7 +148,11 @@ function PropertyDetail() {
   const [comparing, setComparing] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const { data: property, isLoading, isError } = useQuery({
+  const {
+    data: property,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["property", id],
     queryFn: () => fetchProperty(id),
   });
@@ -168,7 +189,10 @@ function PropertyDetail() {
       <PropertyStructuredData property={property} />
 
       {/* 1. PRESTIGE STICKY BACK NAVIGATION & BREADCRUMBS BAR */}
-      <nav aria-label="Breadcrumbs and navigation" className="sticky top-16 z-30 border-b border-border/40 bg-background/80 backdrop-blur-xl transition-all">
+      <nav
+        aria-label="Breadcrumbs and navigation"
+        className="sticky top-16 z-30 border-b border-border/40 bg-background/80 backdrop-blur-xl transition-all"
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <Link
             to="/properties"
@@ -183,13 +207,17 @@ function PropertyDetail() {
 
           {/* Breadcrumbs */}
           <div className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
-            <Link to="/" className="hover:text-foreground transition">Home</Link>
+            <Link to="/" className="hover:text-foreground transition">
+              Home
+            </Link>
             <span>/</span>
             <span className="capitalize">{property.listing_type}</span>
             <span>/</span>
             <span>{property.city}</span>
             <span>/</span>
-            <span className="font-medium text-foreground truncate max-w-[200px]">{property.title}</span>
+            <span className="font-medium text-foreground truncate max-w-[200px]">
+              {property.title}
+            </span>
           </div>
         </div>
       </nav>
@@ -223,9 +251,10 @@ function PropertyDetail() {
           <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-4xl lg:text-5xl">
             {property.title}
           </h1>
-          
+
           <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground sm:text-base">
-            <MapPin className="h-4 w-4 text-primary" /> {property.address}, {property.city}, Telangana
+            <MapPin className="h-4 w-4 text-primary" /> {property.address}, {property.city},
+            Telangana
           </p>
 
           {/* 3. QUICK ACTION BAR */}
@@ -249,7 +278,11 @@ function PropertyDetail() {
               onClick={handleShare}
               className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary/50 px-4 py-2.5 text-xs font-semibold text-foreground transition hover:scale-105 hover:bg-secondary"
             >
-              {copiedLink ? <Check className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4" />}
+              {copiedLink ? (
+                <Check className="h-4 w-4 text-emerald-500" />
+              ) : (
+                <Share2 className="h-4 w-4" />
+              )}
               {copiedLink ? "Copied!" : "Share"}
             </button>
 
@@ -280,7 +313,7 @@ function PropertyDetail() {
               alt={property.title}
               className="aspect-[16/9] w-full object-cover transition-all duration-300 sm:aspect-[21/9]"
             />
-            
+
             {/* Gallery Control Badges */}
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
               <span className="rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
@@ -309,7 +342,9 @@ function PropertyDetail() {
                   key={i}
                   onClick={() => setActiveImg(i)}
                   className={`h-20 w-32 flex-none overflow-hidden rounded-xl ring-2 ring-offset-2 ring-offset-background transition ${
-                    i === activeImg ? "ring-primary scale-105" : "ring-transparent opacity-70 hover:opacity-100"
+                    i === activeImg
+                      ? "ring-primary scale-105"
+                      : "ring-transparent opacity-70 hover:opacity-100"
                   }`}
                 >
                   <img src={src} alt="" className="h-full w-full object-cover" />
@@ -327,20 +362,54 @@ function PropertyDetail() {
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <h2 className="text-xl font-bold text-foreground">Property Specifications</h2>
               <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <StatCard icon={<BedDouble className="h-5 w-5 text-primary" />} label="Bedrooms" value={`${property.bedrooms} BHK Duplex`} />
-                <StatCard icon={<Bath className="h-5 w-5 text-primary" />} label="Bathrooms" value={`${property.bathrooms} Baths`} />
-                <StatCard icon={<Maximize className="h-5 w-5 text-primary" />} label="Super Area" value={`${property.area_sqft} sq.ft`} />
-                <StatCard icon={<Compass className="h-5 w-5 text-primary" />} label="Facing" value="East (Vastu)" />
-                <StatCard icon={<Car className="h-5 w-5 text-primary" />} label="Parking" value="2 Covered Car" />
-                <StatCard icon={<Building className="h-5 w-5 text-primary" />} label="Furnishing" value="Semi-Furnished" />
-                <StatCard icon={<Clock className="h-5 w-5 text-primary" />} label="Possession" value="Immediate Move-in" />
-                <StatCard icon={<BadgeCheck className="h-5 w-5 text-emerald-600" />} label="Brokerage" value="0% Zero Fee" />
+                <StatCard
+                  icon={<BedDouble className="h-5 w-5 text-primary" />}
+                  label="Bedrooms"
+                  value={`${property.bedrooms} BHK Duplex`}
+                />
+                <StatCard
+                  icon={<Bath className="h-5 w-5 text-primary" />}
+                  label="Bathrooms"
+                  value={`${property.bathrooms} Baths`}
+                />
+                <StatCard
+                  icon={<Maximize className="h-5 w-5 text-primary" />}
+                  label="Super Area"
+                  value={`${property.area_sqft} sq.ft`}
+                />
+                <StatCard
+                  icon={<Compass className="h-5 w-5 text-primary" />}
+                  label="Facing"
+                  value="East (Vastu)"
+                />
+                <StatCard
+                  icon={<Car className="h-5 w-5 text-primary" />}
+                  label="Parking"
+                  value="2 Covered Car"
+                />
+                <StatCard
+                  icon={<Building className="h-5 w-5 text-primary" />}
+                  label="Furnishing"
+                  value="Semi-Furnished"
+                />
+                <StatCard
+                  icon={<Clock className="h-5 w-5 text-primary" />}
+                  label="Possession"
+                  value="Immediate Move-in"
+                />
+                <StatCard
+                  icon={<BadgeCheck className="h-5 w-5 text-emerald-600" />}
+                  label="Brokerage"
+                  value="0% Zero Fee"
+                />
               </div>
             </section>
 
             {/* ROOM BREAKDOWN & CAPTIONS */}
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Interior Highlights & Room Breakdown</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                Interior Highlights & Room Breakdown
+              </h2>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <RoomCard
                   title="Living Room & Family Lounge"
@@ -382,7 +451,10 @@ function PropertyDetail() {
                 ].map((item, idx) => {
                   const IconComp = item.icon;
                   return (
-                    <div key={idx} className="flex items-center gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-3.5 text-xs font-semibold text-foreground">
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-3.5 text-xs font-semibold text-foreground"
+                    >
                       <IconComp className="h-4 w-4 text-primary" />
                       <span>{item.name}</span>
                     </div>
@@ -395,8 +467,12 @@ function PropertyDetail() {
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Transit & Key Neighborhood Hubs</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">Prime location: Vinayak Nagar, Madhapur, Hyderabad</p>
+                  <h2 className="text-xl font-bold text-foreground">
+                    Transit & Key Neighborhood Hubs
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Prime location: Vinayak Nagar, Madhapur, Hyderabad
+                  </p>
                 </div>
                 <span className="rounded-full bg-emerald-600/10 px-3.5 py-1.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
                   ★ 9.8/10 Connectivity Score
@@ -404,23 +480,58 @@ function PropertyDetail() {
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <ConnectivityItem icon={<Building className="h-4 w-4 text-purple-500" />} title="Mindspace IT Park" dist="0.8 km (3 mins)" />
-                <ConnectivityItem icon={<Building className="h-4 w-4 text-blue-500" />} title="Cyber Towers" dist="1.2 km (4 mins)" />
-                <ConnectivityItem icon={<TrainTrack className="h-4 w-4 text-blue-500" />} title="Durgam Cheruvu Metro Station" dist="1.5 km (5 mins)" />
-                <ConnectivityItem icon={<TrainTrack className="h-4 w-4 text-indigo-500" />} title="Raidurg Metro Station" dist="1.8 km (6 mins)" />
-                <ConnectivityItem icon={<Building2 className="h-4 w-4 text-rose-500" />} title="Inorbit Mall & Lake" dist="1.4 km (5 mins)" />
-                <ConnectivityItem icon={<Building2 className="h-4 w-4 text-amber-500" />} title="IKEA Hyderabad" dist="2.0 km (7 mins)" />
-                <ConnectivityItem icon={<Hospital className="h-4 w-4 text-rose-500" />} title="AIG Super-Specialty Hospital" dist="1.9 km (6 mins)" />
-                <ConnectivityItem icon={<MapPin className="h-4 w-4 text-emerald-500" />} title="Jubilee Hills Checkpost" dist="3.0 km (9 mins)" />
+                <ConnectivityItem
+                  icon={<Building className="h-4 w-4 text-purple-500" />}
+                  title="Mindspace IT Park"
+                  dist="0.8 km (3 mins)"
+                />
+                <ConnectivityItem
+                  icon={<Building className="h-4 w-4 text-blue-500" />}
+                  title="Cyber Towers"
+                  dist="1.2 km (4 mins)"
+                />
+                <ConnectivityItem
+                  icon={<TrainTrack className="h-4 w-4 text-blue-500" />}
+                  title="Durgam Cheruvu Metro Station"
+                  dist="1.5 km (5 mins)"
+                />
+                <ConnectivityItem
+                  icon={<TrainTrack className="h-4 w-4 text-indigo-500" />}
+                  title="Raidurg Metro Station"
+                  dist="1.8 km (6 mins)"
+                />
+                <ConnectivityItem
+                  icon={<Building2 className="h-4 w-4 text-rose-500" />}
+                  title="Inorbit Mall & Lake"
+                  dist="1.4 km (5 mins)"
+                />
+                <ConnectivityItem
+                  icon={<Building2 className="h-4 w-4 text-amber-500" />}
+                  title="IKEA Hyderabad"
+                  dist="2.0 km (7 mins)"
+                />
+                <ConnectivityItem
+                  icon={<Hospital className="h-4 w-4 text-rose-500" />}
+                  title="AIG Super-Specialty Hospital"
+                  dist="1.9 km (6 mins)"
+                />
+                <ConnectivityItem
+                  icon={<MapPin className="h-4 w-4 text-emerald-500" />}
+                  title="Jubilee Hills Checkpost"
+                  dist="3.0 km (9 mins)"
+                />
               </div>
             </section>
 
             {/* CUSTOMER REVIEWS */}
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-foreground">Verified Resident & Visitor Reviews</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  Verified Resident & Visitor Reviews
+                </h2>
                 <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                  ★ 4.9 <span className="text-muted-foreground text-xs font-normal">(14 reviews)</span>
+                  ★ 4.9{" "}
+                  <span className="text-muted-foreground text-xs font-normal">(14 reviews)</span>
                 </div>
               </div>
 
@@ -456,7 +567,7 @@ function PropertyDetail() {
               <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 {property.listing_type === "rent" ? "Monthly Rent" : "Asking Price"}
               </span>
-              
+
               <div className="mt-2 flex items-baseline justify-between">
                 <p className="font-[family-name:var(--font-display)] text-3xl font-black text-foreground sm:text-4xl">
                   {formatPrice(property.price, property.listing_type)}
@@ -472,7 +583,9 @@ function PropertyDetail() {
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs border-t border-border/40 pt-4">
                   <div>
                     <span className="text-muted-foreground">Security Deposit</span>
-                    <p className="font-bold text-foreground mt-0.5">₹{(property.price * 2).toLocaleString("en-IN")}</p>
+                    <p className="font-bold text-foreground mt-0.5">
+                      ₹{(property.price * 2).toLocaleString("en-IN")}
+                    </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Notice Period</span>
@@ -490,14 +603,19 @@ function PropertyDetail() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-foreground">Direct Owner Property</p>
-                  <p className="text-[11px] text-muted-foreground">Verified ID • 100% Zero Brokerage</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Verified ID • 100% Zero Brokerage
+                  </p>
                 </div>
               </div>
 
               {/* CTA Action Buttons */}
               <div className="mt-6 space-y-3">
-                <WhatsAppButton propertyId={property.id} className="w-full h-12 text-sm font-bold shadow-sm" />
-                
+                <WhatsAppButton
+                  propertyId={property.id}
+                  className="w-full h-12 text-sm font-bold shadow-sm"
+                />
+
                 <button
                   onClick={() => setScheduleOpen(true)}
                   className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xs font-bold text-primary-foreground transition hover:brightness-110 shadow-md"
@@ -535,10 +653,7 @@ function PropertyDetail() {
               </div>
 
               {enquiryOpen && (
-                <EnquiryForm
-                  propertyId={property.id}
-                  onSent={() => setEnquiryOpen(false)}
-                />
+                <EnquiryForm propertyId={property.id} onSent={() => setEnquiryOpen(false)} />
               )}
             </div>
           </aside>
@@ -567,7 +682,7 @@ function PropertyDetail() {
           >
             <X className="h-5 w-5" />
           </button>
-          
+
           <img
             src={property.images[activeImg]}
             alt=""
@@ -577,13 +692,17 @@ function PropertyDetail() {
           {property.images.length > 1 && (
             <>
               <button
-                onClick={() => setActiveImg((prev) => (prev > 0 ? prev - 1 : property.images.length - 1))}
+                onClick={() =>
+                  setActiveImg((prev) => (prev > 0 ? prev - 1 : property.images.length - 1))
+                }
                 className="absolute left-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
               <button
-                onClick={() => setActiveImg((prev) => (prev < property.images.length - 1 ? prev + 1 : 0))}
+                onClick={() =>
+                  setActiveImg((prev) => (prev < property.images.length - 1 ? prev + 1 : 0))
+                }
                 className="absolute right-6 grid h-12 w-12 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
               >
                 <ChevronRight className="h-6 w-6" />
@@ -599,10 +718,7 @@ function PropertyDetail() {
         isOpen={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
       />
-      <RentalAgreementModal
-        isOpen={agreementOpen}
-        onClose={() => setAgreementOpen(false)}
-      />
+      <RentalAgreementModal isOpen={agreementOpen} onClose={() => setAgreementOpen(false)} />
     </div>
   );
 }
@@ -617,7 +733,15 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function ConnectivityItem({ icon, title, dist }: { icon: React.ReactNode; title: string; dist: string }) {
+function ConnectivityItem({
+  icon,
+  title,
+  dist,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  dist: string;
+}) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-border/40 bg-secondary/30 p-3.5">
       <div className="flex items-center gap-3">
@@ -678,11 +802,38 @@ function EnquiryForm({ propertyId, onSent }: { propertyId: string; onSent: () =>
         onChange={(e) => setCompany(e.target.value)}
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
       />
-      <input required value={name} onChange={(e) => setName(e.target.value)} maxLength={100} placeholder="Your name" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-      <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} placeholder="Phone" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-      <textarea required rows={3} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1000} placeholder="I'm interested in this home…" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+      <input
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        maxLength={100}
+        placeholder="Your name"
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+      />
+      <input
+        required
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        maxLength={20}
+        placeholder="Phone"
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+      />
+      <textarea
+        required
+        rows={3}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        maxLength={1000}
+        placeholder="I'm interested in this home…"
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+      />
       <TurnstileWidget onToken={setToken} className="[&>*]:max-w-full" />
-      <button type="submit" disabled={sending} className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:brightness-110 disabled:opacity-60">
+      <button
+        type="submit"
+        disabled={sending}
+        className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:brightness-110 disabled:opacity-60"
+      >
         {sending ? "Sending…" : "Send"}
       </button>
     </form>
@@ -745,10 +896,20 @@ function PropertyStructuredData({
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function Stat({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-center gap-3">
-      <div className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground">{icon}</div>
+      <div className="grid h-10 w-10 place-items-center rounded-full bg-secondary text-foreground">
+        {icon}
+      </div>
       <div>
         <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="text-sm font-semibold text-foreground">{value}</p>
@@ -784,14 +945,26 @@ function ReviewCard({ author, role, text }: { author: string; role: string; text
   );
 }
 
-function UrbanAiAssistant({ property }: { property: any }) {
+function UrbanAiAssistant({ property }: { property: Property }) {
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
 
   const prompts = [
-    { label: "🤖 Explain locality & water supply", answer: `In ${property.city}, ${property.address} has 24/7 Manjeera water supply, 100% DG power backup, and a 4.9/5 safety rating. It is 3 mins from Mindspace IT Park.` },
-    { label: "💰 Estimate fair market price", answer: `Our AI valuation model estimates the fair rental range for ${property.bedrooms} BHK in ${property.city} at ₹${(property.price * 0.95).toLocaleString("en-IN")} – ₹${(property.price * 1.05).toLocaleString("en-IN")}. Current asking price of ₹${property.price.toLocaleString("en-IN")} is highly competitive with 0% brokerage.` },
-    { label: "📈 3-Year appreciation potential", answer: `Given the upcoming Metro Expansion and ORR connectivity, properties in ${property.city} are projected to appreciate by 12.5% YoY over the next 36 months.` },
-    { label: "🚆 Calculate commute time", answer: `Commute time from this property: Hitech City Cyber Towers (4 mins, 1.2 km), Durgam Cheruvu Metro (5 mins, 1.5 km), Rajiv Gandhi Int'l Airport (32 mins via ORR).` },
+    {
+      label: "🤖 Explain locality & water supply",
+      answer: `In ${property.city}, ${property.address} has 24/7 Manjeera water supply, 100% DG power backup, and a 4.9/5 safety rating. It is 3 mins from Mindspace IT Park.`,
+    },
+    {
+      label: "💰 Estimate fair market price",
+      answer: `Our AI valuation model estimates the fair rental range for ${property.bedrooms} BHK in ${property.city} at ₹${(property.price * 0.95).toLocaleString("en-IN")} – ₹${(property.price * 1.05).toLocaleString("en-IN")}. Current asking price of ₹${property.price.toLocaleString("en-IN")} is highly competitive with 0% brokerage.`,
+    },
+    {
+      label: "📈 3-Year appreciation potential",
+      answer: `Given the upcoming Metro Expansion and ORR connectivity, properties in ${property.city} are projected to appreciate by 12.5% YoY over the next 36 months.`,
+    },
+    {
+      label: "🚆 Calculate commute time",
+      answer: `Commute time from this property: Hitech City Cyber Towers (4 mins, 1.2 km), Durgam Cheruvu Metro (5 mins, 1.5 km), Rajiv Gandhi Int'l Airport (32 mins via ORR).`,
+    },
   ];
 
   return (
@@ -802,7 +975,9 @@ function UrbanAiAssistant({ property }: { property: any }) {
         </span>
         <div>
           <h3 className="text-lg font-extrabold text-foreground">Ask Urban AI Assistant</h3>
-          <p className="text-xs text-muted-foreground">Instant real-estate insights, price benchmarks & locality intelligence.</p>
+          <p className="text-xs text-muted-foreground">
+            Instant real-estate insights, price benchmarks & locality intelligence.
+          </p>
         </div>
       </div>
 
@@ -822,7 +997,12 @@ function UrbanAiAssistant({ property }: { property: any }) {
         <div className="mt-4 rounded-2xl border border-primary/30 bg-card p-4 text-xs leading-relaxed text-foreground animate-fadeIn">
           <div className="flex items-center justify-between font-bold text-primary mb-1">
             <span>🤖 Urban AI Analysis Result:</span>
-            <button onClick={() => setSelectedPrompt(null)} className="text-[10px] text-muted-foreground hover:underline">Clear</button>
+            <button
+              onClick={() => setSelectedPrompt(null)}
+              className="text-[10px] text-muted-foreground hover:underline"
+            >
+              Clear
+            </button>
           </div>
           <p>{selectedPrompt}</p>
         </div>

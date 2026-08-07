@@ -74,7 +74,13 @@ export const PLANS = [
   { id: "owner_free", audience: "owner", label: "Owner Free", priceInr: 0, listings: 2 },
   { id: "owner_plus", audience: "owner", label: "Owner Plus", priceInr: 499, listings: 15 },
   { id: "agent_pro", audience: "agent", label: "Agent Pro", priceInr: 1999, listings: 100 },
-  { id: "builder_suite", audience: "builder", label: "Builder Suite", priceInr: 9999, listings: 1000 },
+  {
+    id: "builder_suite",
+    audience: "builder",
+    label: "Builder Suite",
+    priceInr: 9999,
+    listings: 1000,
+  },
 ] as const;
 
 export const LISTING_BOOSTS = [

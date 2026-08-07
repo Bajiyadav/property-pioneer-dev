@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Wrench, ArrowLeft, Home, RefreshCw, Terminal } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
+import { APP_COPYRIGHT } from "@/config/app";
 
 export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: () => void }) {
   const requestId = `REQ-${Date.now().toString(36).toUpperCase()}-UP`;
@@ -23,7 +24,8 @@ export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: (
             The page is temporarily unavailable
           </h1>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-            Our technical team has been automatically alerted. We are resolving this short interruption to get you back to your property search.
+            Our technical team has been automatically alerted. We are resolving this short
+            interruption to get you back to your property search.
           </p>
         </div>
 
@@ -77,6 +79,8 @@ export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: (
             <Home className="h-4 w-4" /> Home
           </Link>
         </div>
+
+        <p className="pt-4 text-xs text-muted-foreground">{APP_COPYRIGHT}</p>
       </div>
     </div>
   );

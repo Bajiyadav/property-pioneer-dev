@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { MapPin, Sparkles, CheckCircle2, Bell, Building2, Rocket, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,7 +60,8 @@ export function ExpansionWaitlistModal({
             {title}
           </DialogTitle>
           <DialogDescription className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            We are expanding our 100% verified, 0% brokerage direct owner network from Hyderabad to {cityName || categoryName}. Be the first to unlock listings!
+            We are expanding our 100% verified, 0% brokerage direct owner network from Hyderabad to{" "}
+            {cityName || categoryName}. Be the first to unlock listings!
           </DialogDescription>
         </DialogHeader>
 
@@ -63,9 +70,13 @@ export function ExpansionWaitlistModal({
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-600 text-white">
               <CheckCircle2 className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-extrabold text-foreground">You're on the VIP Waitlist!</h3>
+            <h3 className="text-base font-extrabold text-foreground">
+              You're on the VIP Waitlist!
+            </h3>
             <p className="text-xs text-muted-foreground">
-              We'll send an instant SMS alert to <span className="font-bold text-foreground">{phone}</span> as soon as verified listings drop in {cityName || categoryName}.
+              We'll send an instant SMS alert to{" "}
+              <span className="font-bold text-foreground">{phone}</span> as soon as verified
+              listings drop in {cityName || categoryName}.
             </p>
             <button
               onClick={() => {
@@ -100,9 +111,13 @@ export function ExpansionWaitlistModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1">Mobile Number (for SMS Priority Alert)</label>
+              <label className="block text-xs font-bold text-foreground mb-1">
+                Mobile Number (for SMS Priority Alert)
+              </label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">+91</span>
+                <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">
+                  +91
+                </span>
                 <input
                   type="tel"
                   required
@@ -116,7 +131,9 @@ export function ExpansionWaitlistModal({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1">Email Address (Optional)</label>
+              <label className="block text-xs font-bold text-foreground mb-1">
+                Email Address (Optional)
+              </label>
               <input
                 type="email"
                 value={email}
@@ -131,7 +148,8 @@ export function ExpansionWaitlistModal({
               disabled={loading}
               className="w-full rounded-2xl bg-primary py-3 text-xs font-extrabold text-primary-foreground shadow-md transition hover:brightness-110 flex items-center justify-center gap-2"
             >
-              {loading ? "Joining Waitlist…" : "Join Early Access Waitlist"} <ArrowRight className="h-4 w-4" />
+              {loading ? "Joining Waitlist…" : "Join Early Access Waitlist"}{" "}
+              <ArrowRight className="h-4 w-4" />
             </button>
           </form>
         )}

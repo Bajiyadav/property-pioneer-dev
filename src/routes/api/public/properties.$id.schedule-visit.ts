@@ -10,7 +10,12 @@ export const Route = createFileRoute("/api/public/properties/$id/schedule-visit"
         const userAgent = getUserAgent(request);
         const propertyId = params.id;
 
-        let body: { preferredDate?: string; preferredTime?: string; name?: string; phone?: string } = {};
+        let body: {
+          preferredDate?: string;
+          preferredTime?: string;
+          name?: string;
+          phone?: string;
+        } = {};
         try {
           body = await request.json();
         } catch {

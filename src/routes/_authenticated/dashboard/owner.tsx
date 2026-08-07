@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -16,13 +17,23 @@ import {
   Phone,
   Eye,
   Edit,
-  Trash2,
-  Calendar,
-  Sparkles,
 } from "lucide-react";
-import { fetchProperties } from "@/lib/properties";
+import { fetchProperties, type Property } from "@/lib/properties";
 import { DashboardLayout, type NavItem } from "@/components/dashboard/DashboardLayout";
+import { DashboardPlaceholder } from "@/components/dashboard/DashboardPlaceholder";
 import { OwnerOnboardingModal } from "@/components/modals/OwnerOnboardingModal";
+
+/** Tabs with a real panel below. `add` opens the wizard instead of a panel. */
+const IMPLEMENTED_TABS = ["overview", "properties", "leads", "add"];
+
+const FALLBACK_LISTING_IMAGE = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
+
+/** Listings may have an empty `images` array — never render an undefined src. */
+function listingImage(property: Property): string {
+  return Array.isArray(property.images) && property.images[0]
+    ? property.images[0]
+    : FALLBACK_LISTING_IMAGE;
+}
 
 export const Route = createFileRoute("/_authenticated/dashboard/owner")({
   component: OwnerDashboardPage,
@@ -40,10 +51,12 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 function OwnerDashboardPage() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { tab: activeTab } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const setActiveTab = (id: string) => navigate({ search: { tab: id }, replace: true });
   const [showAddWizard, setShowAddWizard] = useState(false);
 
-  const { data: properties = [] } = useQuery({
+  const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: fetchProperties,
   });
@@ -69,10 +82,30 @@ function OwnerDashboardPage() {
         <div className="space-y-8">
           {/* Revenue & Listing Stats */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <StatCard title="Active Listings" value="4" icon={<Building2 className="h-5 w-5 text-emerald-500" />} note="100% Verified Direct" />
-            <StatCard title="Total Tenant Leads" value="18" icon={<Users className="h-5 w-5 text-blue-500" />} note="+5 new this week" />
-            <StatCard title="Est. Monthly Rent" value="₹1,45,000" icon={<TrendingUp className="h-5 w-5 text-purple-500" />} note="0% Commission paid" />
-            <StatCard title="Avg Response Time" value="12 mins" icon={<CheckCircle2 className="h-5 w-5 text-amber-500" />} note="Top 5% Owner Badge" />
+            <StatCard
+              title="Active Listings"
+              value="4"
+              icon={<Building2 className="h-5 w-5 text-emerald-500" />}
+              note="100% Verified Direct"
+            />
+            <StatCard
+              title="Total Tenant Leads"
+              value="18"
+              icon={<Users className="h-5 w-5 text-blue-500" />}
+              note="+5 new this week"
+            />
+            <StatCard
+              title="Est. Monthly Rent"
+              value="₹1,45,000"
+              icon={<TrendingUp className="h-5 w-5 text-purple-500" />}
+              note="0% Commission paid"
+            />
+            <StatCard
+              title="Avg Response Time"
+              value="12 mins"
+              icon={<CheckCircle2 className="h-5 w-5 text-amber-500" />}
+              note="Top 5% Owner Badge"
+            />
           </div>
 
           {/* Add Property Banner CTA */}
@@ -81,8 +114,13 @@ function OwnerDashboardPage() {
               <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
                 🚀 List Another Property 100% Free
               </span>
-              <h2 className="mt-2 text-xl font-extrabold text-foreground">Have another flat or villa in Hyderabad?</h2>
-              <p className="mt-1 text-xs text-muted-foreground">Post your property in 2 minutes and get inquiries directly from verified tenants without brokers.</p>
+              <h2 className="mt-2 text-xl font-extrabold text-foreground">
+                Have another flat or villa in Hyderabad?
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Post your property in 2 minutes and get inquiries directly from verified tenants
+                without brokers.
+              </p>
             </div>
             <button
               onClick={() => setShowAddWizard(true)}
@@ -94,16 +132,52 @@ function OwnerDashboardPage() {
 
           {/* Active Listings Table */}
           <div className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-foreground mb-4">Your Active Hyderabad Listings ({ownerListings.length})</h2>
+            <h2 className="text-lg font-bold text-foreground mb-4">
+              Your Active Hyderabad Listings ({ownerListings.length})
+            </h2>
+            {isLoading && (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-20 animate-pulse rounded-2xl bg-secondary/50" />
+                ))}
+              </div>
+            )}
+
+            {!isLoading && ownerListings.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border p-10 text-center">
+                <p className="text-sm font-bold text-foreground">No listings published yet</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add your first property — listing is free and takes under 3 minutes.
+                </p>
+                <button
+                  onClick={() => setShowAddWizard(true)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
+                >
+                  <PlusCircle className="h-4 w-4" /> Add Property
+                </button>
+              </div>
+            )}
+
             <div className="divide-y divide-border/40">
               {ownerListings.map((p) => (
-                <div key={p.id} className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div
+                  key={p.id}
+                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                >
                   <div className="flex items-center gap-4">
-                    <img src={p.images[0]} alt="" className="h-14 w-20 rounded-xl object-cover flex-none bg-muted" />
+                    <img
+                      src={listingImage(p)}
+                      alt=""
+                      className="h-14 w-20 rounded-xl object-cover flex-none bg-muted"
+                    />
                     <div>
                       <h3 className="text-xs font-bold text-foreground">{p.title}</h3>
-                      <p className="text-[11px] text-muted-foreground">{p.address}, {p.city}</p>
-                      <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">₹{p.price.toLocaleString("en-IN")}/mo</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {p.address}, {p.city}
+                      </p>
+                      <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                        ₹{p.price.toLocaleString("en-IN")}/mo
+                      </p>
                     </div>
                   </div>
 
@@ -112,10 +186,19 @@ function OwnerDashboardPage() {
                       ● Active & Live
                     </span>
                     <div className="flex items-center gap-1">
-                      <button className="p-2 rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary">
+                      <Link
+                        to="/properties/$id"
+                        params={{ id: p.id }}
+                        className="p-2 rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary"
+                        aria-label={`View ${p.title}`}
+                      >
                         <Eye className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="p-2 rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary">
+                      </Link>
+                      <button
+                        onClick={() => setShowAddWizard(true)}
+                        className="p-2 rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary"
+                        aria-label={`Edit ${p.title}`}
+                      >
                         <Edit className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -130,7 +213,9 @@ function OwnerDashboardPage() {
       {activeTab === "properties" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground">Your Listed Properties ({ownerListings.length})</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              Your Listed Properties ({ownerListings.length})
+            </h2>
             <button
               onClick={() => setShowAddWizard(true)}
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
@@ -142,10 +227,16 @@ function OwnerDashboardPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {ownerListings.map((p) => (
               <div key={p.id} className="rounded-3xl border border-border/50 bg-card p-4 shadow-sm">
-                <img src={p.images[0]} alt="" className="h-40 w-full rounded-2xl object-cover" />
+                <img
+                  src={listingImage(p)}
+                  alt=""
+                  className="h-40 w-full rounded-2xl object-cover"
+                />
                 <h3 className="mt-3 text-sm font-bold text-foreground">{p.title}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{p.city}</p>
-                <p className="mt-2 text-sm font-extrabold text-emerald-600">₹{p.price.toLocaleString("en-IN")}/mo</p>
+                <p className="mt-2 text-sm font-extrabold text-emerald-600">
+                  ₹{p.price.toLocaleString("en-IN")}/mo
+                </p>
               </div>
             ))}
           </div>
@@ -156,11 +247,37 @@ function OwnerDashboardPage() {
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">Tenant Lead Enquiries (18)</h2>
           <div className="space-y-3">
-            <LeadRow name="Rahul Sharma" phone="+91 98765 43210" property="Luxury 2BHK Gachibowli" date="10 mins ago" status="High Intent" />
-            <LeadRow name="Priya Varma" phone="+91 91234 56789" property="Modern Studio Financial District" date="1 hour ago" status="Scheduled Visit" />
-            <LeadRow name="Vikram Roy" phone="+91 99887 76655" property="3BHK Villa Kondapur" date="3 hours ago" status="Agreement Generated" />
+            <LeadRow
+              name="Rahul Sharma"
+              phone="+91 98765 43210"
+              property="Luxury 2BHK Gachibowli"
+              date="10 mins ago"
+              status="High Intent"
+            />
+            <LeadRow
+              name="Priya Varma"
+              phone="+91 91234 56789"
+              property="Modern Studio Financial District"
+              date="1 hour ago"
+              status="Scheduled Visit"
+            />
+            <LeadRow
+              name="Vikram Roy"
+              phone="+91 99887 76655"
+              property="3BHK Villa Kondapur"
+              date="3 hours ago"
+              status="Agreement Generated"
+            />
           </div>
         </div>
+      )}
+
+      {!IMPLEMENTED_TABS.includes(activeTab) && (
+        <DashboardPlaceholder
+          navItems={NAV_ITEMS}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       )}
 
       <OwnerOnboardingModal isOpen={showAddWizard} onClose={() => setShowAddWizard(false)} />
@@ -168,7 +285,17 @@ function OwnerDashboardPage() {
   );
 }
 
-function StatCard({ title, value, icon, note }: { title: string; value: string; icon: React.ReactNode; note: string }) {
+function StatCard({
+  title,
+  value,
+  icon,
+  note,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  note: string;
+}) {
   return (
     <div className="rounded-3xl border border-border/50 bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
@@ -181,12 +308,26 @@ function StatCard({ title, value, icon, note }: { title: string; value: string; 
   );
 }
 
-function LeadRow({ name, phone, property, date, status }: { name: string; phone: string; property: string; date: string; status: string }) {
+function LeadRow({
+  name,
+  phone,
+  property,
+  date,
+  status,
+}: {
+  name: string;
+  phone: string;
+  property: string;
+  date: string;
+  status: string;
+}) {
   return (
     <div className="rounded-2xl border border-border/50 bg-card p-4 flex items-center justify-between gap-4">
       <div>
         <h4 className="text-xs font-bold text-foreground">{name}</h4>
-        <p className="text-[11px] text-muted-foreground">{property} • {phone}</p>
+        <p className="text-[11px] text-muted-foreground">
+          {property} • {phone}
+        </p>
         <span className="text-[10px] text-muted-foreground mt-0.5 block">{date}</span>
       </div>
       <div className="flex items-center gap-2">

@@ -1,9 +1,22 @@
 import { Link } from "@tanstack/react-router";
-import { Train, GraduationCap, Stethoscope, Briefcase, Bus, ShoppingCart, School } from "lucide-react";
+import {
+  Train,
+  GraduationCap,
+  Stethoscope,
+  Briefcase,
+  Bus,
+  ShoppingCart,
+  School,
+} from "lucide-react";
 
 const NEARBY_AMENITIES = [
   { name: "Metro Stations", tag: "Near Public Transit", icon: Train, query: "Metro" },
-  { name: "Colleges & Universities", tag: "Near Higher Education", icon: GraduationCap, query: "College" },
+  {
+    name: "Colleges & Universities",
+    tag: "Near Higher Education",
+    icon: GraduationCap,
+    query: "College",
+  },
   { name: "Coaching Hubs", tag: "Near Student Centers", icon: School, query: "Coaching" },
   { name: "Hospitals & Clinics", tag: "Near Medical Care", icon: Stethoscope, query: "Hospital" },
   { name: "IT & Tech Parks", tag: "Near Workplaces", icon: Briefcase, query: "IT Park" },
@@ -15,9 +28,15 @@ export function NearbyPlaces() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Micro-Location Search</p>
-        <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">Explore Homes Near Key Landmarks</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Find properties within walking distance of workplaces, colleges, and transit hubs.</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          Micro-Location Search
+        </p>
+        <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">
+          Explore Homes Near Key Landmarks
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Find properties within walking distance of workplaces, colleges, and transit hubs.
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

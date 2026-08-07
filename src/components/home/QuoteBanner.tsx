@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Quote } from "lucide-react";
 
 const QUOTES = [
@@ -10,14 +11,20 @@ const QUOTES = [
 ];
 
 export function QuoteBanner() {
-  const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  // Picking a random quote during render makes the server and client markup
+  // disagree, which fails hydration. Render a stable quote first, then rotate.
+  const [quote, setQuote] = useState(QUOTES[0]);
+
+  useEffect(() => {
+    setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+  }, []);
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-secondary p-8 text-center shadow-lg">
         <Quote className="mx-auto h-8 w-8 text-primary/40" />
         <blockquote className="mt-3 text-xl font-serif font-medium italic text-foreground sm:text-2xl">
-          "{randomQuote}"
+          "{quote}"
         </blockquote>
         <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Urban Properties • The Hyderabad Standard

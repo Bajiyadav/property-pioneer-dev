@@ -33,21 +33,30 @@ export function FAQSection() {
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
           <HelpCircle className="h-3.5 w-3.5" /> Support Center
         </span>
-        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Frequently Asked Questions</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Everything you need to know about renting & listing on Urban Properties.</p>
+        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
+          Frequently Asked Questions
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Everything you need to know about renting & listing on Urban Properties.
+        </p>
       </div>
 
       <div className="space-y-3">
         {FAQS.map((faq, index) => {
           const isOpen = openIndex === index;
           return (
-            <div key={index} className="rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-card)]">
+            <div
+              key={index}
+              className="rounded-2xl border border-border bg-card overflow-hidden shadow-[var(--shadow-card)]"
+            >
               <button
                 onClick={() => setOpenIndex(isOpen ? null : index)}
                 className="w-full flex items-center justify-between p-5 text-left font-semibold text-foreground text-sm sm:text-base hover:bg-secondary/50 transition"
               >
                 <span>{faq.q}</span>
-                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180 text-primary" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180 text-primary" : ""}`}
+                />
               </button>
               {isOpen && (
                 <div className="px-5 pb-5 text-xs sm:text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-3">

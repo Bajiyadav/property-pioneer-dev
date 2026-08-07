@@ -6,7 +6,7 @@ export function RichServiceBookingForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [service, setService] = useState("Deep House Cleaning");
+  const [service, setService] = useState("Digital E-Stamp Rental Agreement");
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("Morning (09:00 AM - 12:00 PM)");
   const [address, setAddress] = useState("");
@@ -34,7 +34,9 @@ export function RichServiceBookingForm() {
           <h2 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">
             Book Verified Home Service
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">Zero advance payment required. Pay after 100% service satisfaction.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Zero advance payment required. Pay after 100% service satisfaction.
+          </p>
         </div>
 
         {submitted ? (
@@ -44,7 +46,8 @@ export function RichServiceBookingForm() {
             </div>
             <h3 className="text-xl font-extrabold text-foreground">Service Booking Confirmed!</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Your service partner has been assigned. SMS & WhatsApp details have been sent to <strong>+91 {phone}</strong>.
+              Your service partner has been assigned. SMS & WhatsApp details have been sent to{" "}
+              <strong>+91 {phone}</strong>.
             </p>
             <button
               onClick={() => setSubmitted(false)}
@@ -69,9 +72,13 @@ export function RichServiceBookingForm() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Mobile Number (+91)</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Mobile Number (+91)
+                </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">+91</span>
+                  <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">
+                    +91
+                  </span>
                   <input
                     type="tel"
                     required
@@ -87,7 +94,9 @@ export function RichServiceBookingForm() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Email Address</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Email Address
+                </label>
                 <input
                   type="email"
                   required
@@ -105,17 +114,25 @@ export function RichServiceBookingForm() {
                   onChange={(e) => setService(e.target.value)}
                   className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-teal-600"
                 >
-                  <option value="Deep House Cleaning">Deep House Cleaning</option>
-                  <option value="Kitchen & Bath Sanitization">Kitchen & Bath Sanitization</option>
-                  <option value="Packers & Movers Relocation">Packers & Movers Relocation</option>
-                  <option value="Digital E-Stamp Rental Agreement">Digital E-Stamp Rental Agreement</option>
+                  <option value="Digital E-Stamp Rental Agreement">
+                    Digital E-Stamp Rental Agreement
+                  </option>
+                  <option value="Wall Painting & Waterproofing">
+                    Wall Painting & Waterproofing
+                  </option>
+                  <option value="Legal Title Verification">Legal Title Verification</option>
+                  <option value="Tenant Background Verification">
+                    Tenant Background Verification
+                  </option>
                 </select>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Preferred Date</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Preferred Date
+                </label>
                 <input
                   type="date"
                   required
@@ -132,15 +149,23 @@ export function RichServiceBookingForm() {
                   onChange={(e) => setTimeSlot(e.target.value)}
                   className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-teal-600"
                 >
-                  <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 AM - 12:00 PM)</option>
-                  <option value="Afternoon (12:00 PM - 04:00 PM)">Afternoon (12:00 PM - 04:00 PM)</option>
-                  <option value="Evening (04:00 PM - 07:00 PM)">Evening (04:00 PM - 07:00 PM)</option>
+                  <option value="Morning (09:00 AM - 12:00 PM)">
+                    Morning (09:00 AM - 12:00 PM)
+                  </option>
+                  <option value="Afternoon (12:00 PM - 04:00 PM)">
+                    Afternoon (12:00 PM - 04:00 PM)
+                  </option>
+                  <option value="Evening (04:00 PM - 07:00 PM)">
+                    Evening (04:00 PM - 07:00 PM)
+                  </option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1">Full Service Address</label>
+              <label className="block text-xs font-bold text-foreground mb-1">
+                Full Service Address
+              </label>
               <textarea
                 required
                 rows={2}
@@ -152,12 +177,14 @@ export function RichServiceBookingForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1">Special Instructions (Optional)</label>
+              <label className="block text-xs font-bold text-foreground mb-1">
+                Special Instructions (Optional)
+              </label>
               <input
                 type="text"
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
-                placeholder="e.g. Please bring extra ladder for high ceiling cleaning"
+                placeholder="e.g. Please call 30 minutes before the scheduled visit"
                 className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-teal-600"
               />
             </div>

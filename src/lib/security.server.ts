@@ -4,6 +4,8 @@
  * modules inherit the same protections without re-implementing them.
  */
 
+import type { Json } from "@/integrations/supabase/types";
+
 export function getClientIp(request: Request): string {
   const cf = request.headers.get("cf-connecting-ip");
   if (cf) return cf.trim();
@@ -62,7 +64,7 @@ export interface AuditEvent {
   actorId?: string | null;
   subjectType?: string | null;
   subjectId?: string | null;
-  outcome?: "success" | "rejected" | "error";
+  outcome?: "success" | "rejected" | "error" | "rate_limited" | "captcha_failed";
   ip?: string | null;
   userAgent?: string | null;
   details?: Record<string, unknown>;
@@ -71,7 +73,7 @@ export interface AuditEvent {
 export async function recordAudit(entry: AuditEvent): Promise<void> {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await (supabaseAdmin as any).from("audit_logs").insert({
+    await supabaseAdmin.from("audit_logs").insert({
       event: entry.event,
       actor_id: entry.actorId ?? null,
       subject_type: entry.subjectType ?? null,
@@ -79,7 +81,8 @@ export async function recordAudit(entry: AuditEvent): Promise<void> {
       outcome: entry.outcome ?? "success",
       ip_address: entry.ip ?? null,
       user_agent: entry.userAgent ?? null,
-      details: entry.details ?? {},
+      // AuditEvent.details is a loose bag of values; the column is jsonb.
+      details: (entry.details ?? {}) as Json,
     });
   } catch (error) {
     // Auditing must never break the request path.

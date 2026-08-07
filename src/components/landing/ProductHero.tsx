@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, ShieldCheck, CheckCircle2, ArrowRight, Building2, MapPin, BadgeCheck } from "lucide-react";
+import {
+  Sparkles,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowRight,
+  Building2,
+  MapPin,
+  BadgeCheck,
+} from "lucide-react";
 
 export function ProductHero({
   badge,
@@ -15,7 +23,9 @@ export function ProductHero({
   bgGradient?: string;
 }) {
   return (
-    <div className={`relative overflow-hidden border-b border-border/40 bg-gradient-to-b ${bgGradient} py-16 sm:py-24`}>
+    <div
+      className={`relative overflow-hidden border-b border-border/40 bg-gradient-to-b ${bgGradient} py-16 sm:py-24`}
+    >
       {/* Background Glow Overlay */}
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
 
@@ -68,7 +78,10 @@ export function ProductHero({
         {/* Launch City Banner */}
         <div className="mt-10 inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md px-4 py-2 text-xs font-medium text-muted-foreground">
           <MapPin className="h-4 w-4 text-emerald-500" />
-          <span>Launching First in <strong className="text-foreground">Hyderabad</strong> — Expanding to Bangalore, Mumbai, Chennai & Pan-India.</span>
+          <span>
+            Launching First in <strong className="text-foreground">Hyderabad</strong> — Expanding to
+            Bangalore, Mumbai, Chennai & Pan-India.
+          </span>
         </div>
       </div>
     </div>

@@ -1,14 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProductHero } from "@/components/landing/ProductHero";
-import { ExpansionRoadmap } from "@/components/landing/ExpansionRoadmap";
 import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { ComparisonTable } from "@/components/landing/ComparisonTable";
 import { LaunchProgress } from "@/components/landing/LaunchProgress";
 import { ProductFaq } from "@/components/landing/ProductFaq";
 
 import { HomeServicesCalculator } from "@/components/services/HomeServicesCalculator";
-import { BeforeAfterSlider } from "@/components/services/BeforeAfterSlider";
-import { ExpandableChecklist } from "@/components/services/ExpandableChecklist";
 import { ServiceProcessTimeline } from "@/components/services/ServiceProcessTimeline";
 import { CoverageCityMap } from "@/components/services/CoverageCityMap";
 import { RichServiceBookingForm } from "@/components/services/RichServiceBookingForm";
@@ -22,9 +19,17 @@ export const Route = createFileRoute("/home-services")({
     return {
       meta: [
         { title: `Home Services & Digital Agreements — ${APP_NAME}` },
-        { name: "description", content: "Instant Digital E-Stamp Rental Agreements, Packers & Movers, Deep House Cleaning, Painting, & Pre-Approved Home Loans in Hyderabad & India." },
+        {
+          name: "description",
+          content:
+            "Instant Digital E-Stamp Rental Agreements, Wall Painting, Legal Title Verification, Tenant Verification & Pre-Approved Home Loans in Hyderabad & India.",
+        },
         { property: "og:title", content: `Home Services & Digital Agreements — ${APP_NAME}` },
-        { property: "og:description", content: "Get state-stamped digital rental agreements and verified home services at guaranteed lowest rates." },
+        {
+          property: "og:description",
+          content:
+            "Get state-stamped digital rental agreements and verified home services at guaranteed lowest rates.",
+        },
         { property: "og:image", content: ogImage },
         { property: "og:url", content: canonicalUrl },
       ],
@@ -35,10 +40,22 @@ export const Route = createFileRoute("/home-services")({
 });
 
 const SERVICES_FAQS = [
-  { q: "Is the Digital Rental Agreement legally valid in Telangana?", a: "Yes! Every agreement includes official State E-Stamp paper, biometric e-signatures, and instant PDF download accepted by IT companies & banks." },
-  { q: "How quickly are Packers & Movers assigned?", a: "Movers are confirmed within 15 minutes of booking with 100% price lock guarantee." },
-  { q: "What is included in Deep House Cleaning?", a: "Full floor machine scrubbing, bathroom descaling, kitchen degreasing, sofa shampooing, and balcony sanitization." },
-  { q: "When do I need to pay for the service?", a: "Pay zero advance! You pay via UPI or card only after 100% service completion and supervisor inspection." },
+  {
+    q: "Is the Digital Rental Agreement legally valid in Telangana?",
+    a: "Yes! Every agreement includes official State E-Stamp paper, biometric e-signatures, and instant PDF download accepted by IT companies & banks.",
+  },
+  {
+    q: "How quickly is a service professional assigned?",
+    a: "Your service partner is confirmed within 15 minutes of booking with a 100% price lock guarantee.",
+  },
+  {
+    q: "What is included in Legal Title Verification?",
+    a: "Encumbrance certificate checks, title deed chain verification, approval-plan validation, and a written legal opinion from a partner advocate.",
+  },
+  {
+    q: "When do I need to pay for the service?",
+    a: "Pay zero advance! You pay via UPI or card only after 100% service completion and supervisor inspection.",
+  },
 ];
 
 function HomeServicesLandingPage() {
@@ -47,7 +64,7 @@ function HomeServicesLandingPage() {
       <ProductHero
         badge="Tenant & Owner Services Engine"
         title="Complete Home Services & Legal Agreements Platform"
-        subtitle="Get instant state-stamped digital rental agreements, verified packers & movers, deep home cleaning, wall painting, and pre-approved home loans."
+        subtitle="Get instant state-stamped digital rental agreements, legal title verification, tenant background checks, wall painting, and pre-approved home loans."
         productType="Home Services"
         bgGradient="from-teal-900/20 via-background to-background"
       />
@@ -56,12 +73,6 @@ function HomeServicesLandingPage() {
       <section className="mx-auto max-w-5xl px-4 sm:px-6">
         <HomeServicesCalculator />
       </section>
-
-      {/* Visual Transformation Slider */}
-      <BeforeAfterSlider />
-
-      {/* Room-by-Room Checklist */}
-      <ExpandableChecklist />
 
       {/* 8-Stage Process Timeline */}
       <ServiceProcessTimeline />

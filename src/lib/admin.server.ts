@@ -19,9 +19,7 @@ export async function loadOverview(): Promise<AdminOverview> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [{ data: props }, { data: enquiries }] = await Promise.all([
-    supabaseAdmin
-      .from("properties")
-      .select("city, is_approved, is_featured, listing_type"),
+    supabaseAdmin.from("properties").select("city, is_approved, is_featured, listing_type"),
     supabaseAdmin.from("enquiries").select("created_at"),
   ]);
 
@@ -39,9 +37,8 @@ export async function loadOverview(): Promise<AdminOverview> {
     forRent: rows.filter((r) => r.listing_type === "rent").length,
     forSale: rows.filter((r) => r.listing_type === "sale").length,
     totalEnquiries: (enquiries ?? []).length,
-    enquiriesLast7Days: (enquiries ?? []).filter(
-      (e) => new Date(e.created_at).getTime() >= weekAgo,
-    ).length,
+    enquiriesLast7Days: (enquiries ?? []).filter((e) => new Date(e.created_at).getTime() >= weekAgo)
+      .length,
     cities: [...cityMap.entries()]
       .map(([city, count]) => ({ city, count }))
       .sort((a, b) => b.count - a.count)
@@ -70,16 +67,22 @@ export async function loadEnquiries() {
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    name: row.name,
-    phone: row.phone,
-    message: row.message,
-    createdAt: row.created_at,
-    propertyId: row.property_id,
-    propertyTitle: (row as any).properties?.title ?? "Unknown listing",
-    propertyCity: (row as any).properties?.city ?? "—",
-  }));
+  // The embedded `properties(...)` relation is not reflected in the generated
+  // row type, so narrow it explicitly instead of casting the whole row.
+  type JoinedProperty = { title?: string | null; city?: string | null } | null;
+  return (data ?? []).map((row) => {
+    const property = (row as { properties?: JoinedProperty }).properties ?? null;
+    return {
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      message: row.message,
+      createdAt: row.created_at,
+      propertyId: row.property_id,
+      propertyTitle: property?.title ?? "Unknown listing",
+      propertyCity: property?.city ?? "—",
+    };
+  });
 }
 
 export async function loadAuditLogs() {

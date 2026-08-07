@@ -1,25 +1,26 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { getActiveRole } from "@/components/demo/DemoModeSwitcher";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
-  component: DashboardDispatcher,
+/**
+ * Layout route for every role dashboard.
+ *
+ * This route owns the `/dashboard` path segment, so it MUST render an <Outlet />
+ * — without one the child routes (/dashboard/customer, /owner, /agent, /admin)
+ * never mount.
+ *
+ * The `tab` search param lives here so all four dashboards share one
+ * deep-linkable schema (e.g. /dashboard/owner?tab=leads).
+ */
+const dashboardSearchSchema = z.object({
+  tab: fallback(z.string(), "overview").default("overview"),
 });
 
-function DashboardDispatcher() {
-  const navigate = useNavigate();
+export const Route = createFileRoute("/_authenticated/dashboard")({
+  validateSearch: zodValidator(dashboardSearchSchema),
+  component: DashboardLayoutRoute,
+});
 
-  useEffect(() => {
-    const role = getActiveRole();
-    navigate({ to: `/dashboard/${role}` as any, replace: true });
-  }, [navigate]);
-
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6">
-      <div className="text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <p className="mt-4 text-xs font-semibold text-muted-foreground">Redirecting to your role dashboard…</p>
-      </div>
-    </div>
-  );
+function DashboardLayoutRoute() {
+  return <Outlet />;
 }

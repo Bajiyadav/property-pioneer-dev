@@ -46,7 +46,8 @@ export function RichPriorityWaitlistForm({
             Join the Priority Member Waitlist
           </h2>
           <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
-            Get 48-hour early priority access to verified direct owner listings in {city} with zero brokerage and free digital agreements.
+            Get 48-hour early priority access to verified direct owner listings in {city} with zero
+            brokerage and free digital agreements.
           </p>
         </div>
 
@@ -55,14 +56,25 @@ export function RichPriorityWaitlistForm({
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-600 text-white shadow-lg">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-extrabold text-foreground">VIP Founder Membership Confirmed!</h3>
+            <h3 className="text-xl font-extrabold text-foreground">
+              VIP Founder Membership Confirmed!
+            </h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-              You are assigned <strong className="text-foreground">Priority Pass #1,428</strong> for {city}. We will send your early access invite via <strong className="text-foreground">{contactMethod}</strong> to <strong className="text-foreground">{phone}</strong>.
+              You are assigned <strong className="text-foreground">Priority Pass #1,428</strong> for{" "}
+              {city}. We will send your early access invite via{" "}
+              <strong className="text-foreground">{contactMethod}</strong> to{" "}
+              <strong className="text-foreground">{phone}</strong>.
             </p>
             <div className="rounded-2xl border border-border/40 bg-background/60 p-4 text-xs font-mono max-w-xs mx-auto text-left">
-              <p className="text-muted-foreground">Category: <span className="font-bold text-foreground">{propertyType}</span></p>
-              <p className="text-muted-foreground">Budget: <span className="font-bold text-foreground">{budget}</span></p>
-              <p className="text-muted-foreground">Timeline: <span className="font-bold text-foreground">{timeline}</span></p>
+              <p className="text-muted-foreground">
+                Category: <span className="font-bold text-foreground">{propertyType}</span>
+              </p>
+              <p className="text-muted-foreground">
+                Budget: <span className="font-bold text-foreground">{budget}</span>
+              </p>
+              <p className="text-muted-foreground">
+                Timeline: <span className="font-bold text-foreground">{timeline}</span>
+              </p>
             </div>
             <button
               onClick={() => setSubmitted(false)}
@@ -87,7 +99,9 @@ export function RichPriorityWaitlistForm({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Email Address</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Email Address
+                </label>
                 <input
                   type="email"
                   required
@@ -101,9 +115,13 @@ export function RichPriorityWaitlistForm({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Mobile Number (SMS Alert)</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Mobile Number (SMS Alert)
+                </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">+91</span>
+                  <span className="absolute left-3 top-2.5 text-xs font-semibold text-muted-foreground">
+                    +91
+                  </span>
                   <input
                     type="tel"
                     required
@@ -152,7 +170,9 @@ export function RichPriorityWaitlistForm({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">Purpose / Intent</label>
+                <label className="block text-xs font-bold text-foreground mb-1">
+                  Purpose / Intent
+                </label>
                 <select
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
@@ -182,7 +202,8 @@ export function RichPriorityWaitlistForm({
               disabled={loading}
               className="w-full rounded-2xl bg-primary py-3.5 text-xs font-black text-primary-foreground shadow-lg transition hover:brightness-110 flex items-center justify-center gap-2"
             >
-              {loading ? "Registering Priority Pass…" : "Register for VIP Priority Access"} <ArrowRight className="h-4 w-4" />
+              {loading ? "Registering Priority Pass…" : "Register for VIP Priority Access"}{" "}
+              <ArrowRight className="h-4 w-4" />
             </button>
           </form>
         )}

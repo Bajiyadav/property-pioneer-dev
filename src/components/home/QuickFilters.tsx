@@ -1,13 +1,32 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Home, Key, Building2, BedDouble, Users, Hotel } from "lucide-react";
+import { Home, Key, Building2, Users } from "lucide-react";
 
 const QUICK_TABS = [
-  { id: "rent", label: "Rent", icon: Key, search: { listing: "rent", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 } },
-  { id: "buy", label: "Buy", icon: Home, search: { listing: "sale", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 } },
-  { id: "commercial", label: "Commercial", icon: Building2, search: { q: "commercial", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 } },
-  { id: "pg", label: "PG / Hostel", icon: BedDouble, search: { q: "PG", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 } },
-  { id: "flatmates", label: "Flatmates", icon: Users, search: { q: "flatmates", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 } },
+  {
+    id: "rent",
+    label: "Rent",
+    icon: Key,
+    search: { listing: "rent", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 },
+  },
+  {
+    id: "buy",
+    label: "Buy",
+    icon: Home,
+    search: { listing: "sale", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 },
+  },
+  {
+    id: "commercial",
+    label: "Commercial",
+    icon: Building2,
+    search: { q: "commercial", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 },
+  },
+  {
+    id: "flatmates",
+    label: "Flatmates",
+    icon: Users,
+    search: { q: "flatmates", listing: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 },
+  },
 ];
 
 export function QuickFilters() {

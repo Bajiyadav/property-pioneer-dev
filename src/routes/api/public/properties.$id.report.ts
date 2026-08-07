@@ -31,7 +31,8 @@ export const Route = createFileRoute("/api/public/properties/$id/report")({
 
         return jsonResponse({
           ok: true,
-          message: "Thank you for bringing this to our attention. Our trust & safety team will review this listing.",
+          message:
+            "Thank you for bringing this to our attention. Our trust & safety team will review this listing.",
         });
       },
     },

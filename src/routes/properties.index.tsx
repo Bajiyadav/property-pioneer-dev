@@ -46,10 +46,7 @@ function PropertiesPage() {
     queryFn: fetchProperties,
   });
 
-  const cities = useMemo(
-    () => Array.from(new Set(all.map((p) => p.city))).sort(),
-    [all],
-  );
+  const cities = useMemo(() => Array.from(new Set(all.map((p) => p.city))).sort(), [all]);
 
   const filtered = useMemo(() => {
     const q = search.q.toLowerCase().trim();
@@ -78,9 +75,13 @@ function PropertiesPage() {
     <div className="mx-auto max-w-6xl px-6 py-10">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">Browse Homes in Hyderabad</h1>
+          <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
+            Browse Homes in Hyderabad
+          </h1>
           <p className="mt-1 text-muted-foreground">
-            {isLoading ? "Loading…" : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available with 0% brokerage`}
+            {isLoading
+              ? "Loading…"
+              : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available with 0% brokerage`}
           </p>
         </div>
 
@@ -90,7 +91,9 @@ function PropertiesPage() {
             type="button"
             onClick={() => setViewMode("grid")}
             className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
-              viewMode === "grid" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+              viewMode === "grid"
+                ? "bg-primary text-primary-foreground shadow"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <LayoutGrid className="h-3.5 w-3.5" /> Grid View
@@ -99,7 +102,9 @@ function PropertiesPage() {
             type="button"
             onClick={() => setViewMode("map")}
             className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold transition ${
-              viewMode === "map" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+              viewMode === "map"
+                ? "bg-primary text-primary-foreground shadow"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <MapPin className="h-3.5 w-3.5" /> Map View
@@ -134,7 +139,11 @@ function PropertiesPage() {
             className="rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none"
           >
             <option value="">All cities</option>
-            {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+            {cities.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
           <select
             value={search.listing}
@@ -189,7 +198,9 @@ function PropertiesPage() {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => <PropertyCard key={p.id} property={p} />)}
+          {filtered.map((p) => (
+            <PropertyCard key={p.id} property={p} />
+          ))}
         </div>
       )}
     </div>

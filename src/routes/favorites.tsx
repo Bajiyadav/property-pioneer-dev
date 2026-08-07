@@ -55,7 +55,9 @@ function FavoritesPage() {
           <div className="rounded-2xl border border-dashed border-border p-12 text-center">
             <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="mt-3 text-lg font-semibold text-foreground">Nothing saved yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Tap the heart on any listing to save it.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tap the heart on any listing to save it.
+            </p>
             <Link
               to="/properties"
               search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
@@ -66,7 +68,9 @@ function FavoritesPage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {saved.map((p) => <PropertyCard key={p.id} property={p} />)}
+            {saved.map((p) => (
+              <PropertyCard key={p.id} property={p} />
+            ))}
           </div>
         )}
       </div>

@@ -32,9 +32,7 @@ export const enquiryInputSchema = z.object({
 
 export type EnquiryInput = z.infer<typeof enquiryInputSchema>;
 
-export type EnquiryResult =
-  | { ok: true }
-  | { ok: false; error: string; retryAfterSeconds?: number };
+export type EnquiryResult = { ok: true } | { ok: false; error: string; retryAfterSeconds?: number };
 
 export async function submitEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
   const res = await fetch("/api/public/enquiries", {

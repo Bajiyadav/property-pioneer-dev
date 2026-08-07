@@ -11,11 +11,24 @@ import {
   type RateLimitRule,
 } from "@/lib/security.server";
 
+/**
+ * Minimal structural view of the PostgREST builder used for rate-limit counts —
+ * enough to chain `.eq()` filters and await the `{ count }` head response.
+ */
+interface CountQueryBuilder extends PromiseLike<{ count: number | null; error: unknown }> {
+  eq(column: string, value: string | number): CountQueryBuilder;
+  gte(column: string, value: string): CountQueryBuilder;
+}
+
 /** Sliding-window limits, evaluated cheapest-scope first. */
 const PER_IP_BURST: RateLimitRule = { name: "enquiry:ip:burst", windowSeconds: 60, max: 2 };
 const PER_IP_HOURLY: RateLimitRule = { name: "enquiry:ip:hourly", windowSeconds: 3600, max: 6 };
 const PER_IP_DAILY: RateLimitRule = { name: "enquiry:ip:daily", windowSeconds: 86400, max: 20 };
-const PER_PHONE_DAILY: RateLimitRule = { name: "enquiry:phone:daily", windowSeconds: 86400, max: 10 };
+const PER_PHONE_DAILY: RateLimitRule = {
+  name: "enquiry:phone:daily",
+  windowSeconds: 86400,
+  max: 10,
+};
 const PER_IP_PROPERTY: RateLimitRule = {
   name: "enquiry:ip+property:daily",
   windowSeconds: 86400,
@@ -78,10 +91,7 @@ export const Route = createFileRoute("/api/public/enquiries")({
             subjectId: input.propertyId,
             details: { reason: "too-fast", elapsedMs: input.elapsedMs },
           });
-          return jsonResponse(
-            { error: "That was a little too quick — please try again." },
-            400,
-          );
+          return jsonResponse({ error: "That was a little too quick — please try again." }, 400);
         }
 
         // ── 4. CAPTCHA (no-op until Turnstile is configured) ────────────
@@ -100,17 +110,17 @@ export const Route = createFileRoute("/api/public/enquiries")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const db = supabaseAdmin as any;
+        const db = supabaseAdmin;
 
         // ── 5. Rate limiting (per IP, per property, per phone) ──────────
         const countWhere = async (
-          apply: (q: any) => any,
+          apply: (q: CountQueryBuilder) => CountQueryBuilder,
           sinceIso: string,
         ): Promise<number> => {
-          const query = apply(
-            db.from("enquiries").select("id", { count: "exact", head: true }),
-          ).gte("created_at", sinceIso);
-          const { count, error } = await query;
+          const base = db
+            .from("enquiries")
+            .select("id", { count: "exact", head: true }) as unknown as CountQueryBuilder;
+          const { count, error } = await apply(base).gte("created_at", sinceIso);
           if (error) {
             console.error("[enquiry] rate-limit count failed", error);
             return 0;
@@ -121,27 +131,24 @@ export const Route = createFileRoute("/api/public/enquiries")({
         const limit = await checkRateLimits([
           {
             rule: PER_IP_BURST,
-            count: (since) => countWhere((q: any) => q.eq("ip_address", ip), since),
+            count: (since) => countWhere((q) => q.eq("ip_address", ip), since),
           },
           {
             rule: PER_IP_HOURLY,
-            count: (since) => countWhere((q: any) => q.eq("ip_address", ip), since),
+            count: (since) => countWhere((q) => q.eq("ip_address", ip), since),
           },
           {
             rule: PER_IP_DAILY,
-            count: (since) => countWhere((q: any) => q.eq("ip_address", ip), since),
+            count: (since) => countWhere((q) => q.eq("ip_address", ip), since),
           },
           {
             rule: PER_IP_PROPERTY,
             count: (since) =>
-              countWhere(
-                (q: any) => q.eq("ip_address", ip).eq("property_id", input.propertyId),
-                since,
-              ),
+              countWhere((q) => q.eq("ip_address", ip).eq("property_id", input.propertyId), since),
           },
           {
             rule: PER_PHONE_DAILY,
-            count: (since) => countWhere((q: any) => q.eq("phone", input.phone), since),
+            count: (since) => countWhere((q) => q.eq("phone", input.phone), since),
           },
         ]);
 
@@ -157,8 +164,7 @@ export const Route = createFileRoute("/api/public/enquiries")({
           });
           return jsonResponse(
             {
-              error:
-                "You've sent several enquiries recently. Please try again a little later.",
+              error: "You've sent several enquiries recently. Please try again a little later.",
               retryAfterSeconds: limit.retryAfterSeconds,
             },
             429,

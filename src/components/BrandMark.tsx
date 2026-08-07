@@ -8,8 +8,18 @@ import urfLogo from "@/assets/urf-logo.png.asset.json";
  */
 export function UrbanLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
-    <div className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-700 p-1.5 shadow-md ring-1 ring-emerald-400/30 text-white ${className}`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+    <div
+      className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-700 p-1.5 shadow-md ring-1 ring-emerald-400/30 text-white ${className}`}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-full w-full"
+      >
         <path d="M3 21H21" />
         <path d="M6 21V9L12 4L18 9V21" />
         <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.25" />
@@ -40,8 +50,7 @@ export function BrandMark({
 
   const logoSizeClass = size === "sm" ? "h-7 w-7" : size === "lg" ? "h-11 w-11" : "h-9 w-9";
   const imgLogoClass = size === "sm" ? "h-7 w-auto" : size === "lg" ? "h-11 w-auto" : "h-9 w-auto";
-  const textClass =
-    size === "sm" ? "text-base" : size === "lg" ? "text-2xl" : "text-xl";
+  const textClass = size === "sm" ? "text-base" : size === "lg" ? "text-2xl" : "text-xl";
 
   const isLocalHostAsset = urfLogo?.url && urfLogo.url.startsWith("/__l5e/");
 

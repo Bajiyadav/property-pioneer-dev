@@ -38,7 +38,7 @@ export function evaluatePasswordRules(
   confirmPass: string = "",
   fullName: string = "",
   email: string = "",
-  phone: string = ""
+  phone: string = "",
 ): PasswordRulesResult {
   const cleanPass = pass || "";
   const lowerPass = cleanPass.toLowerCase();
@@ -48,10 +48,14 @@ export function evaluatePasswordRules(
   const hasUppercase = /[A-Z]/.test(cleanPass);
   const hasLowercase = /[a-z]/.test(cleanPass);
   const hasNumber = /[0-9]/.test(cleanPass);
-  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(cleanPass);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.test(cleanPass);
 
   // Check if contains name (if name length >= 3)
-  const nameParts = fullName.trim().toLowerCase().split(/\s+/).filter((p) => p.length >= 3);
+  const nameParts = fullName
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((p) => p.length >= 3);
   const noNameMatch = !nameParts.some((part) => lowerPass.includes(part));
 
   // Check if contains email prefix (before @)

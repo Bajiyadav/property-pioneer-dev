@@ -143,8 +143,8 @@ function AdminDashboard() {
             Admin access required
           </h2>
           <p className="max-w-prose text-sm text-muted-foreground">
-            You're signed in, but this account doesn't have the admin role yet. Ask a
-            platform administrator to grant it, then reload this page.
+            You're signed in, but this account doesn't have the admin role yet. Ask a platform
+            administrator to grant it, then reload this page.
           </p>
         </Card>
       </AdminShell>
@@ -183,9 +183,7 @@ function AdminDashboard() {
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <Card className="p-5">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-2 font-serif text-3xl font-semibold text-foreground">{value}</p>
       {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
     </Card>
@@ -279,8 +277,7 @@ function ListingsPanel() {
   });
 
   if (isPending) return <Skeleton className="h-64 rounded-xl" />;
-  if (!data?.length)
-    return <p className="text-sm text-muted-foreground">No listings yet.</p>;
+  if (!data?.length) return <p className="text-sm text-muted-foreground">No listings yet.</p>;
 
   return (
     <Card className="overflow-x-auto">
@@ -367,8 +364,7 @@ function EnquiriesPanel() {
   });
 
   if (isPending) return <Skeleton className="h-64 rounded-xl" />;
-  if (!data?.length)
-    return <p className="text-sm text-muted-foreground">No enquiries yet.</p>;
+  if (!data?.length) return <p className="text-sm text-muted-foreground">No enquiries yet.</p>;
 
   return (
     <div className="space-y-3">

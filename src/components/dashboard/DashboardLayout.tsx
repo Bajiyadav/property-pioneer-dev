@@ -1,42 +1,13 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  Building2,
-  PlusCircle,
-  Users,
-  BarChart3,
-  MessageSquare,
-  Calendar,
-  Bell,
-  Settings,
-  UserCircle,
-  CreditCard,
-  FileBarChart,
-  LogOut,
-  Search,
-  CheckSquare,
-  ShieldAlert,
-  FileText,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight,
-  Menu,
-  X,
-  Sparkles,
-  Heart,
-  Briefcase,
-  Star,
-  Banknote,
-  CheckCircle2,
-} from "lucide-react";
-import { type UserRole } from "@/components/demo/DemoModeSwitcher";
+import { ChevronLeft, ChevronRight, Menu, X, CheckCircle2 } from "lucide-react";
+import { type UserRole } from "@/config/roles";
 import { BrandMark } from "@/components/BrandMark";
 
 export interface NavItem {
   id: string;
   label: string;
-  icon: any;
+  icon: React.ElementType;
   badge?: string;
 }
 
@@ -61,10 +32,22 @@ export function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const roleLabels: Record<UserRole, { name: string; color: string }> = {
-    customer: { name: "Tenant & Buyer Portal", color: "bg-blue-600/10 text-blue-600 dark:text-blue-400" },
-    owner: { name: "Verified Owner Portal", color: "bg-emerald-600/10 text-emerald-600 dark:text-emerald-400" },
-    agent: { name: "Partner Agent Hub", color: "bg-purple-600/10 text-purple-600 dark:text-purple-400" },
-    admin: { name: "Platform Admin HQ", color: "bg-amber-600/10 text-amber-600 dark:text-amber-400" },
+    customer: {
+      name: "Tenant & Buyer Portal",
+      color: "bg-blue-600/10 text-blue-600 dark:text-blue-400",
+    },
+    owner: {
+      name: "Verified Owner Portal",
+      color: "bg-emerald-600/10 text-emerald-600 dark:text-emerald-400",
+    },
+    agent: {
+      name: "Partner Agent Hub",
+      color: "bg-purple-600/10 text-purple-600 dark:text-purple-400",
+    },
+    admin: {
+      name: "Platform Admin HQ",
+      color: "bg-amber-600/10 text-amber-600 dark:text-amber-400",
+    },
   };
 
   return (
@@ -100,7 +83,9 @@ export function DashboardLayout({
         {/* Role Badge */}
         {!collapsed && (
           <div className="p-4 border-b border-border/30">
-            <span className={`rounded-xl px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider block text-center ${roleLabels[role].color}`}>
+            <span
+              className={`rounded-xl px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider block text-center ${roleLabels[role].color}`}
+            >
               ● {roleLabels[role].name}
             </span>
           </div>
@@ -126,13 +111,13 @@ export function DashboardLayout({
                 title={collapsed ? item.label : undefined}
               >
                 <Icon className="h-4 w-4 flex-none" />
-                {!collapsed && (
-                  <span className="flex-1 text-left truncate">{item.label}</span>
-                )}
+                {!collapsed && <span className="flex-1 text-left truncate">{item.label}</span>}
                 {!collapsed && item.badge && (
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                    isActive ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
-                  }`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      isActive ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}
@@ -159,9 +144,7 @@ export function DashboardLayout({
             <h1 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-extrabold text-foreground">
               {title}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {subtitle}
-            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">{subtitle}</p>
           </div>
 
           <div className="flex items-center gap-3">

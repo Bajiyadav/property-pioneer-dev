@@ -1,8 +1,18 @@
 import { MapPin, Sparkles, Building2 } from "lucide-react";
 
 const CITIES = [
-  { name: "Hyderabad", status: "LIVE NOW", isLive: true, hub: "Hitech City / Gachibowli / Madhapur Hub" },
-  { name: "Bangalore", status: "Launching Q3 2026", isLive: false, hub: "Indiranagar / Koramangala Hub" },
+  {
+    name: "Hyderabad",
+    status: "LIVE NOW",
+    isLive: true,
+    hub: "Hitech City / Gachibowli / Madhapur Hub",
+  },
+  {
+    name: "Bangalore",
+    status: "Launching Q3 2026",
+    isLive: false,
+    hub: "Indiranagar / Koramangala Hub",
+  },
   { name: "Chennai", status: "Launching Q4 2026", isLive: false, hub: "OMR / Velachery Hub" },
   { name: "Pune", status: "Launching Q4 2026", isLive: false, hub: "Hinjawadi / Baner Hub" },
   { name: "Mumbai", status: "Launching Q4 2026", isLive: false, hub: "BKC / Powai Hub" },
@@ -21,7 +31,9 @@ export function CoverageCityMap() {
         <h2 className="mt-3 text-2xl font-extrabold text-foreground sm:text-3xl">
           City Coverage & Service Expansion
         </h2>
-        <p className="mt-1 text-xs text-muted-foreground">Operating live across Hyderabad with expansion across major metro hubs.</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Operating live across Hyderabad with expansion across major metro hubs.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -36,7 +48,9 @@ export function CoverageCityMap() {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-foreground">{c.name}</h3>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.isLive ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"}`}>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.isLive ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"}`}
+              >
                 {c.status}
               </span>
             </div>

@@ -17,18 +17,18 @@ import {
   FileCheck,
   FileBarChart,
   ChevronDown,
-  Sparkles,
   CheckCircle2,
 } from "lucide-react";
-import { getActiveRole, type UserRole } from "@/components/demo/DemoModeSwitcher";
+import { getActiveRole, getDashboardRoute, type UserRole } from "@/config/roles";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export function HeaderProfileMenu({ user }: { user?: any }) {
+export function HeaderProfileMenu({ user }: { user?: { email?: string | null } | null }) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<UserRole>("customer");
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const dashboardPath = getDashboardRoute(role);
 
   useEffect(() => {
     setRole(getActiveRole());
@@ -77,20 +77,26 @@ export function HeaderProfileMenu({ user }: { user?: any }) {
         className="flex items-center gap-2 rounded-full border border-border/80 bg-secondary/50 p-1 pr-3 transition hover:border-primary hover:bg-secondary focus:outline-none"
         aria-label="User profile menu"
       >
-        <div className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${roleColors[role]}`}>
+        <div
+          className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${roleColors[role]}`}
+        >
           {getInitials()}
         </div>
         <span className="hidden text-xs font-semibold capitalize text-foreground sm:inline-block">
           {role} Account
         </span>
-        <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
         <div className="absolute right-0 top-12 z-50 w-72 rounded-3xl border border-border/60 bg-card p-3 shadow-2xl backdrop-blur-2xl animate-in fade-in zoom-in-95">
           {/* User Info Header */}
           <div className="flex items-center gap-3 border-b border-border/40 pb-3 px-3 pt-2">
-            <div className={`grid h-10 w-10 place-items-center rounded-full text-sm font-extrabold ${roleColors[role]}`}>
+            <div
+              className={`grid h-10 w-10 place-items-center rounded-full text-sm font-extrabold ${roleColors[role]}`}
+            >
               {getInitials()}
             </div>
             <div className="overflow-hidden">
@@ -105,44 +111,151 @@ export function HeaderProfileMenu({ user }: { user?: any }) {
 
           {/* Quick Menu Items */}
           <div className="mt-2 space-y-1">
-            <MenuItem to={`/dashboard/${role}`} icon={LayoutDashboard} label="My Dashboard" onClick={() => setOpen(false)} />
-            <MenuItem to="/favorites" icon={Heart} label="Saved Properties" onClick={() => setOpen(false)} />
-            <MenuItem to={`/dashboard/${role}?tab=visits`} icon={Calendar} label="My Visits" onClick={() => setOpen(false)} />
-            <MenuItem to={`/dashboard/${role}?tab=enquiries`} icon={MessageSquare} label="My Enquiries" onClick={() => setOpen(false)} />
+            <MenuItem
+              to={dashboardPath}
+              search={{ tab: "overview" }}
+              icon={LayoutDashboard}
+              label="My Dashboard"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to="/favorites"
+              icon={Heart}
+              label="Saved Properties"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to={dashboardPath}
+              search={{ tab: "visits" }}
+              icon={Calendar}
+              label="My Visits"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to={dashboardPath}
+              search={{ tab: "enquiries" }}
+              icon={MessageSquare}
+              label="My Enquiries"
+              onClick={() => setOpen(false)}
+            />
 
             {/* Role Specific Additions */}
             {role === "owner" && (
               <>
                 <div className="my-1 border-t border-border/30" />
-                <MenuItem to="/dashboard/owner?tab=add" icon={PlusCircle} label="Add Property" onClick={() => setOpen(false)} highlight />
-                <MenuItem to="/dashboard/owner?tab=properties" icon={Building2} label="My Listings" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/owner?tab=analytics" icon={BarChart3} label="Analytics" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/owner?tab=leads" icon={Users} label="Leads" onClick={() => setOpen(false)} />
+                <MenuItem
+                  to="/dashboard/owner"
+                  search={{ tab: "add" }}
+                  icon={PlusCircle}
+                  label="Add Property"
+                  onClick={() => setOpen(false)}
+                  highlight
+                />
+                <MenuItem
+                  to="/dashboard/owner"
+                  search={{ tab: "properties" }}
+                  icon={Building2}
+                  label="My Listings"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/owner"
+                  search={{ tab: "analytics" }}
+                  icon={BarChart3}
+                  label="Analytics"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/owner"
+                  search={{ tab: "leads" }}
+                  icon={Users}
+                  label="Leads"
+                  onClick={() => setOpen(false)}
+                />
               </>
             )}
 
             {role === "agent" && (
               <>
                 <div className="my-1 border-t border-border/30" />
-                <MenuItem to="/dashboard/agent?tab=clients" icon={Users} label="Clients CRM" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/agent?tab=listings" icon={Building2} label="Listings" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/agent?tab=commission" icon={BarChart3} label="Commission Tracker" onClick={() => setOpen(false)} />
+                <MenuItem
+                  to="/dashboard/agent"
+                  search={{ tab: "clients" }}
+                  icon={Users}
+                  label="Clients CRM"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/agent"
+                  search={{ tab: "listings" }}
+                  icon={Building2}
+                  label="Listings"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/agent"
+                  search={{ tab: "commission" }}
+                  icon={BarChart3}
+                  label="Commission Tracker"
+                  onClick={() => setOpen(false)}
+                />
               </>
             )}
 
             {role === "admin" && (
               <>
                 <div className="my-1 border-t border-border/30" />
-                <MenuItem to="/admin" icon={Shield} label="Admin Portal" onClick={() => setOpen(false)} highlight />
-                <MenuItem to="/dashboard/admin?tab=users" icon={Users} label="User Management" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/admin?tab=approvals" icon={FileCheck} label="Pending Approvals" onClick={() => setOpen(false)} />
-                <MenuItem to="/dashboard/admin?tab=reports" icon={FileBarChart} label="Platform Reports" onClick={() => setOpen(false)} />
+                <MenuItem
+                  to="/admin"
+                  icon={Shield}
+                  label="Admin Portal"
+                  onClick={() => setOpen(false)}
+                  highlight
+                />
+                <MenuItem
+                  to="/dashboard/admin"
+                  search={{ tab: "users" }}
+                  icon={Users}
+                  label="User Management"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/admin"
+                  search={{ tab: "approvals" }}
+                  icon={FileCheck}
+                  label="Pending Approvals"
+                  onClick={() => setOpen(false)}
+                />
+                <MenuItem
+                  to="/dashboard/admin"
+                  search={{ tab: "reports" }}
+                  icon={FileBarChart}
+                  label="Platform Reports"
+                  onClick={() => setOpen(false)}
+                />
               </>
             )}
 
             <div className="my-1 border-t border-border/30" />
-            <MenuItem to={`/dashboard/${role}?tab=notifications`} icon={Bell} label="Notifications" onClick={() => setOpen(false)} />
-            <MenuItem to={`/dashboard/${role}?tab=settings`} icon={Settings} label="Settings" onClick={() => setOpen(false)} />
+            <MenuItem
+              to="/profile"
+              icon={UserCircle}
+              label="My Profile"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to="/notifications"
+              icon={Bell}
+              label="Notifications"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to={dashboardPath}
+              search={{ tab: "settings" }}
+              icon={Settings}
+              label="Settings"
+              onClick={() => setOpen(false)}
+            />
 
             <button
               onClick={handleLogout}
@@ -160,13 +273,16 @@ export function HeaderProfileMenu({ user }: { user?: any }) {
 
 function MenuItem({
   to,
+  search,
   icon: Icon,
   label,
   onClick,
   highlight = false,
 }: {
   to: string;
-  icon: any;
+  /** Query params for the target route, e.g. the dashboard `tab`. */
+  search?: Record<string, string>;
+  icon: React.ElementType;
   label: string;
   onClick: () => void;
   highlight?: boolean;
@@ -174,6 +290,7 @@ function MenuItem({
   return (
     <Link
       to={to}
+      search={search}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition ${
         highlight

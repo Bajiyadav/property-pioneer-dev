@@ -63,10 +63,17 @@ export function PropertyStatus({
   size?: "sm" | "md" | "lg";
 }) {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.available;
-  const textSize = size === "sm" ? "text-[10px] px-2 py-0.5" : size === "lg" ? "text-xs px-3 py-1" : "text-xs px-2.5 py-0.5";
+  const textSize =
+    size === "sm"
+      ? "text-[10px] px-2 py-0.5"
+      : size === "lg"
+        ? "text-xs px-3 py-1"
+        : "text-xs px-2.5 py-0.5";
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full font-semibold uppercase tracking-wide ${config.bg} ${config.text} ${textSize}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full font-semibold uppercase tracking-wide ${config.bg} ${config.text} ${textSize}`}
+    >
       {config.icon}
       {config.label}
     </span>

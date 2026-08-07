@@ -10,32 +10,89 @@ interface CityRoadmap {
 }
 
 const CITY_ROADMAP: CityRoadmap[] = [
-  { name: "Hyderabad", tag: "Hitech City, Gachibowli & Kondapur", status: "live", badge: "● Live Market" },
-  { name: "Bangalore", tag: "Koramangala, Whitefield & Indiranagar", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Chennai", tag: "OMR, Velachery & Anna Nagar", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Pune", tag: "Kharadi, Hinjewadi & Baner", status: "upcoming", badge: "🚀 Launching Soon" },
+  {
+    name: "Hyderabad",
+    tag: "Hitech City, Gachibowli & Kondapur",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Bangalore",
+    tag: "Koramangala, Whitefield & Indiranagar",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Chennai",
+    tag: "OMR, Velachery & Anna Nagar",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Pune",
+    tag: "Kharadi, Hinjewadi & Baner",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
   { name: "Mumbai", tag: "Bandra, BKC & Powai", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Delhi NCR", tag: "Gurugram, Noida & Saket", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Visakhapatnam", tag: "Beach Road, MVP Colony & Gajuwaka", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Vijayawada", tag: "Benz Circle, Enikepadu & Amaravati", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Jaipur", tag: "Malviya Nagar, Vaishali & Jagatpura", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Lucknow", tag: "Gomti Nagar & Hazratganj", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Indore", tag: "Vijay Nagar & Super Corridor", status: "upcoming", badge: "🚀 Launching Soon" },
-  { name: "Warangal", tag: "Kazipet & Hanamkonda Corridor", status: "upcoming", badge: "🚀 Launching Soon" },
+  {
+    name: "Delhi NCR",
+    tag: "Gurugram, Noida & Saket",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Visakhapatnam",
+    tag: "Beach Road, MVP Colony & Gajuwaka",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Vijayawada",
+    tag: "Benz Circle, Enikepadu & Amaravati",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Jaipur",
+    tag: "Malviya Nagar, Vaishali & Jagatpura",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Lucknow",
+    tag: "Gomti Nagar & Hazratganj",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Indore",
+    tag: "Vijay Nagar & Super Corridor",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
+  {
+    name: "Warangal",
+    tag: "Kazipet & Hanamkonda Corridor",
+    status: "upcoming",
+    badge: "🚀 Launching Soon",
+  },
 ];
 
-export function PopularCities({
-  onSelectCity,
-}: {
-  onSelectCity?: (city: CityRoadmap) => void;
-}) {
+export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoadmap) => void }) {
   const handleCityClick = (city: CityRoadmap) => {
     if (onSelectCity) {
       onSelectCity(city);
     } else if (city.status === "upcoming") {
-      toast.info(`Urban Properties is launching soon in ${city.name}! Currently live in Hyderabad.`, {
-        description: "We are expanding city by city. Register to get notified when we launch in " + city.name + ".",
-      });
+      toast.info(
+        `Urban Properties is launching soon in ${city.name}! Currently live in Hyderabad.`,
+        {
+          description:
+            "We are expanding city by city. Register to get notified when we launch in " +
+            city.name +
+            ".",
+        },
+      );
     }
   };
 
@@ -45,9 +102,12 @@ export function PopularCities({
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
           <Rocket className="h-3.5 w-3.5" /> Pan-India Expansion Roadmap
         </span>
-        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Expanding Across India</h2>
+        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
+          Expanding Across India
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Launching with Hyderabad as our first market, Urban Properties is rapidly expanding to every major real estate hub.
+          Launching with Hyderabad as our first market, Urban Properties is rapidly expanding to
+          every major real estate hub.
         </p>
       </div>
 
@@ -58,7 +118,14 @@ export function PopularCities({
             <Link
               key={city.name}
               to="/properties"
-              search={{ q: "", city: city.name, listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+              search={{
+                q: "",
+                city: city.name,
+                listing: "rent",
+                minPrice: 0,
+                maxPrice: 0,
+                beds: 0,
+              }}
               className="group flex items-center justify-between rounded-2xl border border-emerald-500/40 bg-card p-4 shadow-md transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:shadow-xl"
             >
               <div className="flex items-center gap-3">
