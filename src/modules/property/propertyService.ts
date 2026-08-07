@@ -41,9 +41,55 @@ export type Property = {
   created_at: string;
 };
 
-// NOTICE: owner_phone and owner_email are strictly EXCLUDED from public queries to enforce PII safety
+/**
+ * Columns the anon/authenticated roles are actually granted on `public.properties`
+ * (see migration 20260730043953). owner_phone / owner_name / owner_email exist but
+ * are deliberately NOT granted — PII stays server-side behind the contact endpoint.
+ *
+ * The verification columns from 20260806000000_enterprise_property_schema.sql are
+ * NOT selected here: that migration has not been applied to the live database, and
+ * naming a non-existent column makes PostgREST reject the whole query with a 400,
+ * which silently collapsed every listing query onto the hard-coded fallback data.
+ * They are re-attached with safe defaults by `withVerificationDefaults` below and
+ * will start flowing through automatically once the migration lands.
+ */
 export const PUBLIC_PROPERTY_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,owner_verification_status,property_verification_status,verified_by,verified_at,verification_notes,phone_verified,email_verified,id_verified,is_zero_brokerage,is_premium,created_at";
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+
+/** Shape PostgREST returns for the granted column set. */
+type PropertyRow = Omit<
+  Property,
+  | "owner_verification_status"
+  | "property_verification_status"
+  | "verified_by"
+  | "verified_at"
+  | "verification_notes"
+  | "phone_verified"
+  | "email_verified"
+  | "id_verified"
+  | "is_zero_brokerage"
+  | "is_premium"
+> &
+  Partial<Property>;
+
+/**
+ * Normalises a database row into a full `Property`. Verification flags default to
+ * the conservative "pending / unverified" state so a missing column can never make
+ * an unverified listing look verified.
+ */
+function withVerificationDefaults(row: PropertyRow): Property {
+  return {
+    ...row,
+    images: Array.isArray(row.images) ? row.images : [],
+    owner_verification_status: row.owner_verification_status ?? "pending",
+    property_verification_status: row.property_verification_status ?? "pending",
+    phone_verified: row.phone_verified ?? false,
+    email_verified: row.email_verified ?? false,
+    id_verified: row.id_verified ?? false,
+    is_zero_brokerage: row.is_zero_brokerage ?? true,
+    is_premium: row.is_premium ?? false,
+  } as Property;
+}
 
 export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
@@ -215,7 +261,23 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   },
 ];
 
-export async function fetchPublicProperties(): Promise<Property[]> {
+/** Where a listing set came from — lets the UI be honest about demo data. */
+export type PropertySource = "database" | "fallback";
+
+export interface PropertyFeed {
+  properties: Property[];
+  source: PropertySource;
+  /** Populated when the database query failed and the fallback was used. */
+  error: string | null;
+}
+
+/**
+ * Loads approved listings with their provenance.
+ *
+ * A failed or empty query still yields a usable list, but `source: "fallback"`
+ * lets callers show a banner instead of passing seed data off as live records.
+ */
+export async function fetchPublicPropertyFeed(): Promise<PropertyFeed> {
   try {
     const { data, error } = await db
       .from("properties")
@@ -223,26 +285,52 @@ export async function fetchPublicProperties(): Promise<Property[]> {
       .eq("is_approved", true)
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false });
-    if (error || !data || data.length === 0) {
-      return HYDERABAD_FALLBACK_PROPERTIES;
+
+    if (error) {
+      console.error("[properties] query failed", error);
+      return {
+        properties: HYDERABAD_FALLBACK_PROPERTIES,
+        source: "fallback",
+        error: error.message,
+      };
     }
-    return data as Property[];
-  } catch {
-    return HYDERABAD_FALLBACK_PROPERTIES;
+    if (!data || data.length === 0) {
+      return { properties: HYDERABAD_FALLBACK_PROPERTIES, source: "fallback", error: null };
+    }
+    return {
+      properties: (data as PropertyRow[]).map(withVerificationDefaults),
+      source: "database",
+      error: null,
+    };
+  } catch (err) {
+    console.error("[properties] unreachable", err);
+    return {
+      properties: HYDERABAD_FALLBACK_PROPERTIES,
+      source: "fallback",
+      error: err instanceof Error ? err.message : "Network error",
+    };
   }
 }
 
+export async function fetchPublicProperties(): Promise<Property[]> {
+  return (await fetchPublicPropertyFeed()).properties;
+}
+
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {
-  const fallback = HYDERABAD_FALLBACK_PROPERTIES.find((p) => p.id === id);
-  if (fallback) return fallback;
-  const { data, error } = await db
-    .from("properties")
-    .select(PUBLIC_PROPERTY_COLUMNS)
-    .eq("id", id)
-    .eq("is_approved", true)
-    .maybeSingle();
-  if (error) return null;
-  return (data as Property | null) ?? null;
+  try {
+    const { data, error } = await db
+      .from("properties")
+      .select(PUBLIC_PROPERTY_COLUMNS)
+      .eq("id", id)
+      .eq("is_approved", true)
+      .maybeSingle();
+    if (!error && data) return withVerificationDefaults(data as PropertyRow);
+    if (error) console.error("[properties] detail query failed", error);
+  } catch (err) {
+    console.error("[properties] detail unreachable", err);
+  }
+  // Seed listings keep the demo links (e.g. /properties/hyd-000) working.
+  return HYDERABAD_FALLBACK_PROPERTIES.find((p) => p.id === id) ?? null;
 }
 
 export function isOwnerVerified(property: Property): boolean {

@@ -19,33 +19,29 @@ import {
   ChevronDown,
   CheckCircle2,
 } from "lucide-react";
-import { getActiveRole, getDashboardRoute, type UserRole } from "@/config/roles";
+import { getDashboardRoute, type UserRole } from "@/config/roles";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function HeaderProfileMenu({ user }: { user?: { email?: string | null } | null }) {
   const [open, setOpen] = useState(false);
-  const [role, setRole] = useState<UserRole>("customer");
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Authoritative role — matches whatever the dashboards will actually let the
+  // user open, so the menu can never advertise a portal they can't reach.
+  const { role }: { role: UserRole } = useAuthSession();
   const dashboardPath = getDashboardRoute(role);
 
   useEffect(() => {
-    setRole(getActiveRole());
-    const handleRoleChange = () => setRole(getActiveRole());
-    window.addEventListener("demo_role_changed", handleRoleChange);
-
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      window.removeEventListener("demo_role_changed", handleRoleChange);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = async () => {

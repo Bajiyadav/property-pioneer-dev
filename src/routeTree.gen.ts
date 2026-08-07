@@ -28,6 +28,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as VillasRouteImport } from './routes/villas'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
@@ -136,6 +137,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth_/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -297,6 +305,7 @@ export interface FileRoutesById {
   '/villas': typeof VillasRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/auth_/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -332,6 +341,7 @@ export interface FileRouteTypes {
     | '/villas'
     | '/admin'
     | '/dashboard'
+    | '/auth/callback'
     | '/properties/$id'
     | '/properties/'
     | '/dashboard/admin'
@@ -363,6 +373,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/villas'
     | '/admin'
+    | '/auth/callback'
     | '/properties/$id'
     | '/properties'
     | '/dashboard/admin'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/villas'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/auth_/callback'
     | '/properties/$id'
     | '/properties/'
     | '/_authenticated/dashboard/admin'
@@ -430,6 +442,7 @@ export interface RootRouteChildren {
   PropertiesRoute: typeof PropertiesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VillasRoute: typeof VillasRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
@@ -572,6 +585,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth_/callback': {
+      id: '/auth_/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/properties/': {
       id: '/properties/'
@@ -734,6 +754,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesRoute: PropertiesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VillasRoute: VillasRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,

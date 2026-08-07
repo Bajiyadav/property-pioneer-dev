@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, LayoutGrid, MapPin } from "lucide-react";
 import { fetchProperties } from "@/lib/properties";
+import { recordRecentSearch } from "@/lib/dashboard-data";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyMapView } from "@/components/map/PropertyMapView";
 
@@ -45,6 +46,18 @@ function PropertiesPage() {
     queryKey: ["properties"],
     queryFn: fetchProperties,
   });
+
+  // Feeds the customer dashboard's "Recent searches" panel.
+  useEffect(() => {
+    recordRecentSearch({
+      q: search.q,
+      city: search.city,
+      listing: search.listing,
+      minPrice: search.minPrice,
+      maxPrice: search.maxPrice,
+      beds: search.beds,
+    });
+  }, [search]);
 
   const cities = useMemo(() => Array.from(new Set(all.map((p) => p.city))).sort(), [all]);
 

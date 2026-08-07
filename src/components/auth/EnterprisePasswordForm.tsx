@@ -2,11 +2,11 @@ import { useState, useMemo } from "react";
 import {
   Check,
   X,
-  ShieldCheck,
   Lock,
   Eye,
   EyeOff,
-  Phone,
+  MailCheck,
+  RefreshCw,
   AlertCircle,
   Loader2,
 } from "lucide-react";
@@ -29,9 +29,31 @@ export function EnterprisePasswordForm({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [otpStep, setOtpStep] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [showCodeEntry, setShowCodeEntry] = useState(false);
+  const [resending, setResending] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  /** Where Supabase should send the user after they click the email link. */
+  const emailRedirectTo =
+    typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined;
+
+  const resendConfirmation = async (targetEmail: string) => {
+    if (!targetEmail) {
+      toast.error("Enter your email address first.");
+      return;
+    }
+    setResending(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: targetEmail,
+      options: { emailRedirectTo },
+    });
+    setResending(false);
+    if (error) toast.error(error.message);
+    else toast.success(`Confirmation email sent to ${targetEmail}.`);
+  };
 
   const rules = useMemo(() => {
     return evaluatePasswordRules(password, confirmPassword, name, email, phone);
@@ -55,6 +77,7 @@ export function EnterprisePasswordForm({
         password,
         options: {
           data: { full_name: name, phone: `+91${phone}`, role },
+          emailRedirectTo,
         },
       });
 
@@ -70,13 +93,14 @@ export function EnterprisePasswordForm({
       }
 
       if (data.session) {
-        // Auto-confirmed — proceed directly
+        // Project has email confirmation disabled — the account is live now.
         toast.success(`Account created! Welcome to Urban Properties.`);
         onSuccess({ name, email, phone: `+91${phone}`, role });
       } else {
-        // Email confirmation required — show OTP step as a UI cue
-        setOtpStep(true);
-        toast.success("Verification email sent. Enter your 6-digit code.");
+        // Confirmation required. Supabase sends a LINK by default, so we must not
+        // demand a code the user was never given — show the check-your-inbox state.
+        setAwaitingConfirmation(true);
+        toast.success(`Confirmation email sent to ${email}.`);
       }
     } else {
       // Sign In
@@ -84,10 +108,13 @@ export function EnterprisePasswordForm({
       setLoading(false);
 
       if (error) {
-        if (error.message.toLowerCase().includes("invalid login credentials")) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("invalid login credentials")) {
           toast.error("Incorrect email or password. Please try again.");
-        } else if (error.message.toLowerCase().includes("email not confirmed")) {
-          toast.error("Please verify your email first, then sign in.");
+        } else if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
+          // Previously a dead end: the user could never get past this.
+          setAwaitingConfirmation(true);
+          toast.error("Your email isn't confirmed yet — we can resend the link.");
         } else {
           toast.error(error.message);
         }
@@ -102,12 +129,13 @@ export function EnterprisePasswordForm({
     }
   };
 
+  /** Optional path for projects whose email template embeds a 6-digit token. */
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otpCode.length < 6) return;
     setLoading(true);
 
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.verifyOtp({
       email,
       token: otpCode,
       type: "signup",
@@ -116,68 +144,98 @@ export function EnterprisePasswordForm({
     setLoading(false);
 
     if (error) {
-      toast.error("Invalid or expired verification code. Please try again.");
+      toast.error("Invalid or expired code. Use the link in your email instead.");
       return;
     }
 
-    toast.success("Phone verified! Account created successfully.");
+    toast.success("Email verified! Account activated.");
     onSuccess({ name, email, phone: `+91${phone}`, role });
   };
 
   return (
     <div className="space-y-6">
-      {otpStep ? (
-        <form
-          onSubmit={handleVerifyOtp}
-          className="space-y-4 rounded-3xl border border-emerald-600/30 bg-emerald-600/5 p-6"
-        >
+      {awaitingConfirmation ? (
+        <div className="space-y-4 rounded-3xl border border-emerald-600/30 bg-emerald-600/5 p-6">
           <div className="text-center">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              <Phone className="h-3.5 w-3.5" /> Email Verification
-            </span>
-            <h3 className="mt-2 text-lg font-extrabold text-foreground">
-              Enter 6-Digit Verification Code
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Sent to <strong className="text-foreground">{email}</strong>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-600/10 text-emerald-600 dark:text-emerald-400">
+              <MailCheck className="h-7 w-7" />
+            </div>
+            <h3 className="mt-3 text-lg font-extrabold text-foreground">Confirm your email</h3>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
+              Open it and you'll be signed straight into your dashboard.
             </p>
           </div>
 
-          <div>
-            <input
-              type="text"
-              required
-              maxLength={6}
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="1 2 3 4 5 6"
-              className="w-full text-center font-mono text-xl font-bold tracking-widest rounded-2xl border border-border bg-background py-3 text-foreground outline-none focus:ring-2 focus:ring-primary"
-              autoComplete="one-time-code"
-            />
+          <div className="rounded-2xl border border-border/60 bg-background/60 p-3 text-left">
+            <p className="text-[11px] font-bold text-foreground">Didn't get it?</p>
+            <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
+              <li>• Check your spam or promotions folder</li>
+              <li>• Links expire — request a fresh one below</li>
+            </ul>
           </div>
 
           <button
-            type="submit"
-            disabled={loading || otpCode.length < 6}
-            className="w-full rounded-2xl bg-emerald-600 py-3 text-xs font-extrabold text-white shadow-md transition hover:bg-emerald-500 disabled:opacity-50 flex items-center justify-center gap-2"
+            type="button"
+            onClick={() => resendConfirmation(email)}
+            disabled={resending}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 text-xs font-extrabold text-white shadow-md transition hover:bg-emerald-500 disabled:opacity-50"
           >
-            {loading ? (
+            {resending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Verifying…
+                <Loader2 className="h-4 w-4 animate-spin" /> Sending…
               </>
             ) : (
-              "Verify & Complete Registration"
+              <>
+                <RefreshCw className="h-4 w-4" /> Resend confirmation email
+              </>
             )}
           </button>
 
+          {showCodeEntry ? (
+            <form onSubmit={handleVerifyOtp} className="space-y-2 border-t border-border/40 pt-4">
+              <label className="block text-[11px] font-bold text-foreground">
+                Enter the 6-digit code from your email
+              </label>
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                placeholder="1 2 3 4 5 6"
+                className="w-full rounded-2xl border border-border bg-background py-3 text-center font-mono text-xl font-bold tracking-widest text-foreground outline-none focus:ring-2 focus:ring-primary"
+                autoComplete="one-time-code"
+              />
+              <button
+                type="submit"
+                disabled={loading || otpCode.length < 6}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-2.5 text-xs font-extrabold text-primary-foreground disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Verify code
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowCodeEntry(true)}
+              className="w-full text-center text-[11px] text-muted-foreground transition hover:text-foreground"
+            >
+              My email contains a 6-digit code instead
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={() => setOtpStep(false)}
-            className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition"
+            onClick={() => {
+              setAwaitingConfirmation(false);
+              setShowCodeEntry(false);
+            }}
+            className="w-full text-center text-xs text-muted-foreground transition hover:text-foreground"
           >
             ← Go back
           </button>
-        </form>
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "signup" && (

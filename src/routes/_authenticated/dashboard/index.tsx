@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { getActiveRole, getDashboardRoute } from "@/config/roles";
+import { getDashboardRoute } from "@/config/roles";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { BrandMark } from "@/components/BrandMark";
 
 /**
- * Index route for `/dashboard` — redirects to the signed-in user's role
- * dashboard. The role lives in browser storage, so the redirect runs in an
- * effect rather than in `beforeLoad` (which also executes during SSR).
+ * Index route for `/dashboard` — sends the user to their own role dashboard.
+ *
+ * The role comes from the authoritative resolver (user_roles → user_metadata),
+ * never from client-writable storage, so this cannot be used to reach the
+ * admin dashboard by editing localStorage.
  */
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   component: DashboardDispatcher,
@@ -14,22 +17,18 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
 
 function DashboardDispatcher() {
   const navigate = useNavigate();
+  const { status, role, roleVerified } = useAuthSession();
 
   useEffect(() => {
-    navigate({
-      to: getDashboardRoute(getActiveRole()),
-      search: { tab: "overview" },
-      replace: true,
-    });
-  }, [navigate]);
+    if (status !== "authenticated" || !roleVerified) return;
+    navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
+  }, [status, role, roleVerified, navigate]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6">
       <BrandMark size="md" className="justify-center" />
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      <p className="text-xs font-semibold text-muted-foreground">
-        Redirecting to your role dashboard…
-      </p>
+      <p className="text-xs font-semibold text-muted-foreground">Taking you to your dashboard…</p>
     </div>
   );
 }

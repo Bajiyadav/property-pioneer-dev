@@ -1,300 +1,648 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import type { User } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  LayoutDashboard,
-  Search,
-  Heart,
-  Calendar,
-  MessageSquare,
-  Bell,
-  Settings,
-  FileText,
   ArrowRight,
+  Bell,
+  BellRing,
+  Bookmark,
+  Calendar,
+  CalendarCheck,
+  Heart,
+  History,
+  LayoutDashboard,
+  MessageSquare,
+  Search,
+  Settings,
+  Sparkles,
+  UserCircle,
 } from "lucide-react";
-import { fetchProperties, type Property } from "@/lib/properties";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
 import { useFavorites } from "@/lib/useFavorites";
 import { PropertyCard } from "@/components/PropertyCard";
 import { DashboardLayout, type NavItem } from "@/components/dashboard/DashboardLayout";
+import { RequireRole } from "@/components/dashboard/RequireRole";
+import {
+  ActivityTimeline,
+  CardSkeleton,
+  DataTable,
+  DemoDataNotice,
+  EmptyState,
+  ErrorState,
+  FilterChips,
+  KpiCard,
+  LoadingSkeleton,
+  OnboardingTips,
+  QuickActions,
+  SearchInput,
+  SectionHeader,
+  StatusPill,
+  type TimelineItem,
+} from "@/components/dashboard/DashboardKit";
+import { TrendAreaChart, DonutChart } from "@/components/dashboard/DashboardCharts";
+import { displayName } from "@/lib/auth-session";
+import { readRecentSearches, type RecentSearch } from "@/lib/dashboard-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard/customer")({
-  component: CustomerDashboardPage,
+  component: CustomerDashboardRoute,
 });
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-  { id: "saved", label: "Saved Properties", icon: Heart, badge: "Favorites" },
-  { id: "visits", label: "Scheduled Visits", icon: Calendar, badge: "2 Upcoming" },
-  { id: "enquiries", label: "My Enquiries", icon: MessageSquare, badge: "3 Sent" },
-  { id: "notifications", label: "Notifications", icon: Bell, badge: "1 New" },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "profile", label: "Profile", icon: UserCircle },
+  { id: "saved", label: "Saved Properties", icon: Heart },
+  { id: "searches", label: "Recent Searches", icon: History },
+  { id: "wishlist", label: "Wishlist", icon: Bookmark },
+  { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "bookings", label: "Bookings", icon: CalendarCheck },
+  { id: "enquiries", label: "Enquiries", icon: MessageSquare },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-function CustomerDashboardPage() {
+const SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
+
+interface Booking {
+  id: string;
+  title: string;
+  when: string;
+  mode: string;
+  owner: string;
+  status: "Confirmed" | "Scheduled" | "Completed";
+}
+
+interface Enquiry {
+  id: string;
+  title: string;
+  message: string;
+  sent: string;
+  status: "Owner responded" | "Awaiting reply";
+}
+
+const BOOKINGS: Booking[] = [
+  {
+    id: "b1",
+    title: "Luxury 2BHK Apartment, Gachibowli",
+    when: "Tomorrow · 10:00 AM",
+    mode: "In-person walkthrough",
+    owner: "Suresh Reddy",
+    status: "Confirmed",
+  },
+  {
+    id: "b2",
+    title: "Modern Studio, Financial District",
+    when: "Friday · 02:00 PM",
+    mode: "Live video tour",
+    owner: "Anitha Rao",
+    status: "Scheduled",
+  },
+  {
+    id: "b3",
+    title: "3BHK Gated Villa, Kondapur",
+    when: "Last Monday · 05:30 PM",
+    mode: "In-person walkthrough",
+    owner: "Anil Varma",
+    status: "Completed",
+  },
+];
+
+const ENQUIRIES: Enquiry[] = [
+  {
+    id: "e1",
+    title: "3BHK Gated Villa, Kondapur",
+    message: "Is this available for immediate move-in?",
+    sent: "2 hours ago",
+    status: "Owner responded",
+  },
+  {
+    id: "e2",
+    title: "Fully Furnished 2BHK, Madhapur",
+    message: "Interested in scheduling a weekend visit.",
+    sent: "Yesterday",
+    status: "Awaiting reply",
+  },
+];
+
+const NOTIFICATIONS: TimelineItem[] = [
+  {
+    id: "n1",
+    title: "Price drop on a saved home",
+    detail: "2BHK in Gachibowli reduced rent by ₹2,000/mo.",
+    time: "30 min ago",
+    tone: "success",
+  },
+  {
+    id: "n2",
+    title: "Visit confirmed",
+    detail: "Suresh Reddy confirmed tomorrow at 10:00 AM.",
+    time: "3 hours ago",
+    tone: "info",
+  },
+  {
+    id: "n3",
+    title: "New listings match your search",
+    detail: "4 new 2BHK homes in Madhapur under ₹35,000.",
+    time: "Yesterday",
+    tone: "neutral",
+  },
+];
+
+const VIEW_TREND = [
+  { label: "Mon", value: 4 },
+  { label: "Tue", value: 7 },
+  { label: "Wed", value: 5 },
+  { label: "Thu", value: 11 },
+  { label: "Fri", value: 9 },
+  { label: "Sat", value: 15 },
+  { label: "Sun", value: 12 },
+];
+
+function CustomerDashboardRoute() {
+  return (
+    <RequireRole role="customer">
+      {(session) => <CustomerDashboard user={session.user} />}
+    </RequireRole>
+  );
+}
+
+function CustomerDashboard({ user }: { user: User | null }) {
   const { tab: activeTab } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
-  const setActiveTab = (id: string) => navigate({ search: { tab: id }, replace: true });
-  const { ids } = useFavorites();
+  const navigate = useNavigate();
+  const setActiveTab = (id: string) =>
+    navigate({ to: "/dashboard/customer", search: { tab: id }, replace: true });
 
-  // Settings form state
-  const [settingsName, setSettingsName] = useState("");
-  const [settingsEmail, setSettingsEmail] = useState("");
-  const [settingsSaving, setSettingsSaving] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setSettingsName(data.user.user_metadata?.full_name || "");
-        setSettingsEmail(data.user.email || "");
-      }
-    });
-  }, []);
+  const { ids, toggle } = useFavorites();
+  const [savedQuery, setSavedQuery] = useState("");
+  const [bookingFilter, setBookingFilter] = useState("all");
 
   const {
-    data: properties = [],
+    data: feed,
     isLoading,
     isError,
     refetch,
-  } = useQuery({
-    queryKey: ["properties"],
-    queryFn: fetchProperties,
-  });
+  } = useQuery({ queryKey: ["property-feed"], queryFn: fetchPropertyFeed });
 
-  const savedHomes = properties.filter((p) => ids.includes(p.id));
+  const properties = useMemo(() => feed?.properties ?? [], [feed]);
+  const isSampleData = feed?.source === "fallback";
+
+  const savedHomes = useMemo(() => properties.filter((p) => ids.includes(p.id)), [properties, ids]);
+  const recentSearches = useMemo(() => readRecentSearches(), []);
+
+  const filteredSaved = useMemo(() => {
+    const q = savedQuery.trim().toLowerCase();
+    if (!q) return savedHomes;
+    return savedHomes.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
+  }, [savedHomes, savedQuery]);
+
+  const visibleBookings = useMemo(() => {
+    if (bookingFilter === "all") return BOOKINGS;
+    if (bookingFilter === "upcoming") return BOOKINGS.filter((b) => b.status !== "Completed");
+    return BOOKINGS.filter((b) => b.status === "Completed");
+  }, [bookingFilter]);
+
+  const cityMix = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of properties) counts.set(p.city, (counts.get(p.city) ?? 0) + 1);
+    return [...counts.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [properties]);
 
   return (
     <DashboardLayout
       role="customer"
-      title="Tenant & Buyer Dashboard"
-      subtitle="Track your saved homes, scheduled visits, digital agreements, and property enquiries."
+      title={`Welcome back, ${displayName(user)}`}
+      subtitle="Track saved homes, scheduled visits, enquiries, and everything you've shortlisted."
       navItems={NAV_ITEMS}
       activeTab={activeTab}
       onTabChange={setActiveTab}
+      user={user}
+      headerAction={
+        <Link
+          to="/properties"
+          search={SEARCH_PARAMS}
+          className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
+        >
+          <Search className="h-3.5 w-3.5" /> Browse homes
+        </Link>
+      }
     >
       {activeTab === "overview" && (
         <div className="space-y-8">
-          {/* Key Metrics */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <MetricCard
-              title="Saved Properties"
-              value={savedHomes.length}
-              icon={<Heart className="h-5 w-5 text-rose-500" />}
-            />
-            <MetricCard
-              title="Scheduled Visits"
-              value="2"
-              icon={<Calendar className="h-5 w-5 text-blue-500" />}
-              note="1 In-Person, 1 Video"
-            />
-            <MetricCard
-              title="Active Enquiries"
-              value="3"
-              icon={<MessageSquare className="h-5 w-5 text-purple-500" />}
-              note="Owner Response < 15m"
-            />
-            <MetricCard
-              title="Digital Agreements"
-              value="1"
-              icon={<FileText className="h-5 w-5 text-emerald-500" />}
-              note="Telangana E-Stamp"
-            />
-          </div>
+          {isSampleData && <DemoDataNotice reason={feed?.error} />}
 
-          {/* Quick Action Banner */}
-          <div className="rounded-3xl border border-primary/30 bg-primary/5 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary uppercase tracking-wide">
-                ✨ Hyderabad Search Assistant
-              </span>
-              <h2 className="mt-2 text-xl font-extrabold text-foreground">
-                Find 0% Brokerage Homes in Gachibowli & Madhapur
-              </h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Explore 4,500+ verified listings directly from property owners.
-              </p>
+          {isLoading ? (
+            <CardSkeleton />
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <KpiCard
+                label="Saved properties"
+                numericValue={savedHomes.length}
+                icon={<Heart className="h-4 w-4" />}
+                accent="rose"
+                hint="In your wishlist"
+              />
+              <KpiCard
+                label="Upcoming visits"
+                numericValue={BOOKINGS.filter((b) => b.status !== "Completed").length}
+                icon={<Calendar className="h-4 w-4" />}
+                accent="blue"
+                trend={{ direction: "up", label: "1 tomorrow" }}
+              />
+              <KpiCard
+                label="Active enquiries"
+                numericValue={ENQUIRIES.length}
+                icon={<MessageSquare className="h-4 w-4" />}
+                accent="purple"
+                hint="Avg reply < 15m"
+              />
+              <KpiCard
+                label="Listings available"
+                numericValue={properties.length}
+                icon={<Sparkles className="h-4 w-4" />}
+                accent="emerald"
+                trend={{ direction: "up", label: "Updated live" }}
+              />
             </div>
-            <Link
-              to="/properties"
-              search={{
-                q: "Hyderabad",
-                city: "Hyderabad",
-                listing: "rent",
-                minPrice: 0,
-                maxPrice: 0,
-                beds: 0,
-              }}
-              className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110"
-            >
-              <Search className="h-4 w-4" /> Browse Hyderabad Homes
-            </Link>
-          </div>
+          )}
 
-          {/* Saved Homes / Recommended Preview */}
+          {savedHomes.length === 0 && (
+            <OnboardingTips
+              tips={[
+                "Tap the heart on any listing to save it — saved homes appear here instantly.",
+                "Schedule a walkthrough directly from a property page; owners reply in under 15 minutes.",
+                "Every listing is 0% brokerage, so the rent you see is the rent you pay.",
+              ]}
+            />
+          )}
+
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-foreground">
-                {savedHomes.length > 0
-                  ? `Your Saved Favorites (${savedHomes.length})`
-                  : `Recommended Hyderabad Homes (${properties.slice(0, 3).length})`}
-              </h2>
-              <button
-                onClick={() => setActiveTab("saved")}
-                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-              >
-                View All <ArrowRight className="h-3 w-3" />
-              </button>
+            <SectionHeader title="Quick actions" subtitle="The things tenants do most" />
+            <QuickActions
+              actions={[
+                {
+                  id: "browse",
+                  label: "Find a home",
+                  hint: "Search verified listings",
+                  icon: <Search className="h-4 w-4" />,
+                  onClick: () => navigate({ to: "/properties", search: SEARCH_PARAMS }),
+                },
+                {
+                  id: "saved",
+                  label: "Saved homes",
+                  hint: `${savedHomes.length} shortlisted`,
+                  icon: <Heart className="h-4 w-4" />,
+                  onClick: () => setActiveTab("saved"),
+                },
+                {
+                  id: "visits",
+                  label: "My bookings",
+                  hint: "Visits & tours",
+                  icon: <CalendarCheck className="h-4 w-4" />,
+                  onClick: () => setActiveTab("bookings"),
+                },
+                {
+                  id: "enquiries",
+                  label: "My enquiries",
+                  hint: "Owner conversations",
+                  icon: <MessageSquare className="h-4 w-4" />,
+                  onClick: () => setActiveTab("enquiries"),
+                },
+              ]}
+            />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <TrendAreaChart
+              title="Your search activity"
+              subtitle="Listings viewed over the last 7 days"
+              data={VIEW_TREND}
+              valueName="Views"
+            />
+            {cityMix.length > 0 ? (
+              <DonutChart
+                title="Where the homes are"
+                subtitle="Available listings by city"
+                data={cityMix}
+              />
+            ) : (
+              <EmptyState
+                title="No listings yet"
+                hint="City coverage appears once listings load."
+              />
+            )}
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <SectionHeader
+                title={savedHomes.length > 0 ? "Your saved homes" : "Recommended for you"}
+                subtitle={
+                  savedHomes.length > 0
+                    ? "Shortlisted properties"
+                    : "Verified listings picked for you"
+                }
+                action={
+                  <button
+                    onClick={() => setActiveTab("saved")}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    View all <ArrowRight className="h-3 w-3" />
+                  </button>
+                }
+              />
+              <ListingGrid
+                items={(savedHomes.length > 0 ? savedHomes : properties).slice(0, 3)}
+                isLoading={isLoading}
+                isError={isError}
+                onRetry={refetch}
+                emptyTitle="No listings to show yet"
+                emptyHint="New verified homes appear here as owners publish them."
+              />
             </div>
 
-            <ListingGrid
-              isLoading={isLoading}
-              isError={isError}
-              onRetry={refetch}
-              items={savedHomes.length > 0 ? savedHomes.slice(0, 3) : properties.slice(0, 3)}
-              emptyTitle="No listings available yet"
-              emptyHint="New verified Hyderabad homes appear here as owners publish them."
-            />
+            <div className="rounded-3xl border border-border/60 bg-card p-5">
+              <SectionHeader title="Recent activity" />
+              <ActivityTimeline items={NOTIFICATIONS} />
+            </div>
           </div>
         </div>
       )}
 
+      {activeTab === "profile" && <ProfilePanel user={user} />}
+
       {activeTab === "saved" && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-foreground">
-            All Saved Properties ({savedHomes.length})
-          </h2>
+        <div className="space-y-5">
+          <SectionHeader
+            title={`Saved properties (${filteredSaved.length})`}
+            subtitle="Everything you've hearted across the platform"
+            action={
+              <SearchInput
+                value={savedQuery}
+                onChange={setSavedQuery}
+                placeholder="Search saved homes…"
+              />
+            }
+          />
           <ListingGrid
+            items={filteredSaved}
             isLoading={isLoading}
             isError={isError}
             onRetry={refetch}
-            items={savedHomes}
-            emptyTitle="Your favorites list is empty"
-            emptyHint="Browse properties in Hyderabad to save your preferred listings."
+            emptyTitle={savedQuery ? "No matches" : "Your saved list is empty"}
+            emptyHint={
+              savedQuery
+                ? "Try a different city or property name."
+                : "Tap the heart on any listing to shortlist it."
+            }
+            action={
+              <Link
+                to="/properties"
+                search={SEARCH_PARAMS}
+                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
+              >
+                <Search className="h-3.5 w-3.5" /> Browse listings
+              </Link>
+            }
           />
         </div>
       )}
 
-      {activeTab === "visits" && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-foreground">Your Scheduled Walkthrough Visits</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <VisitCard
-              title="Luxury 2BHK Apartment in Gachibowli"
-              date="Tomorrow, 10:00 AM"
-              type="In-Person Walkthrough"
-              owner="Suresh Reddy"
-              status="Confirmed"
-            />
-            <VisitCard
-              title="Modern Studio Flat near Financial District"
-              date="Friday, 02:00 PM"
-              type="Live Video Tour"
-              owner="Anitha Rao"
-              status="Scheduled"
-            />
-          </div>
-        </div>
-      )}
+      {activeTab === "searches" && <RecentSearchesPanel searches={recentSearches} />}
 
-      {activeTab === "enquiries" && (
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-foreground">Sent Property Enquiries</h2>
-          <div className="space-y-3">
-            <EnquiryRow
-              title="3BHK Gated Villa in Kondapur"
-              date="2 hours ago"
-              message="Hi, is this available for immediate move-in?"
-              status="Owner Responded"
+      {activeTab === "wishlist" && (
+        <div className="space-y-5">
+          <SectionHeader
+            title={`Wishlist (${savedHomes.length})`}
+            subtitle="Compare shortlisted homes side by side, then remove what no longer fits"
+          />
+          {isLoading ? (
+            <LoadingSkeleton rows={3} />
+          ) : savedHomes.length === 0 ? (
+            <EmptyState
+              icon={<Bookmark className="h-6 w-6" />}
+              title="Nothing on your wishlist"
+              hint="Save homes you like and compare their rent, size, and location here."
+              action={
+                <Link
+                  to="/properties"
+                  search={SEARCH_PARAMS}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
+                >
+                  Start browsing
+                </Link>
+              }
             />
-            <EnquiryRow
-              title="Fully Furnished 2BHK in Madhapur"
-              date="Yesterday"
-              message="Interested in scheduling a weekend visit."
-              status="Pending Response"
+          ) : (
+            <DataTable
+              rows={savedHomes}
+              getKey={(p) => p.id}
+              columns={[
+                {
+                  key: "home",
+                  header: "Property",
+                  render: (p: Property) => (
+                    <Link
+                      to="/properties/$id"
+                      params={{ id: p.id }}
+                      search={SEARCH_PARAMS}
+                      className="font-bold text-foreground hover:text-primary"
+                    >
+                      {p.title}
+                    </Link>
+                  ),
+                },
+                {
+                  key: "city",
+                  header: "Location",
+                  render: (p: Property) => <span className="text-muted-foreground">{p.city}</span>,
+                },
+                {
+                  key: "config",
+                  header: "Config",
+                  render: (p: Property) => (
+                    <span className="text-muted-foreground">
+                      {p.bedrooms} BHK · {p.area_sqft} sq.ft
+                    </span>
+                  ),
+                },
+                {
+                  key: "price",
+                  header: "Price",
+                  render: (p: Property) => (
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      {formatPrice(p.price, p.listing_type)}
+                    </span>
+                  ),
+                },
+                {
+                  key: "actions",
+                  header: "",
+                  className: "text-right",
+                  render: (p: Property) => (
+                    <button
+                      onClick={() => {
+                        toggle(p.id);
+                        toast.success("Removed from wishlist");
+                      }}
+                      className="rounded-lg px-2 py-1 text-[11px] font-bold text-rose-600 transition hover:bg-rose-500/10 dark:text-rose-400"
+                    >
+                      Remove
+                    </button>
+                  ),
+                },
+              ]}
             />
-          </div>
+          )}
         </div>
       )}
 
       {activeTab === "notifications" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Notifications & Alerts</h2>
-          <div className="rounded-2xl border border-border bg-card p-4 flex items-start gap-3">
-            <Bell className="h-5 w-5 text-primary flex-none mt-0.5" />
-            <div>
-              <p className="text-xs font-bold text-foreground">Price Drop Alert!</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                2BHK in Gachibowli reduced rent by ₹2,000/mo.
-              </p>
-              <span className="text-[10px] text-muted-foreground">30 mins ago</span>
-            </div>
+        <div className="space-y-5">
+          <SectionHeader
+            title="Notifications"
+            subtitle="Price drops, visit confirmations, and new matches"
+          />
+          <div className="rounded-3xl border border-border/60 bg-card p-6">
+            <ActivityTimeline items={NOTIFICATIONS} />
           </div>
+          <Link
+            to="/notifications"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"
+          >
+            Manage notification preferences <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
       )}
 
-      {activeTab === "settings" && (
-        <div className="rounded-3xl border border-border/50 bg-card p-6 max-w-xl">
-          <h2 className="text-lg font-bold text-foreground">Account Settings</h2>
-          <form
-            className="mt-4 space-y-4 text-xs"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setSettingsSaving(true);
-              const { error } = await supabase.auth.updateUser({
-                email: settingsEmail,
-                data: { full_name: settingsName },
-              });
-              setSettingsSaving(false);
-              if (error) toast.error(error.message);
-              else toast.success("Profile updated successfully!");
-            }}
-          >
-            <div>
-              <label
-                htmlFor="settings-name"
-                className="block text-muted-foreground font-semibold mb-1"
-              >
-                Full Name
-              </label>
-              <input
-                id="settings-name"
-                type="text"
-                value={settingsName}
-                onChange={(e) => setSettingsName(e.target.value)}
-                className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-foreground"
+      {activeTab === "bookings" && (
+        <div className="space-y-5">
+          <SectionHeader
+            title="Bookings & site visits"
+            subtitle="Walkthroughs and video tours you've scheduled"
+            action={
+              <FilterChips
+                active={bookingFilter}
+                onChange={setBookingFilter}
+                options={[
+                  { id: "all", label: "All" },
+                  { id: "upcoming", label: "Upcoming" },
+                  { id: "past", label: "Completed" },
+                ]}
               />
+            }
+          />
+          {visibleBookings.length === 0 ? (
+            <EmptyState
+              icon={<CalendarCheck className="h-6 w-6" />}
+              title="No bookings in this view"
+              hint="Schedule a visit from any property page and it will appear here."
+            />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {visibleBookings.map((b) => (
+                <div
+                  key={b.id}
+                  className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm transition hover:border-primary/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <StatusPill
+                      label={b.status}
+                      tone={
+                        b.status === "Confirmed"
+                          ? "success"
+                          : b.status === "Scheduled"
+                            ? "info"
+                            : "neutral"
+                      }
+                    />
+                    <span className="text-[11px] font-medium text-muted-foreground">{b.mode}</span>
+                  </div>
+                  <h3 className="mt-3 text-sm font-bold text-foreground">{b.title}</h3>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 text-primary" /> {b.when}
+                  </p>
+                  <p className="mt-3 border-t border-border/40 pt-2 text-[11px] text-muted-foreground">
+                    Owner: <span className="font-semibold text-foreground">{b.owner}</span>
+                  </p>
+                </div>
+              ))}
             </div>
-            <div>
-              <label
-                htmlFor="settings-email"
-                className="block text-muted-foreground font-semibold mb-1"
-              >
-                Email Address
-              </label>
-              <input
-                id="settings-email"
-                type="email"
-                value={settingsEmail}
-                onChange={(e) => setSettingsEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-foreground"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={settingsSaving}
-              className="rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-50"
-            >
-              {settingsSaving ? "Saving…" : "Save Changes"}
-            </button>
-          </form>
+          )}
         </div>
       )}
+
+      {activeTab === "enquiries" && (
+        <div className="space-y-5">
+          <SectionHeader
+            title="Your enquiries"
+            subtitle="Messages you've sent to property owners"
+          />
+          <DataTable
+            rows={ENQUIRIES}
+            getKey={(e) => e.id}
+            empty={
+              <EmptyState
+                icon={<MessageSquare className="h-6 w-6" />}
+                title="No enquiries yet"
+                hint="Message an owner from any listing to start a conversation."
+              />
+            }
+            columns={[
+              {
+                key: "property",
+                header: "Property",
+                render: (e: Enquiry) => (
+                  <span className="font-bold text-foreground">{e.title}</span>
+                ),
+              },
+              {
+                key: "message",
+                header: "Message",
+                render: (e: Enquiry) => (
+                  <span className="text-muted-foreground">"{e.message}"</span>
+                ),
+              },
+              {
+                key: "sent",
+                header: "Sent",
+                render: (e: Enquiry) => (
+                  <span className="whitespace-nowrap text-muted-foreground">{e.sent}</span>
+                ),
+              },
+              {
+                key: "status",
+                header: "Status",
+                className: "text-right",
+                render: (e: Enquiry) => (
+                  <StatusPill
+                    label={e.status}
+                    tone={e.status === "Owner responded" ? "success" : "warning"}
+                  />
+                ),
+              },
+            ]}
+          />
+        </div>
+      )}
+
+      {activeTab === "settings" && <SettingsPanel user={user} />}
     </DashboardLayout>
   );
 }
 
-/** Renders a property grid with explicit loading, error, and empty states. */
+/* ───────────────────────────── helper components ─────────────────────────── */
+
 function ListingGrid({
   items,
   isLoading,
@@ -302,6 +650,7 @@ function ListingGrid({
   onRetry,
   emptyTitle,
   emptyHint,
+  action,
 }: {
   items: Property[];
   isLoading: boolean;
@@ -309,6 +658,7 @@ function ListingGrid({
   onRetry: () => void;
   emptyTitle: string;
   emptyHint: string;
+  action?: React.ReactNode;
 }) {
   if (isLoading) {
     return (
@@ -322,33 +672,16 @@ function ListingGrid({
       </div>
     );
   }
-
-  if (isError) {
+  if (isError) return <ErrorState onRetry={onRetry} />;
+  if (items.length === 0)
     return (
-      <div className="rounded-3xl border border-dashed border-rose-500/40 p-12 text-center">
-        <p className="text-base font-bold text-foreground">We couldn't load your listings</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Check your connection and try again — your saved homes are safe.
-        </p>
-        <button
-          onClick={onRetry}
-          className="mt-4 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground"
-        >
-          Retry
-        </button>
-      </div>
+      <EmptyState
+        icon={<Heart className="h-6 w-6" />}
+        title={emptyTitle}
+        hint={emptyHint}
+        action={action}
+      />
     );
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="rounded-3xl border border-dashed border-border p-12 text-center">
-        <Heart className="mx-auto h-10 w-10 text-muted-foreground" />
-        <p className="mt-3 text-base font-bold text-foreground">{emptyTitle}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{emptyHint}</p>
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -359,86 +692,186 @@ function ListingGrid({
   );
 }
 
-function MetricCard({
-  title,
-  value,
-  icon,
-  note,
-}: {
-  title: string;
-  value: React.ReactNode;
-  icon: React.ReactNode;
-  note?: string;
-}) {
+function RecentSearchesPanel({ searches }: { searches: RecentSearch[] }) {
   return (
-    <div className="rounded-3xl border border-border/50 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-muted-foreground">{title}</span>
-        {icon}
-      </div>
-      <p className="mt-2 text-2xl font-black text-foreground">{value}</p>
-      {note && (
-        <p className="mt-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-          {note}
-        </p>
+    <div className="space-y-5">
+      <SectionHeader
+        title={`Recent searches (${searches.length})`}
+        subtitle="Jump straight back into a search you ran earlier"
+      />
+      {searches.length === 0 ? (
+        <EmptyState
+          icon={<History className="h-6 w-6" />}
+          title="No searches yet"
+          hint="Run a search and we'll keep it here so you can pick up where you left off."
+          action={
+            <Link
+              to="/properties"
+              search={SEARCH_PARAMS}
+              className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
+            >
+              <Search className="h-3.5 w-3.5" /> Start a search
+            </Link>
+          }
+        />
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {searches.map((s) => (
+            <Link
+              key={s.id}
+              to="/properties"
+              search={{
+                q: s.q,
+                city: s.city,
+                listing: s.listing,
+                minPrice: s.minPrice,
+                maxPrice: s.maxPrice,
+                beds: s.beds,
+              }}
+              className="group flex items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/50"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-foreground">
+                  {s.q || s.city || "All homes"}
+                </p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {[s.city, s.listing, s.beds ? `${s.beds}+ BHK` : null]
+                    .filter(Boolean)
+                    .join(" · ") || "No filters"}
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 flex-none text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" />
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );
 }
 
-function VisitCard({
-  title,
-  date,
-  type,
-  owner,
-  status,
-}: {
-  title: string;
-  date: string;
-  type: string;
-  owner: string;
-  status: string;
-}) {
+function ProfilePanel({ user }: { user: User | null }) {
+  const meta = user?.user_metadata ?? {};
+  const rows = [
+    { label: "Full name", value: displayName(user) },
+    { label: "Email", value: user?.email ?? "—" },
+    { label: "Mobile", value: (meta.phone as string) ?? "Not added" },
+    { label: "Account type", value: "Tenant & Buyer" },
+    {
+      label: "Member since",
+      value: user?.created_at
+        ? new Date(user.created_at).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—",
+    },
+  ];
+
   return (
-    <div className="rounded-3xl border border-border/50 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <span className="rounded-full bg-emerald-600/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-          ● {status}
-        </span>
-        <span className="text-xs text-muted-foreground font-medium">{type}</span>
+    <div className="space-y-5">
+      <SectionHeader title="Profile" subtitle="Your account details on Urban Properties" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+        {rows.map((r) => (
+          <div key={r.label} className="rounded-2xl border border-border/60 bg-card p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              {r.label}
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-foreground">{r.value}</p>
+          </div>
+        ))}
       </div>
-      <h3 className="mt-3 text-sm font-bold text-foreground">{title}</h3>
-      <p className="mt-1 text-xs text-muted-foreground flex items-center gap-1">
-        <Calendar className="h-3.5 w-3.5 text-primary" /> {date}
-      </p>
-      <p className="mt-2 text-[11px] text-muted-foreground border-t border-border/40 pt-2">
-        Owner: <span className="font-semibold text-foreground">{owner}</span>
-      </p>
+      <Link
+        to="/profile"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"
+      >
+        Open full profile page <ArrowRight className="h-3 w-3" />
+      </Link>
     </div>
   );
 }
 
-function EnquiryRow({
-  title,
-  date,
-  message,
-  status,
-}: {
-  title: string;
-  date: string;
-  message: string;
-  status: string;
-}) {
+function SettingsPanel({ user }: { user: User | null }) {
+  const [name, setName] = useState((user?.user_metadata?.full_name as string) ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [saving, setSaving] = useState(false);
+  const [alerts, setAlerts] = useState(true);
+
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-4 flex items-center justify-between gap-4">
-      <div>
-        <h4 className="text-xs font-bold text-foreground">{title}</h4>
-        <p className="text-xs text-muted-foreground mt-0.5">"{message}"</p>
-        <span className="text-[10px] text-muted-foreground mt-1 block">{date}</span>
+    <div className="space-y-5">
+      <SectionHeader title="Settings" subtitle="Manage your account and alert preferences" />
+
+      <form
+        className="max-w-xl space-y-4 rounded-3xl border border-border/60 bg-card p-6 text-xs"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setSaving(true);
+          const { error } = await supabase.auth.updateUser({
+            email,
+            data: { full_name: name },
+          });
+          setSaving(false);
+          if (error) toast.error(error.message);
+          else toast.success("Profile updated successfully");
+        }}
+      >
+        <div>
+          <label htmlFor="c-name" className="mb-1 block font-semibold text-muted-foreground">
+            Full name
+          </label>
+          <input
+            id="c-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div>
+          <label htmlFor="c-email" className="mb-1 block font-semibold text-muted-foreground">
+            Email address
+          </label>
+          <input
+            id="c-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-xl bg-primary px-4 py-2 font-bold text-primary-foreground disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Save changes"}
+        </button>
+      </form>
+
+      <div className="flex max-w-xl items-center justify-between rounded-3xl border border-border/60 bg-card p-5">
+        <div className="flex items-start gap-3">
+          <BellRing className="mt-0.5 h-4 w-4 flex-none text-primary" />
+          <div>
+            <p className="text-xs font-bold text-foreground">Price-drop alerts</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Get notified when a saved home reduces its rent.
+            </p>
+          </div>
+        </div>
+        <button
+          role="switch"
+          aria-checked={alerts}
+          aria-label="Toggle price-drop alerts"
+          onClick={() => {
+            setAlerts((v) => !v);
+            toast.success(`Price-drop alerts ${alerts ? "disabled" : "enabled"}`);
+          }}
+          className={`relative h-6 w-11 flex-none rounded-full transition ${alerts ? "bg-primary" : "bg-muted"}`}
+        >
+          <span
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${alerts ? "left-[22px]" : "left-0.5"}`}
+          />
+        </button>
       </div>
-      <span className="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary flex-none">
-        {status}
-      </span>
     </div>
   );
 }

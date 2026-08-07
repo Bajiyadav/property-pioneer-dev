@@ -109,8 +109,21 @@ export const Route = createFileRoute("/api/public/enquiries")({
           return jsonResponse({ error: "Verification failed. Please try again." }, 403);
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const db = supabaseAdmin;
+        // A missing service-role key must surface as a clean 503, not as an
+        // unhandled throw that renders the full-page recovery shell.
+        let db: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
+        try {
+          const mod = await import("@/integrations/supabase/client.server");
+          // Touch the proxy so a missing env var throws here, inside the guard.
+          void mod.supabaseAdmin.from;
+          db = mod.supabaseAdmin;
+        } catch (err) {
+          console.error("[enquiry] admin client unavailable", err);
+          return jsonResponse(
+            { error: "Enquiries are temporarily unavailable. Please call the owner directly." },
+            503,
+          );
+        }
 
         // ── 5. Rate limiting (per IP, per property, per phone) ──────────
         const countWhere = async (

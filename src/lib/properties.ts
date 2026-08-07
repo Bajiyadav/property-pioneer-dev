@@ -2,15 +2,22 @@ import type { Database } from "@/integrations/supabase/types";
 import {
   type Property,
   type PropertyStatus,
+  type PropertyFeed,
   type VerificationStatus,
   fetchPublicProperties,
+  fetchPublicPropertyFeed,
   fetchPublicPropertyById,
 } from "@/modules/property/propertyService";
 
-export type { Property, PropertyStatus, VerificationStatus };
+export type { Property, PropertyStatus, PropertyFeed, VerificationStatus };
 
 export async function fetchProperties(): Promise<Property[]> {
   return fetchPublicProperties();
+}
+
+/** Listings plus provenance — used by dashboards to flag seed data. */
+export async function fetchPropertyFeed(): Promise<PropertyFeed> {
+  return fetchPublicPropertyFeed();
 }
 
 export async function fetchProperty(id: string): Promise<Property | null> {
