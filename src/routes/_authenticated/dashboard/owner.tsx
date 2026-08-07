@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -16,11 +17,13 @@ import {
   PlusCircle,
   Settings,
   Star,
+  Trash2,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
+import { getMyListings, removeListing } from "@/lib/owner.functions";
 import { DashboardLayout, type NavItem } from "@/components/dashboard/DashboardLayout";
 import { RequireRole } from "@/components/dashboard/RequireRole";
 import { OwnerOnboardingModal } from "@/components/modals/OwnerOnboardingModal";
@@ -175,10 +178,33 @@ function OwnerDashboard({ user }: { user: User | null }) {
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
 
-  // Until `properties.owner_id` is populated the portfolio is a representative
-  // slice of the catalogue rather than a true per-owner query.
-  const listings = useMemo(() => properties.slice(0, 4), [properties]);
-  const drafts = useMemo(() => properties.slice(4, 6), [properties]);
+  // Real per-owner portfolio, scoped server-side to the signed-in owner_id.
+  const fetchMine = useServerFn(getMyListings);
+  const deleteMine = useServerFn(removeListing);
+  const {
+    data: mine,
+    isLoading: mineLoading,
+    isError: mineError,
+    refetch: refetchMine,
+  } = useQuery({ queryKey: ["owner", "listings"], queryFn: () => fetchMine({}), retry: false });
+
+  const queryClient = useQueryClient();
+  const removal = useMutation({
+    mutationFn: (id: string) => deleteMine({ data: { id } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["owner", "listings"] });
+      queryClient.invalidateQueries({ queryKey: ["property-feed"] });
+      toast.success("Listing deleted");
+    },
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "Could not delete the listing"),
+  });
+
+  const myListings = useMemo(() => mine ?? [], [mine]);
+  /** Live to the public. */
+  const listings = useMemo(() => myListings.filter((p) => p.is_approved), [myListings]);
+  /** Submitted or edited, waiting on moderator approval. */
+  const drafts = useMemo(() => myListings.filter((p) => !p.is_approved), [myListings]);
 
   const filteredListings = useMemo(() => {
     const q = listingQuery.trim().toLowerCase();
@@ -380,10 +406,12 @@ function OwnerDashboard({ user }: { user: User | null }) {
           />
           <ListingRows
             listings={filteredListings}
-            isLoading={isLoading}
-            isError={isError}
-            onRetry={refetch}
+            isLoading={mineLoading}
+            isError={mineError}
+            onRetry={refetchMine}
             onAdd={() => setShowWizard(true)}
+            onDelete={(id) => removal.mutate(id)}
+            deletingId={removal.isPending ? removal.variables : null}
           />
         </div>
       )}
@@ -641,12 +669,16 @@ function ListingRows({
   isError,
   onRetry,
   onAdd,
+  onDelete,
+  deletingId,
 }: {
   listings: Property[];
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
   onAdd: () => void;
+  onDelete?: (id: string) => void;
+  deletingId?: string | null;
 }) {
   if (isLoading) return <LoadingSkeleton rows={3} />;
   if (isError) return <ErrorState onRetry={onRetry} />;
@@ -712,6 +744,19 @@ function ListingRows({
               >
                 <FileEdit className="h-3.5 w-3.5" />
               </button>
+              {onDelete && (
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Delete "${p.title}"? This cannot be undone.`))
+                      onDelete(p.id);
+                  }}
+                  disabled={deletingId === p.id}
+                  aria-label={`Delete ${p.title}`}
+                  className="rounded-xl border border-border bg-secondary/50 p-2 text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

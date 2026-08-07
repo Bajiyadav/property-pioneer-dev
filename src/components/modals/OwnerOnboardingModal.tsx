@@ -1,4 +1,12 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { createListing, uploadListingImage } from "@/lib/owner.functions";
+
+interface PickedPhoto {
+  name: string;
+  dataUrl: string;
+}
 import {
   Dialog,
   DialogContent,
@@ -8,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  Info,
+  CheckCircle2,
   ArrowRight,
   ArrowLeft,
   Upload,
@@ -29,31 +37,96 @@ export function OwnerOnboardingModal({
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     title: "",
+    description: "",
     city: "Hyderabad",
     locality: "Gachibowli",
     propertyType: "Apartment",
     bedrooms: 2,
+    areaSqft: 900,
     rent: 25000,
     deposit: 50000,
     phone: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [photos, setPhotos] = useState<PickedPhoto[]>([]);
+
+  const create = useServerFn(createListing);
+  const uploadImage = useServerFn(uploadListingImage);
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 5));
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // This wizard collects details but does not yet write to `properties` —
-    // owner-scoped inserts need the owner_id column and RLS policy from
-    // migration 20260807120000. Until that ships, do NOT claim the listing was
-    // submitted: a false success would leave owners believing they are live.
-    toast.info("Details captured — listing submission isn't live yet", {
-      description:
-        "Owner self-publishing is being enabled. Our team will contact you to complete this listing.",
-    });
+    if (saving) return;
+
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) {
+      toast.error("Please sign in to publish a listing.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Upload any selected photos first so the listing is created with real URLs.
+      const urls: string[] = [];
+      for (const photo of photos) {
+        const { url } = await uploadImage({
+          data: { dataUrl: photo.dataUrl, filename: photo.name },
+        });
+        urls.push(url);
+      }
+
+      await create({
+        data: {
+          title: formData.title.trim(),
+          description:
+            formData.description.trim() ||
+            `${formData.bedrooms} BHK ${formData.propertyType} in ${formData.locality}, ${formData.city}.`,
+          price: Number(formData.rent),
+          city: formData.city,
+          address: formData.locality,
+          bedrooms: Number(formData.bedrooms),
+          bathrooms: Math.max(1, Number(formData.bedrooms)),
+          area_sqft: Number(formData.areaSqft) || 900,
+          property_type: formData.propertyType,
+          listing_type: "rent",
+          images: urls,
+        },
+      });
+
+      setSubmitted(true);
+      toast.success("Listing submitted for review", {
+        description: "It goes live as soon as a moderator approves it.",
+      });
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not save the listing. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onPickFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    const picked: PickedPhoto[] = [];
+    for (const file of Array.from(files).slice(0, 8)) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} is over the 5 MB limit.`);
+        continue;
+      }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Could not read the file"));
+        reader.readAsDataURL(file);
+      });
+      picked.push({ name: file.name, dataUrl });
+    }
+    setPhotos((prev) => [...prev, ...picked].slice(0, 8));
   };
 
   return (
@@ -85,14 +158,18 @@ export function OwnerOnboardingModal({
 
         {submitted ? (
           <div className="py-8 text-center space-y-4">
-            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-primary/10 text-primary">
-              <Info className="h-8 w-8" />
+            <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-600/10 text-emerald-600">
+              <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground">Thanks — we have your details</h3>
+            <h3 className="text-xl font-semibold text-foreground">Listing submitted for review</h3>
             <p className="mx-auto max-w-md text-xs text-muted-foreground">
-              Owner self-publishing isn't switched on yet, so{" "}
-              <strong className="text-foreground">{formData.title || "your property"}</strong> has
-              not been listed. Our Hyderabad team will contact you to complete it.
+              <strong className="text-foreground">{formData.title || "Your property"}</strong> has
+              been saved to your account
+              {photos.length > 0
+                ? ` with ${photos.length} photo${photos.length > 1 ? "s" : ""}`
+                : ""}
+              . It appears publicly as soon as a moderator approves it — you can track it under{" "}
+              <strong className="text-foreground">My Listings</strong>.
             </p>
             <button
               onClick={() => {
@@ -225,8 +302,58 @@ export function OwnerOnboardingModal({
             {step === 4 && (
               <div className="space-y-3">
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
-                  Step 4: Contact & Phone Verification
+                  Step 4: Photos & Contact
                 </h4>
+
+                <div>
+                  <label htmlFor="listing-photos" className="text-xs font-medium text-foreground">
+                    Property photos (up to 8, max 5 MB each)
+                  </label>
+                  <input
+                    id="listing-photos"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    multiple
+                    onChange={(e) => onPickFiles(e.target.files)}
+                    className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-xs file:font-semibold"
+                  />
+                  {photos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {photos.map((p, i) => (
+                        <div key={`${p.name}-${i}`} className="relative">
+                          <img
+                            src={p.dataUrl}
+                            alt={p.name}
+                            className="h-14 w-20 rounded-lg border border-border object-cover"
+                          />
+                          <button
+                            type="button"
+                            aria-label={`Remove ${p.name}`}
+                            onClick={() => setPhotos((prev) => prev.filter((_, k) => k !== i))}
+                            className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-rose-600 text-[10px] font-bold text-white"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="listing-desc" className="text-xs font-medium text-foreground">
+                    Description
+                  </label>
+                  <textarea
+                    id="listing-desc"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Furnishing, amenities, nearby landmarks…"
+                    className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
+                  />
+                </div>
+
                 <div>
                   <label className="text-xs font-medium text-foreground">
                     Mobile Phone (WhatsApp Leads)
@@ -294,9 +421,14 @@ export function OwnerOnboardingModal({
               ) : (
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-6 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500"
+                  disabled={saving}
+                  className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-6 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500 disabled:opacity-50"
                 >
-                  Publish Listing FREE
+                  {saving
+                    ? photos.length
+                      ? "Uploading photos…"
+                      : "Submitting…"
+                    : "Submit Listing FREE"}
                 </button>
               )}
             </div>
