@@ -1,3 +1,8 @@
+## v0.1.2 — 2026-08-07
+
+### Fixes
+- fix(ci): honour the server/client boundary convention; harden health check (005c494)
+
 ## v0.1.1 — 2026-08-07
 
 ### Fixes
