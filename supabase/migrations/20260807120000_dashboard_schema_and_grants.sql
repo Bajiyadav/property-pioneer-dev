@@ -47,14 +47,20 @@ CREATE POLICY "Owners manage their own properties"
 
 CREATE INDEX IF NOT EXISTS properties_owner_id_idx ON public.properties (owner_id);
 
--- ── 2. Extend app_role with the personas the product actually uses
-DO $$
-BEGIN
-  ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'customer';
-  ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'owner';
-  ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'agent';
-EXCEPTION WHEN others THEN NULL;
-END $$;
+-- ── 2. Extend app_role with the personas the product actually uses.
+-- ALTER TYPE ... ADD VALUE cannot run inside a transaction block on older
+-- Postgres, so each value is added in its own statement.
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'customer';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'owner';
+ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'agent';
+
+-- ── 2b. Harden user_roles.
+-- The live database grants SELECT on user_roles to `anon`, which the original
+-- migration never intended. RLS still returns zero rows to anon (the policy is
+-- scoped TO authenticated), so nothing leaked — but the grant is wider than the
+-- policy and should not be relied on as the only barrier.
+REVOKE ALL ON public.user_roles FROM anon;
+GRANT SELECT ON public.user_roles TO authenticated;
 
 -- ── 3. profiles
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -107,6 +113,13 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Backfill profiles for accounts that already exist; the trigger only fires on
+-- new sign-ups, so without this every current user would have no profile row.
+INSERT INTO public.profiles (id, full_name, phone)
+SELECT u.id, u.raw_user_meta_data ->> 'full_name', u.raw_user_meta_data ->> 'phone'
+FROM auth.users u
+ON CONFLICT (id) DO NOTHING;
 
 -- ── 4. favorites (server-side mirror of the local wishlist)
 CREATE TABLE IF NOT EXISTS public.favorites (

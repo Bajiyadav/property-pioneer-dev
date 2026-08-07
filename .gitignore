@@ -31,3 +31,9 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Local environment (secrets stay out of git — configure them in Vercel)
+.env
+.env.local
+.env.*.local
+!.env.example
