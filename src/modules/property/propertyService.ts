@@ -91,6 +91,24 @@ function withVerificationDefaults(row: PropertyRow): Property {
   } as Property;
 }
 
+/**
+ * Fixed timestamps for the seed rows.
+ *
+ * These were `new Date().toISOString()`, evaluated when the module was first
+ * imported — which happens at a different instant on the server than in the
+ * browser. Any component deriving output from `created_at` (relative times, the
+ * "Newly Listed" badge) therefore rendered different text on each side and broke
+ * hydration. Constants keep SSR and the client byte-identical.
+ */
+const SEED_CREATED_AT = [
+  "2026-08-01T09:00:00.000Z",
+  "2026-07-30T09:00:00.000Z",
+  "2026-07-28T09:00:00.000Z",
+  "2026-07-25T09:00:00.000Z",
+  "2026-07-22T09:00:00.000Z",
+  "2026-07-18T09:00:00.000Z",
+] as const;
+
 export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   {
     id: "hyd-000",
@@ -122,7 +140,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: true,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[0],
   },
   {
     id: "hyd-001",
@@ -149,7 +167,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: true,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[1],
   },
   {
     id: "hyd-002",
@@ -176,7 +194,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: false,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[2],
   },
   {
     id: "hyd-003",
@@ -203,7 +221,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: true,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[3],
   },
   {
     id: "hyd-004",
@@ -230,7 +248,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: false,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[4],
   },
   {
     id: "hyd-006",
@@ -257,7 +275,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     id_verified: true,
     is_zero_brokerage: true,
     is_premium: false,
-    created_at: new Date().toISOString(),
+    created_at: SEED_CREATED_AT[5],
   },
 ];
 

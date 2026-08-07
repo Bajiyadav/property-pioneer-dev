@@ -49,6 +49,7 @@ export function UrbanAISearch() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="e.g. Furnished 2BHK flat under ₹30,000 near Raidurg Metro for bachelors"
+            aria-label="Describe the home you are looking for"
             className="w-full rounded-2xl border border-border bg-background py-3.5 pl-11 pr-4 text-xs sm:text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>

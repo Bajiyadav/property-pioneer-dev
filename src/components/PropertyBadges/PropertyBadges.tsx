@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   type Property,
   isOwnerVerified,
@@ -18,7 +19,14 @@ export function PropertyBadges({
   const isZeroBrokerage = property.is_zero_brokerage !== false;
   const isFeatured = property.is_featured;
   const isPremium = Boolean(property.is_premium);
-  const newlyListed = isNewlyListed(property);
+
+  // `isNewlyListed` reads the wall clock, so evaluating it during render makes
+  // the server and client disagree and fails hydration. Resolve it after mount:
+  // the first client render then matches the SSR markup exactly.
+  const [newlyListed, setNewlyListed] = useState(false);
+  useEffect(() => {
+    setNewlyListed(isNewlyListed(property));
+  }, [property]);
 
   const textSize =
     size === "sm"

@@ -45,6 +45,7 @@ export function SearchBar({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder="Search by City, Locality, Metro Station, College, IT Park, or Landmark"
+          aria-label="Search properties by city, locality, or landmark"
           className="w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"
         />
       </div>

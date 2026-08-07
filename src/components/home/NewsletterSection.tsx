@@ -46,6 +46,7 @@ export function NewsletterSection() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
+                  aria-label="Email address for newsletter updates"
                   className="w-full rounded-xl border border-border bg-background py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
                 />
               </div>
