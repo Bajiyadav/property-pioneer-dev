@@ -1,3 +1,8 @@
+## v0.1.3 — 2026-08-07
+
+### Refactoring
+- refactor(types): generate Supabase types from live schema; validate env at startup (c8e694b)
+
 ## v0.1.2 — 2026-08-07
 
 ### Fixes
