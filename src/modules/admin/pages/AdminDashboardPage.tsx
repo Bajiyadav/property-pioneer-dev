@@ -657,7 +657,7 @@ function AdminDashboard({ user }: { user: User | null }) {
           <SectionHeader title="Platform settings" subtitle="Global configuration" />
           <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
             {[
-              { label: "Zero brokerage", value: "Enabled platform-wide" },
+              { label: "Platform commission", value: "None charged on listings" },
               { label: "Listing auto-approval", value: "Disabled — manual review" },
               { label: "Enquiry rate limit", value: "6 / hour / IP" },
               { label: "CAPTCHA", value: "Cloudflare Turnstile" },

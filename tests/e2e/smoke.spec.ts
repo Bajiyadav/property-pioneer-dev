@@ -27,7 +27,6 @@ test.describe("public routes", () => {
     ["/villas", /Villa/i],
     ["/plots", /Plot/i],
     ["/farm-lands", /Farm/i],
-    ["/home-services", /Home Services/i],
     ["/favorites", /Saved/i],
     ["/blog", /Blog|Insight/i],
     ["/help", /help/i],
@@ -59,7 +58,7 @@ test.describe("public routes", () => {
   // The homepage used to render its own footer on top of the global one, so
   // visitors saw the brand blurb, the columns and the copyright twice.
   test("renders exactly one footer on every page", async ({ page }) => {
-    for (const path of ["/", `/properties${SEARCH}`, "/buy", "/home-services", "/help"]) {
+    for (const path of ["/", `/properties${SEARCH}`, "/buy", "/help"]) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
       await expect(page.locator("footer"), `${path} should have one footer`).toHaveCount(1);
       const copies = await page.getByText("© 2022 Urban Properties. All Rights Reserved.").count();
@@ -156,6 +155,16 @@ test.describe("product focus", () => {
     "Plumbing Services",
     "Internet Setup",
     "Explore & Book Service",
+    // Fabricated integrations and unearned claims removed in the credibility pass.
+    "Powered by Gemini",
+    "Urban AI",
+    "Zero Brokerage",
+    "0% Brokerage",
+    "Aadhaar",
+    "Launching Soon",
+    "Download the Urban Properties mobile app",
+    "Pan-India",
+    "Expanding Across India",
   ];
 
   test("homepage carries no removed promotional sections", async ({ page }) => {
@@ -163,6 +172,38 @@ test.describe("product focus", () => {
     const body = await page.locator("body").innerText();
     for (const phrase of REMOVED) {
       expect(body, `"${phrase}" should be gone`).not.toContain(phrase);
+    }
+  });
+
+  // Assertions on specific phrasings rather than bare keywords: /help may
+  // legitimately say we do NOT verify RERA or title deeds, and /blog may list
+  // "RERA compliance" as a planned guide topic. Only the affirmative claim is a
+  // defect, because the platform performs none of these checks.
+  const FALSE_CLAIMS = [
+    /we verify (rera|title)/i,
+    /title[- ]cleared/i,
+    /title deed (audit|verification)/i,
+    /verify .{0,30}(hmda|ghmc) approvals/i,
+    /pre-?approv(ed|al) (in|from)/i,
+    /bank partners/i,
+    /aadhaar (identity )?verif/i,
+    /government verified/i,
+    /legally verified/i,
+    /100% (verified|title|zero brokerage|direct owner verification)/i,
+    /guarantee(s|d)? (zero|0%) brokerage/i,
+  ];
+
+  test("no page makes a verification or finance claim the platform cannot back", async ({
+    page,
+  }) => {
+    for (const path of ["/", "/help", "/blog", "/auth"]) {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      // textContent, not innerText: FAQ answers live inside collapsed
+      // accordions and would otherwise go unchecked.
+      const text = await page.evaluate(() => document.body.textContent ?? "");
+      for (const claim of FALSE_CLAIMS) {
+        expect(text, `${claim} must not appear on ${path}`).not.toMatch(claim);
+      }
     }
   });
 

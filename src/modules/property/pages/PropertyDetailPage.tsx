@@ -1,9 +1,8 @@
 import { Link, notFound, useParams } from "@tanstack/react-router";
-import { StatCard, ConnectivityItem } from "@/modules/property/components/PropertyStatCard";
+import { StatCard } from "@/modules/property/components/PropertyStatCard";
 import { EnquiryForm } from "@/modules/property/components/PropertyEnquiryForm";
 import { PropertyStructuredData } from "@/modules/property/components/PropertyStructuredData";
-import { Stat, RoomCard, ReviewCard } from "@/modules/property/components/PropertyDisplayAtoms";
-import { UrbanAiAssistant } from "@/modules/property/components/PropertyAiAssistant";
+import { Stat, RoomCard } from "@/modules/property/components/PropertyDisplayAtoms";
 
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -34,8 +33,6 @@ import {
   Wifi,
   Zap,
   Car,
-  GraduationCap,
-  Hospital,
   Building,
   Check,
   Copy,
@@ -44,7 +41,6 @@ import {
   Sparkle,
   Clock,
   Shield,
-  TrainTrack,
 } from "lucide-react";
 import {
   fetchProperty,
@@ -58,7 +54,6 @@ import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
 import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
-import { RentalAgreementModal } from "@/shared/components/dialogs/RentalAgreementModal";
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
@@ -71,7 +66,6 @@ export function PropertyDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [agreementOpen, setAgreementOpen] = useState(false);
   const [emiOpen, setEmiOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [comparing, setComparing] = useState(false);
@@ -162,15 +156,7 @@ export function PropertyDetailPage() {
               <span className="rounded-full bg-secondary px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-foreground">
                 {property.property_type}
               </span>
-              <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Verified Owner
-              </span>
-              <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                <BadgeCheck className="h-3.5 w-3.5" /> 0% Brokerage
-              </span>
-              <span className="rounded-full bg-purple-600/10 px-3 py-1 text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5" /> Verified Property
-              </span>
+              <PropertyBadges property={property} />
             </div>
             <span className="text-xs font-mono text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-md">
               REF: UP-HYD-{property.id.slice(0, 6).toUpperCase()}
@@ -392,92 +378,6 @@ export function PropertyDetailPage() {
               </div>
             </section>
 
-            {/* HYDERABAD NEIGHBORHOOD ACCESS */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">
-                    Transit & Key Neighborhood Hubs
-                  </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Prime location: Vinayak Nagar, Madhapur, Hyderabad
-                  </p>
-                </div>
-                <span className="rounded-full bg-emerald-600/10 px-3.5 py-1.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
-                  ★ 9.8/10 Connectivity Score
-                </span>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <ConnectivityItem
-                  icon={<Building className="h-4 w-4 text-purple-500" />}
-                  title="Mindspace IT Park"
-                  dist="0.8 km (3 mins)"
-                />
-                <ConnectivityItem
-                  icon={<Building className="h-4 w-4 text-blue-500" />}
-                  title="Cyber Towers"
-                  dist="1.2 km (4 mins)"
-                />
-                <ConnectivityItem
-                  icon={<TrainTrack className="h-4 w-4 text-blue-500" />}
-                  title="Durgam Cheruvu Metro Station"
-                  dist="1.5 km (5 mins)"
-                />
-                <ConnectivityItem
-                  icon={<TrainTrack className="h-4 w-4 text-indigo-500" />}
-                  title="Raidurg Metro Station"
-                  dist="1.8 km (6 mins)"
-                />
-                <ConnectivityItem
-                  icon={<Building2 className="h-4 w-4 text-rose-500" />}
-                  title="Inorbit Mall & Lake"
-                  dist="1.4 km (5 mins)"
-                />
-                <ConnectivityItem
-                  icon={<Building2 className="h-4 w-4 text-amber-500" />}
-                  title="IKEA Hyderabad"
-                  dist="2.0 km (7 mins)"
-                />
-                <ConnectivityItem
-                  icon={<Hospital className="h-4 w-4 text-rose-500" />}
-                  title="AIG Super-Specialty Hospital"
-                  dist="1.9 km (6 mins)"
-                />
-                <ConnectivityItem
-                  icon={<MapPin className="h-4 w-4 text-emerald-500" />}
-                  title="Jubilee Hills Checkpost"
-                  dist="3.0 km (9 mins)"
-                />
-              </div>
-            </section>
-
-            {/* CUSTOMER REVIEWS */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-foreground">
-                  Verified Resident & Visitor Reviews
-                </h2>
-                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                  ★ 4.9{" "}
-                  <span className="text-muted-foreground text-xs font-normal">(14 reviews)</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <ReviewCard
-                  author="Vikram Roy"
-                  role="Senior Lead, Mindspace"
-                  text="The duplex property in Vinayak Nagar, Madhapur is exactly as described. 0% brokerage saved us over ₹45,000 upfront."
-                />
-                <ReviewCard
-                  author="Srinivas Rao"
-                  role="IT Professional, Hitech City"
-                  text="Super smooth scheduling for in-person walkthrough. The direct owner contact without brokers is a game changer in Hyderabad."
-                />
-              </div>
-            </section>
-
             {/* DESCRIPTION */}
             <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <h2 className="text-xl font-bold text-foreground">About This Property</h2>
@@ -485,9 +385,6 @@ export function PropertyDetailPage() {
                 {property.description}
               </p>
             </section>
-
-            {/* ASK URBAN AI ASSISTANT */}
-            <UrbanAiAssistant property={property} />
           </div>
 
           {/* Sidebar Financial & Contact Panel */}
@@ -503,7 +400,7 @@ export function PropertyDetailPage() {
                 </p>
                 {property.listing_type === "rent" && (
                   <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-600/10 px-2.5 py-1 rounded-full">
-                    Zero Brokerage
+                    No platform commission
                   </span>
                 )}
               </div>
@@ -533,7 +430,7 @@ export function PropertyDetailPage() {
                 <div>
                   <p className="text-xs font-bold text-foreground">Direct Owner Property</p>
                   <p className="text-[11px] text-muted-foreground">
-                    Verified ID • 100% Zero Brokerage
+                    Listed directly by the owner • Urban Properties adds no commission
                   </p>
                 </div>
               </div>
@@ -550,13 +447,6 @@ export function PropertyDetailPage() {
                   className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xs font-bold text-primary-foreground transition hover:brightness-110 shadow-md"
                 >
                   <Calendar className="h-4 w-4" /> Schedule Visit Walkthrough
-                </button>
-
-                <button
-                  onClick={() => setAgreementOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl border border-emerald-600/40 bg-emerald-600/10 px-4 py-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-600/20"
-                >
-                  <FileText className="h-4 w-4" /> Generate Digital Agreement
                 </button>
 
                 <button
@@ -643,11 +533,11 @@ export function PropertyDetailPage() {
 
       {/* MODALS */}
       <ScheduleVisitModal
+        propertyId={property.id}
         propertyTitle={property.title}
         isOpen={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
       />
-      <RentalAgreementModal isOpen={agreementOpen} onClose={() => setAgreementOpen(false)} />
     </div>
   );
 }

@@ -1,19 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandMark } from "@/shared/components/BrandMark";
+import { APP_NAME } from "@/config/app";
 
+/**
+ * Catch-all for unknown URLs.
+ *
+ * Known limitation: this responds 200, not 404. `setResponseStatus(404)` in
+ * `beforeLoad` was verified to execute during SSR but the streaming render
+ * handler overwrites the status afterwards, so the call was removed rather than
+ * left in place looking effective. `robots: noindex` below keeps these URLs out
+ * of the index in the meantime.
+ */
 export const Route = createFileRoute("/$")({
   head: () => ({
     meta: [
-      { title: "Page not found — Urban Rental Flats" },
+      { title: `Page not found — ${APP_NAME}` },
       {
         name: "description",
-        content:
-          "This page doesn't exist on Urban Rental Flats. Browse homes for rent and sale across India.",
+        content: `This page doesn't exist on ${APP_NAME}. Browse homes for rent and sale in Hyderabad.`,
       },
-      { property: "og:title", content: "Page not found — Urban Rental Flats" },
-      { property: "og:description", content: "This page doesn't exist on Urban Rental Flats." },
+      { property: "og:title", content: `Page not found — ${APP_NAME}` },
+      { property: "og:description", content: `This page doesn't exist on ${APP_NAME}.` },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Urban Rental Flats" },
+      { property: "og:site_name", content: APP_NAME },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
     ],

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,14 +6,26 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { Calendar, Clock, MapPin, CheckCircle2, User, Phone, Video } from "lucide-react";
+import { Calendar, MapPin, CheckCircle2, Video, Loader2 } from "lucide-react";
+import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
 
+/**
+ * Visit request for a property.
+ *
+ * This previously showed a "Visit Confirmed!" screen and promised an SMS
+ * reminder while persisting nothing at all. There is no scheduling or SMS
+ * backend, so rather than keep a confirmation the product cannot honour, the
+ * form now submits a real enquiry — the one workflow that does exist — with the
+ * requested slot in the message. The owner receives it in their dashboard, and
+ * the success copy claims only that.
+ */
 export function ScheduleVisitModal({
+  propertyId,
   propertyTitle,
   isOpen,
   onClose,
 }: {
+  propertyId: string;
   propertyTitle?: string;
   isOpen: boolean;
   onClose: () => void;
@@ -23,55 +35,78 @@ export function ScheduleVisitModal({
   const [time, setTime] = useState("10:00 AM");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [booked, setBooked] = useState(false);
+  /** Honeypot — a real user never sees or fills this. */
+  const [company, setCompany] = useState("");
+  const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Timing is measured from when the form is actually shown, since the endpoint
+  // rejects submissions that arrive implausibly fast.
+  const openedAt = useRef(0);
+  useEffect(() => {
+    if (isOpen) openedAt.current = Date.now();
+  }, [isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !date) return;
-    setBooked(true);
-    toast.success("Property Visit Scheduled Successfully!", {
-      description: `Confirmed ${visitType === "in_person" ? "In-Person Walkthrough" : "Live Video Tour"} on ${date} at ${time}.`,
+    if (submitting) return;
+    setError("");
+    setSubmitting(true);
+
+    const visitLabel = visitType === "in_person" ? "in-person visit" : "video tour";
+    const result = await submitEnquiry({
+      propertyId,
+      name,
+      phone,
+      message: `Visit request: ${visitLabel} on ${date} at ${time}. Please confirm if this slot works.`,
+      company,
+      elapsedMs: Date.now() - openedAt.current,
     });
+
+    setSubmitting(false);
+    if (result.ok) {
+      setSent(true);
+    } else {
+      setError(result.error);
+    }
+  };
+
+  const close = () => {
+    setSent(false);
+    setError("");
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent className="sm:max-w-md bg-card border-border p-6 rounded-3xl shadow-2xl">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              Verified Owner Walkthrough
-            </span>
-            <span className="text-xs text-muted-foreground">0% Brokerage</span>
-          </div>
-          <DialogTitle className="text-xl font-semibold text-foreground mt-2">
-            Schedule Property Visit
+          <DialogTitle className="text-xl font-semibold text-foreground">
+            Request a Property Visit
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            {propertyTitle || "Hyderabad Rental Property"}
+            {propertyTitle || "Hyderabad rental property"}
           </DialogDescription>
         </DialogHeader>
 
-        {booked ? (
+        {sent ? (
           <div className="py-6 text-center space-y-3">
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-600/10 text-emerald-600">
               <CheckCircle2 className="h-7 w-7" />
             </div>
-            <h4 className="text-base font-semibold text-foreground">Visit Confirmed!</h4>
+            <h4 className="text-base font-semibold text-foreground">Request sent</h4>
             <p className="text-xs text-muted-foreground">
-              The property owner has been notified. You will receive an SMS reminder before your
-              visit on{" "}
+              Your visit request for{" "}
               <strong className="text-foreground">
                 {date} at {time}
-              </strong>
-              .
+              </strong>{" "}
+              has been sent to the owner. They will see it in their dashboard and contact you on the
+              number you provided. The slot is not confirmed until the owner responds.
             </p>
             <button
               type="button"
-              onClick={() => {
-                setBooked(false);
-                onClose();
-              }}
+              onClick={close}
               className="rounded-xl bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow"
             >
               Done & Close
@@ -79,7 +114,6 @@ export function ScheduleVisitModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-            {/* Visit Type selector */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -101,15 +135,17 @@ export function ScheduleVisitModal({
                     : "border-border bg-background text-foreground"
                 }`}
               >
-                <Video className="h-4 w-4" /> Live Video Tour
+                <Video className="h-4 w-4" /> Video Tour
               </button>
             </div>
 
-            {/* Date & Time Selectors */}
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[11px] font-semibold text-foreground">Preferred Date</label>
+                <label htmlFor="visit-date" className="text-[11px] font-semibold text-foreground">
+                  Preferred Date
+                </label>
                 <input
+                  id="visit-date"
                   type="date"
                   required
                   value={date}
@@ -118,8 +154,11 @@ export function ScheduleVisitModal({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-semibold text-foreground">Time Slot</label>
+                <label htmlFor="visit-time" className="text-[11px] font-semibold text-foreground">
+                  Time Slot
+                </label>
                 <select
+                  id="visit-time"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
@@ -132,10 +171,12 @@ export function ScheduleVisitModal({
               </div>
             </div>
 
-            {/* Name & Contact */}
             <div>
-              <label className="text-[11px] font-semibold text-foreground">Your Full Name</label>
+              <label htmlFor="visit-name" className="text-[11px] font-semibold text-foreground">
+                Your Full Name
+              </label>
               <input
+                id="visit-name"
                 type="text"
                 required
                 value={name}
@@ -145,8 +186,11 @@ export function ScheduleVisitModal({
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold text-foreground">Mobile Phone</label>
+              <label htmlFor="visit-phone" className="text-[11px] font-semibold text-foreground">
+                Mobile Phone
+              </label>
               <input
+                id="visit-phone"
                 type="tel"
                 required
                 value={phone}
@@ -156,11 +200,37 @@ export function ScheduleVisitModal({
               />
             </div>
 
+            {/* Honeypot: hidden from users, attractive to bots. */}
+            <input
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="hidden"
+            />
+
+            {error && (
+              <p role="alert" className="text-[11px] font-medium text-destructive">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground transition hover:brightness-110 shadow"
+              disabled={submitting}
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground transition hover:brightness-110 shadow disabled:opacity-60"
             >
-              <Calendar className="h-4 w-4" /> Confirm Visit Booking
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4" /> Send Visit Request
+                </>
+              )}
             </button>
           </form>
         )}

@@ -18,64 +18,9 @@ const CITY_ROADMAP: CityRoadmap[] = [
   },
   {
     name: "Bangalore",
-    tag: "Koramangala, Whitefield & Indiranagar",
+    tag: "Koramangala & Indiranagar",
     status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Chennai",
-    tag: "OMR, Velachery & Anna Nagar",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Pune",
-    tag: "Kharadi, Hinjewadi & Baner",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  { name: "Mumbai", tag: "Bandra, BKC & Powai", status: "upcoming", badge: "🚀 Launching Soon" },
-  {
-    name: "Delhi NCR",
-    tag: "Gurugram, Noida & Saket",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Visakhapatnam",
-    tag: "Beach Road, MVP Colony & Gajuwaka",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Vijayawada",
-    tag: "Benz Circle, Enikepadu & Amaravati",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Jaipur",
-    tag: "Malviya Nagar, Vaishali & Jagatpura",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Lucknow",
-    tag: "Gomti Nagar & Hazratganj",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Indore",
-    tag: "Vijay Nagar & Super Corridor",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
-  },
-  {
-    name: "Warangal",
-    tag: "Kazipet & Hanamkonda Corridor",
-    status: "upcoming",
-    badge: "🚀 Launching Soon",
+    badge: "Upcoming Market",
   },
 ];
 
@@ -100,14 +45,14 @@ export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoad
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="mb-8">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-          <Rocket className="h-3.5 w-3.5" /> Pan-India Expansion Roadmap
+          <Rocket className="h-3.5 w-3.5" /> Where We Operate
         </span>
         <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
-          Expanding Across India
+          Live in Hyderabad
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Launching with Hyderabad as our first market, Urban Properties is rapidly expanding to
-          every major real estate hub.
+          Hyderabad is our live market. Bangalore is an early expansion and does not yet have full
+          coverage.
         </p>
       </div>
 

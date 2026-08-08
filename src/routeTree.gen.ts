@@ -19,7 +19,6 @@ import { Route as CommercialRouteImport } from './routes/commercial'
 import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
-import { Route as HomeServicesRouteImport } from './routes/home-services'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlotsRouteImport } from './routes/plots'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -90,11 +89,6 @@ const FavoritesRoute = FavoritesRouteImport.update({
 const HelpRoute = HelpRouteImport.update({
   id: '/help',
   path: '/help',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeServicesRoute = HomeServicesRouteImport.update({
-  id: '/home-services',
-  path: '/home-services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -228,7 +222,6 @@ export interface FileRoutesByFullPath {
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/home-services': typeof HomeServicesRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
   '/profile': typeof ProfileRoute
@@ -262,7 +255,6 @@ export interface FileRoutesByTo {
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/home-services': typeof HomeServicesRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
   '/profile': typeof ProfileRoute
@@ -296,7 +288,6 @@ export interface FileRoutesById {
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/home-services': typeof HomeServicesRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
   '/profile': typeof ProfileRoute
@@ -332,7 +323,6 @@ export interface FileRouteTypes {
     | '/farm-lands'
     | '/favorites'
     | '/help'
-    | '/home-services'
     | '/notifications'
     | '/plots'
     | '/profile'
@@ -366,7 +356,6 @@ export interface FileRouteTypes {
     | '/farm-lands'
     | '/favorites'
     | '/help'
-    | '/home-services'
     | '/notifications'
     | '/plots'
     | '/profile'
@@ -399,7 +388,6 @@ export interface FileRouteTypes {
     | '/farm-lands'
     | '/favorites'
     | '/help'
-    | '/home-services'
     | '/notifications'
     | '/plots'
     | '/profile'
@@ -435,7 +423,6 @@ export interface RootRouteChildren {
   FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
-  HomeServicesRoute: typeof HomeServicesRoute
   NotificationsRoute: typeof NotificationsRoute
   PlotsRoute: typeof PlotsRoute
   ProfileRoute: typeof ProfileRoute
@@ -521,13 +508,6 @@ declare module '@tanstack/react-router' {
       path: '/help'
       fullPath: '/help'
       preLoaderRoute: typeof HelpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home-services': {
-      id: '/home-services'
-      path: '/home-services'
-      fullPath: '/home-services'
-      preLoaderRoute: typeof HomeServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -747,7 +727,6 @@ const rootRouteChildren: RootRouteChildren = {
   FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
-  HomeServicesRoute: HomeServicesRoute,
   NotificationsRoute: NotificationsRoute,
   PlotsRoute: PlotsRoute,
   ProfileRoute: ProfileRoute,

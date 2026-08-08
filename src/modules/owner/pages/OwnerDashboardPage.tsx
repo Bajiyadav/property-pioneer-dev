@@ -182,7 +182,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
           ? `Welcome back, ${displayName(user)}`
           : (tabTitle[activeTab] ?? "Owner")
       }
-      subtitle="Manage your 0% brokerage listings, tenant leads, walkthroughs, and rent collection."
+      subtitle="Manage your listings and the enquiries they receive."
       navItems={NAV_ITEMS}
       activeTab={activeTab}
       onTabChange={(id) => (id === "add" ? setShowWizard(true) : setActiveTab(id))}

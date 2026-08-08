@@ -94,7 +94,7 @@ function PropertiesPage() {
           <p className="mt-1 text-muted-foreground">
             {isLoading
               ? "Loading…"
-              : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available with 0% brokerage`}
+              : `${filtered.length} ${filtered.length === 1 ? "home" : "homes"} available`}
           </p>
         </div>
 

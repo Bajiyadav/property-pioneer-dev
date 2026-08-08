@@ -191,7 +191,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
               tips={[
                 "Tap the heart on any listing to save it — saved homes appear here instantly.",
                 "Schedule a walkthrough directly from a property page; owners reply in under 15 minutes.",
-                "Every listing is 0% brokerage, so the rent you see is the rent you pay.",
+                "Urban Properties adds no commission, so the price you see is the owner's asking price.",
               ]}
             />
           )}

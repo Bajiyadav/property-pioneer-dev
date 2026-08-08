@@ -81,7 +81,7 @@ function AuthPage() {
         <p className="mt-1 text-xs text-muted-foreground">
           {mode === "signin"
             ? "Enter your verified credentials to access your saved homes & dashboards."
-            : "Register with enterprise password rules, 100% data privacy & zero brokerage."}
+            : "Create an account to save homes, send enquiries, or list a property."}
         </p>
       </div>
 

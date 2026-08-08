@@ -18,7 +18,7 @@ export function OwnerCTA({ onOpenWizard }: { onOpenWizard?: () => void }) {
 
           <div className="mt-6 flex flex-wrap gap-4 text-xs font-semibold text-primary-foreground/90">
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" /> 100% Zero Brokerage
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" /> No platform commission
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Instant WhatsApp Leads

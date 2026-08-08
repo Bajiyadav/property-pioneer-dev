@@ -53,7 +53,6 @@ import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
 import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
-import { RentalAgreementModal } from "@/shared/components/dialogs/RentalAgreementModal";
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";

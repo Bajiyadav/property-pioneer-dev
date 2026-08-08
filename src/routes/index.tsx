@@ -11,21 +11,14 @@ import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties"
 import { PopularCities } from "@/modules/marketing/home/PopularCities";
 import { WhyUrbanProperties } from "@/modules/marketing/home/WhyUrbanProperties";
 import { HowItWorks } from "@/modules/marketing/home/HowItWorks";
-import { IndiaMapSection } from "@/modules/marketing/home/IndiaMapSection";
-import { Testimonials } from "@/modules/marketing/home/Testimonials";
 import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
-import { NewsletterSection } from "@/modules/marketing/home/NewsletterSection";
-import { AppSection } from "@/modules/marketing/home/AppSection";
 
-import { CategoryModal, type CategoryModalData } from "@/shared/components/dialogs/CategoryModal";
 import {
   CityExpansionModal,
   type CityModalData,
 } from "@/shared/components/dialogs/CityExpansionModal";
 import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
-
-import { UrbanAISearch } from "@/modules/marketing/home/UrbanAISearch";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -58,7 +51,6 @@ function Index() {
   const [q, setQ] = useState("");
 
   // Interactive Modal States
-  const [activeCategory, setActiveCategory] = useState<CategoryModalData | null>(null);
   const [activeCity, setActiveCity] = useState<CityModalData | null>(null);
   const [showOwnerWizard, setShowOwnerWizard] = useState(false);
 
@@ -90,13 +82,8 @@ function Index() {
       {/* 2. Real Estate Quote Banner */}
       <QuoteBanner />
 
-      {/* 2.5 Urban AI Natural Language Search */}
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
-        <UrbanAISearch />
-      </div>
-
-      {/* 3. Property Categories Grid (Interactive Category Modal) */}
-      <PropertyCategories onSelectCategory={(cat) => setActiveCategory(cat)} />
+      {/* 3. Property Categories Grid */}
+      <PropertyCategories />
 
       {/* 4. Featured Rentals (Hyderabad Focus) */}
       <FeaturedProperties
@@ -104,41 +91,28 @@ function Index() {
         isLoading={isLoading}
       />
 
-      {/* 6. Popular Cities & Expansion Hubs (Interactive City Roadmap Modal) */}
-      <PopularCities onSelectCity={(city) => setActiveCity(city)} />
-
-      {/* 7. Why Urban Properties (Benefits) */}
+      {/* 5. What Urban Properties actually does today */}
       <div id="why-us">
         <WhyUrbanProperties />
       </div>
 
-      {/* 8. Dual-tab How It Works Workflow */}
+      {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
+      <PopularCities onSelectCity={(city) => setActiveCity(city)} />
+
+      {/* 7. Dual-tab How It Works Workflow */}
       <HowItWorks />
 
-      {/* 10. Interactive India Map & Expansion */}
-      <IndiaMapSection />
-
-      {/* 12. Verified Customer & Owner Stories */}
-      <Testimonials />
-
-      {/* 13. Owner CTA Banner (Triggers Multi-Step Wizard) */}
+      {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
       <OwnerCTA onOpenWizard={() => setShowOwnerWizard(true)} />
 
-      {/* 14. Support FAQ Accordion */}
+      {/* 9. Support FAQ Accordion */}
       <div id="contact">
         <FAQSection />
       </div>
 
-      {/* 15. Newsletter Subscription */}
-      <NewsletterSection />
-
-      {/* 16. Mobile App Banner */}
-      <AppSection />
-
       {/* ======================================= */}
-      {/* INTERACTIVE MODALS & DRAWERS            */}
+      {/* INTERACTIVE MODALS                      */}
       {/* ======================================= */}
-      <CategoryModal data={activeCategory} onClose={() => setActiveCategory(null)} />
       <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
       <OwnerOnboardingModal isOpen={showOwnerWizard} onClose={() => setShowOwnerWizard(false)} />
     </div>

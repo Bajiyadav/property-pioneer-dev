@@ -9,6 +9,8 @@ import {
 import { AlertTriangle, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+const SUPPORT_EMAIL = "support@urbanproperties.in";
+
 export function ReportListingModal({
   isOpen,
   onClose,
@@ -23,14 +25,25 @@ export function ReportListingModal({
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // There is no reports table, so a stored "report" would silently vanish.
+  // Handing off to the published support address actually delivers it.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      toast.success("Thank you! Your report has been submitted to Admin Moderation.");
-    }, 500);
+    const subject = `Listing report: ${propertyTitle}`;
+    const body = [
+      `Listing: ${propertyTitle}`,
+      `Reason: ${reason}`,
+      "",
+      "Details:",
+      comments || "(none provided)",
+    ].join("\n");
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+    setLoading(false);
+    setSubmitted(true);
+    toast.success("Report drafted in your email app — send it to reach our team.");
   };
 
   return (
@@ -55,10 +68,10 @@ export function ReportListingModal({
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-600 text-white">
               <CheckCircle2 className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-extrabold text-foreground">Report Received</h3>
+            <h3 className="text-base font-extrabold text-foreground">Report drafted</h3>
             <p className="text-xs text-muted-foreground">
-              Our safety team will audit this property within 2 hours. Thank you for keeping Urban
-              Properties 100% genuine.
+              We have opened an email to {SUPPORT_EMAIL} with your report. Send it and our team will
+              review the listing. If your email app did not open, write to us directly.
             </p>
             <button
               onClick={() => {

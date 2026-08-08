@@ -44,11 +44,11 @@ const FAQS = [
     items: [
       {
         q: "How do I list my property on Urban Properties?",
-        a: "Click 'List Property FREE' in the navigation bar, complete a quick registration, and follow the onboarding wizard to add your property details, photos, and pricing. Your listing goes live within 24 hours after verification.",
+        a: "Click 'List Property FREE' in the navigation bar, complete a quick registration, and follow the onboarding wizard to add your property details, photos, and pricing. Your listing is then submitted for moderation and becomes publicly visible once an admin approves it.",
       },
       {
-        q: "Is Urban Properties really 0% brokerage?",
-        a: "Yes! For tenants and buyers, there is zero brokerage. Property owners pay a nominal subscription fee for premium listing features, but standard listings are completely free.",
+        q: "Does Urban Properties charge brokerage?",
+        a: "Urban Properties adds no commission to a listing, and listing a property is free. We cannot control charges levied by an individual owner or third party, so confirm all costs directly before committing.",
       },
     ],
   },
@@ -69,12 +69,12 @@ const FAQS = [
     category: "Buying",
     items: [
       {
-        q: "Are all properties RERA registered?",
-        a: "We verify RERA registration for all under-construction projects. For ready-to-move homes, we verify title deeds and HMDA/GHMC approvals before listing.",
+        q: "Do you verify RERA registration or title deeds?",
+        a: "No. Urban Properties reviews the listing information an owner submits before publishing it, but we do not verify RERA registration, title deeds, or HMDA/GHMC approvals. Please carry out your own due diligence and seek independent legal advice before any transaction.",
       },
       {
         q: "Can I apply for a home loan through Urban Properties?",
-        a: "Yes! Use our EMI Calculator on any property page to check eligibility, and apply for pre-approval from our bank partners (SBI, HDFC, ICICI, Axis) directly within the platform.",
+        a: "No. The EMI calculator on a property page is an indicative estimate only. Urban Properties is not a lender, has no lending partners, and cannot arrange or approve finance — speak to your bank directly.",
       },
     ],
   },

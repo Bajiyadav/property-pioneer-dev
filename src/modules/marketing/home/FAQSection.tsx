@@ -3,20 +3,20 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const FAQS = [
   {
-    q: "How does Urban Properties guarantee zero brokerage?",
-    a: "We connect tenants directly with verified property owners via 1-tap WhatsApp and secure in-app messaging. There are no agent commissions or hidden fees involved.",
+    q: "Does Urban Properties charge brokerage?",
+    a: "Urban Properties adds no commission to a listing and never charges you to enquire — you contact the owner directly. We cannot control what an individual owner or third party may charge, so always confirm costs before you commit.",
   },
   {
-    q: "How are owners and properties verified in Hyderabad?",
-    a: "Every owner identity is verified via phone, email, and Aadhaar check. Properties undergo physical address location checks to ensure 100% genuine listings.",
+    q: "How are listings reviewed?",
+    a: "Every listing is submitted to admin moderation and stays private until a moderator approves it. We review the owner and property information supplied at submission. We do not verify Aadhaar, PAN, title deeds or government records, and no listing should be read as carrying that assurance.",
   },
   {
-    q: "Can I generate a digital rental agreement online?",
-    a: "Yes! Urban Properties provides instant digital rental agreement generation with e-stamping and doorstep delivery within 10 minutes.",
+    q: "How do I contact a property owner?",
+    a: "Open any listing and send an enquiry. It goes straight to the owner's dashboard along with the phone number you provide, and they contact you directly.",
   },
   {
     q: "Which areas in Hyderabad have active rental listings?",
-    a: "We have active verified rental flats and PGs in Gachibowli, Madhapur, Kondapur, Hitech City, Miyapur, Kukatpally, Financial District, Banjara Hills, and Jubilee Hills.",
+    a: "Hyderabad is our live market, with listings concentrated in Gachibowli, Madhapur, Kondapur, Hitech City, Miyapur, Financial District, Jubilee Hills, Kokapet and Raidurg. Search shows exactly what is available in each area.",
   },
   {
     q: "How can property owners list their homes for free?",

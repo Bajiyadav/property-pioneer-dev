@@ -195,18 +195,10 @@ export function EmiCalculatorModal({ isOpen, onClose, initialPrice = 5000000 }: 
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="rounded-2xl border border-emerald-600/30 bg-emerald-600/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold text-foreground">Get Pre-Approved in 2 Minutes</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Zero document upload for initial eligibility check
-              </p>
-            </div>
-            <button className="flex-none rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow transition hover:bg-emerald-500">
-              Check Eligibility
-            </button>
-          </div>
+          <p className="text-[11px] text-muted-foreground">
+            An indicative estimate only. Urban Properties is not a lender and does not arrange
+            finance — confirm actual rates and eligibility with your bank.
+          </p>
         </div>
       </div>
     </div>

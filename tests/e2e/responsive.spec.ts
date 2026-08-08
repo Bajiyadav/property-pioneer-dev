@@ -14,7 +14,6 @@ const PAGES = [
   ["home", "/"],
   ["search", `/properties${SEARCH}`],
   ["auth", "/auth?redirect="],
-  ["services", "/home-services"],
   ["help", "/help"],
 ] as const;
 

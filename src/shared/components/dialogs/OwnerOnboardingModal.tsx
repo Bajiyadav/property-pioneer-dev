@@ -135,7 +135,7 @@ export function OwnerOnboardingModal({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              100% Zero Brokerage
+              Free to list
             </span>
             <span className="text-xs text-muted-foreground">Step {step} of 5</span>
           </div>

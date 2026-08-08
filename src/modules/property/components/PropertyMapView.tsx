@@ -114,7 +114,7 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
         {selectedPin ? (
           <div className="space-y-4">
             <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-600/10 px-2.5 py-0.5 rounded-full">
-              Verified Owner • 0% Brokerage
+              Direct owner listing
             </span>
 
             <h3 className="text-lg font-semibold text-foreground">{selectedPin.title}</h3>

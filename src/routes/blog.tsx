@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, Bell, Rss, TrendingUp, Users, MapPin, ArrowRight, Clock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+
+const SUPPORT_EMAIL = "support@urbanproperties.in";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 export const Route = createFileRoute("/blog")({
@@ -77,7 +79,12 @@ function BlogPage() {
 
           {/* Subscribe CTA */}
           <form
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+                "Blog launch notification",
+              )}&body=${encodeURIComponent("Please notify me when the Urban Properties blog launches.")}`;
+            }}
             className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 mx-auto max-w-md"
           >
             <input

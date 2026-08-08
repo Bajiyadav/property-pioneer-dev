@@ -15,6 +15,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+
+const SUPPORT_EMAIL = "support@urbanproperties.in";
 import { MapPin, Bell, CheckCircle2, Rocket, Building, Compass } from "lucide-react";
 
 export interface CityModalData {
@@ -40,10 +42,15 @@ export function CityExpansionModal({
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    // Nothing stores launch interest yet, so this hands off to support rather
+    // than claiming a registration that does not exist.
+    const subject = `Launch interest: ${data.name}`;
+    const body = `Please notify me when Urban Properties launches in ${data.name}.\nEmail: ${email}`;
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
     setJoined(true);
-    toast.success(`Registered for ${data.name} launch notifications!`, {
-      description: "You'll receive priority early access as soon as property onboarding begins.",
-    });
+    toast.success("Interest drafted in your email app — send it to reach our team.");
   };
 
   return (
@@ -149,8 +156,8 @@ export function CityExpansionModal({
 
             {joined ? (
               <div className="rounded-xl bg-emerald-600/10 p-4 text-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
-                <CheckCircle2 className="h-5 w-5" /> You're on the launch list for {data.name}!
-                We'll notify you on day one.
+                <CheckCircle2 className="h-5 w-5" /> Email drafted to {SUPPORT_EMAIL} — send it and
+                we'll be in touch when {data.name} goes live.
               </div>
             ) : (
               <form onSubmit={handleWaitlist} className="space-y-3">

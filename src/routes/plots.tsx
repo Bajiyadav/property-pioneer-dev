@@ -1,86 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ProductHero } from "@/modules/marketing/landing/ProductHero";
-import { ExpansionRoadmap } from "@/modules/marketing/landing/ExpansionRoadmap";
-import { FeatureGrid } from "@/modules/marketing/landing/FeatureGrid";
-import { ComparisonTable } from "@/modules/marketing/landing/ComparisonTable";
-import { LaunchProgress } from "@/modules/marketing/landing/LaunchProgress";
-import { RichPriorityWaitlistForm } from "@/modules/marketing/landing/RichPriorityWaitlistForm";
-import { ProductFaq } from "@/modules/marketing/landing/ProductFaq";
-import { LivePlatformStats } from "@/modules/marketing/landing/LivePlatformStats";
-import { DocumentationCenter } from "@/modules/marketing/landing/DocumentationCenter";
-import { MobileAppPreview } from "@/modules/marketing/landing/MobileAppPreview";
-import { RelatedServicesSection } from "@/modules/marketing/landing/RelatedServicesSection";
-import { CoverageCityMap } from "@/modules/marketing/services/CoverageCityMap";
-import { getCanonicalUrl, getOgImageUrl, APP_NAME } from "@/config/app";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+/**
+ * Plots & land — a saved view of the real property search.
+ *
+ * This URL used to render a standalone marketing page that listed no
+ * properties and asserted title-deed audits, RERA validation and a guaranteed
+ * zero-brokerage model, none of which the platform performs. The URL is kept
+ * working because it is public and linked, but it now resolves to the actual
+ * filtered catalogue, so what a visitor sees is whatever inventory genuinely
+ * exists — including none.
+ */
 export const Route = createFileRoute("/plots")({
-  head: () => {
-    const canonicalUrl = getCanonicalUrl("/plots");
-    const ogImage = getOgImageUrl();
-    return {
-      meta: [
-        { title: `HMDA & DTCP Approved Plots — ${APP_NAME}` },
-        {
-          name: "description",
-          content:
-            "Buy HMDA, DTCP, and RERA approved residential plot land in Hyderabad, Shankarpally, Mokila, Shadnagar, & ORR growth corridors with 100% legal title clearance.",
-        },
-        { property: "og:title", content: `HMDA & DTCP Approved Plots — ${APP_NAME}` },
-        {
-          property: "og:description",
-          content:
-            "Buy verified residential plots in Hyderabad growth corridors with 0% brokerage.",
-        },
-        { property: "og:image", content: ogImage },
-        { property: "og:url", content: canonicalUrl },
-      ],
-      links: [{ rel: "canonical", href: canonicalUrl }],
-    };
+  beforeLoad: () => {
+    throw redirect({
+      to: "/properties",
+      search: { ...{ q: "plot", listing: "" }, city: "", minPrice: 0, maxPrice: 0, beds: 0 },
+    });
   },
-  component: PlotsLandingPage,
 });
-
-const PLOTS_FAQS = [
-  {
-    q: "Are all listed plots HMDA / DTCP approved?",
-    a: "Yes! Every plot listing undergoes strict layout verification for HMDA, DTCP, or RERA approval with clear LP numbers.",
-  },
-  {
-    q: "Which growth corridors in Hyderabad are featured?",
-    a: "We feature plots in Mokila, Shankarpally, Tellapur, Patancheru, Shadnagar, Srisailam Highway, and Regional Ring Road (RRR) corridors.",
-  },
-  {
-    q: "Can I get bank plot loans?",
-    a: "Yes, our partner banks (SBI, HDFC, ICICI) provide up to 70% plot purchase and construction loan clearance.",
-  },
-  {
-    q: "How are boundary markers verified?",
-    a: "Every layout undergoes digital GPS boundary survey verification before listing.",
-  },
-];
-
-function PlotsLandingPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground space-y-12">
-      <ProductHero
-        badge="Land & Plots Engine"
-        title="Invest in HMDA & DTCP Approved Plot Land"
-        subtitle="Secure high-appreciation residential land and gated plot layouts along Hyderabad's ORR and growth corridors with 100% legal title clearance."
-        productType="Residential Plots"
-        bgGradient="from-amber-900/20 via-background to-background"
-      />
-
-      <LivePlatformStats />
-      <ExpansionRoadmap />
-      <FeatureGrid />
-      <ComparisonTable />
-      <CoverageCityMap />
-      <LaunchProgress />
-      <DocumentationCenter productTitle="Plots & Land Engine" />
-      <MobileAppPreview />
-      <RichPriorityWaitlistForm defaultCategory="Residential Plots & Land" />
-      <RelatedServicesSection />
-      <ProductFaq faqs={PLOTS_FAQS} />
-    </div>
-  );
-}

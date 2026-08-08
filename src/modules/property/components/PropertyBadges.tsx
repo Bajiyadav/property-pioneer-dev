@@ -42,7 +42,7 @@ export function PropertyBadges({
       {ownerVerified && (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-emerald-600/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
-          title="Owner identity, email, and phone verified"
+          title="Owner contact details confirmed at signup"
         >
           <CheckCircle2 className={iconSize} /> Verified Owner
         </span>
@@ -52,19 +52,19 @@ export function PropertyBadges({
       {propertyVerified && (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-blue-600/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
-          title="Physical location and ownership documents verified"
+          title="Reviewed by a moderator before publication"
         >
           <ShieldCheck className={iconSize} /> Verified Property
         </span>
       )}
 
-      {/* 3. Zero Brokerage Badge */}
+      {/* 3. No-commission Badge */}
       {isZeroBrokerage && (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-teal-700/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
-          title="Direct listing — 0% brokerage fee"
+          title="Listed directly by the owner — Urban Properties adds no commission"
         >
-          <Tag className={iconSize} /> 0% Brokerage
+          <Tag className={iconSize} /> No commission
         </span>
       )}
 

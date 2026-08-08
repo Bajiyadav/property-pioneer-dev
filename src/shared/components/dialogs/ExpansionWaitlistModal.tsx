@@ -9,6 +9,8 @@ import {
 import { MapPin, Sparkles, CheckCircle2, Bell, Building2, Rocket, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+const SUPPORT_EMAIL = "support@urbanproperties.in";
+
 export function ExpansionWaitlistModal({
   isOpen,
   onClose,
@@ -26,8 +28,8 @@ export function ExpansionWaitlistModal({
   const [loading, setLoading] = useState(false);
 
   const title = categoryName
-    ? `${categoryName} — Launching Soon with 0% Brokerage`
-    : `${cityName} Launch — Get Early Access to 0% Brokerage Homes`;
+    ? `${categoryName} — Coming Soon`
+    : `${cityName} — Get Notified at Launch`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +38,17 @@ export function ExpansionWaitlistModal({
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setJoined(true);
-      toast.success(`You're #1,428 on the ${cityName || categoryName} early access waitlist!`);
-    }, 600);
+    // No waitlist table exists, so a stored signup would go nowhere. The
+    // interest is emailed to the published support address instead, and the
+    // copy no longer invents a queue position or promises an SMS.
+    const subject = `Launch interest: ${cityName || categoryName}`;
+    const body = `Please notify me when Urban Properties launches in ${cityName || categoryName}.\nMobile: ${phone}`;
+    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+    setLoading(false);
+    setJoined(true);
+    toast.success("Interest drafted in your email app — send it to reach our team.");
   };
 
   return (
@@ -70,13 +78,10 @@ export function ExpansionWaitlistModal({
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-600 text-white">
               <CheckCircle2 className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-extrabold text-foreground">
-              You're on the VIP Waitlist!
-            </h3>
+            <h3 className="text-base font-extrabold text-foreground">Interest drafted</h3>
             <p className="text-xs text-muted-foreground">
-              We'll send an instant SMS alert to{" "}
-              <span className="font-bold text-foreground">{phone}</span> as soon as verified
-              listings drop in {cityName || categoryName}.
+              We have opened an email to {SUPPORT_EMAIL} with your details. Send it and we will get
+              in touch when listings go live in {cityName || categoryName}.
             </p>
             <button
               onClick={() => {
@@ -97,15 +102,15 @@ export function ExpansionWaitlistModal({
               <ul className="space-y-1.5 text-[11px] text-muted-foreground">
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />
-                  <span>Early 48-hour priority access to zero brokerage flats</span>
+                  <span>An email when listings go live in your area</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />
-                  <span>Free Telangana/State Digital E-Stamp Rental Agreement</span>
+                  <span>Direct owner contact — no brokerage charged by Urban Properties</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />
-                  <span>₹2,000 moving discount voucher upon launch</span>
+                  <span>Early access to new listings as the market opens</span>
                 </li>
               </ul>
             </div>

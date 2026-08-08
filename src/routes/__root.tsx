@@ -29,7 +29,6 @@ import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
 import { DemoModeSwitcher } from "@/app/layouts/DemoModeSwitcher";
 import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
-import { HomeServicesModal } from "@/shared/components/dialogs/HomeServicesModal";
 
 function NotFoundComponent() {
   return (
@@ -170,7 +169,6 @@ function SiteHeader() {
   const [user, setUser] = useState<User | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [waitlistCategory, setWaitlistCategory] = useState<string | null>(null);
-  const [servicesOpen, setServicesOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -250,16 +248,6 @@ function SiteHeader() {
               </span>
             </Link>
 
-            <Link
-              to="/home-services"
-              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
-            >
-              Services
-              <span className="rounded-full bg-emerald-600/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-600 dark:text-emerald-400">
-                Live
-              </span>
-            </Link>
-
             <a
               href="#why-us"
               className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
@@ -302,12 +290,6 @@ function SiteHeader() {
         onClose={() => setWaitlistCategory(null)}
         categoryName={waitlistCategory || ""}
       />
-
-      <HomeServicesModal
-        isOpen={servicesOpen}
-        onClose={() => setServicesOpen(false)}
-        initialService="agreement"
-      />
     </>
   );
 }
@@ -321,7 +303,7 @@ function SiteFooter() {
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <BrandMark size="sm" />
             <p className="mt-3 max-w-xs text-xs text-muted-foreground leading-relaxed">
-              {BRAND.tagline} — India's 0% brokerage real estate platform.
+              {BRAND.tagline} — a Hyderabad property marketplace with no platform commission.
             </p>
             <div className="mt-4 flex items-center gap-3">
               <a
@@ -400,11 +382,6 @@ function SiteFooter() {
               Platform
             </h3>
             <ul className="space-y-2 text-xs text-muted-foreground">
-              <li>
-                <Link to="/home-services" className="hover:text-foreground transition">
-                  Home Services
-                </Link>
-              </li>
               <li>
                 <Link to="/favorites" className="hover:text-foreground transition">
                   Saved Properties
@@ -558,9 +535,7 @@ function SiteFooter() {
 
         <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border/40 pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">{APP_COPYRIGHT}</p>
-          <p className="text-xs text-muted-foreground">
-            Made with ❤️ in Hyderabad, India · RERA Compliant
-          </p>
+          <p className="text-xs text-muted-foreground">Made with ❤️ in Hyderabad, India</p>
         </div>
       </div>
     </footer>

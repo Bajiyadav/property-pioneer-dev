@@ -93,7 +93,7 @@ export function HeroSection({
               List Property FREE <ArrowRight className="h-4 w-4" />
             </button>
             <span className="text-xs text-background/80">
-              ⚡ 100% Direct Owner Verification • Zero Brokerage
+              ⚡ Direct owner listings • No platform commission
             </span>
           </div>
         </div>
