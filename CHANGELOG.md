@@ -1,3 +1,8 @@
+## v0.1.6 — 2026-08-08
+
+### Refactoring
+- refactor(product): remove unbacked promotional sections; make location search real (6360ed9)
+
 ## v0.1.5 — 2026-08-08
 
 ### Fixes
