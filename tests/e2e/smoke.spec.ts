@@ -173,10 +173,13 @@ test.describe("product focus", () => {
   });
 
   test("a search with no matches names the term and offers a way back", async ({ page }) => {
-    await page.goto(`/properties?q=Madhapur&city=&listing=&minPrice=0&maxPrice=0&beds=0`, {
+    // Deliberately a locality with no inventory. Madhapur was used here until
+    // the Hyderabad catalogue was seeded and it started returning results —
+    // the assertion belongs on a term that is genuinely empty.
+    await page.goto(`/properties?q=Sriperumbudur&city=&listing=&minPrice=0&maxPrice=0&beds=0`, {
       waitUntil: "domcontentloaded",
     });
-    await expect(page.getByText(/No properties found in Madhapur yet/i)).toBeVisible({
+    await expect(page.getByText(/No properties found in Sriperumbudur yet/i)).toBeVisible({
       timeout: 30_000,
     });
     const back = page.getByRole("link", { name: /View all properties/i });
