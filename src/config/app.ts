@@ -14,7 +14,7 @@ export const APP_URL = getAppUrl();
 export const APP_NAME = "Urban Properties";
 export const APP_SHORT_NAME = "UP";
 export const APP_DESCRIPTION =
-  "India's next-generation real estate platform for Rent, Buy, Commercial, Villas, Apartments & Plots in Tier-2, Tier-3 & Metro cities.";
+  "Rent, buy and commercial property in Hyderabad, listed directly by owners and reviewed before publication. No platform commission.";
 export const APP_LOGO = `${APP_URL}/favicon.ico`;
 /** Single source of truth for the footer copyright line shown on every page. */
 export const APP_COPYRIGHT = `© 2022 ${APP_NAME}. All Rights Reserved.`;

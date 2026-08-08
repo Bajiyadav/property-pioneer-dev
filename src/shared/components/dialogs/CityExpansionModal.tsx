@@ -68,7 +68,7 @@ export function CityExpansionModal({
               >
                 {data.badge}
               </span>
-              <span className="text-xs text-muted-foreground">Pan-India Expansion</span>
+              <span className="text-xs text-muted-foreground">Expansion roadmap</span>
             </div>
             <DialogTitle className="text-2xl font-semibold text-foreground mt-2 flex items-center gap-2">
               <MapPin className="h-6 w-6 text-primary" /> {data.name} Expansion Roadmap

@@ -30,18 +30,16 @@ export function HeroSection({
             <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
               <MapPin className="h-3.5 w-3.5" /> Launch City: Hyderabad
             </span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-primary font-bold">🇮🇳 Expanding Across India</span>
           </div>
 
           <h1 className="mt-5 text-4xl font-semibold leading-[1.1] text-background sm:text-6xl">
-            Discover Homes You'll Love{" "}
-            <em className="not-italic text-[color:var(--primary-glow)]">Across India</em>
+            Discover Homes You'll Love in{" "}
+            <em className="not-italic text-[color:var(--primary-glow)]">Hyderabad</em>
           </h1>
 
           <p className="mt-4 text-base text-background/85 sm:text-lg leading-relaxed max-w-2xl">
-            Starting with Hyderabad and expanding city by city, Urban Properties connects you with
-            verified homes, trusted owners, and a premium real estate experience.
+            Urban Properties connects you directly with property owners across Hyderabad. Every
+            listing is reviewed by a moderator before it goes live.
           </p>
 
           {/* Quick Category Filter Tabs */}
