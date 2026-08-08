@@ -1,3 +1,11 @@
+## v0.3.0 — 2026-08-08
+
+### Features
+- feat(demo): seed a real Hyderabad catalogue; wire owner leads to live enquiries (51d74e6)
+
+### Fixes
+- feat(demo): seed a real Hyderabad catalogue; wire owner leads to live enquiries (51d74e6)
+
 ## v0.2.0 — 2026-08-08
 
 ### Features
