@@ -1,3 +1,8 @@
+## v0.3.3 — 2026-08-08
+
+### Fixes
+- fix(ci): stop the env validator failing unit tests in CI (79a5fcd)
+
 ## v0.3.2 — 2026-08-08
 
 ### Fixes
