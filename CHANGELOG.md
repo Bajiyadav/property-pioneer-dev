@@ -1,3 +1,8 @@
+## v0.1.4 — 2026-08-08
+
+### Refactoring
+- refactor(structure): move domain code into owning modules; drop empty scaffolding (a549c72)
+
 ## v0.1.3 — 2026-08-07
 
 ### Refactoring
