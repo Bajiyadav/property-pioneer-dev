@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, LayoutGrid, MapPin } from "lucide-react";
@@ -206,8 +206,21 @@ function PropertiesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-          <p className="text-lg font-semibold text-foreground">No homes match those filters</p>
-          <p className="mt-1 text-sm text-muted-foreground">Try widening your search.</p>
+          <p className="text-lg font-semibold text-foreground">
+            {search.q ? `No properties found in ${search.q} yet.` : "No homes match those filters"}
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+            We are adding verified listings continually. Try a nearby area, or browse everything
+            available right now.
+          </p>
+          {/* A dead end is a bad empty state — always offer the way back. */}
+          <Link
+            to="/properties"
+            search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground transition hover:brightness-110"
+          >
+            View all properties
+          </Link>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -65,14 +65,21 @@ export function HeroSection({
               "Miyapur",
               "Financial District",
             ].map((loc) => (
-              <button
+              <Link
                 key={loc}
-                type="button"
-                onClick={() => onQueryChange(loc)}
-                className="rounded-full bg-background/20 px-3 py-1 text-xs font-medium text-background backdrop-blur hover:bg-background/40 transition"
+                to="/properties"
+                search={{
+                  q: loc,
+                  city: "",
+                  listing: "",
+                  minPrice: 0,
+                  maxPrice: 0,
+                  beds: 0,
+                }}
+                className="rounded-full bg-background/20 px-3 py-1 text-xs font-medium text-background backdrop-blur transition hover:bg-background/40"
               >
                 {loc}
-              </button>
+              </Link>
             ))}
           </div>
 

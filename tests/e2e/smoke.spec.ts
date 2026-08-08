@@ -141,3 +141,47 @@ test.describe("accessibility basics", () => {
     expect(audit.altlessImages).toBe(0);
   });
 });
+
+test.describe("product focus", () => {
+  // Promotional sections removed in the final cleanup pass. Asserted so they
+  // cannot quietly return: each advertised a service with no working flow.
+  const REMOVED = [
+    "Micro-Location",
+    "Explore Homes Near",
+    "Metro Stations",
+    "Coaching Hubs",
+    "Bus Terminals",
+    "Grocery & Malls",
+    "Electrician Services",
+    "Plumbing Services",
+    "Internet Setup",
+    "Explore & Book Service",
+  ];
+
+  test("homepage carries no removed promotional sections", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const body = await page.locator("body").innerText();
+    for (const phrase of REMOVED) {
+      expect(body, `"${phrase}" should be gone`).not.toContain(phrase);
+    }
+  });
+
+  test("a trending location chip runs a real search", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "Madhapur", exact: true }).first().click();
+    await page.waitForURL(/\/properties\?.*q=Madhapur/, { timeout: 30_000 });
+  });
+
+  test("a search with no matches names the term and offers a way back", async ({ page }) => {
+    await page.goto(`/properties?q=Madhapur&city=&listing=&minPrice=0&maxPrice=0&beds=0`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page.getByText(/No properties found in Madhapur yet/i)).toBeVisible({
+      timeout: 30_000,
+    });
+    const back = page.getByRole("link", { name: /View all properties/i });
+    await expect(back).toBeVisible();
+    await back.click();
+    await expect(page.locator('a[href*="/properties/"]').first()).toBeVisible({ timeout: 30_000 });
+  });
+});

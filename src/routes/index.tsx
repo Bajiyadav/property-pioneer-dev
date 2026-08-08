@@ -8,13 +8,10 @@ import { HeroSection } from "@/modules/marketing/home/HeroSection";
 import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
 import { PropertyCategories } from "@/modules/marketing/home/PropertyCategories";
 import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
-import { ComingSoonBadges } from "@/modules/marketing/home/ComingSoonBadges";
 import { PopularCities } from "@/modules/marketing/home/PopularCities";
 import { WhyUrbanProperties } from "@/modules/marketing/home/WhyUrbanProperties";
 import { HowItWorks } from "@/modules/marketing/home/HowItWorks";
-import { Services } from "@/modules/marketing/home/Services";
 import { IndiaMapSection } from "@/modules/marketing/home/IndiaMapSection";
-import { NearbyPlaces } from "@/modules/marketing/home/NearbyPlaces";
 import { Testimonials } from "@/modules/marketing/home/Testimonials";
 import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
@@ -22,10 +19,6 @@ import { NewsletterSection } from "@/modules/marketing/home/NewsletterSection";
 import { AppSection } from "@/modules/marketing/home/AppSection";
 
 import { CategoryModal, type CategoryModalData } from "@/shared/components/dialogs/CategoryModal";
-import {
-  ServiceDetailModal,
-  type ServiceModalData,
-} from "@/shared/components/dialogs/ServiceDetailModal";
 import {
   CityExpansionModal,
   type CityModalData,
@@ -66,7 +59,6 @@ function Index() {
 
   // Interactive Modal States
   const [activeCategory, setActiveCategory] = useState<CategoryModalData | null>(null);
-  const [activeService, setActiveService] = useState<ServiceModalData | null>(null);
   const [activeCity, setActiveCity] = useState<CityModalData | null>(null);
   const [showOwnerWizard, setShowOwnerWizard] = useState(false);
 
@@ -112,13 +104,6 @@ function Index() {
         isLoading={isLoading}
       />
 
-      {/* 5. Product Roadmap (Interactive Coming Soon Cards) */}
-      <ComingSoonBadges
-        onSelectUpcoming={(item) =>
-          setActiveCategory({ id: item.title.toLowerCase(), title: item.title, isLive: false })
-        }
-      />
-
       {/* 6. Popular Cities & Expansion Hubs (Interactive City Roadmap Modal) */}
       <PopularCities onSelectCity={(city) => setActiveCity(city)} />
 
@@ -130,16 +115,8 @@ function Index() {
       {/* 8. Dual-tab How It Works Workflow */}
       <HowItWorks />
 
-      {/* 9. Services Ecosystem (Interactive Service Detail & Booking Modal) */}
-      <div id="services">
-        <Services onSelectService={(s) => setActiveService(s)} />
-      </div>
-
       {/* 10. Interactive India Map & Expansion */}
       <IndiaMapSection />
-
-      {/* 11. Nearby Landmarks Explorer */}
-      <NearbyPlaces />
 
       {/* 12. Verified Customer & Owner Stories */}
       <Testimonials />
@@ -162,7 +139,6 @@ function Index() {
       {/* INTERACTIVE MODALS & DRAWERS            */}
       {/* ======================================= */}
       <CategoryModal data={activeCategory} onClose={() => setActiveCategory(null)} />
-      <ServiceDetailModal data={activeService} onClose={() => setActiveService(null)} />
       <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
       <OwnerOnboardingModal isOpen={showOwnerWizard} onClose={() => setShowOwnerWizard(false)} />
     </div>
