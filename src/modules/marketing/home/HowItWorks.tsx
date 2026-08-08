@@ -39,7 +39,7 @@ const CUSTOMER_STEPS = [
   {
     step: "05",
     title: "Move In",
-    desc: "Sign digital rental agreement online and move into your home.",
+    desc: "Agree terms directly with the owner and move into your home.",
     icon: Key,
   },
 ];

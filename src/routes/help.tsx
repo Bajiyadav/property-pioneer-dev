@@ -60,8 +60,8 @@ const FAQS = [
         a: "On any property listing page, click 'Schedule Visit'. Choose a date and time, and the property owner will confirm within 2 hours. You'll receive a WhatsApp and email confirmation.",
       },
       {
-        q: "How does the digital rental agreement work?",
-        a: "After a tenant is finalised, both parties digitally sign a legally-valid rental agreement via our platform. The agreement is Aadhaar-authenticated and legally enforceable under the Indian IT Act.",
+        q: "Does Urban Properties provide the rental agreement?",
+        a: "No. Urban Properties connects you with the owner and does not draft, sign, stamp or store rental agreements. Arrange the agreement directly with the owner and seek independent legal advice if you need it.",
       },
     ],
   },
