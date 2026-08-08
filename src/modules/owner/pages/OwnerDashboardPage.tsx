@@ -203,7 +203,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 numericValue={listings.length}
                 icon={<Building2 className="h-4 w-4" />}
                 accent="emerald"
-                hint="100% verified"
+                hint="Moderated before publication"
               />
               <KpiCard
                 label="Tenant leads"

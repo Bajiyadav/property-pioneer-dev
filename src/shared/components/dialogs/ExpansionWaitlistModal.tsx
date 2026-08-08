@@ -60,7 +60,7 @@ export function ExpansionWaitlistModal({
             {title}
           </DialogTitle>
           <DialogDescription className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            We are expanding our 100% verified, 0% brokerage direct owner network from Hyderabad to{" "}
+            We are expanding our moderated, direct-owner network from Hyderabad to{" "}
             {cityName || categoryName}. Be the first to unlock listings!
           </DialogDescription>
         </DialogHeader>

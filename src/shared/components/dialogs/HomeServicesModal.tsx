@@ -30,7 +30,7 @@ const SERVICES_DATA: Record<
   loan: {
     title: "Home Loan & Mortgage Assistance",
     price: "0% Service Fee",
-    desc: "Get pre-approved home loans starting at 8.35% p.a. interest from HDFC, SBI, ICICI, and Axis Bank.",
+    desc: "Guidance on the home-loan journey and help comparing options. Any loan is subject to lender eligibility and approval.",
     icon: Landmark,
   },
 };

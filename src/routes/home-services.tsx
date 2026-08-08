@@ -64,7 +64,7 @@ function HomeServicesLandingPage() {
       <ProductHero
         badge="Tenant & Owner Services Engine"
         title="Complete Home Services & Legal Agreements Platform"
-        subtitle="Get instant state-stamped digital rental agreements, legal title verification, tenant background checks, wall painting, and pre-approved home loans."
+        subtitle="Digital rental agreements, document assistance, tenant background checks, wall painting, and guidance on home-loan options."
         productType="Home Services"
         bgGradient="from-teal-900/20 via-background to-background"
       />

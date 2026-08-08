@@ -82,7 +82,7 @@ export function FeatureGrid() {
       color: "text-amber-500",
     },
     {
-      title: "0% Commission Guaranteed",
+      title: "No platform commission",
       desc: "Direct transaction between verified buyers & sellers with zero broker fees.",
       icon: BadgeCheck,
       color: "text-emerald-500",

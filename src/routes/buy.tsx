@@ -23,7 +23,7 @@ export const Route = createFileRoute("/buy")({
         {
           name: "description",
           content:
-            "Buy 100% verified 2, 3 & 4 BHK apartments, gated community villas, and independent houses in Hyderabad with pre-approved bank loans and zero brokerage.",
+            "Browse moderated 2, 3 & 4 BHK apartments, gated community villas and independent houses in Hyderabad, listed directly by owners with no platform commission.",
         },
         { property: "og:title", content: `Buy Residential Homes — ${APP_NAME}` },
         {
@@ -45,8 +45,8 @@ const BUY_FAQS = [
     a: "Every listed residential home undergoes legal title deed audits, HMDA/GHMC municipal plan check, and RERA registration validation.",
   },
   {
-    q: "Are pre-approved bank loans available for listed homes?",
-    a: "Yes, our banking partners (SBI, HDFC, ICICI, Axis) provide instant home loan eligibility up to 80% with digital pre-approval letters.",
+    q: "Can Urban Properties help with home loans?",
+    a: "We can explain the home-loan process and help you compare the options available. Urban Properties is not a lender — any loan is subject to lender eligibility and approval.",
   },
   {
     q: "Do I have to pay any brokerage fees to Urban Properties?",

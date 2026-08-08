@@ -148,7 +148,7 @@ export function CategoryModal({
               </h4>
               <div className="grid grid-cols-2 gap-2 text-xs text-foreground">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> 100% Verified Sellers
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Moderated listings
                 </span>
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Bank Loan Assistance

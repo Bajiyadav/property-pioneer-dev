@@ -9,7 +9,7 @@ const STATS = [
     color: "text-emerald-500",
   },
   {
-    label: "Title Deeds Verified",
+    label: "Listings Moderated",
     value: "100%",
     note: "HMDA / RERA Cleared",
     icon: ShieldCheck,

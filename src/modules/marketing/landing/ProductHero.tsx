@@ -49,7 +49,7 @@ export function ProductHero({
         {/* Value Prop Pill Badges */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-3.5 py-1 text-xs font-semibold text-foreground border border-border/40">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 100% Verified Title Deeds
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Owner-submitted documentation
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 px-3.5 py-1 text-xs font-semibold text-foreground border border-border/40">
             <BadgeCheck className="h-3.5 w-3.5 text-blue-500" /> Direct Seller Contact
