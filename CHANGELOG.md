@@ -1,3 +1,8 @@
+## v0.3.1 — 2026-08-08
+
+### Refactoring
+- refactor: remove unbacked features and unearned claims across the product (365daf6)
+
 ## v0.3.0 — 2026-08-08
 
 ### Features
