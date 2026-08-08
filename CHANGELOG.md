@@ -1,3 +1,8 @@
+## v0.3.5 — 2026-08-08
+
+### Fixes
+- fix(content): remove the last two fabricated service claims (6531043)
+
 ## v0.3.4 — 2026-08-08
 
 ### Fixes
