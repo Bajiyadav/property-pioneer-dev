@@ -55,10 +55,10 @@ jobs:
             for pair in "feat:Features" "fix:Fixes" "perf:Performance" "refactor:Refactoring" "docs:Documentation"; do
               t="${pair%%:*}"; label="${pair##*:}"
               body=$(git log $RANGE --pretty=format:'- %s (%h)' --grep="^${t}")
-              [ -n "$body" ] && { echo "### ${label}"; echo "$body"; echo; }
+              if [ -n "$body" ]; then echo "### ${label}"; echo "$body"; echo; fi
             done
             MIG=$(git diff --name-only $RANGE -- supabase/migrations | sed 's/^/- /')
-            [ -n "$MIG" ] && { echo "### Migration notes"; echo "$MIG"; echo; echo "Apply with \`supabase db push\` before promoting."; echo; }
+            if [ -n "$MIG" ]; then echo "### Migration notes"; echo "$MIG"; echo; echo "Apply with \`supabase db push\` before promoting."; echo; fi
           } > RELEASE_NOTES.md
           cat RELEASE_NOTES.md
 

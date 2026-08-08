@@ -126,7 +126,14 @@ jobs:
           for path in "${PATHS[@]}"; do
             CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${URL}${path}")
             echo "$path -> $CODE"
-            [ "$CODE" -ge 400 ] && { echo "::error::$path returned $CODE"; exit 1; }
+            # Must be `if`, not `[ ... ] && { ... }`: on a healthy response the
+            # test is false, the compound returns 1, and as the loop's last
+            # command that failed the step under `set -e` — reporting every
+            # good deploy as unhealthy and triggering a needless rollback.
+            if [ "$CODE" -ge 400 ]; then
+              echo "::error::$path returned $CODE"
+              exit 1
+            fi
           done
 
       - name: Production smoke tests
