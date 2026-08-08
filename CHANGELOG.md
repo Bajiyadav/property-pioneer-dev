@@ -1,3 +1,8 @@
+## v0.2.0 — 2026-08-08
+
+### Features
+- feat(expansion): make Bangalore roadmap cards informative; remove false claims (f6c41a8)
+
 ## v0.1.6 — 2026-08-08
 
 ### Refactoring
