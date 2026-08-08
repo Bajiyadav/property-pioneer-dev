@@ -1,3 +1,8 @@
+## v0.1.5 — 2026-08-08
+
+### Fixes
+- fix(ui): remove the duplicate footer on the homepage (b5cd8ad)
+
 ## v0.1.4 — 2026-08-08
 
 ### Refactoring
