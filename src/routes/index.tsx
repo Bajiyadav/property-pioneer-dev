@@ -20,7 +20,6 @@ import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
 import { NewsletterSection } from "@/modules/marketing/home/NewsletterSection";
 import { AppSection } from "@/modules/marketing/home/AppSection";
-import { FooterLinks } from "@/modules/marketing/home/FooterLinks";
 
 import { CategoryModal, type CategoryModalData } from "@/shared/components/dialogs/CategoryModal";
 import {
@@ -158,9 +157,6 @@ function Index() {
 
       {/* 16. Mobile App Banner */}
       <AppSection />
-
-      {/* 17. Startup Footer */}
-      <FooterLinks />
 
       {/* ======================================= */}
       {/* INTERACTIVE MODALS & DRAWERS            */}

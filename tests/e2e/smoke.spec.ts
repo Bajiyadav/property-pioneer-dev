@@ -55,6 +55,17 @@ test.describe("public routes", () => {
       "© 2022 Urban Properties. All Rights Reserved.",
     );
   });
+
+  // The homepage used to render its own footer on top of the global one, so
+  // visitors saw the brand blurb, the columns and the copyright twice.
+  test("renders exactly one footer on every page", async ({ page }) => {
+    for (const path of ["/", `/properties${SEARCH}`, "/buy", "/home-services", "/help"]) {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      await expect(page.locator("footer"), `${path} should have one footer`).toHaveCount(1);
+      const copies = await page.getByText("© 2022 Urban Properties. All Rights Reserved.").count();
+      expect(copies, `${path} should show the copyright once`).toBe(1);
+    }
+  });
 });
 
 test.describe("SEO", () => {

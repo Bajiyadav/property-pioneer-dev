@@ -316,7 +316,7 @@ function SiteFooter() {
   return (
     <footer className="border-t border-border/60 bg-secondary/40">
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-6">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <BrandMark size="sm" />
@@ -438,6 +438,94 @@ function SiteFooter() {
             </ul>
           </div>
 
+          {/* Popular Cities */}
+          <div>
+            <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
+              Popular Cities
+            </h3>
+            <ul className="space-y-2 text-xs text-muted-foreground">
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Hyderabad",
+                    listing: "",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Flats in Hyderabad
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Jaipur",
+                    listing: "",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Flats in Jaipur
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Lucknow",
+                    listing: "",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Flats in Lucknow
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Indore",
+                    listing: "",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Flats in Indore
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Vizag",
+                    listing: "",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Flats in Vizag
+                </Link>
+              </li>
+            </ul>
+          </div>
           {/* Legal */}
           <div>
             <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
