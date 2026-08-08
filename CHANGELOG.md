@@ -1,3 +1,8 @@
+## v0.3.4 — 2026-08-08
+
+### Fixes
+- fix(cd): stop the health check failing every healthy deployment (83322f3)
+
 ## v0.3.3 — 2026-08-08
 
 ### Fixes
