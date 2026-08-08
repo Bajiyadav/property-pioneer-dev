@@ -15,7 +15,10 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:e2e:smoke": "playwright test smoke",
+    "test:e2e:journey": "playwright test journey",
+    "test:e2e:responsive": "playwright test responsive"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
