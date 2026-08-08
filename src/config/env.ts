@@ -130,9 +130,14 @@ export function reportEnvIssues(issues: EnvIssue[], scope: "client" | "server"):
     else console.warn(line);
   }
 
+  // Vitest runs with DEV=true, so without this the unit suite would demand
+  // Supabase credentials it never uses and fail CI on every push. The issues
+  // are still logged above; only the throw is suppressed under test.
+  const underTest = import.meta.env?.MODE === "test" || Boolean(process.env?.VITEST);
+
   // In production a hard throw would take the whole site down over a warning-
   // level misconfiguration, so surface loudly and keep serving.
-  if (errors.length > 0 && import.meta.env?.DEV) {
+  if (errors.length > 0 && import.meta.env?.DEV && !underTest) {
     throw new Error(
       `Invalid ${scope} environment:\n` +
         errors.map((e) => `  ${e.variable}: ${e.problem}`).join("\n"),
