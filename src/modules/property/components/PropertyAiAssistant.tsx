@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import type { Property } from "@/lib/properties";
+import type { Property } from "@/modules/property/services/propertyQueries";
 
 export function UrbanAiAssistant({ property }: { property: Property }) {
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import { TURNSTILE_SITE_KEY } from "@/lib/enquiries";
+import { TURNSTILE_SITE_KEY } from "@/modules/enquiry/services/enquiryService";
 
 declare global {
   interface Window {

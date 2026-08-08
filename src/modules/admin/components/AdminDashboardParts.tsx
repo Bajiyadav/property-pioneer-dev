@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Building2, Users } from "lucide-react";
-import { formatPrice, type Property } from "@/lib/properties";
+import { formatPrice, type Property } from "@/modules/property/services/propertyQueries";
 import {
   DataTable,
   EmptyState,

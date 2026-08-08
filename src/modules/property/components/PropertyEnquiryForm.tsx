@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { submitEnquiry } from "@/lib/enquiries";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
+import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
 import { CheckCircle2 } from "lucide-react";
 
 export function EnquiryForm({ propertyId, onSent }: { propertyId: string; onSent: () => void }) {

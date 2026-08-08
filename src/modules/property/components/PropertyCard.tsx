@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Heart, MapPin, BedDouble, Bath, Maximize } from "lucide-react";
-import { type Property, formatPrice } from "@/lib/properties";
-import { useFavorites } from "@/lib/useFavorites";
-import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
-import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
+import { type Property, formatPrice } from "@/modules/property/services/propertyQueries";
+import { useFavorites } from "@/modules/property/hooks/useFavorites";
+import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
+import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();

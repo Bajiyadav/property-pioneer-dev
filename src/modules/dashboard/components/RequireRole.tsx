@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ShieldAlert } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { getDashboardRoute, type UserRole } from "@/config/roles";
 import { useAuthSession, type UseAuthSession } from "@/hooks/useAuthSession";
 

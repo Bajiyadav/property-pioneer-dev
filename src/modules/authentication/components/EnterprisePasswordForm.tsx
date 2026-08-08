@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { evaluatePasswordRules, validateFullName, validateIndianPhone } from "@/lib/auth-security";
+import {
+  evaluatePasswordRules,
+  validateFullName,
+  validateIndianPhone,
+} from "@/modules/authentication/services/passwordPolicy";
 
 export function EnterprisePasswordForm({
   mode = "signup",

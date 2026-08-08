@@ -7,7 +7,7 @@ import {
   fetchPublicProperties,
   fetchPublicPropertyFeed,
   fetchPublicPropertyById,
-} from "@/modules/property/propertyService";
+} from "@/modules/property/services/propertyService";
 
 export type { Property, PropertyStatus, PropertyFeed, VerificationStatus };
 

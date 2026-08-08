@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { enquiryInputSchema, MIN_SUBMIT_MS } from "@/lib/enquiries";
+import { enquiryInputSchema, MIN_SUBMIT_MS } from "@/modules/enquiry/services/enquiryService";
 import {
   checkRateLimits,
   getClientIp,

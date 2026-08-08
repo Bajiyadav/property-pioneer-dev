@@ -21,9 +21,13 @@ import {
   UserCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
-import { useFavorites } from "@/lib/useFavorites";
-import { PropertyCard } from "@/components/PropertyCard";
+import {
+  fetchPropertyFeed,
+  formatPrice,
+  type Property,
+} from "@/modules/property/services/propertyQueries";
+import { useFavorites } from "@/modules/property/hooks/useFavorites";
+import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import {
@@ -44,8 +48,8 @@ import {
   type TimelineItem,
 } from "@/modules/dashboard/components/DashboardKit";
 import { TrendAreaChart, DonutChart } from "@/modules/dashboard/components/DashboardCharts";
-import { displayName } from "@/lib/auth-session";
-import { readRecentSearches, type RecentSearch } from "@/lib/dashboard-data";
+import { displayName } from "@/modules/authentication/services/session";
+import { readRecentSearches, type RecentSearch } from "@/modules/dashboard/services/dashboardData";
 import {
   Booking,
   Enquiry,

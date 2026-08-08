@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
 import { Heart } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { BRAND } from "@/config/platform";
 import {
   APP_NAME,
@@ -26,7 +26,7 @@ import {
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
-import { DemoModeSwitcher } from "@/components/demo/DemoModeSwitcher";
+import { DemoModeSwitcher } from "@/app/layouts/DemoModeSwitcher";
 import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
 import { HomeServicesModal } from "@/shared/components/dialogs/HomeServicesModal";

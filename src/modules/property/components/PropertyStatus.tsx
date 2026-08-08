@@ -1,4 +1,4 @@
-import { type PropertyStatus as PropertyStatusType } from "@/modules/property/propertyService";
+import { type PropertyStatus as PropertyStatusType } from "@/modules/property/services/propertyService";
 import { CheckCircle2, Clock, Ban, Archive, Lock, Home } from "lucide-react";
 
 const STATUS_CONFIG: Record<

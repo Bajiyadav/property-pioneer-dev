@@ -17,7 +17,11 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
+import {
+  fetchPropertyFeed,
+  formatPrice,
+  type Property,
+} from "@/modules/property/services/propertyQueries";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import {
@@ -41,8 +45,8 @@ import {
   FunnelBars,
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
-import { displayName } from "@/lib/auth-session";
-import { seededSeries } from "@/lib/dashboard-data";
+import { displayName } from "@/modules/authentication/services/session";
+import { seededSeries } from "@/modules/dashboard/services/dashboardData";
 import {
   Lead,
   Client,

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_COPYRIGHT } from "@/config/app";
 
 export function FooterLinks() {

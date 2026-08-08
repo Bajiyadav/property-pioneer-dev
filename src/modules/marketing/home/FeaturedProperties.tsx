@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { PropertyCard } from "@/components/PropertyCard";
-import type { Property } from "@/lib/properties";
+import { PropertyCard } from "@/modules/property/components/PropertyCard";
+import type { Property } from "@/modules/property/services/propertyQueries";
 
 export function FeaturedProperties({
   properties,

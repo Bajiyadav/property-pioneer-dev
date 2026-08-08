@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
-import { fetchProperties } from "@/lib/properties";
-import { PropertyCard } from "@/components/PropertyCard";
-import { useFavorites } from "@/lib/useFavorites";
+import { fetchProperties } from "@/modules/property/services/propertyQueries";
+import { PropertyCard } from "@/modules/property/components/PropertyCard";
+import { useFavorites } from "@/modules/property/hooks/useFavorites";
 
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 

@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { evaluatePasswordRules, validateFullName, validateIndianPhone } from "@/lib/auth-security";
+import {
+  evaluatePasswordRules,
+  validateFullName,
+  validateIndianPhone,
+} from "@/modules/authentication/services/passwordPolicy";
 
 /**
  * These guard the rules that decide whether an account can be created at all.

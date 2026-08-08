@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { CHART_COLORS } from "@/lib/chart-palette";
+import { CHART_COLORS } from "@/modules/dashboard/services/chartPalette";
 
 const axisProps = {
   stroke: "currentColor",

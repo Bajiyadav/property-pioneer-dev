@@ -41,13 +41,17 @@ import {
   Shield,
   TrainTrack,
 } from "lucide-react";
-import { fetchProperty, formatPrice, type Property } from "@/lib/properties";
-import { useFavorites } from "@/lib/useFavorites";
-import { submitEnquiry } from "@/lib/enquiries";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
-import { PropertyBadges } from "@/components/PropertyBadges/PropertyBadges";
-import { PropertyStatus } from "@/components/PropertyStatus/PropertyStatus";
-import { WhatsAppButton } from "@/components/WhatsAppButton/WhatsAppButton";
+import {
+  fetchProperty,
+  formatPrice,
+  type Property,
+} from "@/modules/property/services/propertyQueries";
+import { useFavorites } from "@/modules/property/hooks/useFavorites";
+import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
+import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
+import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
+import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
+import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
 import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
 import { RentalAgreementModal } from "@/shared/components/dialogs/RentalAgreementModal";
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";

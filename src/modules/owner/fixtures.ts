@@ -1,4 +1,4 @@
-import type { Property } from "@/lib/properties";
+import type { Property } from "@/modules/property/services/propertyQueries";
 
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 

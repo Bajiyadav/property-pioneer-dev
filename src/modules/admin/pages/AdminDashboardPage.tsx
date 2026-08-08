@@ -22,7 +22,11 @@ import {
   UsersRound,
   XCircle,
 } from "lucide-react";
-import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
+import {
+  fetchPropertyFeed,
+  formatPrice,
+  type Property,
+} from "@/modules/property/services/propertyQueries";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import {
@@ -47,9 +51,9 @@ import {
   DualLineChart,
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
-import { countBy, relativeTime, seededSeries } from "@/lib/dashboard-data";
-import { getAdminProperties, updateAdminProperty } from "@/lib/admin.functions";
-import { displayName } from "@/lib/auth-session";
+import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
+import { getAdminProperties, updateAdminProperty } from "@/modules/admin/services/adminFunctions";
+import { displayName } from "@/modules/authentication/services/session";
 import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
 import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
 

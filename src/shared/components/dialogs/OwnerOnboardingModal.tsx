@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { createListing, uploadListingImage } from "@/lib/owner.functions";
+import { createListing, uploadListingImage } from "@/modules/owner/services/ownerFunctions";
 
 interface PickedPhoto {
   name: string;

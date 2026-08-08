@@ -7,7 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Building2, Eye, FileEdit, PlusCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice, type Property } from "@/lib/properties";
+import { formatPrice, type Property } from "@/modules/property/services/propertyQueries";
 import {
   EmptyState,
   ErrorState,

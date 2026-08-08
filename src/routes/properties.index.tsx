@@ -2,10 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, LayoutGrid, MapPin } from "lucide-react";
-import { fetchProperties } from "@/lib/properties";
-import { recordRecentSearch } from "@/lib/dashboard-data";
-import { PropertyCard } from "@/components/PropertyCard";
-import { PropertyMapView } from "@/components/map/PropertyMapView";
+import { fetchProperties } from "@/modules/property/services/propertyQueries";
+import { recordRecentSearch } from "@/modules/dashboard/services/dashboardData";
+import { PropertyCard } from "@/modules/property/components/PropertyCard";
+import { PropertyMapView } from "@/modules/property/components/PropertyMapView";
 
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 

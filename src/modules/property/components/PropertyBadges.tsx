@@ -4,7 +4,7 @@ import {
   isOwnerVerified,
   isPropertyVerified,
   isNewlyListed,
-} from "@/modules/property/propertyService";
+} from "@/modules/property/services/propertyService";
 import { CheckCircle2, ShieldCheck, Tag, Sparkles, Clock, Crown } from "lucide-react";
 
 export function PropertyBadges({

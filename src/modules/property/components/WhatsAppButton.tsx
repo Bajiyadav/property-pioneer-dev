@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchOwnerContact } from "@/lib/properties";
+import { fetchOwnerContact } from "@/modules/property/services/propertyQueries";
 
 export function WhatsAppButton({
   propertyId,

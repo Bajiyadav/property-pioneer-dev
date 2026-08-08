@@ -1,5 +1,5 @@
-import { toListingType } from "@/lib/properties";
-import type { Property, PropertyStatus } from "@/modules/property/propertyService";
+import { toListingType } from "@/modules/property/services/propertyQueries";
+import type { Property, PropertyStatus } from "@/modules/property/services/propertyService";
 
 /**
  * Server-only owner listing operations.

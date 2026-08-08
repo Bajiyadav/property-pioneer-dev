@@ -10,7 +10,7 @@ import {
   Layers,
   Navigation,
 } from "lucide-react";
-import { type Property, formatPrice } from "@/lib/properties";
+import { type Property, formatPrice } from "@/modules/property/services/propertyQueries";
 
 const HYD_MAP_PINS = [
   {

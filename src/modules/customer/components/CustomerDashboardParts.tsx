@@ -1,14 +1,14 @@
 import { BellRing } from "lucide-react";
-import type { RecentSearch } from "@/lib/dashboard-data";
+import type { RecentSearch } from "@/modules/dashboard/services/dashboardData";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { ArrowRight, Heart, History, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { PropertyCard } from "@/components/PropertyCard";
-import type { Property } from "@/lib/properties";
-import { displayName } from "@/lib/auth-session";
+import { PropertyCard } from "@/modules/property/components/PropertyCard";
+import type { Property } from "@/modules/property/services/propertyQueries";
+import { displayName } from "@/modules/authentication/services/session";
 import {
   EmptyState,
   ErrorState,

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Wrench, ArrowLeft, Home, RefreshCw, Terminal } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_COPYRIGHT } from "@/config/app";
 
 export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: () => void }) {

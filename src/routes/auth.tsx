@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { BrandMark } from "@/components/BrandMark";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole, setActiveRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";

@@ -3,8 +3,8 @@ import {
   isOwnerVerified,
   isPropertyVerified,
   type Property,
-} from "@/modules/property/propertyService";
-import { formatPrice } from "@/lib/properties";
+} from "@/modules/property/services/propertyService";
+import { formatPrice } from "@/modules/property/services/propertyQueries";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { APP_COPYRIGHT, getCanonicalUrl } from "@/config/app";
 

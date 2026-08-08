@@ -23,8 +23,12 @@ import {
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchPropertyFeed, formatPrice, type Property } from "@/lib/properties";
-import { getMyListings, removeListing } from "@/lib/owner.functions";
+import {
+  fetchPropertyFeed,
+  formatPrice,
+  type Property,
+} from "@/modules/property/services/propertyQueries";
+import { getMyListings, removeListing } from "@/modules/owner/services/ownerFunctions";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
@@ -50,8 +54,8 @@ import {
   DonutChart,
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
-import { countBy, relativeTime, seededSeries } from "@/lib/dashboard-data";
-import { displayName } from "@/lib/auth-session";
+import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
+import { displayName } from "@/modules/authentication/services/session";
 import {
   OwnerLead,
   LEADS,

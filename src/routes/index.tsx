@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { fetchProperties } from "@/lib/properties";
+import { fetchProperties } from "@/modules/property/services/propertyQueries";
 import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 import { HeroSection } from "@/modules/marketing/home/HeroSection";

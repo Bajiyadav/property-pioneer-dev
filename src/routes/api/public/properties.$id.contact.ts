@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPrice } from "@/lib/properties";
+import { formatPrice } from "@/modules/property/services/propertyQueries";
 import { APP_URL } from "@/config/app";
 import {
   getClientIp,

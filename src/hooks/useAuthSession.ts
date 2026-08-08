@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { GUEST_SESSION, resolveRoleForSession, type ResolvedSession } from "@/lib/auth-session";
+import {
+  GUEST_SESSION,
+  resolveRoleForSession,
+  type ResolvedSession,
+} from "@/modules/authentication/services/session";
 
 export type AuthStatus = "loading" | "authenticated" | "guest";
 
