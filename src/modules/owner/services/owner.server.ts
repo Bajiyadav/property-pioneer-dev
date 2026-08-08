@@ -153,3 +153,50 @@ export async function uploadOwnerImage(ownerId: string, dataUrl: string, filenam
   const { data } = db.storage.from("property-images").getPublicUrl(path);
   return { url: data.publicUrl, path };
 }
+
+export interface OwnerLead {
+  id: string;
+  name: string;
+  phone: string;
+  message: string;
+  createdAt: string;
+  propertyId: string;
+  propertyTitle: string;
+}
+
+/**
+ * Enquiries on this owner's listings.
+ *
+ * Scoped by resolving the owner's property ids first, so an owner can never see
+ * a lead belonging to someone else's listing even though this runs with the
+ * service role.
+ */
+export async function listOwnerLeads(ownerId: string): Promise<OwnerLead[]> {
+  const db = await adminDb();
+
+  const { data: props, error: propErr } = await db
+    .from("properties")
+    .select("id,title")
+    .eq("owner_id", ownerId);
+  if (propErr) throw new Error(propErr.message);
+  if (!props?.length) return [];
+
+  const titles = new Map(props.map((p) => [p.id, p.title]));
+  const { data, error } = await db
+    .from("enquiries")
+    .select("id,name,phone,message,created_at,property_id")
+    .in("property_id", [...titles.keys()])
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((e) => ({
+    id: e.id,
+    name: e.name,
+    phone: e.phone,
+    message: e.message,
+    createdAt: e.created_at,
+    propertyId: e.property_id,
+    propertyTitle: titles.get(e.property_id) ?? "Listing",
+  }));
+}

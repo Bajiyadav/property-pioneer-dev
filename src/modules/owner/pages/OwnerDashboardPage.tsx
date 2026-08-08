@@ -28,7 +28,8 @@ import {
   formatPrice,
   type Property,
 } from "@/modules/property/services/propertyQueries";
-import { getMyListings, removeListing } from "@/modules/owner/services/ownerFunctions";
+import type { OwnerLead } from "@/modules/owner/services/owner.server";
+import { getMyLeads, getMyListings, removeListing } from "@/modules/owner/services/ownerFunctions";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
@@ -56,14 +57,7 @@ import {
 } from "@/modules/dashboard/components/DashboardCharts";
 import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
 import { displayName } from "@/modules/authentication/services/session";
-import {
-  OwnerLead,
-  LEADS,
-  VISITS,
-  ACTIVITY,
-  SEARCH_PARAMS,
-  listingImage,
-} from "@/modules/owner/fixtures";
+import { VISITS, ACTIVITY, SEARCH_PARAMS, listingImage } from "@/modules/owner/fixtures";
 import { ListingRows, OwnerSettings } from "@/modules/owner/components/OwnerDashboardParts";
 
 const NAV_ITEMS: NavItem[] = [
@@ -134,9 +128,21 @@ function OwnerDashboard({ user }: { user: User | null }) {
     return listings.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
   }, [listings, listingQuery]);
 
+  // Real enquiries on this owner's listings, scoped server-side by owner_id.
+  const fetchLeads = useServerFn(getMyLeads);
+  const {
+    data: leads,
+    isLoading: leadsLoading,
+    isError: leadsError,
+    refetch: refetchLeads,
+  } = useQuery({ queryKey: ["owner", "leads"], queryFn: () => fetchLeads({}), retry: false });
+
+  const allLeads = useMemo(() => leads ?? [], [leads]);
+  /** Anything received in the last 48h counts as new for the filter chip. */
+  const isNew = (iso: string) => Date.now() - new Date(iso).getTime() < 48 * 3600 * 1000;
   const visibleLeads = useMemo(
-    () => (leadFilter === "all" ? LEADS : LEADS.filter((l) => l.status === "New")),
-    [leadFilter],
+    () => (leadFilter === "all" ? allLeads : allLeads.filter((l) => isNew(l.createdAt))),
+    [allLeads, leadFilter],
   );
 
   const monthlyRent = useMemo(
@@ -207,7 +213,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
               />
               <KpiCard
                 label="Tenant leads"
-                numericValue={LEADS.length}
+                numericValue={allLeads.length}
                 icon={<Users className="h-4 w-4" />}
                 accent="blue"
                 trend={{ direction: "up", label: "+1 today" }}
@@ -253,7 +259,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 {
                   id: "leads",
                   label: "Tenant leads",
-                  hint: `${LEADS.length} open`,
+                  hint: `${allLeads.length} open`,
                   icon: <MessageSquare className="h-4 w-4" />,
                   onClick: () => setActiveTab("enquiries"),
                 },
@@ -478,6 +484,14 @@ function OwnerDashboard({ user }: { user: User | null }) {
               />
             }
           />
+          {leadsError && (
+            <ErrorState
+              title="Could not load enquiries"
+              message="Your leads could not be fetched. Please retry."
+              onRetry={() => refetchLeads()}
+            />
+          )}
+          {leadsLoading && <LoadingSkeleton rows={3} />}
           <DataTable
             rows={visibleLeads}
             getKey={(l) => l.id}
@@ -503,7 +517,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 key: "property",
                 header: "Property",
                 render: (l: OwnerLead) => (
-                  <span className="text-muted-foreground">{l.property}</span>
+                  <span className="text-muted-foreground">{l.propertyTitle}</span>
                 ),
               },
               {
@@ -517,7 +531,9 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 key: "when",
                 header: "Received",
                 render: (l: OwnerLead) => (
-                  <span className="whitespace-nowrap text-muted-foreground">{l.when}</span>
+                  <span className="whitespace-nowrap text-muted-foreground">
+                    {relativeTime(l.createdAt)}
+                  </span>
                 ),
               },
               {
@@ -526,10 +542,8 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 className: "text-right",
                 render: (l: OwnerLead) => (
                   <StatusPill
-                    label={l.status}
-                    tone={
-                      l.status === "New" ? "warning" : l.status === "Contacted" ? "info" : "success"
-                    }
+                    label={isNew(l.createdAt) ? "New" : "Seen"}
+                    tone={isNew(l.createdAt) ? "info" : "neutral"}
                   />
                 ),
               },

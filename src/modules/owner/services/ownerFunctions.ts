@@ -72,3 +72,10 @@ export const uploadListingImage = createServerFn({ method: "POST" })
     const { uploadOwnerImage } = await import("./owner.server");
     return uploadOwnerImage(context.userId, data.dataUrl, data.filename);
   });
+
+export const getMyLeads = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { listOwnerLeads } = await import("./owner.server");
+    return listOwnerLeads(context.userId);
+  });

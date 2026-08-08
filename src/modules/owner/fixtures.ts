@@ -2,46 +2,6 @@ import type { Property } from "@/modules/property/services/propertyQueries";
 
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 
-export interface OwnerLead {
-  id: string;
-  name: string;
-  phone: string;
-  property: string;
-  message: string;
-  when: string;
-  status: "New" | "Contacted" | "Visit booked";
-}
-
-export const LEADS: OwnerLead[] = [
-  {
-    id: "l1",
-    name: "Kavitha Reddy",
-    phone: "+91 98765 43210",
-    property: "2BHK Gachibowli",
-    message: "Is parking included in the rent?",
-    when: "12 min ago",
-    status: "New",
-  },
-  {
-    id: "l2",
-    name: "Arjun Kapoor",
-    phone: "+91 99887 76655",
-    property: "3BHK Villa Kondapur",
-    message: "Can I schedule a visit this weekend?",
-    when: "3 hours ago",
-    status: "Contacted",
-  },
-  {
-    id: "l3",
-    name: "Neha Sharma",
-    phone: "+91 90000 12345",
-    property: "Studio, Hitech City",
-    message: "Is it available from the 1st?",
-    when: "Yesterday",
-    status: "Visit booked",
-  },
-];
-
 export const VISITS = [
   { id: "v1", day: "Today", time: "04:00 PM", who: "Kavitha Reddy", what: "2BHK Gachibowli" },
   { id: "v2", day: "Tomorrow", time: "11:00 AM", who: "Arjun Kapoor", what: "3BHK Kondapur" },
