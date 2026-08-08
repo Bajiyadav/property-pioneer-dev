@@ -1,3 +1,8 @@
+## v0.3.2 — 2026-08-08
+
+### Fixes
+- fix(content): drop remaining pan-India framing from hero and site metadata (cef1af1)
+
 ## v0.3.1 — 2026-08-08
 
 ### Refactoring
