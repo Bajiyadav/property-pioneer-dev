@@ -1,3 +1,8 @@
+## v0.5.0 — 2026-08-13
+
+### Features
+- feat(ci): upgrade to production-grade gated delivery architecture with release score (b741d62)
+
 ## v0.4.1 — 2026-08-13
 
 ### Fixes
