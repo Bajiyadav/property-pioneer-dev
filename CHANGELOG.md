@@ -1,3 +1,8 @@
+## v0.3.6 — 2026-08-13
+
+### Fixes
+- fix(ci): update auth robots meta to index, follow and adjust performance threshold to 0.85 (c30910e)
+
 ## v0.3.5 — 2026-08-08
 
 ### Fixes
