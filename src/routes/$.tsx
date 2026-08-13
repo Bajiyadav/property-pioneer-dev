@@ -1,17 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 
 /**
  * Catch-all for unknown URLs.
- *
- * Known limitation: this responds 200, not 404. `setResponseStatus(404)` in
- * `beforeLoad` was verified to execute during SSR but the streaming render
- * handler overwrites the status afterwards, so the call was removed rather than
- * left in place looking effective. `robots: noindex` below keeps these URLs out
- * of the index in the meantime.
  */
 export const Route = createFileRoute("/$")({
+  beforeLoad: () => {
+    throw notFound();
+  },
   head: () => ({
     meta: [
       { title: `Page not found — ${APP_NAME}` },
@@ -28,6 +25,7 @@ export const Route = createFileRoute("/$")({
     ],
   }),
   component: CatchAll,
+  notFoundComponent: CatchAll,
 });
 
 function CatchAll() {

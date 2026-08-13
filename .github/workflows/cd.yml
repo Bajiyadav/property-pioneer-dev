@@ -122,14 +122,10 @@ jobs:
       - name: Health check
         run: |
           URL="${{ secrets.PRODUCTION_URL || 'https://property-pioneer-dev.vercel.app' }}"
-          PATHS=("/" "/properties?q=&city=&listing=&minPrice=0&maxPrice=0&beds=0" "/auth?redirect=" "/sitemap.xml")
+          PATHS=("/" "/properties?q=&city=&listing=&minPrice=0&maxPrice=0&beds=0" "/buy" "/commercial" "/villas" "/plots" "/farm-lands" "/auth?redirect=" "/help" "/blog" "/sitemap.xml")
           for path in "${PATHS[@]}"; do
             CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${URL}${path}")
             echo "$path -> $CODE"
-            # Must be `if`, not `[ ... ] && { ... }`: on a healthy response the
-            # test is false, the compound returns 1, and as the loop's last
-            # command that failed the step under `set -e` — reporting every
-            # good deploy as unhealthy and triggering a needless rollback.
             if [ "$CODE" -ge 400 ]; then
               echo "::error::$path returned $CODE"
               exit 1
