@@ -34,7 +34,7 @@ export const getMyListings = createServerFn({ method: "GET" })
 
 export const createListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => listingSchema.parse(input))
+  .validator((input: unknown) => listingSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { createOwnerProperty } = await import("./owner.server");
     return createOwnerProperty(context.userId, data);
@@ -42,7 +42,7 @@ export const createListing = createServerFn({ method: "POST" })
 
 export const editListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z.object({ id: z.string().uuid(), patch: listingSchema.partial() }).parse(input),
   )
   .handler(async ({ data, context }) => {
@@ -52,7 +52,7 @@ export const editListing = createServerFn({ method: "POST" })
 
 export const removeListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { deleteOwnerProperty } = await import("./owner.server");
     return deleteOwnerProperty(context.userId, data.id);
@@ -60,7 +60,7 @@ export const removeListing = createServerFn({ method: "POST" })
 
 export const uploadListingImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         dataUrl: z.string().startsWith("data:image/"),

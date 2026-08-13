@@ -64,7 +64,7 @@ export const getAdminAuditLogs = createServerFn({ method: "GET" })
 
 export const updateAdminProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         id: z.string().uuid(),
