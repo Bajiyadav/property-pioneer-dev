@@ -1,3 +1,8 @@
+## v0.4.0 — 2026-08-13
+
+### Features
+- feat(category): add dedicated category landing pages for buy, commercial, villas, plots, farm-lands (1bdc7e4)
+
 ## v0.3.6 — 2026-08-13
 
 ### Fixes
