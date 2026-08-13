@@ -30,7 +30,7 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: `Enterprise authentication & secure login for ${APP_NAME}.` },
       { property: "og:title", content: `Sign in — ${APP_NAME}` },
       { property: "og:type", content: "website" },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "index, follow" },
     ],
   }),
   component: AuthPage,
