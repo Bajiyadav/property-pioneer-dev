@@ -1,3 +1,8 @@
+## v0.4.1 — 2026-08-13
+
+### Fixes
+- fix(cd): expand health check routes and set 404 handler for unknown routes (c4429b7)
+
 ## v0.4.0 — 2026-08-13
 
 ### Features
