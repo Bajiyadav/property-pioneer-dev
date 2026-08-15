@@ -1,3 +1,8 @@
+## v0.6.1 — 2026-08-15
+
+### Fixes
+- fix(e2e): stabilize LocationPicker hydration and assertion timings (96279d8)
+
 ## v0.6.0 — 2026-08-15
 
 ### Features
