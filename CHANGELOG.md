@@ -1,3 +1,16 @@
+## v0.6.0 — 2026-08-15
+
+### Features
+- feat: complete production rental platform with video tours, agent careers, and RLS (3fe5946)
+
+### Migration notes
+- supabase/migrations/20260815131921_add_video_and_location_to_properties.sql
+- supabase/migrations/properties/20260815190000_add_extended_video_fields.sql
+- supabase/migrations/properties/20260816000000_add_property_visits_and_agent_leads.sql
+- supabase/migrations/users/20260816010000_add_agent_applications.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.5.0 — 2026-08-13
 
 ### Features
