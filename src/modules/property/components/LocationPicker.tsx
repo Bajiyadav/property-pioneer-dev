@@ -97,6 +97,7 @@ export function LocationPicker({
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Trigger Button */}
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen((prev) => !prev);

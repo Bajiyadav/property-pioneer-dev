@@ -30,9 +30,7 @@ test.describe("Location Discovery Routing", () => {
   });
 
   test("location picker navigates to the correct locality route", async ({ page }) => {
-    // Start at rent (redirects to hyderabad)
-    await page.goto("/rent", { waitUntil: "domcontentloaded" });
-    await page.waitForURL(/\/rent\/hyderabad/, { timeout: 15000 });
+    await page.goto("/rent/hyderabad", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: /Rental Homes in Hyderabad/i })).toBeVisible({
       timeout: 15000,
     });
