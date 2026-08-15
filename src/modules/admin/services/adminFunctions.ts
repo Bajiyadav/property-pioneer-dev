@@ -71,6 +71,7 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
         is_approved: z.boolean().optional(),
         is_featured: z.boolean().optional(),
         status: z.enum(["available", "rented", "sold"]).optional(),
+        video_status: z.enum(["pending", "approved", "rejected"]).optional(),
       })
       .parse(input),
   )

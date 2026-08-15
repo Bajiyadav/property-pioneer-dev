@@ -39,7 +39,8 @@ function FavoritesPage() {
   const { ids } = useFavorites();
   const { data: all = [], isLoading } = useQuery({
     queryKey: ["properties"],
-    queryFn: fetchProperties,
+    queryFn: () => fetchProperties(),
+    staleTime: 5 * 60 * 1000,
   });
   const saved = all.filter((p) => ids.includes(p.id));
 

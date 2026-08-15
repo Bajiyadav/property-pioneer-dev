@@ -29,10 +29,21 @@ export interface OwnerListingInput {
   listing_type: "rent" | "sale";
   images: string[];
   status?: "draft" | "available";
+  video_url?: string | null;
+  video_thumbnail_url?: string | null;
+  video_duration?: number | null;
+  video_status?: "pending" | "approved" | "rejected";
+  video_uploaded_at?: string | null;
+  locality?: string | null;
+  landmark?: string | null;
+  metro_station?: string | null;
+  it_park?: string | null;
+  college?: string | null;
+  hospital?: string | null;
 }
 
 const OWNER_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_approved,is_featured,created_at";
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_approved,is_featured,video_url,video_thumbnail_url,video_duration,video_status,video_uploaded_at,created_at,locality,landmark,metro_station,it_park,college,hospital";
 
 /**
  * Rows come back with `listing_type` as free-text, so normalise once here at the
@@ -152,6 +163,33 @@ export async function uploadOwnerImage(ownerId: string, dataUrl: string, filenam
 
   const { data } = db.storage.from("property-images").getPublicUrl(path);
   return { url: data.publicUrl, path };
+}
+
+export async function createVideoUploadUrl(ownerId: string, filename: string, mime: string) {
+  if (!["video/mp4", "video/webm", "video/quicktime"].includes(mime)) {
+    throw new Error(`Unsupported video type: ${mime}`);
+  }
+
+  const ext = mime.split("/")[1].replace("quicktime", "mov");
+  const safe = filename.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-40);
+  // Just use a random UUID or timestamp for the path
+  const propertyIdPlaceholder = "temp";
+  const path = `${ownerId}/${propertyIdPlaceholder}/${Date.now()}-${safe || "video"}.${ext}`;
+
+  const db = await adminDb();
+  // Get a signed URL valid for 1 hour to allow direct client upload
+  const { data, error } = await db.storage.from("property_videos").createSignedUploadUrl(path);
+
+  if (error) throw new Error(error.message);
+
+  const { data: publicData } = db.storage.from("property_videos").getPublicUrl(path);
+
+  return {
+    signedUrl: data.signedUrl,
+    path,
+    token: data.token,
+    publicUrl: publicData.publicUrl,
+  };
 }
 
 export interface OwnerLead {

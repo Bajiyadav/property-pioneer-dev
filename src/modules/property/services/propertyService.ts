@@ -23,6 +23,14 @@ export type Property = {
   status: PropertyStatus;
   images: string[];
   is_featured: boolean;
+  video_url?: string | null;
+  video_status?: "pending" | "approved" | "rejected";
+  locality?: string | null;
+  landmark?: string | null;
+  metro_station?: string | null;
+  it_park?: string | null;
+  college?: string | null;
+  hospital?: string | null;
   /** Moderation gate — RLS only exposes approved listings publicly. */
   is_approved?: boolean;
   owner_verification_status?: VerificationStatus;
@@ -51,7 +59,7 @@ export type Property = {
  * will start flowing through automatically once the migration lands.
  */
 export const PUBLIC_PROPERTY_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,video_url,video_status,locality,landmark,metro_station,it_park,college,hospital";
 
 /** Shape PostgREST returns for the granted column set. */
 type PropertyRow = Omit<
@@ -85,6 +93,7 @@ function withVerificationDefaults(row: PropertyRow): Property {
     id_verified: row.id_verified ?? false,
     is_zero_brokerage: row.is_zero_brokerage ?? true,
     is_premium: row.is_premium ?? false,
+    video_url: row.video_status === "approved" ? row.video_url : null,
   } as Property;
 }
 
@@ -114,6 +123,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "Experience elegant duplex living in the heart of Vinayak Nagar, Madhapur. This spacious home offers premium interiors, designer false ceilings, Italian marble flooring, a large family lounge, modern wooden staircase, multiple seating areas, and a peaceful residential atmosphere just 3 minutes from Hyderabad's IT corridor.",
     price: 45000,
     city: "Hyderabad",
+    locality: "Madhapur",
     address: "Vinayak Nagar, Madhapur",
     bedrooms: 3,
     bathrooms: 3,
@@ -146,6 +156,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "Fully furnished 2 BHK flat near Financial District & DLF Cybercity. 24/7 security, power backup, modular kitchen, and reserved car parking.",
     price: 32000,
     city: "Hyderabad",
+    locality: "Gachibowli",
     address: "Financial District, Gachibowli",
     bedrooms: 2,
     bathrooms: 2,
@@ -173,6 +184,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "East-facing 1 BHK apartment walking distance from Cyber Towers & Durgam Cheruvu Metro Station. Includes AC, fridge, and high-speed Wi-Fi.",
     price: 22000,
     city: "Hyderabad",
+    locality: "Madhapur",
     address: "Near Cyber Towers, Madhapur",
     bedrooms: 1,
     bathrooms: 1,
@@ -190,7 +202,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     email_verified: true,
     id_verified: true,
     is_zero_brokerage: true,
-    is_premium: false,
+    is_premium: true,
     created_at: SEED_CREATED_AT[2],
   },
   {
@@ -200,6 +212,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "Premium 3 BHK flat in a gated community with swimming pool, gym, clubhouse, and children play area near Botanical Garden.",
     price: 48000,
     city: "Hyderabad",
+    locality: "Kondapur",
     address: "Botanical Garden Road, Kondapur",
     bedrooms: 3,
     bathrooms: 3,
@@ -227,6 +240,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "Cozy 1 Studio flat for IT professionals. Fully furnished with Smart TV, sofa, balcony view, and daily housekeeping optional.",
     price: 18500,
     city: "Hyderabad",
+    locality: "Hitech City",
     address: "Mindspace Road, Hitech City",
     bedrooms: 1,
     bathrooms: 1,
@@ -254,6 +268,7 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
       "Quiet residential 2 BHK flat near Miyapur Metro Station & JNTU Road. Well ventilated with wardrobe, lights, fans, and gas pipeline.",
     price: 24000,
     city: "Hyderabad",
+    locality: "Miyapur",
     address: "Metro Corridor, Miyapur",
     bedrooms: 2,
     bathrooms: 2,
@@ -276,6 +291,72 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
   },
 ];
 
+export const BANGALORE_FALLBACK_PROPERTIES: Property[] = [
+  {
+    id: "blr-001",
+    title: "Modern 2 BHK in Koramangala 4th Block",
+    description:
+      "Well-lit 2 BHK rental apartment near Sony World Junction and 80 Feet Road. Premium wood flooring, modular kitchen, power backup, and dedicated parking.",
+    price: 42000,
+    city: "Bangalore",
+    locality: "Koramangala",
+    address: "4th Block, Koramangala",
+    bedrooms: 2,
+    bathrooms: 2,
+    area_sqft: 1200,
+    property_type: "Apartment",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[1],
+  },
+  {
+    id: "blr-002",
+    title: "Luxury 3 BHK Penthouse in Indiranagar",
+    description:
+      "Spacious 3 BHK home on 100 Feet Road, Indiranagar. Walking distance from 12th Main food street & CMH Road Metro Station.",
+    price: 65000,
+    city: "Bangalore",
+    locality: "Indiranagar",
+    address: "100 Feet Road, Indiranagar",
+    bedrooms: 3,
+    bathrooms: 3,
+    area_sqft: 2100,
+    property_type: "Apartment",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[2],
+  },
+];
+
+export const ALL_FALLBACK_PROPERTIES: Property[] = [
+  ...HYDERABAD_FALLBACK_PROPERTIES,
+  ...BANGALORE_FALLBACK_PROPERTIES,
+];
+
+export const FALLBACK_PROPERTIES = HYDERABAD_FALLBACK_PROPERTIES;
+
 /** Where a listing set came from — lets the UI be honest about demo data. */
 export type PropertySource = "database" | "fallback";
 
@@ -292,25 +373,103 @@ export interface PropertyFeed {
  * A failed or empty query still yields a usable list, but `source: "fallback"`
  * lets callers show a banner instead of passing seed data off as live records.
  */
-export async function fetchPublicPropertyFeed(): Promise<PropertyFeed> {
+export interface PropertySearchParams {
+  q?: string;
+  city?: string;
+  listing?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  beds?: number;
+  baths?: number;
+  type?: string;
+  locality?: string;
+  sort?: "recommended" | "newest" | "lowest_rent" | "highest_rent" | "largest_area";
+}
+
+export async function fetchPublicPropertyFeed(
+  params?: PropertySearchParams,
+): Promise<PropertyFeed> {
   try {
-    const { data, error } = await db
-      .from("properties")
-      .select(PUBLIC_PROPERTY_COLUMNS)
-      .eq("is_approved", true)
-      .order("is_featured", { ascending: false })
-      .order("created_at", { ascending: false });
+    let query = db.from("properties").select(PUBLIC_PROPERTY_COLUMNS).eq("is_approved", true);
+    if (params) {
+      if (params.city) query = query.ilike("city", params.city);
+      if (params.listing) query = query.ilike("listing_type", params.listing);
+      if (params.beds && params.beds > 0) query = query.gte("bedrooms", params.beds);
+      if (params.baths && params.baths > 0) query = query.gte("bathrooms", params.baths);
+      if (params.type) query = query.ilike("property_type", `%${params.type}%`);
+      if (params.locality) query = query.ilike("locality", `%${params.locality}%`);
+      if (params.minPrice && params.minPrice > 0) query = query.gte("price", params.minPrice);
+      if (params.maxPrice && params.maxPrice > 0) query = query.lte("price", params.maxPrice);
+      if (params.q) {
+        // A naive ilike on multiple columns for text search
+        query = query.or(
+          `title.ilike.%${params.q}%,city.ilike.%${params.q}%,address.ilike.%${params.q}%,description.ilike.%${params.q}%,locality.ilike.%${params.q}%,landmark.ilike.%${params.q}%`,
+        );
+      }
+    }
+
+    // Apply sorting
+    if (params?.sort === "newest") {
+      query = query.order("created_at", { ascending: false });
+    } else if (params?.sort === "lowest_rent") {
+      query = query.order("price", { ascending: true });
+    } else if (params?.sort === "highest_rent") {
+      query = query.order("price", { ascending: false });
+    } else if (params?.sort === "largest_area") {
+      query = query.order("area_sqft", { ascending: false });
+    } else {
+      // Default / "recommended"
+      query = query
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false });
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("[properties] query failed", error);
+      const q = params?.q?.toLowerCase();
+      const loc = params?.locality?.toLowerCase();
+      const city = params?.city?.toLowerCase();
+      const filtered = ALL_FALLBACK_PROPERTIES.filter((p) => {
+        if (city && p.city.toLowerCase() !== city) return false;
+        if (loc && !(p.locality?.toLowerCase().includes(loc) ?? false)) return false;
+        if (
+          q &&
+          !p.title.toLowerCase().includes(q) &&
+          !p.description.toLowerCase().includes(q) &&
+          !(p.locality?.toLowerCase().includes(q) ?? false) &&
+          !p.address.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+        return true;
+      });
       return {
-        properties: HYDERABAD_FALLBACK_PROPERTIES,
+        properties: filtered,
         source: "fallback",
         error: error.message,
       };
     }
     if (!data || data.length === 0) {
-      return { properties: HYDERABAD_FALLBACK_PROPERTIES, source: "fallback", error: null };
+      const q = params?.q?.toLowerCase();
+      const loc = params?.locality?.toLowerCase();
+      const city = params?.city?.toLowerCase();
+      const filtered = ALL_FALLBACK_PROPERTIES.filter((p) => {
+        if (city && p.city.toLowerCase() !== city) return false;
+        if (loc && !(p.locality?.toLowerCase().includes(loc) ?? false)) return false;
+        if (
+          q &&
+          !p.title.toLowerCase().includes(q) &&
+          !p.description.toLowerCase().includes(q) &&
+          !(p.locality?.toLowerCase().includes(q) ?? false) &&
+          !p.address.toLowerCase().includes(q)
+        ) {
+          return false;
+        }
+        return true;
+      });
+      return { properties: filtered, source: "fallback", error: null };
     }
     return {
       properties: (data as PropertyRow[]).map(withVerificationDefaults),
@@ -320,15 +479,15 @@ export async function fetchPublicPropertyFeed(): Promise<PropertyFeed> {
   } catch (err) {
     console.error("[properties] unreachable", err);
     return {
-      properties: HYDERABAD_FALLBACK_PROPERTIES,
+      properties: [],
       source: "fallback",
       error: err instanceof Error ? err.message : "Network error",
     };
   }
 }
 
-export async function fetchPublicProperties(): Promise<Property[]> {
-  return (await fetchPublicPropertyFeed()).properties;
+export async function fetchPublicProperties(params?: PropertySearchParams): Promise<Property[]> {
+  return (await fetchPublicPropertyFeed(params)).properties;
 }
 
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {
@@ -345,7 +504,7 @@ export async function fetchPublicPropertyById(id: string): Promise<Property | nu
     console.error("[properties] detail unreachable", err);
   }
   // Seed listings keep the demo links (e.g. /properties/hyd-000) working.
-  return HYDERABAD_FALLBACK_PROPERTIES.find((p) => p.id === id) ?? null;
+  return ALL_FALLBACK_PROPERTIES.find((p) => p.id === id) ?? null;
 }
 
 export function isOwnerVerified(property: Property): boolean {

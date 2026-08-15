@@ -14,12 +14,14 @@ Built with **TanStack Start**, **React 19**, **Vite 8**, and **Supabase**, the p
 ## 🌟 Key Features
 
 ### Customer Experience (Public)
+
 - 🔍 **Real-Time Property Search**: Instant in-memory filtering by city, price range, bedrooms (BHK), listing type (Rent/Sale), and search keywords.
 - 🏡 **Rich Property Detail Pages**: Multi-image photo gallery, specs overview, pricing formatting (Lakhs/Crores for sale, monthly for rent), and `Residence` JSON-LD structured data.
 - ❤️ **Saved Homes Wishlist**: Bookmark favorite listings stored locally in the browser (`localStorage`).
 - 📩 **Protected Lead Enquiry Form**: Direct owner contact form backed by honeypot fields, minimum submission timing checks, Turnstile CAPTCHA, and 5 sliding-window rate limits.
 
 ### Admin Dashboard (`/_authenticated/admin`)
+
 - 📊 **Platform Overview Metrics**: Track total listings, pending approvals, featured properties, and 7-day enquiry activity.
 - ✅ **Listing Moderation**: Toggle approval (`is_approved`) and featured (`is_featured`) status for any property listing.
 - 📥 **Customer Leads Inbox**: Review customer messages, phone numbers, and target property details.
@@ -72,10 +74,12 @@ property-pioneer-dev/
 ## 🚀 Quickstart & Local Development
 
 ### 1. Prerequisites
+
 - Node.js >= v20.0.0
 - npm >= v10.0.0
 
 ### 2. Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/Bajiyadav/property-pioneer-dev.git
@@ -86,7 +90,9 @@ npm install
 ```
 
 ### 3. Environment Variables (`.env`)
+
 Create a `.env` file in the project root:
+
 ```env
 VITE_SUPABASE_URL="https://your-supabase-project.supabase.co"
 VITE_SUPABASE_PUBLISHABLE_KEY="your-supabase-publishable-key"
@@ -99,9 +105,11 @@ TURNSTILE_SECRET_KEY=""
 ```
 
 ### 4. Run Development Server
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
@@ -109,6 +117,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 📄 Documentation
 
 For in-depth architectural specifications and subsystem guides, explore the [`/docs`](./docs) directory:
+
 - [System Architecture](./docs/ARCHITECTURE.md)
 - [Database Schema & ER Diagram](./docs/DATABASE.md)
 - [API & Server Functions](./docs/API.md)

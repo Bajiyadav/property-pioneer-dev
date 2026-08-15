@@ -1,0 +1,107 @@
+import React, { useState } from "react";
+import { BRAND } from "@/config/platform";
+import urfLogo from "@/assets/urf-logo.png.asset.json";
+
+export interface PropertyWatermarkProps {
+  /** Size variant tailored for thumbnails, standard cards, or high-res galleries */
+  size?: "xs" | "sm" | "md" | "lg";
+  /** Placement corner */
+  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+  /** Additional custom classNames */
+  className?: string;
+}
+
+/**
+ * Authentic, premium watermark badge for Urban Properties real-estate photos.
+ * Ensures consistent, non-intrusive brand attribution across all device viewports.
+ * Pointer-events are disabled so it never blocks clicks, gestures, or overlays.
+ */
+export function PropertyWatermark({
+  size = "md",
+  position = "bottom-right",
+  className = "",
+}: PropertyWatermarkProps) {
+  const [imgError, setImgError] = useState(false);
+
+  // Position utilities
+  const positionClasses = {
+    "bottom-right": "bottom-2.5 right-2.5 sm:bottom-3 sm:right-3",
+    "bottom-left": "bottom-2.5 left-2.5 sm:bottom-3 sm:left-3",
+    "top-right": "top-2.5 right-2.5 sm:top-3 sm:right-3",
+    "top-left": "top-2.5 left-2.5 sm:top-3 sm:left-3",
+  }[position];
+
+  // Size styling tokens
+  const sizeConfig = {
+    xs: {
+      padding: "px-1.5 py-0.5 gap-1",
+      iconSize: "h-2.5 w-2.5",
+      textSize: "text-[8px] font-bold tracking-wider",
+      rounded: "rounded",
+    },
+    sm: {
+      padding: "px-2 py-0.5 gap-1.5",
+      iconSize: "h-3 w-3",
+      textSize: "text-[9px] sm:text-[10px] font-bold tracking-wider",
+      rounded: "rounded-md",
+    },
+    md: {
+      padding: "px-2.5 py-1 gap-1.5",
+      iconSize: "h-3.5 w-3.5",
+      textSize: "text-[10px] sm:text-[11px] font-bold tracking-wider",
+      rounded: "rounded-lg",
+    },
+    lg: {
+      padding: "px-3.5 py-1.5 gap-2",
+      iconSize: "h-4 w-4",
+      textSize: "text-xs sm:text-sm font-extrabold tracking-wider",
+      rounded: "rounded-xl",
+    },
+  }[size];
+
+  const isLocalHostAsset = urfLogo?.url && urfLogo.url.startsWith("/__l5e/");
+
+  return (
+    <div
+      aria-hidden="true"
+      className={`absolute z-10 pointer-events-none select-none inline-flex items-center ${sizeConfig.padding} ${sizeConfig.rounded} ${positionClasses} bg-black/60 text-white shadow-md backdrop-blur-md border border-white/20 ring-1 ring-black/20 transition-opacity duration-300 ${className}`}
+    >
+      {/* Brand Icon */}
+      {imgError || isLocalHostAsset ? (
+        <div
+          className={`flex-none flex items-center justify-center rounded bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 p-0.5 text-white ${sizeConfig.iconSize}`}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-full w-full"
+          >
+            <path d="M3 21H21" />
+            <path d="M6 21V9L12 4L18 9V21" />
+            <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.3" />
+          </svg>
+        </div>
+      ) : (
+        <img
+          src={urfLogo.url}
+          alt=""
+          className={`${sizeConfig.iconSize} object-contain flex-none`}
+          loading="eager"
+          decoding="async"
+          onError={() => setImgError(true)}
+        />
+      )}
+
+      {/* Brand Label */}
+      <span
+        className={`font-[family-name:var(--font-display)] uppercase text-white/95 drop-shadow-sm whitespace-nowrap ${sizeConfig.textSize}`}
+      >
+        {BRAND.name}
+      </span>
+    </div>
+  );
+}

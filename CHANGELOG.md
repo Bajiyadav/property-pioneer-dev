@@ -1,89 +1,107 @@
 ## v0.4.1 — 2026-08-13
 
 ### Fixes
+
 - fix(cd): expand health check routes and set 404 handler for unknown routes (c4429b7)
 
 ## v0.4.0 — 2026-08-13
 
 ### Features
+
 - feat(category): add dedicated category landing pages for buy, commercial, villas, plots, farm-lands (1bdc7e4)
 
 ## v0.3.6 — 2026-08-13
 
 ### Fixes
+
 - fix(ci): update auth robots meta to index, follow and adjust performance threshold to 0.85 (c30910e)
 
 ## v0.3.5 — 2026-08-08
 
 ### Fixes
+
 - fix(content): remove the last two fabricated service claims (6531043)
 
 ## v0.3.4 — 2026-08-08
 
 ### Fixes
+
 - fix(cd): stop the health check failing every healthy deployment (83322f3)
 
 ## v0.3.3 — 2026-08-08
 
 ### Fixes
+
 - fix(ci): stop the env validator failing unit tests in CI (79a5fcd)
 
 ## v0.3.2 — 2026-08-08
 
 ### Fixes
+
 - fix(content): drop remaining pan-India framing from hero and site metadata (cef1af1)
 
 ## v0.3.1 — 2026-08-08
 
 ### Refactoring
+
 - refactor: remove unbacked features and unearned claims across the product (365daf6)
 
 ## v0.3.0 — 2026-08-08
 
 ### Features
+
 - feat(demo): seed a real Hyderabad catalogue; wire owner leads to live enquiries (51d74e6)
 
 ### Fixes
+
 - feat(demo): seed a real Hyderabad catalogue; wire owner leads to live enquiries (51d74e6)
 
 ## v0.2.0 — 2026-08-08
 
 ### Features
+
 - feat(expansion): make Bangalore roadmap cards informative; remove false claims (f6c41a8)
 
 ## v0.1.6 — 2026-08-08
 
 ### Refactoring
+
 - refactor(product): remove unbacked promotional sections; make location search real (6360ed9)
 
 ## v0.1.5 — 2026-08-08
 
 ### Fixes
+
 - fix(ui): remove the duplicate footer on the homepage (b5cd8ad)
 
 ## v0.1.4 — 2026-08-08
 
 ### Refactoring
+
 - refactor(structure): move domain code into owning modules; drop empty scaffolding (a549c72)
 
 ## v0.1.3 — 2026-08-07
 
 ### Refactoring
+
 - refactor(types): generate Supabase types from live schema; validate env at startup (c8e694b)
 
 ## v0.1.2 — 2026-08-07
 
 ### Fixes
+
 - fix(ci): honour the server/client boundary convention; harden health check (005c494)
 
 ## v0.1.1 — 2026-08-07
 
 ### Fixes
+
 - fix(ci): regenerate an out-of-sync package-lock (4e17d76)
 
 ## v0.1.0 — 2026-08-07
 
 ### Features
+
 - feat(owner): real listing CRUD with image upload; migrate to new Supabase project (5caa11a)
 - feat(services): implement interactive price calculator, before/after slider, expandable checklists, 8-stage timeline, and 10-field booking form (7014518)
 - feat(property): add Ask Urban AI assistant, locality scores, and interactive visit scheduler to property details page (1167e33)
@@ -101,6 +119,7 @@
 - feat: updates for production build and documentation (ad2748c)
 
 ### Fixes
+
 - fix(admin): show genuinely pending listings in the moderation queue (4f7a464)
 - fix(ssr,a11y): eliminate hydration mismatch on property pages; label form inputs (319ff73)
 - fix(owner): remove false 'Listing Submitted Successfully' claim (587b589)
@@ -116,6 +135,7 @@
 - fix(router): add null safety checks to property filtering in dashboard and properties routes to prevent ErrorComponent crashes (71cff04)
 
 ### Refactoring
+
 - refactor(architecture): feature-first modules, split oversized files, group migrations (2852d78)
 - refactor(architecture): extract pages from route files into feature modules (017bafd)
 - refactor: remove unused modules, fix dashboards, update footer, production cleanup (068de0a)
@@ -132,6 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-08-05
 
 ### Added
+
 - **TanStack Start & React 19 Architecture**: Migrated project to TanStack Start SSR meta-framework powered by Vite 8 and Nitro server engine.
 - **Supabase Integration**:
   - Client-side Supabase proxy (`client.ts`) with publishable key and `localStorage` session persistence.

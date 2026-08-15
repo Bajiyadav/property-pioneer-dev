@@ -1,3 +1,4 @@
+import { PropertyImage } from "@/shared/components/PropertyImage";
 export function Stat({
   icon,
   label,
@@ -23,7 +24,13 @@ export function Stat({
 export function RoomCard({ title, desc, image }: { title: string; desc: string; image: string }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border/40 bg-secondary/30">
-      <img src={image} alt={title} className="h-44 w-full object-cover" />
+      <PropertyImage
+        src={image}
+        alt={title}
+        watermarkSize="xs"
+        watermarkPosition="bottom-right"
+        containerClassName="h-44 w-full"
+      />
       <div className="p-4">
         <h4 className="text-sm font-bold text-foreground">{title}</h4>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{desc}</p>

@@ -24,7 +24,7 @@ export function SectionHeader({
 }) {
   return (
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
+      <div className="border-l-2 border-l-primary/40 pl-3">
         <h2 className="text-lg font-extrabold text-foreground">{title}</h2>
         {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
       </div>
@@ -121,11 +121,11 @@ export function KpiCard({
   };
 
   return (
-    <div className="group rounded-3xl border border-border/60 bg-card p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs font-semibold text-muted-foreground">{label}</span>
         <span
-          className={`grid h-9 w-9 flex-none place-items-center rounded-2xl transition group-hover:scale-110 ${accents[accent]}`}
+          className={`grid h-9 w-9 flex-none place-items-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm ${accents[accent]}`}
         >
           {icon}
         </span>
@@ -460,7 +460,7 @@ export function QuickActions({
           onClick={a.onClick}
           className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
         >
-          <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+          <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-200 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md">
             {a.icon}
           </span>
           <span className="min-w-0">

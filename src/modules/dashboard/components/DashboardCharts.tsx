@@ -5,6 +5,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
   Line,
   LineChart,
   Pie,
@@ -35,7 +36,11 @@ function ChartFrame({
   height?: number;
 }) {
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 opacity-70"
+      />
       <div className="mb-4">
         <h3 className="text-sm font-extrabold text-foreground">{title}</h3>
         {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}
@@ -86,7 +91,7 @@ export function TrendAreaChart({
       <AreaChart data={data} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="0%" stopColor={color} stopOpacity={0.5} />
             <stop offset="100%" stopColor={color} stopOpacity={0.02} />
           </linearGradient>
         </defs>
@@ -165,7 +170,11 @@ export function DonutChart({
 }) {
   const total = data.reduce((a, d) => a + d.value, 0);
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 opacity-70"
+      />
       <div className="mb-2">
         <h3 className="text-sm font-extrabold text-foreground">{title}</h3>
         {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}
@@ -240,6 +249,7 @@ export function DualLineChart({
         <XAxis dataKey="label" {...axisProps} />
         <YAxis {...axisProps} width={48} />
         <Tooltip {...tooltipStyle} />
+        <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "12px", opacity: 0.7 }} />
         <Line
           type="monotone"
           dataKey="a"
@@ -274,7 +284,11 @@ export function FunnelBars({
 }) {
   const max = Math.max(...stages.map((s) => s.value), 1);
   return (
-    <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-5 shadow-sm">
+      <div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-chart-1 via-chart-2 to-chart-3 opacity-70"
+      />
       <div className="mb-4">
         <h3 className="text-sm font-extrabold text-foreground">{title}</h3>
         {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}

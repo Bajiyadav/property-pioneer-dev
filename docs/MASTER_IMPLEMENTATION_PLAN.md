@@ -3,13 +3,13 @@
 > **Document Type:** Production Readiness Implementation Plan  
 > **Repository:** `property-pioneer-dev`  
 > **Author:** Lead Software Architect, Principal Product Engineer, Senior DevOps Engineer & Staff Security Engineer  
-> **Status:** Approved Baseline Blueprint  
+> **Status:** Approved Baseline Blueprint
 
 ---
 
 ## Executive Summary
 
-Urban Rental Flats (URF) is an API-first, security-hardened real estate rental platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row/Column-Level Security + Auth). 
+Urban Rental Flats (URF) is an API-first, security-hardened real estate rental platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row/Column-Level Security + Auth).
 
 This Master Implementation Plan serves as the definitive technical roadmap transitioning URF from its current MVP state to an enterprise-grade production platform capable of scaling to over 1,000,000 active users.
 
@@ -19,15 +19,15 @@ The strategy prioritizes **Zero Downtime**, **Strict Data Security (CLS/RLS)**, 
 
 ## 1. Current Platform Status
 
-| Dimension | Current Architecture State | Target Production Baseline |
-| --- | --- | --- |
-| **Framework** | TanStack Start (Vite 8 + React 19 SSR + Nitro Engine) | TanStack Start (SSR) + Edge Deployment |
-| **Database** | Supabase Postgres (Hosted Instance) | Supabase Postgres (PITR + Read Replicas + Connection Pooling) |
-| **Security Layer** | Postgres CLS + RLS, Honeypot, Turnstile CAPTCHA, 5-Tier Rate Limiter | WAF + Edge CAPTCHA + Automated Audit Alerts + CSP Headers |
-| **State & Cache** | TanStack React Query v5 + Client `localStorage` | React Query + Redis Multi-Tier Cache Layer |
-| **Search Engine** | Client-Side In-Memory Array Filtering | Server-Side Postgres Full-Text Search / Meilisearch |
-| **Admin System** | Server Functions (`createServerFn`) + Client RPCs | Admin Role Route Guards + Server-Side SQL Aggregations |
-| **Auth System** | Supabase Auth (Email/Password JWT) | Supabase Auth (JWT + MFA + Social OAuth) |
+| Dimension          | Current Architecture State                                           | Target Production Baseline                                    |
+| ------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **Framework**      | TanStack Start (Vite 8 + React 19 SSR + Nitro Engine)                | TanStack Start (SSR) + Edge Deployment                        |
+| **Database**       | Supabase Postgres (Hosted Instance)                                  | Supabase Postgres (PITR + Read Replicas + Connection Pooling) |
+| **Security Layer** | Postgres CLS + RLS, Honeypot, Turnstile CAPTCHA, 5-Tier Rate Limiter | WAF + Edge CAPTCHA + Automated Audit Alerts + CSP Headers     |
+| **State & Cache**  | TanStack React Query v5 + Client `localStorage`                      | React Query + Redis Multi-Tier Cache Layer                    |
+| **Search Engine**  | Client-Side In-Memory Array Filtering                                | Server-Side Postgres Full-Text Search / Meilisearch           |
+| **Admin System**   | Server Functions (`createServerFn`) + Client RPCs                    | Admin Role Route Guards + Server-Side SQL Aggregations        |
+| **Auth System**    | Supabase Auth (Email/Password JWT)                                   | Supabase Auth (JWT + MFA + Social OAuth)                      |
 
 ---
 
@@ -60,16 +60,16 @@ While the core functionality and security architecture are robust, critical pre-
 
 ## 4. Technical Debt Inventory
 
-| ID | Issue Description | Location | Impact | Remediation Strategy |
-| --- | --- | --- | --- | --- |
-| **TD-01** | Client-side search filters entire dataset in browser memory | `src/routes/properties.index.tsx` | High LCP/INP latency as dataset grows | Implement server-side pagination & Supabase query filters |
-| **TD-02** | In-memory admin overview metrics calculation | `src/lib/admin.server.ts` | Server OOM under high lead volume | Replace `.filter()` with SQL `COUNT()` RPC functions |
-| **TD-03** | Late admin authorization check | `src/routes/_authenticated/route.tsx` | Unauthorized bundle loading | Move `checkIsAdmin` check to `beforeLoad` guard |
-| **TD-04** | Legacy storage key name (`nestwise:favorites`) | `src/lib/useFavorites.ts` | Branding inconsistency | Update key to `urf:favorites` with backward migration |
-| **TD-05** | Legacy README references Next.js/Prisma | `README.md` | Developer onboarding confusion | Overhaul README to reflect TanStack Start & Supabase |
-| **TD-06** | 5 Sequential Rate Limit SQL queries per lead | `src/routes/api/public/enquiries.ts` | +250ms lead submission delay | Combine into single RPC or execute via `Promise.all` |
-| **TD-07** | 20+ Unused UI primitive components | `src/components/ui/` | Repository bloat | Audit and remove unreferenced Radix/Shadcn primitives |
-| **TD-08** | Hardcoded canonical domain fallback | `properties.$id.tsx` | Incorrect SEO canonical URLs | Bind to `import.meta.env.VITE_APP_URL` |
+| ID        | Issue Description                                           | Location                              | Impact                                | Remediation Strategy                                      |
+| --------- | ----------------------------------------------------------- | ------------------------------------- | ------------------------------------- | --------------------------------------------------------- |
+| **TD-01** | Client-side search filters entire dataset in browser memory | `src/routes/properties.index.tsx`     | High LCP/INP latency as dataset grows | Implement server-side pagination & Supabase query filters |
+| **TD-02** | In-memory admin overview metrics calculation                | `src/lib/admin.server.ts`             | Server OOM under high lead volume     | Replace `.filter()` with SQL `COUNT()` RPC functions      |
+| **TD-03** | Late admin authorization check                              | `src/routes/_authenticated/route.tsx` | Unauthorized bundle loading           | Move `checkIsAdmin` check to `beforeLoad` guard           |
+| **TD-04** | Legacy storage key name (`nestwise:favorites`)              | `src/lib/useFavorites.ts`             | Branding inconsistency                | Update key to `urf:favorites` with backward migration     |
+| **TD-05** | Legacy README references Next.js/Prisma                     | `README.md`                           | Developer onboarding confusion        | Overhaul README to reflect TanStack Start & Supabase      |
+| **TD-06** | 5 Sequential Rate Limit SQL queries per lead                | `src/routes/api/public/enquiries.ts`  | +250ms lead submission delay          | Combine into single RPC or execute via `Promise.all`      |
+| **TD-07** | 20+ Unused UI primitive components                          | `src/components/ui/`                  | Repository bloat                      | Audit and remove unreferenced Radix/Shadcn primitives     |
+| **TD-08** | Hardcoded canonical domain fallback                         | `properties.$id.tsx`                  | Incorrect SEO canonical URLs          | Bind to `import.meta.env.VITE_APP_URL`                    |
 
 ---
 
@@ -112,6 +112,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 1: Production Readiness (P0 Baseline)
+
 - **Goal**: Resolve all critical pre-launch technical debt and operational blockers.
 - **Business Value**: Guarantees system security, prevents server OOM crashes, ensures fast initial page loads.
 - **Technical Tasks**:
@@ -134,6 +135,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 2: Performance Optimization
+
 - **Goal**: Achieve 95+ Lighthouse performance scores across all device viewports.
 - **Business Value**: Boosts SEO rankings, reduces user drop-off on mobile devices.
 - **Technical Tasks**:
@@ -154,6 +156,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 3: Security Hardening
+
 - **Goal**: Implement enterprise-grade security headers, monitoring, and audit notification bridges.
 - **Business Value**: Shields platform against DDoS, bot automated spam, and OWASP Top 10 vulnerabilities.
 - **Technical Tasks**:
@@ -174,6 +177,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 4: Admin Improvements
+
 - **Goal**: Provide administrators with batch management, listing approval workflows, and audit reporting.
 - **Business Value**: Reduces administrative operational overhead by 70%.
 - **Technical Tasks**:
@@ -194,6 +198,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 5: Property Owner Portal
+
 - **Goal**: Allow property owners to submit, edit, and track their rental listings.
 - **Business Value**: Unlocks direct inventory acquisition and owner self-service.
 - **Technical Tasks**:
@@ -216,6 +221,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 6: Customer Features
+
 - **Goal**: Enhance tenant user experience with interactive maps, comparison tools, and saved searches.
 - **Business Value**: Increases visitor session duration and lead conversion rates.
 - **Technical Tasks**:
@@ -236,6 +242,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 7: Agent Portal
+
 - **Goal**: Empower real estate agencies to manage team members, listing portfolios, and client leads.
 - **Business Value**: Opens B2B revenue channels with agency subscription models.
 - **Technical Tasks**:
@@ -257,6 +264,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 8: Analytics & Reporting
+
 - **Goal**: Deliver actionable real-time insights on listing engagement, lead conversion, and market trends.
 - **Business Value**: Empowers owners/agents with performance data, driving platform retention.
 - **Technical Tasks**:
@@ -276,6 +284,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 9: Monitization & Payments Integration
+
 - **Goal**: Integrate payment gateways to monetize listing boosts, premium owner plans, and agent subscriptions.
 - **Business Value**: Direct revenue generation via Razorpay / Stripe payment processing.
 - **Technical Tasks**:
@@ -297,6 +306,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 10: AI Features
+
 - **Goal**: Embed generative AI capabilities to assist listing creation and property search.
 - **Business Value**: Reduces listing creation friction by 80% and improves inquiry matching.
 - **Technical Tasks**:
@@ -316,6 +326,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 11: Scale to 10,000 Users
+
 - **Goal**: Optimize platform database and server architecture to comfortably support 10,000 active daily users.
 - **Business Value**: Maintains sub-100ms response times during regional user acquisition spikes.
 - **Technical Tasks**:
@@ -335,6 +346,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 12: Scale to 100,000 Users
+
 - **Goal**: Transition infrastructure to support 100,000 active daily users with multi-region delivery.
 - **Business Value**: Guarantees platform stability across nationwide scale.
 - **Technical Tasks**:
@@ -354,6 +366,7 @@ While the core functionality and security architecture are robust, critical pre-
 ---
 
 ### Milestone 13: Scale to 1,000,000 Users
+
 - **Goal**: Enterprise scale architecture capable of handling 1M+ active users and high-concurrency peak traffic.
 - **Business Value**: Unlocks nationwide real estate portal dominance with 99.99% availability.
 - **Technical Tasks**:
@@ -375,24 +388,28 @@ While the core functionality and security architecture are robust, critical pre-
 ## 8. Priority Ranking Rationale
 
 ### P0 — Critical Before Production
+
 - **Move Admin Role Check to `beforeLoad`**: Direct security vulnerability; non-admin users could briefly view protected admin dashboard UI layouts before query resolution.
 - **Implement Server-Side Database Search & Pagination**: Performance blocker; loading all properties into browser JS memory will freeze mobile devices as listing count exceeds 200.
 - **Replace In-Memory Admin Aggregations with SQL `COUNT(*)`**: Server stability blocker; loading full table rows into Node memory causes high memory overhead under load.
 - **Fix Hardcoded Canonical Domain URLs**: Critical SEO bug; hardcoded staging domains will ruin Google search engine indexing.
 
 ### P1 — Should Complete Before Launch
+
 - **Add HTTP Security Response Headers**: Defends against clickjacking (`X-Frame-Options`) and cross-site scripting (`CSP`).
 - **Image WebP URL Optimization**: Reduces mobile page payload sizes by 70%, directly improving LCP and Core Web Vitals.
 - **Parallelize Rate-Limiting Count Queries**: Cuts enquiry API latency from ~300ms to ~60ms.
 - **Provision Cloudflare Turnstile Keys**: Prevents automated bot submission spam on public lead forms.
 
 ### P2 — Can Be Completed After Launch
+
 - **Standardize LocalStorage Key (`urf:favorites`)**: Brand cleanup; low user impact if key migration function is implemented.
 - **Prune Unused UI Primitive Components**: Code hygiene; reduces repository file count without affecting runtime performance.
 - **DB-Synced Wishlist for Logged-In Users**: Convenience feature; local storage fallback functions completely for guest browsing.
 - **Property Owner Upload Portal**: Strategic milestone for direct listing supply acquisition post-launch.
 
 ### P3 — Future Enhancements
+
 - **AI Description Generation & Photo Inspector**: Value-add automation.
 - **Multi-Language Internationalization (i18n)**: Expansion capability for non-English regional markets.
 - **PWA Capabilities**: Enhanced mobile offline experience.

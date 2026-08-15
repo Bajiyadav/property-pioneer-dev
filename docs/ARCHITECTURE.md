@@ -7,7 +7,7 @@ Urban Rental Flats is designed as a full-stack, modular, API-first platform buil
 ```mermaid
 graph TD
     Client[Browser / Client App] <--> Router[TanStack React Router]
-    
+
     subgraph Frontend Layer
         Router <--> ReactQuery[TanStack React Query Cache]
         Router <--> LocalStorage[localStorage: nestwise:favorites]
@@ -22,14 +22,14 @@ graph TD
         ServerFn --> AuthAttacher[Client Middleware: auth-attacher.ts]
         AuthAttacher --> AuthMiddleware[Server Middleware: requireSupabaseAuth]
         AuthMiddleware --> RBAC[assertAdmin Guard]
-        
+
         API --> AntiAbuse[Security Engine: rate-limit, honeypot, timer, Turnstile]
     end
 
     subgraph Supabase Database & Auth Layer
         RBAC --> AdminClient[supabaseAdmin: Service Role Key]
         AdminClient --> DB_Privileged[(Postgres DB: RLS Bypassed)]
-        
+
         ReactQuery --> AnonClient[supabase: Publishable Key]
         AnonClient --> DB_Public[(Postgres DB: RLS & CLS Enforced)]
     end
@@ -84,7 +84,7 @@ sequenceDiagram
     AuthPage->>SupabaseAuth: signInWithPassword({ email, password })
     SupabaseAuth-->>AuthPage: Return Auth Session & JWT Token
     AuthPage->>ClientStorage: Persist Access Token
-    
+
     User->>RPC: Request Admin Action (e.g. getAdminOverview)
     Note over RPC: attachSupabaseAuth adds header<br/>Authorization: Bearer <token>
     RPC->>ServerMiddleware: Intercept Request

@@ -6,7 +6,7 @@ set -euo pipefail
 #
 # Configures strict production delivery rules on the 'main' branch:
 #  - Requires Pull Request reviews before merging
-#  - Requires status checks to pass before merging
+#  - Requires parallel status checks to pass before merging
 #  - Blocks force pushes
 #  - Blocks branch deletions
 #  - Enforces linear history
@@ -32,10 +32,13 @@ gh api --method PUT \
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "1. Security & Compliance Scan",
-      "2. Code Quality & Unit Tests",
-      "3. Database Migration & Schema Safety",
-      "4. E2E & Business Journey QA"
+      "1. Security & Compliance",
+      "2. Code Quality (ESLint)",
+      "3. TypeScript Strict Check",
+      "4. Unit & Coverage Tests",
+      "5. Migration & Schema Safety",
+      "6. Production SSR Build",
+      "7. E2E & Business QA"
     ]
   },
   "enforce_admins": false,

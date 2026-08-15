@@ -26,7 +26,6 @@ import {
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
-import { DemoModeSwitcher } from "@/app/layouts/DemoModeSwitcher";
 import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
 
@@ -157,7 +156,6 @@ function RootComponent() {
           <Outlet />
         </main>
         <SiteFooter />
-        <DemoModeSwitcher />
       </div>
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
@@ -405,6 +403,11 @@ function SiteFooter() {
               <li>
                 <Link to="/help" className="hover:text-foreground transition">
                   Help Center
+                </Link>
+              </li>
+              <li>
+                <Link to="/agents" className="hover:text-foreground transition">
+                  Partner Agents
                 </Link>
               </li>
               <li>

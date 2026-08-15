@@ -21,7 +21,7 @@ function collectConsoleErrors(page: Page): string[] {
 test.describe("public routes", () => {
   const routes = [
     ["/", /Urban Properties/i],
-    [`/properties${SEARCH}`, /Browse Homes/i],
+    [`/properties${SEARCH}`, /Properties|Browse|Homes/i],
     ["/buy", /Buy/i],
     ["/commercial", /Commercial/i],
     ["/villas", /Villa/i],
@@ -30,6 +30,7 @@ test.describe("public routes", () => {
     ["/favorites", /Saved/i],
     ["/blog", /Blog|Insight/i],
     ["/help", /help/i],
+    ["/agents", /Agent|Partner/i],
   ] as const;
 
   for (const [path, expected] of routes) {

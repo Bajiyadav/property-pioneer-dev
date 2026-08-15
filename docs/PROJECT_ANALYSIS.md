@@ -10,21 +10,21 @@ The architecture emphasizes security baseline primitives (rate-limiting, honeypo
 
 ## Technology Stack
 
-| Layer | Primary Technology | Version / Tooling |
-| --- | --- | --- |
-| **Language** | TypeScript | `^5.8.3` |
-| **Frontend Core** | React | `^19.2.0` |
-| **SSR Meta-Framework** | TanStack Start | `^1.168.26` |
-| **Routing** | TanStack React Router | `^1.170.16` |
-| **Build Tool & Bundler** | Vite | `^8.0.16` |
-| **Server Engine** | Nitro / h3 | `3.0.260603-beta` |
-| **Database & Auth** | Supabase (Postgres) | `@supabase/supabase-js ^2.110.9` |
-| **State Caching** | TanStack React Query | `^5.101.1` |
-| **Styling** | Tailwind CSS v4 | `@tailwindcss/vite ^4.2.1` |
-| **UI Components** | Radix UI Primitives | Accordion, Dialog, Dropdown, Table, Tabs, etc. |
-| **Validation** | Zod | `^3.24.2` |
-| **Icons** | Lucide React | `^0.575.0` |
-| **Notifications** | Sonner | `^2.0.7` |
+| Layer                    | Primary Technology    | Version / Tooling                              |
+| ------------------------ | --------------------- | ---------------------------------------------- |
+| **Language**             | TypeScript            | `^5.8.3`                                       |
+| **Frontend Core**        | React                 | `^19.2.0`                                      |
+| **SSR Meta-Framework**   | TanStack Start        | `^1.168.26`                                    |
+| **Routing**              | TanStack React Router | `^1.170.16`                                    |
+| **Build Tool & Bundler** | Vite                  | `^8.0.16`                                      |
+| **Server Engine**        | Nitro / h3            | `3.0.260603-beta`                              |
+| **Database & Auth**      | Supabase (Postgres)   | `@supabase/supabase-js ^2.110.9`               |
+| **State Caching**        | TanStack React Query  | `^5.101.1`                                     |
+| **Styling**              | Tailwind CSS v4       | `@tailwindcss/vite ^4.2.1`                     |
+| **UI Components**        | Radix UI Primitives   | Accordion, Dialog, Dropdown, Table, Tabs, etc. |
+| **Validation**           | Zod                   | `^3.24.2`                                      |
+| **Icons**                | Lucide React          | `^0.575.0`                                     |
+| **Notifications**        | Sonner                | `^2.0.7`                                       |
 
 ---
 
@@ -154,19 +154,19 @@ property-pioneer-dev/
 
 ## Route Structure
 
-| Path | File Path | Route Type | Protection |
-| --- | --- | --- | --- |
-| `/` | `src/routes/index.tsx` | Page | Public |
-| `/properties` | `src/routes/properties.tsx` | Layout | Public (Search validation) |
-| `/properties/` | `src/routes/properties.index.tsx` | Page | Public |
-| `/properties/$id` | `src/routes/properties.$id.tsx` | Page | Public (Loader pre-fetch) |
-| `/favorites` | `src/routes/favorites.tsx` | Page | Public (Client state) |
-| `/auth` | `src/routes/auth.tsx` | Page | Public (Redirect if signed in) |
-| `/_authenticated` | `src/routes/_authenticated/route.tsx` | Layout Guard | Authenticated (`getUser()`) |
-| `/_authenticated/admin` | `src/routes/_authenticated/admin.tsx` | Page | Admin Role (`checkIsAdmin`) |
-| `/api/public/enquiries` | `src/routes/api/public/enquiries.ts` | API POST | Public (Anti-abuse protected) |
-| `/sitemap.xml` | `src/routes/sitemap[.]xml.ts` | API GET | Public |
-| `/*` | `src/routes/$.tsx` | Catch-all | Public (404) |
+| Path                    | File Path                             | Route Type   | Protection                     |
+| ----------------------- | ------------------------------------- | ------------ | ------------------------------ |
+| `/`                     | `src/routes/index.tsx`                | Page         | Public                         |
+| `/properties`           | `src/routes/properties.tsx`           | Layout       | Public (Search validation)     |
+| `/properties/`          | `src/routes/properties.index.tsx`     | Page         | Public                         |
+| `/properties/$id`       | `src/routes/properties.$id.tsx`       | Page         | Public (Loader pre-fetch)      |
+| `/favorites`            | `src/routes/favorites.tsx`            | Page         | Public (Client state)          |
+| `/auth`                 | `src/routes/auth.tsx`                 | Page         | Public (Redirect if signed in) |
+| `/_authenticated`       | `src/routes/_authenticated/route.tsx` | Layout Guard | Authenticated (`getUser()`)    |
+| `/_authenticated/admin` | `src/routes/_authenticated/admin.tsx` | Page         | Admin Role (`checkIsAdmin`)    |
+| `/api/public/enquiries` | `src/routes/api/public/enquiries.ts`  | API POST     | Public (Anti-abuse protected)  |
+| `/sitemap.xml`          | `src/routes/sitemap[.]xml.ts`         | API GET      | Public                         |
+| `/*`                    | `src/routes/$.tsx`                    | Catch-all    | Public (404)                   |
 
 ---
 
@@ -214,15 +214,18 @@ property-pioneer-dev/
 ## Observations & Recommendations
 
 ### Performance Observations
+
 - **Client-Side In-Memory Search**: `fetchProperties()` fetches all approved properties in a single query; search filters run in-memory via `useMemo`. As property counts grow, initial payload size and client memory will scale linearly.
 - **Admin Metrics In-Memory Aggregation**: `loadOverview()` loads all property and enquiry rows into server memory to count and filter using JS arrays.
 
 ### Security Observations
+
 - **Strong Anti-Abuse Baseline**: Excellent protection using sliding-window Postgres rate limits, submit timing checks, honeypot fields, and Turnstile CAPTCHA.
 - **Robust Database CLS & RLS**: Sensitivity of owner contact information is enforced at the database level by revoking column permissions.
 - **Admin Guard Sub-optimality**: Role check (`checkIsAdmin`) occurs inside component `useQuery` rather than in route `beforeLoad`.
 
 ### Technical Debt & Recommendations
+
 1. Move `checkIsAdmin` role verification into `_authenticated/route.tsx`'s `beforeLoad` function.
 2. Rename `nestwise:favorites` localStorage key to `urf:favorites`.
 3. Refactor client-side property search to use Supabase database-level pagination and filtering.

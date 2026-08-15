@@ -1,3 +1,4 @@
+import { PropertyImage } from "@/shared/components/PropertyImage";
 import { listingImage } from "@/modules/owner/fixtures";
 import { CreditCard, Star } from "lucide-react";
 import { SectionHeader } from "@/modules/dashboard/components/DashboardKit";
@@ -61,11 +62,12 @@ export function ListingRows({
           className="flex flex-col items-start justify-between gap-4 py-4 sm:flex-row sm:items-center"
         >
           <div className="flex min-w-0 items-center gap-4">
-            <img
+            <PropertyImage
               src={listingImage(p)}
-              alt=""
-              loading="lazy"
-              className="h-14 w-20 flex-none rounded-xl bg-muted object-cover"
+              alt={p.title}
+              watermarkSize="xs"
+              watermarkPosition="bottom-right"
+              containerClassName="h-14 w-20 flex-none rounded-xl bg-muted"
             />
             <div className="min-w-0">
               <h3 className="truncate text-xs font-bold text-foreground">{p.title}</h3>

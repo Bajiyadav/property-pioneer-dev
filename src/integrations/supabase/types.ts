@@ -211,6 +211,17 @@ export type Database = {
           id_verified: boolean | null;
           is_zero_brokerage: boolean | null;
           is_premium: boolean | null;
+          video_url: string | null;
+          video_thumbnail_url: string | null;
+          video_duration: number | null;
+          video_status: "pending" | "approved" | "rejected";
+          video_uploaded_at: string | null;
+          locality: string | null;
+          landmark: string | null;
+          metro_station: string | null;
+          it_park: string | null;
+          college: string | null;
+          hospital: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -244,6 +255,17 @@ export type Database = {
           id_verified?: boolean | null;
           is_zero_brokerage?: boolean | null;
           is_premium?: boolean | null;
+          video_url?: string | null;
+          video_thumbnail_url?: string | null;
+          video_duration?: number | null;
+          video_status?: "pending" | "approved" | "rejected";
+          video_uploaded_at?: string | null;
+          locality?: string | null;
+          landmark?: string | null;
+          metro_station?: string | null;
+          it_park?: string | null;
+          college?: string | null;
+          hospital?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -277,6 +299,17 @@ export type Database = {
           id_verified?: boolean | null;
           is_zero_brokerage?: boolean | null;
           is_premium?: boolean | null;
+          video_url?: string | null;
+          video_thumbnail_url?: string | null;
+          video_duration?: number | null;
+          video_status?: "pending" | "approved" | "rejected";
+          video_uploaded_at?: string | null;
+          locality?: string | null;
+          landmark?: string | null;
+          metro_station?: string | null;
+          it_park?: string | null;
+          college?: string | null;
+          hospital?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -300,6 +333,174 @@ export type Database = {
           user_id?: string;
           role?: Database["public"]["Enums"]["app_role"];
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_applications: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          name: string;
+          email: string;
+          phone: string;
+          city: string;
+          experience_years: string;
+          preferred_areas: string[];
+          languages: string[];
+          message: string | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          name: string;
+          email: string;
+          phone: string;
+          city?: string;
+          experience_years: string;
+          preferred_areas?: string[];
+          languages?: string[];
+          message?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          name?: string;
+          email?: string;
+          phone?: string;
+          city?: string;
+          experience_years?: string;
+          preferred_areas?: string[];
+          languages?: string[];
+          message?: string | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      property_visits: {
+        Row: {
+          id: string;
+          property_id: string;
+          visitor_id: string | null;
+          visitor_name: string;
+          visitor_email: string;
+          visitor_phone: string;
+          preferred_date: string;
+          preferred_time_slot: string;
+          status: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
+          owner_id: string | null;
+          agent_id: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          visitor_id?: string | null;
+          visitor_name: string;
+          visitor_email: string;
+          visitor_phone: string;
+          preferred_date: string;
+          preferred_time_slot: string;
+          status?: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
+          owner_id?: string | null;
+          agent_id?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          property_id?: string;
+          visitor_id?: string | null;
+          visitor_name?: string;
+          visitor_email?: string;
+          visitor_phone?: string;
+          preferred_date?: string;
+          preferred_time_slot?: string;
+          status?: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
+          owner_id?: string | null;
+          agent_id?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_leads: {
+        Row: {
+          id: string;
+          agent_id: string;
+          lead_name: string;
+          lead_email: string | null;
+          lead_phone: string;
+          preferred_locality: string | null;
+          budget_min: number | null;
+          budget_max: number | null;
+          bedrooms: number | null;
+          stage:
+            | "new"
+            | "contacted"
+            | "qualified"
+            | "visit_scheduled"
+            | "negotiation"
+            | "closed"
+            | "lost";
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_id: string;
+          lead_name: string;
+          lead_email?: string | null;
+          lead_phone: string;
+          preferred_locality?: string | null;
+          budget_min?: number | null;
+          budget_max?: number | null;
+          bedrooms?: number | null;
+          stage?:
+            | "new"
+            | "contacted"
+            | "qualified"
+            | "visit_scheduled"
+            | "negotiation"
+            | "closed"
+            | "lost";
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          agent_id?: string;
+          lead_name?: string;
+          lead_email?: string | null;
+          lead_phone?: string;
+          preferred_locality?: string | null;
+          budget_min?: number | null;
+          budget_max?: number | null;
+          bedrooms?: number | null;
+          stage?:
+            | "new"
+            | "contacted"
+            | "qualified"
+            | "visit_scheduled"
+            | "negotiation"
+            | "closed"
+            | "lost";
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

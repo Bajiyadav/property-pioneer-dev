@@ -27,6 +27,7 @@ import {
   formatPrice,
   type Property,
 } from "@/modules/property/services/propertyQueries";
+import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 import {
@@ -65,6 +66,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "properties", label: "Properties", icon: Building2 },
   { id: "approvals", label: "Pending Approvals", icon: CheckSquare },
   { id: "verification", label: "Verification Queue", icon: ShieldCheck },
+  { id: "applications", label: "Agent Applications", icon: UserCheck },
   { id: "reports", label: "Reports", icon: FileBarChart },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "audit", label: "Audit Logs", icon: ScrollText },
@@ -89,7 +91,11 @@ function AdminDashboard({ user }: { user: User | null }) {
     isLoading,
     isError,
     refetch,
-  } = useQuery({ queryKey: ["property-feed"], queryFn: fetchPropertyFeed });
+  } = useQuery({
+    queryKey: ["property-feed"],
+    queryFn: fetchPropertyFeed,
+    staleTime: 5 * 60 * 1000,
+  });
 
   // The public feed is filtered by RLS to `is_approved = true`, so it can never
   // contain anything awaiting moderation. The queue therefore reads through the
@@ -108,12 +114,19 @@ function AdminDashboard({ user }: { user: User | null }) {
   const queryClient = useQueryClient();
 
   const moderation = useMutation({
-    mutationFn: (vars: { id: string; is_approved: boolean }) =>
-      updateProperty({ data: { id: vars.id, is_approved: vars.is_approved } }),
+    mutationFn: (vars: {
+      id: string;
+      is_approved?: boolean;
+      video_status?: "pending" | "approved" | "rejected";
+    }) => updateProperty({ data: vars }),
     onSuccess: (_res, vars) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
       queryClient.invalidateQueries({ queryKey: ["property-feed"] });
-      toast.success(vars.is_approved ? "Listing approved and published" : "Listing rejected");
+      if (vars.video_status) {
+        toast.success(`Video tour ${vars.video_status}`);
+      } else {
+        toast.success(vars.is_approved ? "Listing approved and published" : "Listing rejected");
+      }
     },
     onError: (err) =>
       toast.error(
@@ -125,6 +138,8 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const moderate = (property: { id: string }, approved: boolean) =>
     moderation.mutate({ id: property.id, is_approved: approved });
+  const moderateVideo = (property: { id: string }, status: "approved" | "rejected") =>
+    moderation.mutate({ id: property.id, video_status: status });
 
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
@@ -136,10 +151,46 @@ function AdminDashboard({ user }: { user: User | null }) {
     () => (adminRows ?? []).filter((p) => !p.is_approved),
     [adminRows],
   );
+  const pendingVideos = useMemo(
+    () => (adminRows ?? []).filter((p) => p.video_url && p.video_status === "pending"),
+    [adminRows],
+  );
   const verificationQueue = useMemo(
     () => properties.filter((p) => p.property_verification_status !== "verified").slice(0, 4),
     [properties],
   );
+
+  const { data: applications = [], refetch: refetchApps } = useQuery({
+    queryKey: ["admin", "agent_applications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agent_applications")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.warn("[agent_applications] Query:", error.message);
+        return [];
+      }
+      return data || [];
+    },
+  });
+
+  const appStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("agent_applications")
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "agent_applications"] });
+      toast.success(`Application marked as ${vars.status.replace("_", " ")}`);
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to update application status");
+    },
+  });
 
   const filteredUsers = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
@@ -395,59 +446,114 @@ function AdminDashboard({ user }: { user: User | null }) {
       )}
 
       {activeTab === "approvals" && (
-        <div className="space-y-5">
-          <SectionHeader
-            title={`Pending approvals (${pendingApprovals.length})`}
-            subtitle="Listings awaiting moderator review"
-          />
-          {adminRowsError ? (
-            <ErrorState
-              title="Moderation queue unavailable"
-              message="The admin listing feed could not be loaded. This needs SUPABASE_SERVICE_ROLE_KEY on the server and an admin role on your account."
-              onRetry={() => queryClient.invalidateQueries({ queryKey: ["admin", "properties"] })}
+        <div className="space-y-10">
+          <div className="space-y-5">
+            <SectionHeader
+              title={`Listing Approvals (${pendingApprovals.length})`}
+              subtitle="Listings awaiting moderator review"
             />
-          ) : !adminRows ? (
-            <LoadingSkeleton rows={3} />
-          ) : pendingApprovals.length === 0 ? (
-            <EmptyState
-              icon={<CheckSquare className="h-6 w-6" />}
-              title="Nothing to approve"
-              hint="New submissions land here for review."
+            {adminRowsError ? (
+              <ErrorState
+                title="Moderation queue unavailable"
+                message="The admin listing feed could not be loaded. This needs SUPABASE_SERVICE_ROLE_KEY on the server and an admin role on your account."
+                onRetry={() => queryClient.invalidateQueries({ queryKey: ["admin", "properties"] })}
+              />
+            ) : !adminRows ? (
+              <LoadingSkeleton rows={3} />
+            ) : pendingApprovals.length === 0 ? (
+              <EmptyState
+                icon={<CheckSquare className="h-6 w-6" />}
+                title="Nothing to approve"
+                hint="New submissions land here for review."
+              />
+            ) : (
+              <div className="space-y-3">
+                {pendingApprovals.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex flex-col justify-between gap-4 rounded-3xl border border-border/60 bg-card p-5 sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-foreground">{p.title}</h3>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {p.city} · {formatPrice(p.price, p.listing_type)} · submitted{" "}
+                        {relativeTime(p.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex flex-none gap-2">
+                      <button
+                        disabled={moderation.isPending}
+                        onClick={() => moderate(p, true)}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+                      >
+                        <BadgeCheck className="h-3.5 w-3.5" /> Approve
+                      </button>
+                      <button
+                        disabled={moderation.isPending}
+                        onClick={() => moderate(p, false)}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary disabled:opacity-50"
+                      >
+                        <XCircle className="h-3.5 w-3.5" /> Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-5">
+            <SectionHeader
+              title={`Video Approvals (${pendingVideos.length})`}
+              subtitle="Property videos awaiting moderator review"
             />
-          ) : (
-            <div className="space-y-3">
-              {pendingApprovals.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex flex-col justify-between gap-4 rounded-3xl border border-border/60 bg-card p-5 sm:flex-row sm:items-center"
-                >
-                  <div className="min-w-0">
-                    <h3 className="truncate text-sm font-bold text-foreground">{p.title}</h3>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                      {p.city} · {formatPrice(p.price, p.listing_type)} · submitted{" "}
-                      {relativeTime(p.created_at)}
-                    </p>
+            {pendingVideos.length === 0 ? (
+              <EmptyState
+                icon={<CheckSquare className="h-6 w-6" />}
+                title="No videos to approve"
+                hint="New video submissions land here for review."
+              />
+            ) : (
+              <div className="space-y-3">
+                {pendingVideos.map((p) => (
+                  <div
+                    key={p.id + "_video"}
+                    className="flex flex-col justify-between gap-4 rounded-3xl border border-border/60 bg-card p-5 sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0 flex gap-4 items-center">
+                      <video
+                        src={p.video_url || undefined}
+                        className="h-20 w-32 object-cover rounded"
+                        controls
+                      />
+                      <div>
+                        <h3 className="truncate text-sm font-bold text-foreground">{p.title}</h3>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
+                          {p.city} · {formatPrice(p.price, p.listing_type)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-none gap-2">
+                      <button
+                        disabled={moderation.isPending}
+                        onClick={() => moderateVideo(p, "approved")}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+                      >
+                        <BadgeCheck className="h-3.5 w-3.5" /> Approve Video
+                      </button>
+                      <button
+                        disabled={moderation.isPending}
+                        onClick={() => moderateVideo(p, "rejected")}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary disabled:opacity-50"
+                      >
+                        <XCircle className="h-3.5 w-3.5" /> Reject Video
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-none gap-2">
-                    <button
-                      disabled={moderation.isPending}
-                      onClick={() => moderate(p, true)}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-[11px] font-bold text-white transition hover:bg-emerald-500 disabled:opacity-50"
-                    >
-                      <BadgeCheck className="h-3.5 w-3.5" /> Approve
-                    </button>
-                    <button
-                      disabled={moderation.isPending}
-                      onClick={() => moderate(p, false)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary disabled:opacity-50"
-                    >
-                      <XCircle className="h-3.5 w-3.5" /> Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -519,6 +625,128 @@ function AdminDashboard({ user }: { user: User | null }) {
                 },
               ]}
             />
+          )}
+        </div>
+      )}
+
+      {activeTab === "applications" && (
+        <div className="space-y-5">
+          <SectionHeader
+            title={`Agent Partner Applications (${applications.length})`}
+            subtitle="Review incoming real estate partner agent profiles, corridors, and qualifications"
+          />
+          {applications.length === 0 ? (
+            <EmptyState
+              icon={<UserCheck className="h-6 w-6" />}
+              title="No pending applications"
+              hint="New submissions from the /agents portal appear here automatically."
+            />
+          ) : (
+            <div className="space-y-4">
+              {applications.map((app) => (
+                <div
+                  key={app.id}
+                  className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 shadow-sm"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-foreground text-base">{app.name}</h4>
+                        <StatusPill
+                          label={app.status.replace("_", " ")}
+                          tone={
+                            app.status === "approved"
+                              ? "success"
+                              : app.status === "rejected"
+                                ? "danger"
+                                : "warning"
+                          }
+                        />
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span>
+                          Email: <strong className="text-foreground">{app.email}</strong>
+                        </span>
+                        <span>
+                          Phone: <strong className="text-foreground">{app.phone}</strong>
+                        </span>
+                        <span>
+                          City: <strong className="text-foreground">{app.city}</strong>
+                        </span>
+                        <span>
+                          Experience:{" "}
+                          <strong className="text-foreground">{app.experience_years}</strong>
+                        </span>
+                      </div>
+
+                      {app.preferred_areas?.length > 0 && (
+                        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] font-semibold text-muted-foreground">
+                            Corridors:
+                          </span>
+                          {app.preferred_areas.map((area: string) => (
+                            <span
+                              key={area}
+                              className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-medium text-foreground"
+                            >
+                              {area}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {app.languages?.length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] font-semibold text-muted-foreground">
+                            Languages:
+                          </span>
+                          {app.languages.map((lang: string) => (
+                            <span
+                              key={lang}
+                              className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary"
+                            >
+                              {lang}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {app.message && (
+                        <p className="mt-3 rounded-2xl bg-secondary/40 p-3 text-xs text-muted-foreground italic">
+                          "{app.message}"
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end">
+                      <button
+                        disabled={appStatusMutation.isPending || app.status === "approved"}
+                        onClick={() => appStatusMutation.mutate({ id: app.id, status: "approved" })}
+                        className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-500 disabled:opacity-40"
+                      >
+                        Approve Partner
+                      </button>
+                      <button
+                        disabled={appStatusMutation.isPending || app.status === "under_review"}
+                        onClick={() =>
+                          appStatusMutation.mutate({ id: app.id, status: "under_review" })
+                        }
+                        className="rounded-xl border border-border bg-secondary px-3.5 py-1.5 text-xs font-bold text-foreground transition hover:bg-secondary/80 disabled:opacity-40"
+                      >
+                        Mark Reviewing
+                      </button>
+                      <button
+                        disabled={appStatusMutation.isPending || app.status === "rejected"}
+                        onClick={() => appStatusMutation.mutate({ id: app.id, status: "rejected" })}
+                        className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-1.5 text-xs font-bold text-rose-500 transition hover:bg-rose-500/20 disabled:opacity-40"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

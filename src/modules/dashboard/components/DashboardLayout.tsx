@@ -16,26 +16,33 @@ export interface NavItem {
   badge?: string;
 }
 
-const ROLE_META: Record<UserRole, { name: string; color: string; avatar: string }> = {
+const ROLE_META: Record<
+  UserRole,
+  { name: string; color: string; avatar: string; accentGrad: string }
+> = {
   customer: {
     name: "Tenant & Buyer Portal",
     color: "bg-blue-600/10 text-blue-600 dark:text-blue-400",
     avatar: "bg-blue-600",
+    accentGrad: "from-blue-500/10",
   },
   owner: {
     name: "Verified Owner Portal",
     color: "bg-emerald-600/10 text-emerald-600 dark:text-emerald-400",
     avatar: "bg-emerald-600",
+    accentGrad: "from-emerald-500/10",
   },
   agent: {
     name: "Partner Agent Hub",
     color: "bg-purple-600/10 text-purple-600 dark:text-purple-400",
     avatar: "bg-purple-600",
+    accentGrad: "from-purple-500/10",
   },
   admin: {
     name: "Platform Admin HQ",
     color: "bg-amber-600/10 text-amber-600 dark:text-amber-400",
     avatar: "bg-amber-600",
+    accentGrad: "from-amber-500/10",
   },
 };
 
@@ -96,7 +103,9 @@ export function DashboardLayout({
 
   const sidebarInner = (
     <>
-      <div className="flex items-center justify-between border-b border-border/40 p-4">
+      <div
+        className={`flex items-center justify-between border-b border-border/40 bg-gradient-to-br ${meta.accentGrad} to-transparent p-4`}
+      >
         {!collapsed && <BrandMark responsiveName />}
         <button
           onClick={() => setCollapsed((v) => !v)}
@@ -126,9 +135,10 @@ export function DashboardLayout({
         </div>
         {!collapsed && (
           <span
-            className={`mt-3 block rounded-xl px-3 py-1.5 text-center text-[10px] font-extrabold uppercase tracking-wider ${meta.color}`}
+            className={`mt-3 flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-center text-[10px] font-extrabold uppercase tracking-wider ${meta.color}`}
           >
-            ● {meta.name}
+            <span className={`h-1.5 w-1.5 flex-none rounded-full ${meta.avatar}`} />
+            {meta.name}
           </span>
         )}
       </div>
@@ -143,9 +153,9 @@ export function DashboardLayout({
               onClick={() => onTabChange(item.id)}
               aria-current={isActive ? "page" : undefined}
               title={collapsed ? item.label : undefined}
-              className={`flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition ${
+              className={`flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-xs font-semibold transition-all duration-200 ${
                 isActive
-                  ? "bg-primary text-primary-foreground shadow-md"
+                  ? "bg-primary text-primary-foreground shadow-lg"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
@@ -243,7 +253,9 @@ export function DashboardLayout({
           </div>
         </header>
 
-        {children}
+        <div key={activeTab} className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+          {children}
+        </div>
       </main>
     </div>
   );

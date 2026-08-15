@@ -95,11 +95,13 @@ Roles and permissions are defined in `src/config/rbac.ts`:
 ## Security Primitives & Protections
 
 ### 1. Cloudflare Turnstile CAPTCHA
+
 - **File**: `src/lib/security.server.ts: verifyTurnstile()`
 - **Mechanism**: Verifies CAPTCHA tokens submitted with enquiry forms against `https://challenges.cloudflare.com/turnstile/v0/siteverify`.
 - **Behavior**: If `TURNSTILE_SECRET_KEY` is not provisioned, Turnstile operates as a no-op (returns `{ ok: true, configured: false }`), ensuring the platform runs without breaking during early development.
 
 ### 2. Postgres Sliding-Window Rate Limiting
+
 - **File**: `src/lib/security.server.ts: checkRateLimits()`
 - **Engine**: Evaluates 5 sliding window rules sequentially against Postgres counts:
   - Burst limit: Max 2 submissions per 60 seconds per IP.
@@ -109,10 +111,12 @@ Roles and permissions are defined in `src/config/rbac.ts`:
   - Per-phone daily limit: Max 10 submissions per 86400 seconds per phone number.
 
 ### 3. Honeypot & Timing Protections
+
 - **Honeypot**: Hidden `company` input field in form. If filled by automated bots, the server logs an audit event and returns a dummy HTTP 200 success response so bots receive no negative signal.
 - **Timer Check**: Rejects form submissions completed in under `MIN_SUBMIT_MS = 2500` (2.5 seconds).
 
 ### 4. Audit Logging
+
 - **File**: `src/lib/security.server.ts: recordAudit()`
 - **Persistence**: Writes event logs (`enquiry.created`, `enquiry.rejected`, `enquiry.rate_limited`) to `public.audit_logs` table via `supabaseAdmin` service role client.
 - **Privacy**: `audit_logs` table is protected by a deny-all RLS policy (`USING (false)`), making it accessible exclusively to administrators.

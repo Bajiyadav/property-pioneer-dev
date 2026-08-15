@@ -5,7 +5,7 @@ import {
   isPropertyVerified,
   isNewlyListed,
 } from "@/modules/property/services/propertyService";
-import { CheckCircle2, ShieldCheck, Tag, Sparkles, Clock, Crown } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Tag, Sparkles, Clock, Crown, Video } from "lucide-react";
 
 export function PropertyBadges({
   property,
@@ -92,6 +92,16 @@ export function PropertyBadges({
           className={`inline-flex items-center gap-1 rounded-full bg-purple-600/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
         >
           <Crown className={iconSize} /> Premium
+        </span>
+      )}
+
+      {/* 7. Video Tour Badge */}
+      {property.video_url && (
+        <span
+          className={`inline-flex items-center gap-1 rounded-full bg-rose-600/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
+          title="This property has a high-definition video tour available"
+        >
+          <Video className={iconSize} /> Video Tour
         </span>
       )}
     </div>

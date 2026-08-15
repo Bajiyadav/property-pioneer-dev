@@ -2,7 +2,7 @@
 
 > **Author**: Staff Mobile Architect & Lead Full-Stack Engineer  
 > **Target Technology**: Expo / React Native (iOS & Android Monorepo)  
-> **Estimated Code Reuse Rate**: **70% Shared Core Logic**  
+> **Estimated Code Reuse Rate**: **70% Shared Core Logic**
 
 ---
 
@@ -33,13 +33,13 @@ URF's current architecture utilizes **TypeScript**, **Zod validation**, **TanSta
 
 ## 2. Reusability Breakdown & Compatibility Audit
 
-| Code Category | File Paths in Web App | Mobile Reusability | Adaptation Effort |
-| :--- | :--- | :---: | :--- |
-| **Supabase Client** | `src/integrations/supabase/client.ts` | **100%** | Drop-in reuse with `AsyncStorage` adapter. |
-| **Validation Schemas** | `src/lib/validations/property.ts` | **100%** | Shared Zod schemas imported directly. |
-| **Data Fetchers** | `src/lib/properties.ts`, `useFavorites.ts` | **90%** | Reusable TanStack Query hooks; substitute web storage with AsyncStorage. |
-| **App Configuration** | `src/config/app.ts` | **100%** | Shared constants (Cities, Types, Metadata). |
-| **UI Components** | `src/components/ui/*` | **25%** | Web uses DOM HTML tags (`<div>`, `<button>`); mobile will use NativeWind (`View`, `Text`, `TouchableOpacity`). |
+| Code Category          | File Paths in Web App                      | Mobile Reusability | Adaptation Effort                                                                                              |
+| :--------------------- | :----------------------------------------- | :----------------: | :------------------------------------------------------------------------------------------------------------- |
+| **Supabase Client**    | `src/integrations/supabase/client.ts`      |      **100%**      | Drop-in reuse with `AsyncStorage` adapter.                                                                     |
+| **Validation Schemas** | `src/lib/validations/property.ts`          |      **100%**      | Shared Zod schemas imported directly.                                                                          |
+| **Data Fetchers**      | `src/lib/properties.ts`, `useFavorites.ts` |      **90%**       | Reusable TanStack Query hooks; substitute web storage with AsyncStorage.                                       |
+| **App Configuration**  | `src/config/app.ts`                        |      **100%**      | Shared constants (Cities, Types, Metadata).                                                                    |
+| **UI Components**      | `src/components/ui/*`                      |      **25%**       | Web uses DOM HTML tags (`<div>`, `<button>`); mobile will use NativeWind (`View`, `Text`, `TouchableOpacity`). |
 
 ---
 
@@ -86,4 +86,3 @@ export function useProperties(searchParams?: PropertySearchParams) {
 - **Week 3–4**: Expo project initialization with NativeWind and shared authentication flow.
 - **Week 5–6**: Property search list, detail screen, and native map integration.
 - **Week 7–8**: Owner photo upload integration, push notifications, and App Store / Google Play store submissions.
-

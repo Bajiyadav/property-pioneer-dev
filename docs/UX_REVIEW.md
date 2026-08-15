@@ -1,7 +1,7 @@
 # Urban Rental Flats (URF) — User Experience (UX) & Friction Audit
 
 > **Author**: Senior UX Designer & Product Manager  
-> **Focus Area**: Real Estate Rental Friction, Micro-interactions, & Tier-2/3 Indian User Psychology  
+> **Focus Area**: Real Estate Rental Friction, Micro-interactions, & Tier-2/3 Indian User Psychology
 
 ---
 
@@ -37,14 +37,17 @@ Renters and property owners in Tier-2/3 Indian markets (e.g. Jaipur, Lucknow, In
 ## 3. Micro-Interactions & Usability Enhancements
 
 ### A. Search & Filter Usability
+
 - **Current Behavior**: Submitting search refreshes page state with query params (`?q=...&city=...`).
 - **UX Improvement**: Preserve instant search inputs and add "Recent Searches" chips (e.g., "2 BHK in Malviya Nagar", "Flats under ₹15,000") in the search bar drop-down.
 
 ### B. Favorite / Wishlist Feedback
+
 - **Current Behavior**: Heart icon toggles filled state instantly.
 - **UX Improvement**: Add subtle haptic vibration (on mobile) and toast notification ("Saved to your favorites — set up price alerts in dashboard").
 
 ### C. Owner Contact Modal
+
 - **Current Behavior**: Pops open a modal asking for Name, Email, Phone, and Message.
 - **UX Improvement**: Offer two distinct one-tap action buttons:
   - 🟢 **WhatsApp Instant Chat**: Pre-fills message `"Hi, I am interested in your property [Property Title] on Urban Rental Flats. Is it available?"`
@@ -54,10 +57,9 @@ Renters and property owners in Tier-2/3 Indian markets (e.g. Jaipur, Lucknow, In
 
 ## 4. Usability Metrics & Target KPIs
 
-| UX Metric | Current Baseline | Post-Launch Target | Primary UX Lever |
-| :--- | :---: | :---: | :--- |
-| **Search-to-Inquiry Rate** | 3.2% | **8.5%** | One-click WhatsApp lead button & phone OTP auth |
-| **Form Completion Rate** | 42% | **78%** | Autofill user profile details into contact modal |
-| **Mobile Bounce Rate** | 58% | **< 35%** | Sticky bottom contact bar & accelerated image loading |
-| **Return User Retention (D30)** | 12% | **38%** | Saved search alerts & price drop notifications |
-
+| UX Metric                       | Current Baseline | Post-Launch Target | Primary UX Lever                                      |
+| :------------------------------ | :--------------: | :----------------: | :---------------------------------------------------- |
+| **Search-to-Inquiry Rate**      |       3.2%       |      **8.5%**      | One-click WhatsApp lead button & phone OTP auth       |
+| **Form Completion Rate**        |       42%        |      **78%**       | Autofill user profile details into contact modal      |
+| **Mobile Bounce Rate**          |       58%        |     **< 35%**      | Sticky bottom contact bar & accelerated image loading |
+| **Return User Retention (D30)** |       12%        |      **38%**       | Saved search alerts & price drop notifications        |

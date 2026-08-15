@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from "@/config/storage";
 /**
  * Client-side dashboard stores.
  *
@@ -7,7 +8,6 @@
  * fails closed to an empty list.
  */
 
-const RECENT_SEARCH_KEY = "urf:recent-searches";
 const MAX_RECENT_SEARCHES = 8;
 
 export interface RecentSearch {
@@ -38,7 +38,7 @@ function isRecentSearch(value: unknown): value is RecentSearch {
 export function readRecentSearches(): RecentSearch[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(RECENT_SEARCH_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEYS.RECENT_SEARCH);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -66,7 +66,7 @@ export function recordRecentSearch(
       0,
       MAX_RECENT_SEARCHES,
     );
-    window.localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(next));
+    window.localStorage.setItem(STORAGE_KEYS.RECENT_SEARCH, JSON.stringify(next));
   } catch {
     // Storage full or blocked — recent searches are a convenience, not critical.
   }
@@ -75,7 +75,7 @@ export function recordRecentSearch(
 export function clearRecentSearches(): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(RECENT_SEARCH_KEY);
+    window.localStorage.removeItem(STORAGE_KEYS.RECENT_SEARCH);
   } catch {
     // ignore
   }

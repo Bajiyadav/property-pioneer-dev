@@ -7,12 +7,13 @@ import {
   fetchPublicProperties,
   fetchPublicPropertyFeed,
   fetchPublicPropertyById,
+  type PropertySearchParams,
 } from "@/modules/property/services/propertyService";
 
-export type { Property, PropertyStatus, PropertyFeed, VerificationStatus };
+export type { Property, PropertyStatus, PropertyFeed, VerificationStatus, PropertySearchParams };
 
-export async function fetchProperties(): Promise<Property[]> {
-  return fetchPublicProperties();
+export async function fetchProperties(params?: PropertySearchParams): Promise<Property[]> {
+  return fetchPublicProperties(params);
 }
 
 /** Listings plus provenance — used by dashboards to flag seed data. */

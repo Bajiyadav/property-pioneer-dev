@@ -23,6 +23,17 @@ const listingSchema = z.object({
   listing_type: z.enum(["rent", "sale"]),
   images: z.array(z.string().url()).max(12).default([]),
   status: z.enum(["draft", "available"]).optional(),
+  video_url: z.string().url().optional().nullable(),
+  video_thumbnail_url: z.string().url().optional().nullable(),
+  video_duration: z.number().int().nonnegative().optional().nullable(),
+  video_status: z.enum(["pending", "approved", "rejected"]).optional(),
+  video_uploaded_at: z.string().optional().nullable(),
+  locality: z.string().trim().optional().nullable(),
+  landmark: z.string().trim().optional().nullable(),
+  metro_station: z.string().trim().optional().nullable(),
+  it_park: z.string().trim().optional().nullable(),
+  college: z.string().trim().optional().nullable(),
+  hospital: z.string().trim().optional().nullable(),
 });
 
 export const getMyListings = createServerFn({ method: "GET" })
@@ -71,6 +82,21 @@ export const uploadListingImage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { uploadOwnerImage } = await import("./owner.server");
     return uploadOwnerImage(context.userId, data.dataUrl, data.filename);
+  });
+
+export const getSignedVideoUploadUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({
+        filename: z.string().max(120).default("video"),
+        mime: z.string().max(50),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { createVideoUploadUrl } = await import("./owner.server");
+    return createVideoUploadUrl(context.userId, data.filename, data.mime);
   });
 
 export const getMyLeads = createServerFn({ method: "GET" })

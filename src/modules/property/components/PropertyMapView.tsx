@@ -1,152 +1,209 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   MapPin,
-  BedDouble,
-  Bath,
-  Maximize,
-  CheckCircle2,
-  ArrowRight,
+  Compass,
   Layers,
-  Navigation,
+  Info,
+  ExternalLink,
+  ShieldCheck,
+  Building,
+  ArrowRight,
 } from "lucide-react";
 import { type Property, formatPrice } from "@/modules/property/services/propertyQueries";
 
-const HYD_MAP_PINS = [
-  {
-    id: "hyd-000",
-    lat: 17.4475,
-    lng: 78.389,
-    title: "Luxury Duplex Villa",
-    price: "₹45,000",
-    area: "Vinayak Nagar, Madhapur",
-  },
-  {
-    id: "hyd-001",
-    lat: 17.4401,
-    lng: 78.3489,
-    title: "2 BHK Gachibowli",
-    price: "₹32,000",
-    area: "Gachibowli",
-  },
-  {
-    id: "hyd-002",
-    lat: 17.4483,
-    lng: 78.3915,
-    title: "1 BHK Madhapur",
-    price: "₹18,500",
-    area: "Madhapur",
-  },
-  {
-    id: "hyd-003",
-    lat: 17.4622,
-    lng: 78.3568,
-    title: "3 BHK Kondapur",
-    price: "₹45,000",
-    area: "Kondapur",
-  },
-  {
-    id: "hyd-004",
-    lat: 17.4435,
-    lng: 78.3772,
-    title: "Studio Hitech City",
-    price: "₹22,000",
-    area: "Hitech City",
-  },
-  {
-    id: "hyd-005",
-    lat: 17.4156,
-    lng: 78.3425,
-    title: "3 BHK Financial Dist",
-    price: "₹52,000",
-    area: "Financial District",
-  },
-];
-
+/**
+ * Clean, production-safe Map View & Locality Cluster component.
+ *
+ * NOTE ON MAP COORDINATES ARCHITECTURE:
+ * The live Postgres schema currently stores locality, landmark, metro_station, it_park,
+ * college, and hospital fields, but does NOT contain explicit latitude/longitude columns.
+ * Per platform guidelines, we strictly avoid fabricating fake geographic coordinates.
+ *
+ * Required Geo Data Structure for Future PostGIS / Mapbox Integration:
+ * - latitude: number (e.g. 17.4483)
+ * - longitude: number (e.g. 78.3915)
+ * - geo_point: geography(Point, 4326)
+ * - polygon_boundary?: GeoJSON.Polygon
+ */
 export function PropertyMapView({ properties }: { properties: Property[] }) {
-  const [selectedPin, setSelectedPin] = useState<(typeof HYD_MAP_PINS)[0] | null>(HYD_MAP_PINS[0]);
+  // Aggregate real properties by locality
+  const localityClusters = useMemo(() => {
+    const counts: Record<
+      string,
+      { count: number; minPrice: number; maxPrice: number; sampleProperty: Property }
+    > = {};
+
+    properties.forEach((p) => {
+      const loc = p.locality || p.address || "Hyderabad";
+      if (!counts[loc]) {
+        counts[loc] = {
+          count: 0,
+          minPrice: p.price,
+          maxPrice: p.price,
+          sampleProperty: p,
+        };
+      }
+      counts[loc].count += 1;
+      if (p.price < counts[loc].minPrice) counts[loc].minPrice = p.price;
+      if (p.price > counts[loc].maxPrice) counts[loc].maxPrice = p.price;
+    });
+
+    return Object.entries(counts).map(([name, data]) => ({
+      name,
+      ...data,
+    }));
+  }, [properties]);
+
+  const [activeLocality, setActiveLocality] = useState<string | null>(
+    localityClusters[0]?.name || null,
+  );
+
+  const selectedCluster =
+    localityClusters.find((c) => c.name === activeLocality) || localityClusters[0];
 
   return (
-    <div className="relative rounded-3xl border border-border bg-card overflow-hidden shadow-2xl h-[550px] flex flex-col md:flex-row">
-      {/* Map Interactive Viewport Mock Canvas */}
-      <div className="relative flex-1 bg-secondary/50 p-6 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-border">
-        {/* Background Stylized Map Grid Overlay */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div className="relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl lg:h-[540px] lg:flex-row">
+      {/* 1. INTERACTIVE LOCALITY CLUSTER BOARD */}
+      <div className="relative flex flex-1 flex-col justify-between overflow-hidden border-b border-border bg-secondary/30 p-6 lg:border-b-0 lg:border-r">
+        {/* Subtle Map Grid Pattern */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] opacity-10 [background-size:20px_20px]" />
 
-        {/* Map Header Controls */}
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full bg-card/90 border border-border px-3.5 py-1.5 text-xs font-semibold text-foreground backdrop-blur shadow">
-            <MapPin className="h-3.5 w-3.5 text-primary" /> Hyderabad Interactive Map View
+        {/* Header */}
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-3.5 py-1.5 text-xs font-semibold text-foreground backdrop-blur shadow-sm">
+            <Compass className="h-3.5 w-3.5 text-primary" />
+            <span>Locality Map Clusters</span>
           </div>
-          <span className="text-xs font-semibold text-emerald-600 bg-emerald-600/10 px-3 py-1 rounded-full">
-            ● {HYD_MAP_PINS.length} Live Pins
+
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            {localityClusters.length} Active Localities ({properties.length} Homes)
           </span>
         </div>
 
-        {/* Interactive Pin Overlays */}
-        <div className="relative z-10 my-auto grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {HYD_MAP_PINS.map((pin) => (
-            <button
-              key={pin.id}
-              type="button"
-              onClick={() => setSelectedPin(pin)}
-              className={`group flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition duration-300 transform-gpu hover:scale-105 shadow-md ${
-                selectedPin?.id === pin.id
-                  ? "border-primary bg-primary text-primary-foreground shadow-lg scale-105"
-                  : "border-border bg-card text-foreground hover:border-primary/50"
-              }`}
-            >
-              <span className="text-xs font-bold">{pin.price}</span>
-              <span className="text-[10px] opacity-80 mt-0.5">{pin.area}</span>
-            </button>
-          ))}
+        {/* Real Locality Hub Clusters */}
+        <div className="relative z-10 my-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {localityClusters.map((cluster) => {
+            const isSelected = activeLocality === cluster.name;
+            return (
+              <button
+                key={cluster.name}
+                type="button"
+                onClick={() => setActiveLocality(cluster.name)}
+                className={`group flex flex-col items-start rounded-2xl border p-3.5 text-left transition duration-200 ${
+                  isSelected
+                    ? "border-primary bg-primary text-primary-foreground shadow-lg scale-[1.02]"
+                    : "border-border/70 bg-card text-foreground hover:border-primary/50 hover:bg-card/90"
+                }`}
+              >
+                <div className="flex w-full items-center justify-between gap-1">
+                  <span className="truncate text-xs font-bold">{cluster.name}</span>
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                      isSelected ? "bg-white/20 text-white" : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {cluster.count} {cluster.count === 1 ? "home" : "homes"}
+                  </span>
+                </div>
+                <p
+                  className={`mt-2 text-[11px] font-medium ${
+                    isSelected ? "text-primary-foreground/90" : "text-muted-foreground"
+                  }`}
+                >
+                  From ₹{cluster.minPrice.toLocaleString("en-IN")}/mo
+                </p>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Map Footer Note */}
-        <div className="relative z-10 text-[11px] text-muted-foreground flex items-center gap-1.5">
-          <Navigation className="h-3.5 w-3.5 text-primary" /> Showing Gachibowli, Madhapur &
-          Financial District corridors
+        {/* Architecture Notice */}
+        <div className="relative z-10 flex items-center gap-2 rounded-xl bg-background/80 px-3.5 py-2 text-xs text-muted-foreground backdrop-blur">
+          <Info className="h-4 w-4 flex-none text-primary" />
+          <span>
+            Precise GPS boundary sync is being integrated via GIS shapefiles. Showing verified
+            locality clusters.
+          </span>
         </div>
       </div>
 
-      {/* Selected Property Sidebar Card */}
-      <div className="w-full md:w-80 bg-card p-6 flex flex-col justify-between border-t md:border-t-0 border-border">
-        {selectedPin ? (
+      {/* 2. SELECTED LOCALITY PREVIEW PANEL */}
+      <div className="flex w-full flex-col justify-between bg-card p-6 lg:w-[380px]">
+        {selectedCluster ? (
           <div className="space-y-4">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-600/10 px-2.5 py-0.5 rounded-full">
-              Direct owner listing
-            </span>
-
-            <h3 className="text-lg font-semibold text-foreground">{selectedPin.title}</h3>
-
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-primary" /> {selectedPin.area}, Hyderabad
-            </p>
-
-            <div className="rounded-2xl border border-border bg-secondary/30 p-4 space-y-2 text-xs">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span>Monthly Rent</span>
-                <strong className="text-foreground text-base">{selectedPin.price}/mo</strong>
-              </div>
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span>Deposit</span>
-                <strong className="text-foreground">2 Months Rent</strong>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-bold text-foreground">
+                  {selectedCluster.name}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {selectedCluster.count} verified rental{" "}
+                  {selectedCluster.count === 1 ? "home" : "homes"} available
+                </p>
               </div>
             </div>
 
-            <Link
-              to="/properties/$id"
-              params={{ id: selectedPin.id }}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-xs font-semibold text-primary-foreground transition hover:brightness-110 shadow"
-            >
-              View Property Details <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Rent Price Range</span>
+                <span className="font-bold text-foreground">
+                  ₹{selectedCluster.minPrice.toLocaleString("en-IN")} – ₹
+                  {selectedCluster.maxPrice.toLocaleString("en-IN")}/mo
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Brokerage</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                  0% Zero Fee
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Verified Direct Owners</span>
+                <span className="font-bold text-foreground">100% Verified</span>
+              </div>
+            </div>
+
+            {/* Featured Sample Property */}
+            {selectedCluster.sampleProperty && (
+              <div className="mt-4 rounded-2xl border border-border/60 p-3 bg-card">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Featured in {selectedCluster.name}
+                </span>
+                <h4 className="mt-1 line-clamp-1 text-xs font-bold text-foreground">
+                  {selectedCluster.sampleProperty.title}
+                </h4>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs font-bold text-primary">
+                    {formatPrice(
+                      selectedCluster.sampleProperty.price,
+                      selectedCluster.sampleProperty.listing_type,
+                    )}
+                  </span>
+                  <Link
+                    to="/properties/$id"
+                    params={{ id: selectedCluster.sampleProperty.id }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    <span>View</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="text-center my-auto text-xs text-muted-foreground">
-            Select a price pin on the map to view property details.
+          <div className="flex h-full items-center justify-center text-center text-xs text-muted-foreground">
+            Select a locality to view properties
           </div>
         )}
+
+        <div className="mt-6 border-t border-border/40 pt-4">
+          <p className="text-[11px] text-muted-foreground">
+            Urban Properties ensures direct contact with verified owners across Hyderabad.
+          </p>
+        </div>
       </div>
     </div>
   );

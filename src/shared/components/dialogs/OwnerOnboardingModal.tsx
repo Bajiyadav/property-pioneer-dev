@@ -1,7 +1,12 @@
+import { PropertyImage } from "@/shared/components/PropertyImage";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { createListing, uploadListingImage } from "@/modules/owner/services/ownerFunctions";
+import {
+  createListing,
+  uploadListingImage,
+  getSignedVideoUploadUrl,
+} from "@/modules/owner/services/ownerFunctions";
 
 interface PickedPhoto {
   name: string;
@@ -25,6 +30,8 @@ import {
   IndianRupee,
   ShieldCheck,
   Sparkles,
+  Video,
+  XCircle,
 } from "lucide-react";
 
 export function OwnerOnboardingModal({
@@ -51,11 +58,15 @@ export function OwnerOnboardingModal({
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const create = useServerFn(createListing);
   const uploadImage = useServerFn(uploadListingImage);
+  const getSignedUrl = useServerFn(getSignedVideoUploadUrl);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 5));
+  const handleNext = () => setStep((s) => Math.min(s + 1, 6));
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,13 +81,32 @@ export function OwnerOnboardingModal({
 
     setSaving(true);
     try {
-      // Upload any selected photos first so the listing is created with real URLs.
+      // Upload any selected photos and video first so the listing is created with real URLs.
       const urls: string[] = [];
       for (const photo of photos) {
         const { url } = await uploadImage({
           data: { dataUrl: photo.dataUrl, filename: photo.name },
         });
         urls.push(url);
+      }
+
+      // Upload video if selected
+      let finalVideoUrl: string | undefined;
+      if (videoFile) {
+        setUploadingVideo(true);
+        const { signedUrl, publicUrl } = await getSignedUrl({
+          data: { filename: videoFile.name, mime: videoFile.type },
+        });
+
+        // Direct upload to Supabase storage bypassing serverless limits
+        const res = await fetch(signedUrl, {
+          method: "PUT",
+          body: videoFile,
+          headers: { "Content-Type": videoFile.type },
+        });
+
+        if (!res.ok) throw new Error("Failed to upload video to storage.");
+        finalVideoUrl = publicUrl;
       }
 
       await create({
@@ -94,6 +124,8 @@ export function OwnerOnboardingModal({
           property_type: formData.propertyType,
           listing_type: "rent",
           images: urls,
+          video_url: finalVideoUrl,
+          video_status: finalVideoUrl ? "pending" : undefined,
         },
       });
 
@@ -137,7 +169,7 @@ export function OwnerOnboardingModal({
             <span className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Free to list
             </span>
-            <span className="text-xs text-muted-foreground">Step {step} of 5</span>
+            <span className="text-xs text-muted-foreground">Step {step} of 6</span>
           </div>
           <DialogTitle className="text-2xl font-semibold text-foreground mt-2">
             List Your Property for FREE
@@ -152,7 +184,7 @@ export function OwnerOnboardingModal({
         <div className="w-full bg-secondary h-2 rounded-full overflow-hidden my-4">
           <div
             className="bg-primary h-full transition-all duration-300"
-            style={{ width: `${(step / 5) * 100}%` }}
+            style={{ width: `${(step / 6) * 100}%` }}
           />
         </div>
 
@@ -321,10 +353,11 @@ export function OwnerOnboardingModal({
                     <div className="mt-2 flex flex-wrap gap-2">
                       {photos.map((p, i) => (
                         <div key={`${p.name}-${i}`} className="relative">
-                          <img
+                          <PropertyImage
                             src={p.dataUrl}
                             alt={p.name}
-                            className="h-14 w-20 rounded-lg border border-border object-cover"
+                            watermarkSize="xs"
+                            containerClassName="h-14 w-20 rounded-lg border border-border"
                           />
                           <button
                             type="button"
@@ -376,8 +409,86 @@ export function OwnerOnboardingModal({
 
             {step === 5 && (
               <div className="space-y-3">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground flex items-center gap-2">
+                  Step 5: Video Tour{" "}
+                  <span className="rounded bg-primary/20 text-primary px-1.5 py-0.5 text-[10px]">
+                    Recommended
+                  </span>
+                </h4>
+
+                <p className="text-xs text-muted-foreground">
+                  Properties with video tours receive up to 5x more genuine leads. Record a quick
+                  walkthrough of the entrance, living area, bedrooms, and kitchen.
+                </p>
+
+                <div>
+                  <label htmlFor="listing-video" className="text-xs font-medium text-foreground">
+                    Upload Property Video (MP4/WebM, max 90s)
+                  </label>
+                  {!videoPreview ? (
+                    <div className="mt-1 flex justify-center rounded-xl border border-dashed border-border bg-background p-6">
+                      <div className="text-center">
+                        <Video className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1 justify-center">
+                          <label
+                            htmlFor="listing-video"
+                            className="relative cursor-pointer rounded-md bg-transparent font-semibold text-primary hover:underline focus-within:outline-none"
+                          >
+                            <span>Upload a file</span>
+                            <input
+                              id="listing-video"
+                              type="file"
+                              className="sr-only"
+                              accept="video/mp4,video/webm,video/quicktime"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 50 * 1024 * 1024) {
+                                  toast.error("Video is over the 50 MB limit.");
+                                  return;
+                                }
+                                setVideoFile(file);
+                                setVideoPreview(URL.createObjectURL(file));
+                              }}
+                            />
+                          </label>
+                          <p>or drag and drop</p>
+                        </div>
+                        <p className="text-[10px] leading-5 text-muted-foreground mt-1">
+                          Keep it under 50MB and steady.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 rounded-xl overflow-hidden border border-border bg-black/5 relative aspect-video">
+                      <video
+                        src={videoPreview}
+                        className="w-full h-full object-contain"
+                        controls
+                        muted
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVideoFile(null);
+                          if (videoPreview) URL.revokeObjectURL(videoPreview);
+                          setVideoPreview(null);
+                        }}
+                        className="absolute top-2 right-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-rose-600 transition"
+                        title="Remove video"
+                      >
+                        <XCircle className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {step === 6 && (
+              <div className="space-y-3">
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground">
-                  Step 5: Review & Publish
+                  Step 6: Review & Publish
                 </h4>
                 <div className="rounded-2xl border border-border bg-secondary/30 p-4 text-xs space-y-1 text-foreground">
                   <p>
@@ -410,7 +521,7 @@ export function OwnerOnboardingModal({
                 <div />
               )}
 
-              {step < 5 ? (
+              {step < 6 ? (
                 <button
                   type="button"
                   onClick={handleNext}
@@ -421,13 +532,15 @@ export function OwnerOnboardingModal({
               ) : (
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploadingVideo}
                   className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-6 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500 disabled:opacity-50"
                 >
-                  {saving
-                    ? photos.length
-                      ? "Uploading photos…"
-                      : "Submitting…"
+                  {saving || uploadingVideo
+                    ? uploadingVideo
+                      ? "Uploading video…"
+                      : photos.length
+                        ? "Uploading photos…"
+                        : "Submitting…"
                     : "Submit Listing FREE"}
                 </button>
               )}

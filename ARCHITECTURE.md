@@ -35,15 +35,15 @@ Nothing in the existing theme, layout, or component tree changes.
 Shared primitives live in `src/lib/security.server.ts` and apply to every
 write endpoint:
 
-| Control | Implementation |
-| --- | --- |
-| Input validation | Zod schemas shared client/server (`src/lib/enquiries.ts`) |
-| Honeypot | Hidden `company` field; filled → silent accept, logged |
-| Time-to-submit | Rejects submissions under 2.5s |
-| Rate limiting | Sliding windows in Postgres: per-IP burst/hourly/daily, per-IP+property, per-phone |
-| CAPTCHA | Cloudflare Turnstile, verified server-side; no-op until keys are set |
-| Audit logs | `audit_logs` table, deny-all RLS, service-role only |
-| Least privilege | `enquiries` + `audit_logs` unreadable by anon/authenticated |
+| Control          | Implementation                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Input validation | Zod schemas shared client/server (`src/lib/enquiries.ts`)                          |
+| Honeypot         | Hidden `company` field; filled → silent accept, logged                             |
+| Time-to-submit   | Rejects submissions under 2.5s                                                     |
+| Rate limiting    | Sliding windows in Postgres: per-IP burst/hourly/daily, per-IP+property, per-phone |
+| CAPTCHA          | Cloudflare Turnstile, verified server-side; no-op until keys are set               |
+| Audit logs       | `audit_logs` table, deny-all RLS, service-role only                                |
+| Least privilege  | `enquiries` + `audit_logs` unreadable by anon/authenticated                        |
 
 ### Turnstile activation
 
@@ -53,11 +53,11 @@ verification — the rest of the anti-abuse stack still applies.
 
 ## Data model
 
-| Table | Access | Purpose |
-| --- | --- | --- |
-| `properties` | anon read (approved, non-contact columns only) | Listings |
-| `enquiries` | service-role only | Customer → owner leads |
-| `audit_logs` | service-role only | Security + compliance trail |
+| Table        | Access                                         | Purpose                     |
+| ------------ | ---------------------------------------------- | --------------------------- |
+| `properties` | anon read (approved, non-contact columns only) | Listings                    |
+| `enquiries`  | service-role only                              | Customer → owner leads      |
+| `audit_logs` | service-role only                              | Security + compliance trail |
 
 Owner contact columns on `properties` are withheld from anonymous readers by
 column-level grants; enquiries are the only contact path.

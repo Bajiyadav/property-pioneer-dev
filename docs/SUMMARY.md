@@ -2,15 +2,15 @@
 
 ## Platform Health & Quality Scores
 
-| Dimension | Score (0–100) | Rating | Key Evaluator Findings |
-| --- | --- | --- | --- |
-| **Overall Project Health** | **87 / 100** | **Strong** | High-quality full-stack SSR codebase with security baseline |
-| **Architecture Score** | **90 / 100** | **Excellent** | Clean 5-layer separation, feature switchboard, SSR meta-framework |
-| **Security Score** | **88 / 100** | **Strong** | Postgres CLS/RLS, rate-limiting, honeypots, Turnstile, audit logs |
-| **Performance Score** | **84 / 100** | **Good** | Fast SSR pre-rendering & React Query caching; memory queries need pagination |
-| **Code Quality Score** | **88 / 100** | **Strong** | Clean TypeScript, strict Zod schemas, structured folder layout |
-| **Scalability Score** | **82 / 100** | **Good** | Modular design ready for scaling; DB-level pagination & count needed |
-| **Maintainability Score** | **90 / 100** | **Excellent** | Data-driven platform config & feature registry enable zero-code expansion |
+| Dimension                  | Score (0–100) | Rating        | Key Evaluator Findings                                                       |
+| -------------------------- | ------------- | ------------- | ---------------------------------------------------------------------------- |
+| **Overall Project Health** | **87 / 100**  | **Strong**    | High-quality full-stack SSR codebase with security baseline                  |
+| **Architecture Score**     | **90 / 100**  | **Excellent** | Clean 5-layer separation, feature switchboard, SSR meta-framework            |
+| **Security Score**         | **88 / 100**  | **Strong**    | Postgres CLS/RLS, rate-limiting, honeypots, Turnstile, audit logs            |
+| **Performance Score**      | **84 / 100**  | **Good**      | Fast SSR pre-rendering & React Query caching; memory queries need pagination |
+| **Code Quality Score**     | **88 / 100**  | **Strong**    | Clean TypeScript, strict Zod schemas, structured folder layout               |
+| **Scalability Score**      | **82 / 100**  | **Good**      | Modular design ready for scaling; DB-level pagination & count needed         |
+| **Maintainability Score**  | **90 / 100**  | **Excellent** | Data-driven platform config & feature registry enable zero-code expansion    |
 
 ---
 
@@ -67,6 +67,7 @@
 ## Top 50 Recommendations for Engineering Roadmap
 
 ### Phase 1: High Priority (Pre-Production Fixes 1–10)
+
 1. Move `checkIsAdmin` role verification into `_authenticated/route.tsx`'s `beforeLoad` function.
 2. Update `useFavorites.ts` to use localStorage key `urf:favorites`.
 3. Add database-level pagination (`.range()`) and query filters to `fetchProperties()`.
@@ -79,6 +80,7 @@
 10. Prune unused UI primitive components from `src/components/ui/`.
 
 ### Phase 2: Medium Priority (Growth & Optimization 11–30)
+
 11. Implement parallel execution (`Promise.all`) for the 5 rate-limiting count queries in `enquiries.ts`.
 12. Add upper bound validation (`max(10)`) on property `images` array length in Zod schemas.
 13. Implement soft-delete timestamp columns (`deleted_at`) on `properties` and `enquiries`.
@@ -101,6 +103,7 @@
 30. Add recent search terms history saved in `localStorage`.
 
 ### Phase 3: Low Priority (Scale & Platform Expansion 31–50)
+
 31. Wire multi-language locale definitions (`hi`, `mr`, `ta`, `te`, `kn`, `bn`) into React i18n context.
 32. Add Google Maps API integration displaying nearby schools, hospitals, and transit stops.
 33. Implement property comparison view allowing users to compare up to 3 listings side-by-side.
@@ -126,10 +129,10 @@
 
 ## Estimated System Readiness Assessment
 
-| Target Scale Milestone | Readiness | Critical Requirements to Reach Scale |
-| --- | --- | --- |
-| **MVP Demonstration** | **100% Ready** | Currently fully operational for MVP testing and demonstration. |
-| **Startup Public Launch** | **92% Ready** | Requires production environment variable setup & domain canonical link updates. |
-| **10,000 Active Users** | **85% Ready** | Requires database-level pagination & SQL aggregations for admin overview. |
-| **100,000 Active Users** | **70% Ready** | Requires CDN image optimization pipeline, HTTP caching, and database read replicas. |
-| **1 Million Active Users** | **55% Ready** | Requires microservice API decomposition, Redis caching layer, and dedicated DB clusters. |
+| Target Scale Milestone     | Readiness      | Critical Requirements to Reach Scale                                                     |
+| -------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| **MVP Demonstration**      | **100% Ready** | Currently fully operational for MVP testing and demonstration.                           |
+| **Startup Public Launch**  | **92% Ready**  | Requires production environment variable setup & domain canonical link updates.          |
+| **10,000 Active Users**    | **85% Ready**  | Requires database-level pagination & SQL aggregations for admin overview.                |
+| **100,000 Active Users**   | **70% Ready**  | Requires CDN image optimization pipeline, HTTP caching, and database read replicas.      |
+| **1 Million Active Users** | **55% Ready**  | Requires microservice API decomposition, Redis caching layer, and dedicated DB clusters. |

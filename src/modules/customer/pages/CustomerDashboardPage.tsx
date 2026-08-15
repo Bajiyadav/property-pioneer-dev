@@ -99,7 +99,11 @@ function CustomerDashboard({ user }: { user: User | null }) {
     isLoading,
     isError,
     refetch,
-  } = useQuery({ queryKey: ["property-feed"], queryFn: fetchPropertyFeed });
+  } = useQuery({
+    queryKey: ["property-feed"],
+    queryFn: fetchPropertyFeed,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";

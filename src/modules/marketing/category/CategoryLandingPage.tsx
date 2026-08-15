@@ -91,7 +91,8 @@ export function CategoryLandingPage({
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
-    queryFn: fetchProperties,
+    queryFn: () => fetchProperties(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const matchingProperties = properties.filter(filterPredicate);

@@ -2,7 +2,7 @@
 
 > **Document Type:** Pre-Launch & Operational Production Audit Checklist  
 > **Repository:** `property-pioneer-dev`  
-> **Target Audience:** DevOps Engineers, Lead Architects, Security Auditors & System Administrators  
+> **Target Audience:** DevOps Engineers, Lead Architects, Security Auditors & System Administrators
 
 ---
 

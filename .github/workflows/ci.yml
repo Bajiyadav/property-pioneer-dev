@@ -11,12 +11,15 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: "22"
 
 jobs:
   security:
-    name: 1. Security & Compliance Scan
+    name: 1. Security & Compliance
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -28,10 +31,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install (locked)
-        run: npm ci
+      - run: npm ci
 
-      - name: Secret-handling hygiene check
+      - name: Secret hygiene check
         run: |
           if grep -rnE 'VITE_[A-Z_]*(SECRET|SERVICE_ROLE|PRIVATE|PASSWORD)' src .env.example 2>/dev/null; then
             echo "::error::Secret key exposed behind public VITE_ prefix"; exit 1
@@ -59,28 +61,47 @@ jobs:
           fi
           echo "✓ License compliance verified"
 
-  code-quality:
-    name: 2. Code Quality & Unit Tests
+  quality:
+    name: 2. Code Quality (ESLint)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-
       - run: npm ci
-
       - name: ESLint
         run: npm run lint
 
-      - name: TypeScript Strict Check
+  typecheck:
+    name: 3. TypeScript Strict Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: TypeScript
         run: npm run typecheck
 
-      - name: Vitest Unit & Domain Tests
+  unit-tests:
+    name: 4. Unit & Coverage Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Vitest
         run: npm run test:coverage
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -88,23 +109,8 @@ jobs:
           path: coverage/
           retention-days: 7
 
-      - name: Production Build
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder' }}
-          VITE_APP_URL: ${{ secrets.VITE_APP_URL || 'https://property-pioneer-dev.vercel.app' }}
-
-      - name: Bundle Size Budget Check
-        run: |
-          TOTAL=$(du -sk .output/public 2>/dev/null | cut -f1)
-          echo "Total client payload: ${TOTAL} KB" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${TOTAL:-0}" -gt 15000 ]; then
-            echo "::error::Client bundle ${TOTAL}KB exceeds 15MB budget"; exit 1
-          fi
-
-  database-safety:
-    name: 3. Database Migration & Schema Safety
+  migration-safety:
+    name: 5. Migration & Schema Safety
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -116,10 +122,36 @@ jobs:
           fi
           echo "✓ No destructive statements in migrations"
 
-  e2e-qa:
-    name: 4. E2E & Business Journey QA
+  build:
+    name: 6. Production SSR Build
     runs-on: ubuntu-latest
-    needs: [security, code-quality, database-safety]
+    needs: [quality, typecheck, unit-tests]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder' }}
+          VITE_APP_URL: ${{ secrets.VITE_APP_URL || 'https://property-pioneer-dev.vercel.app' }}
+      - name: Bundle Budget Check
+        run: |
+          TOTAL=$(du -sk .output/public 2>/dev/null | cut -f1)
+          echo "Total client payload: ${TOTAL} KB" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${TOTAL:-0}" -gt 15000 ]; then
+            echo "::error::Client bundle ${TOTAL}KB exceeds 15MB budget"; exit 1
+          fi
+
+  e2e:
+    name: 7. E2E & Business QA
+    runs-on: ubuntu-latest
+    needs: [build]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -127,15 +159,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-
-      - name: Playwright E2E Smoke & Category Tests
+      - name: Playwright E2E
         run: npm run test:e2e
         env:
           E2E_BASE_URL: ${{ secrets.E2E_BASE_URL || 'https://property-pioneer-dev.vercel.app' }}
-
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -144,9 +173,9 @@ jobs:
           retention-days: 7
 
   release-gate:
-    name: 5. Urban Properties Release Gate Summary
+    name: 8. Urban Properties Release Gate Summary
     runs-on: ubuntu-latest
-    needs: [security, code-quality, database-safety, e2e-qa]
+    needs: [security, quality, typecheck, unit-tests, migration-safety, build, e2e]
     steps:
       - name: Generate Release Gate Summary Report
         run: |
@@ -160,7 +189,7 @@ jobs:
           echo "License Scan:           PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "ESLint Code Quality:    PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "TypeScript Strict:      PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "Unit & Domain Tests:    PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "Unit & Coverage Tests:  PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Database Safety:        PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "Production Build:       PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "E2E & Responsive QA:    PASS" >> "$GITHUB_STEP_SUMMARY"

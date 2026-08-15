@@ -56,7 +56,8 @@ function Index() {
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
-    queryFn: fetchProperties,
+    queryFn: () => fetchProperties(),
+    staleTime: 5 * 60 * 1000,
   });
 
   const featured = properties.filter((p) => p.is_featured);

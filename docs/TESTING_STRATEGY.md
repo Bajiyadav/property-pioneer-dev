@@ -2,7 +2,7 @@
 
 > **Document Type:** Quality Assurance & Test Engineering Framework  
 > **Repository:** `property-pioneer-dev`  
-> **Target Tooling:** Vitest, Playwright, Supabase Local CLI, k6, Lighthouse  
+> **Target Tooling:** Vitest, Playwright, Supabase Local CLI, k6, Lighthouse
 
 ---
 
@@ -40,6 +40,7 @@ This document details the multi-layered testing strategy for Urban Rental Flats 
 - **Target Coverage**: >= 85% Statements, 90% Functions.
 
 ### Execution Command:
+
 ```bash
 npm run test:unit
 ```
@@ -57,6 +58,7 @@ npm run test:unit
 - **Environment**: Isolated Supabase Postgres Docker container populated with migration scripts (`supabase/migrations/`).
 
 ### Execution Command:
+
 ```bash
 npm run test:integration
 ```
@@ -78,6 +80,7 @@ npm run test:integration
   - Server RPC Endpoints (`checkIsAdmin`, `getAdminProperties`): Verification of 401 Unauthorized responses when unauthenticated.
 
 ### Execution Command:
+
 ```bash
 npm run test:api
 ```
@@ -106,6 +109,7 @@ npm run test:api
      - System intercepts navigation and redirects user to `/auth`.
 
 ### Execution Command:
+
 ```bash
 npx playwright test
 ```
@@ -123,6 +127,7 @@ npx playwright test
   - **Rate Limit Resilience**: Bombarding lead submission endpoint with 100 concurrent requests from single IP; verifying system returns HTTP 429 after threshold.
 
 ### Execution Command:
+
 ```bash
 npm run test:security
 ```
@@ -141,6 +146,7 @@ npm run test:security
   - **First Contentful Paint (FCP)**: <= 0.8s
 
 ### Execution Command:
+
 ```bash
 npx lhci autorun
 ```
@@ -157,30 +163,32 @@ npx lhci autorun
   - **Endurance Stress Test**: 300 VUs executing continuous lead submissions for 2 hours to detect Node memory leaks or DB connection exhaustion.
 
 ### k6 Test Script Example (`tests/load/enquiry_spike.js`):
+
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export const options = {
   stages: [
-    { duration: '30s', target: 100 },
-    { duration: '1m', target: 500 },
-    { duration: '30s', target: 0 },
+    { duration: "30s", target: 100 },
+    { duration: "1m", target: 500 },
+    { duration: "30s", target: 0 },
   ],
   thresholds: {
-    http_req_duration: ['p(95)<300'],
-    http_req_failed: ['rate<0.01'],
+    http_req_duration: ["p(95)<300"],
+    http_req_failed: ["rate<0.01"],
   },
 };
 
 export default function () {
-  const res = http.get('https://staging.urbanrentalflats.com/properties');
-  check(res, { 'status is 200': (r) => r.status === 200 });
+  const res = http.get("https://staging.urbanrentalflats.com/properties");
+  check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
 
 ### Execution Command:
+
 ```bash
 k6 run tests/load/enquiry_spike.js
 ```

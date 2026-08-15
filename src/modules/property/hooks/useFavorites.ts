@@ -1,19 +1,17 @@
+import { STORAGE_KEYS } from "@/config/storage";
 import { useEffect, useState, useCallback } from "react";
-
-const NEW_KEY = "urf:favorites";
-const LEGACY_KEY = "nestwise:favorites";
 
 function migrateFavorites(): void {
   if (typeof window === "undefined") return;
   try {
-    const existing = window.localStorage.getItem(NEW_KEY);
+    const existing = window.localStorage.getItem(STORAGE_KEYS.FAVORITES);
     if (!existing) {
-      const legacy = window.localStorage.getItem(LEGACY_KEY);
+      const legacy = window.localStorage.getItem(STORAGE_KEYS.LEGACY_FAVORITES);
       if (legacy) {
-        window.localStorage.setItem(NEW_KEY, legacy);
-        const verify = window.localStorage.getItem(NEW_KEY);
+        window.localStorage.setItem(STORAGE_KEYS.FAVORITES, legacy);
+        const verify = window.localStorage.getItem(STORAGE_KEYS.FAVORITES);
         if (verify === legacy) {
-          window.localStorage.removeItem(LEGACY_KEY);
+          window.localStorage.removeItem(STORAGE_KEYS.LEGACY_FAVORITES);
         }
       }
     }
@@ -26,7 +24,7 @@ function read(): string[] {
   if (typeof window === "undefined") return [];
   try {
     migrateFavorites();
-    const raw = window.localStorage.getItem(NEW_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEYS.FAVORITES);
     return raw ? (JSON.parse(raw) as string[]) : [];
   } catch {
     return [];
@@ -39,7 +37,7 @@ export function useFavorites() {
   useEffect(() => {
     setIds(read());
     const onStorage = (e: StorageEvent) => {
-      if (e.key === NEW_KEY || e.key === LEGACY_KEY) {
+      if (e.key === STORAGE_KEYS.FAVORITES || e.key === STORAGE_KEYS.LEGACY_FAVORITES) {
         setIds(read());
       }
     };
@@ -51,7 +49,7 @@ export function useFavorites() {
     setIds((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       try {
-        window.localStorage.setItem(NEW_KEY, JSON.stringify(next));
+        window.localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(next));
       } catch {
         // Ignore storage quota errors
       }

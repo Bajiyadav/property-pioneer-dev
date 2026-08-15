@@ -1,3 +1,4 @@
+import { STORAGE_KEYS } from "@/config/storage";
 /**
  * Active-role storage and dashboard routing map.
  *
@@ -9,8 +10,6 @@ export type UserRole = "customer" | "owner" | "agent" | "admin";
 
 export const USER_ROLES: readonly UserRole[] = ["customer", "owner", "agent", "admin"];
 
-const ROLE_STORAGE_KEY = "demo_user_role";
-
 export function isUserRole(value: unknown): value is UserRole {
   return typeof value === "string" && (USER_ROLES as readonly string[]).includes(value);
 }
@@ -19,7 +18,7 @@ export function isUserRole(value: unknown): value is UserRole {
 export function getActiveRole(): UserRole {
   if (typeof window === "undefined") return "customer";
   try {
-    const saved = localStorage.getItem(ROLE_STORAGE_KEY);
+    const saved = localStorage.getItem(STORAGE_KEYS.ROLE);
     return isUserRole(saved) ? saved : "customer";
   } catch {
     // localStorage can throw in private-mode / blocked-storage browsers.
@@ -30,7 +29,7 @@ export function getActiveRole(): UserRole {
 export function setActiveRole(role: UserRole) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(ROLE_STORAGE_KEY, role);
+    localStorage.setItem(STORAGE_KEYS.ROLE, role);
     window.dispatchEvent(new Event("demo_role_changed"));
   } catch {
     // Ignore storage failures — the UI still works for the current session.

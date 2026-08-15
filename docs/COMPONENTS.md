@@ -44,6 +44,7 @@ RootShell (src/routes/__root.tsx)
 ## Core Application Components
 
 ### 1. `BrandMark` (`src/components/BrandMark.tsx`)
+
 - **Purpose**: Displays the official Urban Rental Flats logo and name with responsive size presets.
 - **Props**:
   - `size?: "sm" | "md" | "lg"` (default: `"md"`)
@@ -56,6 +57,7 @@ RootShell (src/routes/__root.tsx)
 ---
 
 ### 2. `PropertyCard` (`src/components/PropertyCard.tsx`)
+
 - **Purpose**: Displays a property listing card with cover image, title, price badge, specs (bd, ba, ft²), city, and save heart toggle button.
 - **Props**:
   - `property: Property`
@@ -68,6 +70,7 @@ RootShell (src/routes/__root.tsx)
 ---
 
 ### 3. `TurnstileWidget` (`src/components/TurnstileWidget.tsx`)
+
 - **Purpose**: Renders Cloudflare Turnstile CAPTCHA widget dynamically if site key is configured.
 - **Props**:
   - `onToken: (token: string | undefined) => void`
@@ -82,21 +85,25 @@ RootShell (src/routes/__root.tsx)
 ## Page Route Components
 
 ### 1. `RootComponent` (`src/routes/__root.tsx`)
+
 - **Purpose**: Main application wrapper providing QueryClient context, global auth state listener, header, main outlet, footer, and Sonner toast.
 - **Hooks**: `useRouter()`, `useEffect()`, `useState()`
 - **Child Components**: `SiteHeader`, `SiteFooter`, `Outlet`, `Toaster`
 
 ### 2. `PropertiesPage` (`src/routes/properties.index.tsx`)
+
 - **Purpose**: Main listing search page with real-time reactive filters for keyword, city, listing type, bedroom count, and price range.
 - **Hooks**: `Route.useSearch()`, `useNavigate()`, `useQuery()`, `useMemo()`
 - **Child Components**: `PropertyCard` grid
 
 ### 3. `PropertyDetail` (`src/routes/properties.$id.tsx`)
+
 - **Purpose**: Listing detail page with multi-image gallery switcher, specs grid, save button, and contact enquiry form modal.
 - **Hooks**: `Route.useParams()`, `useFavorites()`, `useState()`, `useQuery()`
 - **Child Components**: `PropertyStructuredData`, `EnquiryForm`
 
 ### 4. `AdminDashboard` (`src/routes/_authenticated/admin.tsx`)
+
 - **Purpose**: Master control panel for platform administrators featuring overview metrics, listing approvals, customer lead inbox, and activity audit logs.
 - **Hooks**: `useServerFn()`, `useQuery()`, `useMutation()`, `useQueryClient()`, `useState()`
 - **Child Components**: `AdminShell`, `MetricsPanel`, `ListingsPanel`, `EnquiriesPanel`, `AuditPanel`

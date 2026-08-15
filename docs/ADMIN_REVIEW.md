@@ -2,7 +2,7 @@
 
 > **Author**: Staff Software Architect & Security Engineer  
 > **Route Audited**: `src/routes/_authenticated/admin.tsx`  
-> **Database Security**: Supabase RLS & Audit Logs  
+> **Database Security**: Supabase RLS & Audit Logs
 
 ---
 
@@ -25,14 +25,14 @@ The Admin System handles platform moderation, listing approval, audit logging, r
 
 ## 2. Granular Admin Feature Evaluation Matrix
 
-| Admin Subsystem | Implemented Capabilities | Operational Gaps | Risk Level | Score (0–100) |
-| :--- | :--- | :--- | :---: | :---: |
-| **Role-Based Access Control (RBAC)** | Admin route guarded by session check | Lacks granular permission tiers (SuperAdmin vs Moderator vs Support) | **Medium** | **78** |
-| **Property Moderation Queue** | Listing creation, feature toggle (`is_featured`), edit capability | Lacks bulk approval actions & automated spam filter | **Low** | **82** |
-| **Audit Logs Subsystem** | Tracks entity modifications in `audit_logs` database table | Lacks CSV export & admin IP/user-agent tracking | **Low** | **84** |
-| **User & Role Management** | Basic user status monitoring | Lacks one-click user ban & OTP reset trigger | **Medium** | **72** |
-| **Content Management System (CMS)** | Static configuration in `app.ts` | Lacks UI toggle for dynamic city banners & notice bars | **Low** | **70** |
-| **System Analytics** | Property count, category split | Lacks real-time lead volume charts & funnel conversion metrics | **Medium** | **68** |
+| Admin Subsystem                      | Implemented Capabilities                                          | Operational Gaps                                                     | Risk Level | Score (0–100) |
+| :----------------------------------- | :---------------------------------------------------------------- | :------------------------------------------------------------------- | :--------: | :-----------: |
+| **Role-Based Access Control (RBAC)** | Admin route guarded by session check                              | Lacks granular permission tiers (SuperAdmin vs Moderator vs Support) | **Medium** |    **78**     |
+| **Property Moderation Queue**        | Listing creation, feature toggle (`is_featured`), edit capability | Lacks bulk approval actions & automated spam filter                  |  **Low**   |    **82**     |
+| **Audit Logs Subsystem**             | Tracks entity modifications in `audit_logs` database table        | Lacks CSV export & admin IP/user-agent tracking                      |  **Low**   |    **84**     |
+| **User & Role Management**           | Basic user status monitoring                                      | Lacks one-click user ban & OTP reset trigger                         | **Medium** |    **72**     |
+| **Content Management System (CMS)**  | Static configuration in `app.ts`                                  | Lacks UI toggle for dynamic city banners & notice bars               |  **Low**   |    **70**     |
+| **System Analytics**                 | Property count, category split                                    | Lacks real-time lead volume charts & funnel conversion metrics       | **Medium** |    **68**     |
 
 ---
 
@@ -43,7 +43,9 @@ The Admin System handles platform moderation, listing approval, audit logging, r
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async ({ location }) => {
     // 1. Session validation via Supabase Auth
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       throw redirect({ to: "/auth", search: { redirect: location.href } });
     }
@@ -62,6 +64,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 ## 4. Security & Audit Trail Governance
 
 ### Database RLS Audit Log Enforcement
+
 Supabase migrations contain audit log triggers (`audit_logs` table) capturing `action_type`, `table_name`, `record_id`, and `performed_by`:
 
 ```sql
@@ -78,7 +81,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 ```
 
 ### Key Security & Governance Recommendations
+
 1. **Granular Admin Roles**: Implement `super_admin`, `city_manager`, `support_agent`, and `listing_verifier` roles.
 2. **2FA Enforcement for Admins**: Require Time-based One-Time Password (TOTP) authenticator app setup for all accounts accessing `/admin`.
 3. **Automated Listing Spam Filter**: Flag listings containing suspicious keywords (e.g. wire transfer requests, advance token scams) before they appear on the public catalog.
-

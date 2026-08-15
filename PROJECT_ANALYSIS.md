@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Urban Rental Flats (URF) is a high-performance, modular, API-first real-estate platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row-Level Security + Auth). 
+Urban Rental Flats (URF) is a high-performance, modular, API-first real-estate platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row-Level Security + Auth).
 
 The platform is designed around a 5-layer security-first architecture. It features anonymous public listing browsing, local storage favoriting, server-side anti-abuse lead processing (honeypot, submit timing, rate-limiting, Turnstile CAPTCHA), and an authenticated admin dashboard powered by server function RPCs.
 
@@ -96,7 +96,7 @@ The system operates on a **Full-Stack Modular, API-First SSR Architecture**:
 ```mermaid
 graph TD
     User([Browser Client]) <--> Router[TanStack Router / React 19 UI]
-    
+
     subgraph Client State & Network
         Router <--> TQ[TanStack Query Cache]
         Router <--> LocalStorage[localStorage: nestwise:favorites]
@@ -111,7 +111,7 @@ graph TD
         ServerFn --> AuthAttacher[auth-attacher.ts: Bearer JWT]
         AuthAttacher --> AuthMiddleware[auth-middleware.ts: requireSupabaseAuth]
         AuthMiddleware --> RBAC[assertAdmin: user_roles check]
-        
+
         REST --> RateLimit[checkRateLimits: 5 Sliding Windows]
         REST --> Honeypot[Honeypot + MIN_SUBMIT_MS Timer]
         REST --> Turnstile[Cloudflare Turnstile CAPTCHA]
@@ -120,7 +120,7 @@ graph TD
     subgraph Database Layer: Supabase Postgres
         RBAC --> AdminClient[supabaseAdmin: Service Role Key]
         AdminClient --> DB_Admin[(Postgres DB: RLS Bypassed)]
-        
+
         TQ --> AnonClient[supabase: Publishable Key]
         AnonClient --> DB_Public[(Postgres DB: Enforced RLS & Column-Level Security)]
     end
@@ -130,17 +130,17 @@ graph TD
 
 ## 3. Technology Stack & Key Subsystems
 
-| Layer | Technology | Usage / Implementation |
-| --- | --- | --- |
-| **Frontend Core** | React 19 + TypeScript | UI rendering with React 19 compiler features |
-| **Meta-Framework** | TanStack Start + Vite 8 | Full-stack SSR framework with server functions |
-| **Routing** | TanStack React Router | File-based, type-safe route loader & search params |
-| **Server Engine** | Nitro / h3 | Server entry runner handling SSR requests |
-| **Database & Auth** | Supabase (Postgres) | Hosted relational DB with Row & Column Level Security |
-| **Data Fetching / Cache** | `@tanstack/react-query` | Server state caching and query invalidation |
-| **Styling & UI** | Tailwind CSS v4 + Radix UI | Utility-first CSS & accessible UI primitives |
-| **Validation** | Zod + `@tanstack/zod-adapter` | Schema validation for search, forms, and RPCs |
-| **Anti-Abuse / Security** | Cloudflare Turnstile + Postgres sliding windows | CAPTCHA, rate-limiting, honeypot, audit logs |
+| Layer                     | Technology                                      | Usage / Implementation                                |
+| ------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| **Frontend Core**         | React 19 + TypeScript                           | UI rendering with React 19 compiler features          |
+| **Meta-Framework**        | TanStack Start + Vite 8                         | Full-stack SSR framework with server functions        |
+| **Routing**               | TanStack React Router                           | File-based, type-safe route loader & search params    |
+| **Server Engine**         | Nitro / h3                                      | Server entry runner handling SSR requests             |
+| **Database & Auth**       | Supabase (Postgres)                             | Hosted relational DB with Row & Column Level Security |
+| **Data Fetching / Cache** | `@tanstack/react-query`                         | Server state caching and query invalidation           |
+| **Styling & UI**          | Tailwind CSS v4 + Radix UI                      | Utility-first CSS & accessible UI primitives          |
+| **Validation**            | Zod + `@tanstack/zod-adapter`                   | Schema validation for search, forms, and RPCs         |
+| **Anti-Abuse / Security** | Cloudflare Turnstile + Postgres sliding windows | CAPTCHA, rate-limiting, honeypot, audit logs          |
 
 ---
 
@@ -243,7 +243,7 @@ sequenceDiagram
     AuthUI->>SupabaseAuth: signInWithPassword({ email, password })
     SupabaseAuth-->>AuthUI: Return Session (JWT Access Token)
     AuthUI->>ClientStorage: Persist JWT Session
-    
+
     User->>RPC: Invoke Admin Action
     Note over RPC: attachSupabaseAuth adds header<br/>Authorization: Bearer <JWT>
     RPC->>Middleware: Intercept Server Function
@@ -276,7 +276,7 @@ sequenceDiagram
     Note over DB: Column-Level Security hides<br/>owner_name, phone, whatsapp, email
     DB-->>Query: Return public property fields only
     Query-->>DetailUI: Render Title, Specs, Gallery & JSON-LD
-    
+
     Visitor->>DetailUI: Submit Enquiry Form (name, phone, message)
     DetailUI->>EnquiryAPI: POST /api/public/enquiries
     Note over EnquiryAPI: 1. Validate Zod Schema<br/>2. Check Honeypot & Timer<br/>3. Verify Turnstile CAPTCHA<br/>4. Check 5 Rate Limits
@@ -292,18 +292,21 @@ sequenceDiagram
 ## 8. Improvement Opportunities & Strategic Recommendations
 
 ### High Priority (Security & Reliability)
+
 1. **Move Admin Role Check to Route `beforeLoad`**:
    - Update `src/routes/_authenticated/route.tsx` to check `user_roles` inside `beforeLoad` before rendering the child routes, preventing unauthorized users from accessing the admin bundle.
 2. **Standardize LocalStorage Keys**:
    - Rename `nestwise:favorites` in `useFavorites.ts` to `urf:favorites` to align with the platform name.
 
 ### Medium Priority (Performance & Scaling)
+
 3. **Database Server-Side Search & Pagination**:
    - Replace client-side filtering in `properties.index.tsx` with Supabase server-side query parameters (`.ilike()`, `.eq()`, `.range(offset, limit)`).
 4. **Postgres Aggregations for Admin Dashboard**:
    - Refactor `loadOverview()` in `admin.server.ts` to use SQL `COUNT()` and `GROUP BY` instead of pulling full table rows into Node.js memory.
 
 ### Low Priority (Future Phase Preparedness)
+
 5. **Clean Up Unused UI Primitives**:
    - Remove unused scaffolding components from `src/components/ui/` to reduce repository bloat.
 6. **Update Repository Documentation**:

@@ -18,27 +18,59 @@ export interface AdminOverview {
 export async function loadOverview(): Promise<AdminOverview> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ data: props }, { data: enquiries }] = await Promise.all([
-    supabaseAdmin.from("properties").select("city, is_approved, is_featured, listing_type"),
-    supabaseAdmin.from("enquiries").select("created_at"),
+  // Optimized counting queries
+  const weekAgoStr = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [
+    { count: totalProps },
+    { count: approvedProps },
+    { count: featuredProps },
+    { count: rentProps },
+    { count: saleProps },
+    { count: totalEnq },
+    { count: recentEnq },
+    { data: cityData },
+  ] = await Promise.all([
+    supabaseAdmin.from("properties").select("*", { count: "exact", head: true }),
+    supabaseAdmin
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("is_approved", true),
+    supabaseAdmin
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("is_featured", true),
+    supabaseAdmin
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("listing_type", "rent"),
+    supabaseAdmin
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("listing_type", "sale"),
+    supabaseAdmin.from("enquiries").select("*", { count: "exact", head: true }),
+    supabaseAdmin
+      .from("enquiries")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", weekAgoStr),
+    // For cities, if there are many properties, it is best to use a view or RPC.
+    // For now we will fetch only the city column to minimize payload.
+    supabaseAdmin.from("properties").select("city"),
   ]);
 
-  const rows = props ?? [];
+  const rows = cityData ?? [];
   const cityMap = new Map<string, number>();
   for (const row of rows) cityMap.set(row.city, (cityMap.get(row.city) ?? 0) + 1);
 
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
   return {
-    totalProperties: rows.length,
-    approvedProperties: rows.filter((r) => r.is_approved).length,
-    pendingProperties: rows.filter((r) => !r.is_approved).length,
-    featuredProperties: rows.filter((r) => r.is_featured).length,
-    forRent: rows.filter((r) => r.listing_type === "rent").length,
-    forSale: rows.filter((r) => r.listing_type === "sale").length,
-    totalEnquiries: (enquiries ?? []).length,
-    enquiriesLast7Days: (enquiries ?? []).filter((e) => new Date(e.created_at).getTime() >= weekAgo)
-      .length,
+    totalProperties: totalProps || 0,
+    approvedProperties: approvedProps || 0,
+    pendingProperties: (totalProps || 0) - (approvedProps || 0),
+    featuredProperties: featuredProps || 0,
+    forRent: rentProps || 0,
+    forSale: saleProps || 0,
+    totalEnquiries: totalEnq || 0,
+    enquiriesLast7Days: recentEnq || 0,
     cities: [...cityMap.entries()]
       .map(([city, count]) => ({ city, count }))
       .sort((a, b) => b.count - a.count)
@@ -51,7 +83,7 @@ export async function loadProperties() {
   const { data, error } = await supabaseAdmin
     .from("properties")
     .select(
-      "id, title, city, price, listing_type, status, is_approved, is_featured, owner_name, owner_phone, created_at",
+      "id, title, city, price, listing_type, status, is_approved, is_featured, owner_name, owner_phone, created_at, video_url, video_status",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -102,6 +134,7 @@ export async function applyPropertyUpdate(
     is_approved?: boolean;
     is_featured?: boolean;
     status?: "available" | "rented" | "sold";
+    video_status?: "pending" | "approved" | "rejected";
   },
 ) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
