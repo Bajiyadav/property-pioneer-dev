@@ -177,8 +177,12 @@ function SiteHeader() {
             : "border-b border-border/40 bg-background/90 backdrop-blur-md py-3.5"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center group">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 sm:px-6">
+          <Link
+            to="/"
+            aria-label={`${BRAND.name} home`}
+            className="flex min-w-0 items-center group"
+          >
             <BrandMark responsiveName />
           </Link>
 
@@ -239,12 +243,25 @@ function SiteHeader() {
             </a>
           </nav>
 
-          {/* User Actions & CTAs */}
-          <div className="flex items-center gap-2.5">
+          {/*
+            User Actions & CTAs
+
+            Spacing steps up at `sm`. At 320px this group measured 259px against
+            288px of available content width, so the header — and therefore every
+            page — scrolled sideways. The pieces are all still here: only the
+            padding, the gaps, and the "FREE" badge's *layout* box shrink.
+
+            The badge becomes `sr-only` rather than `hidden`: it keeps announcing
+            "List Property FREE" to assistive tech and keeps that accessible name
+            matchable, while taking no horizontal space. `not-sr-only` zeroes
+            padding when it restores the badge, so the padding is re-applied at
+            the same breakpoint rather than left unprefixed.
+          */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <Link
               to="/favorites"
               aria-label="Saved Properties"
-              className="p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"
+              className="p-2 sm:p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"
             >
               <Heart className="h-4 w-4" />
             </Link>
@@ -253,10 +270,10 @@ function SiteHeader() {
 
             <Link
               to="/auth"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-3 sm:px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
             >
-              <span>List Property</span>
-              <span className="bg-white/20 text-white rounded-full px-1.5 py-0.2 text-[10px] uppercase font-bold">
+              <span className="whitespace-nowrap">List Property</span>
+              <span className="sr-only sm:not-sr-only sm:inline-block sm:rounded-full sm:bg-white/20 sm:px-1.5 sm:py-0.5 sm:text-[10px] sm:font-bold sm:uppercase sm:text-white">
                 FREE
               </span>
             </Link>
