@@ -21,7 +21,7 @@ function DashboardDispatcher() {
 
   useEffect(() => {
     if (status !== "authenticated" || !roleVerified) return;
-    navigate({ href: `${getDashboardRoute(role)}?tab=overview`, replace: true });
+    navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
   }, [status, role, roleVerified, navigate]);
 
   return (
