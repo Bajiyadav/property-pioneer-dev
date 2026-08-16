@@ -37,12 +37,10 @@ export const Route = createFileRoute("/auth")({
 });
 
 type AuthMode = "signin" | "signup";
-type AccountRole = "customer" | "owner" | "agent";
 
 function AuthPage() {
   const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<AuthMode>("signin");
-  const [role, setRole] = useState<AccountRole>("customer");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -104,38 +102,27 @@ function AuthPage() {
         </button>
       </div>
 
-      {/* Account Role Selector */}
+      {/*
+        No persona picker.
+
+        Registering here always creates a tenant/buyer account. The picker that
+        used to sit at this spot fed its value straight into `auth.signUp`'s
+        user_metadata, and the database trigger wrote that value into
+        `user_roles` verbatim — so the choice was not a preference, it was a
+        self-issued grant. Owner and agent access is granted deliberately, by an
+        admin, to an account that already exists.
+      */}
       {mode === "signup" && (
-        <div className="mt-4 w-full">
-          <label className="block text-xs font-bold text-foreground mb-1 text-center">
-            Select Account Persona
-          </label>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            {[
-              { id: "customer", label: "Tenant / Buyer" },
-              { id: "owner", label: "Property Owner" },
-              { id: "agent", label: "Partner Agent" },
-            ].map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setRole(item.id as AccountRole)}
-                className={`rounded-xl border p-2.5 font-bold transition ${
-                  role === item.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border/60 bg-card text-muted-foreground hover:bg-secondary"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <p className="mt-4 w-full text-center text-[11px] leading-relaxed text-muted-foreground">
+          Registering creates a <strong className="text-foreground">Tenant &amp; Buyer</strong>{" "}
+          account. Listing a property or joining as a partner agent is arranged with our team after
+          your account is verified.
+        </p>
       )}
 
       {/* Form & Real-time Validation */}
       <div className="mt-6 w-full rounded-3xl border border-border/60 bg-card p-6 shadow-xl">
-        <EnterprisePasswordForm mode={mode} role={role} onSuccess={handleSuccess} />
+        <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
 
         {/*
           Social sign-in bar.

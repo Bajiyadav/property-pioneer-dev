@@ -20,13 +20,22 @@ import {
 import { resolveRoleFromDatabase } from "@/modules/authentication/services/session";
 import { isUserRole, type UserRole } from "@/config/roles";
 
+/** Self-registration always produces a tenant/buyer account. */
+const SELF_REGISTRATION_ROLE = "customer" as const;
+
+/**
+ * Sign-in / sign-up form.
+ *
+ * Registration deliberately takes no role parameter. It used to accept one and
+ * pass it to `auth.signUp`, where a database trigger copied it straight into
+ * `user_roles` — so the caller chose their own authority. Every account created
+ * here is a customer; elevation is an admin action.
+ */
 export function EnterprisePasswordForm({
   mode = "signup",
-  role = "customer",
   onSuccess,
 }: {
   mode?: "signin" | "signup";
-  role?: "customer" | "owner" | "agent";
   onSuccess: (data: { name: string; email: string; phone: string; role: string }) => void;
 }) {
   const [name, setName] = useState("");
@@ -82,7 +91,9 @@ export function EnterprisePasswordForm({
         email,
         password,
         options: {
-          data: { full_name: name, phone: `+91${phone}`, role },
+          // Persona only — never an authority. The database assigns the
+          // role, and it always assigns "customer" for a self-registration.
+          data: { full_name: name, phone: `+91${phone}`, role: SELF_REGISTRATION_ROLE },
           emailRedirectTo,
         },
       });
@@ -101,7 +112,7 @@ export function EnterprisePasswordForm({
       if (data.session) {
         // Project has email confirmation disabled — the account is live now.
         toast.success(`Account created! Welcome to Urban Properties.`);
-        onSuccess({ name, email, phone: `+91${phone}`, role });
+        onSuccess({ name, email, phone: `+91${phone}`, role: SELF_REGISTRATION_ROLE });
       } else {
         // Confirmation required. Supabase sends a LINK by default, so we must not
         // demand a code the user was never given — show the check-your-inbox state.
@@ -163,7 +174,7 @@ export function EnterprisePasswordForm({
     }
 
     toast.success("Email verified! Account activated.");
-    onSuccess({ name, email, phone: `+91${phone}`, role });
+    onSuccess({ name, email, phone: `+91${phone}`, role: SELF_REGISTRATION_ROLE });
   };
 
   return (

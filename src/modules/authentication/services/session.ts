@@ -28,8 +28,15 @@ export const GUEST_SESSION: ResolvedSession = {
   roleVerified: false,
 };
 
-/** Persona from user_metadata — never trusted for admin. */
-function personaFromMetadata(user: User | null): UserRole {
+/**
+ * The persona the user picked at sign-up.
+ *
+ * Presentation only — onboarding copy, analytics, "what did they come here to
+ * do". It is NOT an authority: `user_metadata` is writable by the account
+ * holder (`supabase.auth.updateUser({ data: { role } })` is accepted), so
+ * anything derived from it is self-asserted.
+ */
+export function personaFromMetadata(user: User | null): UserRole {
   const raw = user?.user_metadata?.role;
   if (isUserRole(raw) && raw !== "admin") return raw;
   return "customer";
@@ -73,11 +80,17 @@ export async function hasAdminRole(userId: string): Promise<boolean> {
   }
 }
 
-/** Resolves the role for an already-known session. */
+/**
+ * Resolves the role for an already-known session.
+ *
+ * `user_roles` is the only authority. There is deliberately no fall back to
+ * `user_metadata`: that field is writable by the account holder, so falling
+ * back to it let anyone without a `user_roles` row self-assert owner or agent
+ * and be believed. A caller with no row is a customer.
+ */
 export async function resolveRoleForSession(session: Session): Promise<UserRole> {
   const dbRole = await resolveRoleFromDatabase(session.user.id);
-  if (dbRole) return dbRole;
-  return personaFromMetadata(session.user);
+  return dbRole ?? "customer";
 }
 
 /** Resolves the current session and the caller's effective role. */
