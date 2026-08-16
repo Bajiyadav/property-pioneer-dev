@@ -20,6 +20,9 @@ import {
   type QaRole,
 } from "../fixtures/qaAccounts";
 
+/** Text that only the admin portal at /admin renders. */
+const ADMIN_PORTAL_MARKER = "Dashboard Overview";
+
 /** Sidebar label rendered only inside that role's own dashboard. */
 const PORTAL_LABEL: Record<QaRole, string> = {
   customer: "Tenant & Buyer Portal",
@@ -358,7 +361,11 @@ test.describe("Authentication lifecycle", () => {
     // The dedicated admin portal is gated separately, at the route level.
     await page.goto("/admin");
     await page.waitForURL(/\/dashboard\/customer|\/auth/, { timeout: 30000 });
-    await expect(page.getByRole("heading", { name: "Admin dashboard" })).toHaveCount(0);
+    // Marker for "admin-only content rendered". The portal used to be headed
+    // "Admin dashboard"; it is now a sidebar + analytics shell. Asserting the
+    // old heading here would pass vacuously against the new UI, so this checks
+    // what the portal actually renders today.
+    await expect(page.getByText(ADMIN_PORTAL_MARKER, { exact: false })).toHaveCount(0);
   });
 
   test("admin reaches the admin portal that other roles cannot", async ({ page }) => {
@@ -367,7 +374,7 @@ test.describe("Authentication lifecycle", () => {
     await page.waitForURL(/\/dashboard\/admin/, { timeout: 30000 });
 
     await page.goto("/admin");
-    await expect(page.getByRole("heading", { name: "Admin dashboard" })).toBeVisible({
+    await expect(page.getByText(ADMIN_PORTAL_MARKER, { exact: false }).first()).toBeVisible({
       timeout: 30000,
     });
   });

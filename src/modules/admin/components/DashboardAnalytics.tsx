@@ -1,12 +1,30 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
 import { TrendingUp, Clock, CheckCircle2, XCircle, Home } from "lucide-react";
 
 export function DashboardAnalytics() {
-  const pending = useAdminPropertyStore((s) => s.getPendingProperties());
-  const active = useAdminPropertyStore((s) => s.getActiveProperties());
-  const rejected = useAdminPropertyStore((s) => s.getRejectedProperties());
-  const expired = useAdminPropertyStore((s) => s.getExpiredProperties());
+  // Derived with useMemo from the raw slice, not inside the selector. A
+  // selector that returns `.filter(...)` hands useSyncExternalStore a brand new
+  // array every render, so the snapshot never compares equal and React loops
+  // until "Maximum update depth exceeded" — which crashed this dashboard to the
+  // error boundary and took the sign-out control down with it.
+  const allProperties = useAdminPropertyStore((s) => s.properties);
+  const pending = useMemo(
+    () => allProperties.filter((p) => p.status === "pending"),
+    [allProperties],
+  );
+  const active = useMemo(
+    () => allProperties.filter((p) => p.status === "available"),
+    [allProperties],
+  );
+  const rejected = useMemo(
+    () => allProperties.filter((p) => p.status === "rejected"),
+    [allProperties],
+  );
+  const expired = useMemo(
+    () => allProperties.filter((p) => p.status === "archived"),
+    [allProperties],
+  );
 
   const total = pending.length + active.length + rejected.length + expired.length;
 

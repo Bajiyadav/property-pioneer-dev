@@ -111,9 +111,24 @@ function CustomerDashboard({ user }: { user: User | null }) {
     return savedHomes.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
   }, [savedHomes, savedQuery]);
 
-  const myBookings = useInteractionStore((s) => s.getTenantBookings(user?.id || ""));
-  const myChats = useInteractionStore((s) => s.getTenantChats(user?.id || ""));
-  const myNotifications = useInteractionStore((s) => s.getUserNotifications(user?.id || ""));
+  // Derived with useMemo from the raw slice, not inside the selector. A
+  // selector that returns `.filter(...)` hands useSyncExternalStore a brand new
+  // array every render, so the snapshot never compares equal and React loops
+  // until "Maximum update depth exceeded" — which crashed this dashboard to the
+  // error boundary and took the sign-out control down with it.
+  const allBookings = useInteractionStore((s) => s.bookings);
+  const allChats = useInteractionStore((s) => s.chats);
+  const allNotifications = useInteractionStore((s) => s.notifications);
+  const uid = user?.id || "";
+  const myBookings = useMemo(
+    () => allBookings.filter((b) => b.tenantId === uid),
+    [allBookings, uid],
+  );
+  const myChats = useMemo(() => allChats.filter((c) => c.tenantId === uid), [allChats, uid]);
+  const myNotifications = useMemo(
+    () => allNotifications.filter((n) => n.userId === uid),
+    [allNotifications, uid],
+  );
 
   const visibleBookings = useMemo(() => {
     if (bookingFilter === "all") return myBookings;

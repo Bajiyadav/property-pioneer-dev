@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { BadgeCheck, Building2, Inbox, ScrollText, Sparkles, LogOut } from "lucide-react";
 
@@ -150,10 +150,28 @@ function AdminShell({ children }: { children: React.ReactNode }) {
 function AdminDashboard() {
   const [currentView, setCurrentView] = useState("dashboard");
 
-  const pending = useAdminPropertyStore((s) => s.getPendingProperties());
-  const active = useAdminPropertyStore((s) => s.getActiveProperties());
-  const rejected = useAdminPropertyStore((s) => s.getRejectedProperties());
-  const expired = useAdminPropertyStore((s) => s.getExpiredProperties());
+  // Derived with useMemo from the raw slice, not inside the selector. A
+  // selector that returns `.filter(...)` hands useSyncExternalStore a brand new
+  // array every render, so the snapshot never compares equal and React loops
+  // until "Maximum update depth exceeded" — which crashed this dashboard to the
+  // error boundary and took the sign-out control down with it.
+  const allProperties = useAdminPropertyStore((s) => s.properties);
+  const pending = useMemo(
+    () => allProperties.filter((p) => p.status === "pending"),
+    [allProperties],
+  );
+  const active = useMemo(
+    () => allProperties.filter((p) => p.status === "available"),
+    [allProperties],
+  );
+  const rejected = useMemo(
+    () => allProperties.filter((p) => p.status === "rejected"),
+    [allProperties],
+  );
+  const expired = useMemo(
+    () => allProperties.filter((p) => p.status === "archived"),
+    [allProperties],
+  );
 
   const renderContent = () => {
     switch (currentView) {

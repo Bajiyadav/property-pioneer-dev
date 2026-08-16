@@ -134,8 +134,19 @@ function OwnerDashboard({ user }: { user: User | null }) {
     return listings.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
   }, [listings, listingQuery]);
 
-  const myBookings = useInteractionStore((s) => s.getOwnerBookings(user?.id || ""));
-  const myChats = useInteractionStore((s) => s.getOwnerChats(user?.id || ""));
+  // Derived with useMemo from the raw slice, not inside the selector. A
+  // selector that returns `.filter(...)` hands useSyncExternalStore a brand new
+  // array every render, so the snapshot never compares equal and React loops
+  // until "Maximum update depth exceeded" — which crashed this dashboard to the
+  // error boundary and took the sign-out control down with it.
+  const allBookings = useInteractionStore((s) => s.bookings);
+  const allChats = useInteractionStore((s) => s.chats);
+  const uid = user?.id || "";
+  const myBookings = useMemo(
+    () => allBookings.filter((b) => b.ownerId === uid),
+    [allBookings, uid],
+  );
+  const myChats = useMemo(() => allChats.filter((c) => c.ownerId === uid), [allChats, uid]);
 
   const monthlyRent = useMemo(
     () => listings.reduce((sum, p) => sum + Number(p.price || 0), 0),
