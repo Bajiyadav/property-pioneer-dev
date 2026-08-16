@@ -1,3 +1,8 @@
+## v0.7.0 — 2026-08-16
+
+### Features
+- feat(ui): upgrade visual design system, enforce route security and audit marketing claims (4c810f3)
+
 ## v0.6.1 — 2026-08-15
 
 ### Fixes
