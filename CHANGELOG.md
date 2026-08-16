@@ -1,3 +1,8 @@
+## v0.7.2 — 2026-08-16
+
+### Fixes
+- fix(routing): remove conflicting splat route and streamline auth assertions (dfc4765)
+
 ## v0.7.1 — 2026-08-16
 
 ### Fixes
