@@ -87,18 +87,20 @@ export function PropertyReviewModal({
               <h4 className="font-medium text-neutral-900 border-b pb-2">Pricing & Preferences</h4>
               <dl className="grid grid-cols-2 gap-y-3 text-sm">
                 <dt className="text-neutral-500">Expected Rent</dt>
-                <dd className="font-medium text-brand-700">{formatPrice(property.price)}/mo</dd>
+                <dd className="font-medium text-brand-700">
+                  {formatPrice(property.price, property.listing_type ?? "rent")}
+                </dd>
 
                 <dt className="text-neutral-500">Deposit</dt>
                 <dd className="font-medium text-neutral-900">
-                  {formatPrice(property.deposit || 0)}
+                  {formatPrice(property.deposit || 0, "sale")}
                 </dd>
 
                 <dt className="text-neutral-500">Maintenance</dt>
                 <dd className="font-medium text-neutral-900">
                   {property.maintenance_included
                     ? "Included"
-                    : formatPrice(property.maintenance || 0)}
+                    : formatPrice(property.maintenance || 0, "sale")}
                 </dd>
 
                 <dt className="text-neutral-500">Preferred Tenants</dt>

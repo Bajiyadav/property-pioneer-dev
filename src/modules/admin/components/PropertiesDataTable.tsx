@@ -60,7 +60,9 @@ export function PropertiesDataTable({
                       <div className="text-neutral-900">{p.locality || p.city}</div>
                       <div className="text-neutral-500 text-xs line-clamp-1">{p.address}</div>
                     </td>
-                    <td className="px-6 py-4 font-medium">{formatPrice(p.price)}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {formatPrice(p.price, p.listing_type ?? "rent")}
+                    </td>
                     <td className="px-6 py-4 text-neutral-500">
                       {new Date(p.created_at).toLocaleDateString()}
                     </td>

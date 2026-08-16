@@ -136,6 +136,19 @@ function CustomerDashboard({ user }: { user: User | null }) {
     return myBookings.filter((b) => b.status === "Completed");
   }, [bookingFilter, myBookings]);
 
+  // Map Notification → TimelineItem (Notification uses 'createdAt', TimelineItem requires 'time')
+  const notificationsAsTimeline = useMemo<TimelineItem[]>(
+    () =>
+      myNotifications.map((n) => ({
+        id: n.id,
+        title: n.title,
+        detail: n.detail,
+        time: new Date(n.createdAt).toLocaleString(),
+        tone: n.tone as TimelineItem["tone"],
+      })),
+    [myNotifications],
+  );
+
   const cityMix = useMemo(() => {
     const counts = new Map<string, number>();
     for (const p of properties) counts.set(p.city, (counts.get(p.city) ?? 0) + 1);
@@ -302,15 +315,15 @@ function CustomerDashboard({ user }: { user: User | null }) {
               <SectionHeader title="Recent activity" />
               <ActivityTimeline
                 items={
-                  myNotifications.length > 0
-                    ? myNotifications
+                  notificationsAsTimeline.length > 0
+                    ? notificationsAsTimeline
                     : [
                         {
                           id: "placeholder",
                           title: "Welcome to Urban Properties",
                           detail: "Start exploring and favoriting properties to see activity here.",
                           time: "Just now",
-                          tone: "info",
+                          tone: "info" as const,
                         },
                       ]
                 }
@@ -457,15 +470,15 @@ function CustomerDashboard({ user }: { user: User | null }) {
           <div className="rounded-3xl border border-border/60 bg-card p-6">
             <ActivityTimeline
               items={
-                myNotifications.length > 0
-                  ? myNotifications
+                notificationsAsTimeline.length > 0
+                  ? notificationsAsTimeline
                   : [
                       {
                         id: "placeholder",
                         title: "No notifications yet",
                         detail: "We'll let you know when owners reply to you.",
                         time: "Now",
-                        tone: "neutral",
+                        tone: "neutral" as const,
                       },
                     ]
               }
@@ -523,12 +536,12 @@ function CustomerDashboard({ user }: { user: User | null }) {
                     />
                     <span className="text-[11px] font-medium text-muted-foreground">{b.mode}</span>
                   </div>
-                  <h3 className="mt-3 text-sm font-bold text-foreground">{b.title}</h3>
+                  <h3 className="mt-3 text-sm font-bold text-foreground">{b.propertyTitle}</h3>
                   <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5 text-primary" /> {b.when}
                   </p>
                   <p className="mt-3 border-t border-border/40 pt-2 text-[11px] text-muted-foreground">
-                    Owner: <span className="font-semibold text-foreground">{b.owner}</span>
+                    Owner: <span className="font-semibold text-foreground">{b.ownerId}</span>
                   </p>
                 </div>
               ))}

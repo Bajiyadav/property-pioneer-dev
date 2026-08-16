@@ -2,7 +2,8 @@ import React from "react";
 import { formatPrice } from "@/modules/property/services/propertyQueries";
 import { CheckCircle, AlertTriangle } from "lucide-react";
 
-export function Step6Review({ data }: { data: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function Step6Review({ data }: { data: Record<string, any> }) {
   // A simple validation to see if core fields are filled
   const isComplete = data.city && data.address && data.price > 0 && data.area_sqft > 0;
 
@@ -80,17 +81,19 @@ export function Step6Review({ data }: { data: any }) {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <span className="text-neutral-500">Expected Rent:</span>
                 <span className="font-medium text-neutral-900">
-                  {formatPrice(data.price || 0)}/mo
+                  {formatPrice(data.price || 0, data.listing_type ?? "rent")}
                 </span>
 
                 <span className="text-neutral-500">Deposit:</span>
                 <span className="font-medium text-neutral-900">
-                  {formatPrice(data.deposit || 0)}
+                  {formatPrice(data.deposit || 0, "sale")}
                 </span>
 
                 <span className="text-neutral-500">Maintenance:</span>
                 <span className="font-medium text-neutral-900">
-                  {data.maintenance_included ? "Included" : formatPrice(data.maintenance || 0)}
+                  {data.maintenance_included
+                    ? "Included"
+                    : formatPrice(data.maintenance || 0, "sale")}
                 </span>
               </div>
             </div>
