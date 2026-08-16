@@ -1,3 +1,8 @@
+## v0.7.1 — 2026-08-16
+
+### Fixes
+- fix(routing): support non-trailing slash on /rent/$city and normalize test matcher (cf4575c)
+
 ## v0.7.0 — 2026-08-16
 
 ### Features
