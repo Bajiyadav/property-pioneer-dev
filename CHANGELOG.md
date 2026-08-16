@@ -1,3 +1,8 @@
+## v0.7.5 — 2026-08-16
+
+### Fixes
+- fix(ci): generate the lock with the npm major that CI actually runs (87d9a2f)
+
 ## v0.7.4 — 2026-08-16
 
 ### Fixes
