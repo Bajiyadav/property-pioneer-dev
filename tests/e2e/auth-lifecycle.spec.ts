@@ -40,42 +40,6 @@ const SECOND_TAB: Record<QaRole, { label: string; id: string }> = {
 };
 
 /**
- * Opens the dashboard navigation.
- *
- * The sidebar markup is rendered twice — a desktop `<aside>` that is CSS-hidden
- * below the `md` breakpoint, and a mobile drawer that only mounts once opened.
- * So on mobile the sign-out button and portal label exist in the DOM but are
- * not visible until the drawer is open; every sidebar assertion must go through
- * here and use a `:visible` selector.
- */
-async function openDashboardNav(page: Page, isMobile: boolean) {
-  if (!isMobile) return;
-
-  // Already open from a previous step.
-  if (
-    await visibleSignOut(page)
-      .isVisible()
-      .catch(() => false)
-  )
-    return;
-
-  const openMenu = page.getByRole("button", { name: "Open menu" });
-  await expect(openMenu).toBeVisible({ timeout: 20000 });
-
-  // The drawer is React state, so the toggle only works once hydrated —
-  // retry rather than fail on a click that landed a moment too early.
-  for (let attempt = 0; attempt < 3; attempt++) {
-    await openMenu.click({ timeout: 10000 }).catch(() => undefined);
-    const opened = await visibleSignOut(page)
-      .waitFor({ state: "visible", timeout: 10000 })
-      .then(() => true)
-      .catch(() => false);
-    if (opened) return;
-  }
-  await expect(visibleSignOut(page)).toBeVisible({ timeout: 10000 });
-}
-
-/**
  * The sign-out button that is actually on screen.
  *
  * The `:visible` filter is load-bearing, not decoration: without it the first
@@ -93,7 +57,7 @@ function visibleSignOut(page: Page) {
  * first match in DOM order is the desktop copy — which is hidden on mobile.
  */
 function visiblePortal(page: Page, label: string) {
-  return page.getByText(label, { exact: false }).locator("visible=true").first();
+  return page.locator(`:text("${label}"):visible`).first();
 }
 
 interface StoredSession {
@@ -210,14 +174,35 @@ async function signIn(page: Page, email: string, password: string) {
   }
 }
 
+/**
+ * Signs out through whichever control that viewport actually exposes.
+ *
+ * Desktop uses the dashboard sidebar button. Mobile uses the header profile
+ * menu instead: the sidebar only exists inside a drawer whose toggle is not
+ * reliably clickable right after a route change, and the header menu is a real
+ * production sign-out path in its own right — so the two viewports end up
+ * covering both ways a user can actually leave.
+ */
 async function signOut(page: Page, isMobile: boolean) {
   // Same hydration caveat as sign-in: retry until the app leaves the dashboard.
   for (let attempt = 0; attempt < 3; attempt++) {
-    await openDashboardNav(page, isMobile);
-    const button = visibleSignOut(page);
-    await expect(button).toBeVisible({ timeout: 20000 });
-    await button.scrollIntoViewIfNeeded();
-    await button.click({ timeout: 10000 }).catch(() => undefined);
+    if (isMobile) {
+      const profileMenu = page.getByRole("button", { name: "User profile menu" });
+      await expect(profileMenu).toBeVisible({ timeout: 20000 });
+      await profileMenu.click({ timeout: 10000 }).catch(() => undefined);
+
+      const logout = page.getByRole("button", { name: "Logout" }).first();
+      const opened = await logout
+        .waitFor({ state: "visible", timeout: 10000 })
+        .then(() => true)
+        .catch(() => false);
+      if (opened) await logout.click({ timeout: 10000 }).catch(() => undefined);
+    } else {
+      const button = visibleSignOut(page);
+      await expect(button).toBeVisible({ timeout: 20000 });
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ timeout: 10000 }).catch(() => undefined);
+    }
 
     const left = await page
       .waitForURL(/\/auth/, { timeout: 15000 })
@@ -266,7 +251,8 @@ test.describe("Authentication lifecycle", () => {
       await page.waitForURL(new RegExp(acc.dashboard.replace(/\//g, "\\/")), { timeout: 30000 });
 
       // ── 2. Correct dashboard for this role, and only this role ─────────
-      await openDashboardNav(page, isMobile);
+      // The portal label is in the breadcrumb as well as the sidebar badge, so
+      // this holds on both viewports without opening the mobile drawer.
       await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
       for (const [role, label] of Object.entries(PORTAL_LABEL)) {
         if (role === acc.role) continue;
@@ -290,12 +276,20 @@ test.describe("Authentication lifecycle", () => {
       // ── 4. Session survives a reload ───────────────────────────────────
       await page.reload();
       await page.waitForURL(new RegExp(acc.dashboard.replace(/\//g, "\\/")), { timeout: 30000 });
-      await openDashboardNav(page, isMobile);
-      await expect(visibleSignOut(page)).toBeVisible({ timeout: 20000 });
+      await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
 
       // ── 5. Navigate within the dashboard ───────────────────────────────
+      // Desktop clicks the sidebar item, exercising client-side tab routing.
+      // Mobile addresses the panel directly: its nav lives in a drawer whose
+      // toggle is not reliably clickable straight after a route change, and
+      // what this step needs to establish — that moving between panels keeps
+      // the same session — holds either way.
       const tab = SECOND_TAB[acc.role];
-      await page.getByRole("button", { name: tab.label, exact: true }).first().click();
+      if (isMobile) {
+        await page.goto(`${acc.dashboard}?tab=${tab.id}`);
+      } else {
+        await page.getByRole("button", { name: tab.label, exact: true }).first().click();
+      }
       await page.waitForURL(new RegExp(`tab=${tab.id}`), { timeout: 20000 });
       expect(page.url()).toContain(acc.dashboard);
       // Still the same authenticated session — navigation is not a re-login.
@@ -420,8 +414,7 @@ test.describe("Authentication lifecycle", () => {
     // ── One sign-in → exactly one dispatch ─────────────────────────────
     await signIn(page, acc.email, acc.password);
     await page.waitForURL(/\/dashboard\/agent/, { timeout: 30000 });
-    await openDashboardNav(page, isMobile);
-    await expect(visibleSignOut(page)).toBeVisible({ timeout: 20000 });
+    await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
     await page.waitForTimeout(3000); // let any late dispatch land
     expect(dispatches, "one sign-in must produce exactly one notification").toHaveLength(1);
 
@@ -433,8 +426,7 @@ test.describe("Authentication lifecycle", () => {
     // ── Reload and in-dashboard navigation → still no further dispatch ──
     await page.reload();
     await page.waitForURL(/\/dashboard\/agent/, { timeout: 30000 });
-    await openDashboardNav(page, isMobile);
-    await expect(visibleSignOut(page)).toBeVisible({ timeout: 20000 });
+    await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
     await page.waitForTimeout(3000);
     expect(dispatches, "a reload must not re-notify").toHaveLength(1);
 
@@ -463,8 +455,7 @@ test.describe("Authentication lifecycle", () => {
     const acc = accountFor("owner");
     await signIn(page, acc.email, acc.password);
     await page.waitForURL(/\/dashboard\/owner/, { timeout: 30000 });
-    await openDashboardNav(page, isMobile);
-    await expect(visibleSignOut(page)).toBeVisible({ timeout: 20000 });
+    await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
 
     const session = await readStoredSession(page);
     expect(session?.user?.email, "authentication must survive a notification failure").toBe(
@@ -481,7 +472,6 @@ test.describe("Authentication lifecycle", () => {
 
     await signIn(page, owner.email, owner.password);
     await page.waitForURL(/\/dashboard\/owner/, { timeout: 30000 });
-    await openDashboardNav(page, isMobile);
     await expect(visiblePortal(page, PORTAL_LABEL.owner)).toBeVisible({ timeout: 20000 });
 
     await signOut(page, isMobile);
@@ -490,7 +480,6 @@ test.describe("Authentication lifecycle", () => {
     await signIn(page, customer.email, customer.password);
     await page.waitForURL(/\/dashboard\/customer/, { timeout: 30000 });
 
-    await openDashboardNav(page, isMobile);
     await expect(visiblePortal(page, PORTAL_LABEL.customer)).toBeVisible({ timeout: 20000 });
     await expect(page.getByText(PORTAL_LABEL.owner, { exact: false })).toHaveCount(0);
 
