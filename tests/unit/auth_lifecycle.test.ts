@@ -203,7 +203,7 @@ describe.skipIf(!canRun)("Real Supabase authentication lifecycle", () => {
       const refreshToken = data.session!.refresh_token;
 
       // A live session is accepted by the auth server before sign-out.
-      const before = await client.auth.getUser(accessToken);
+      const before = await client.auth.getUser();
       expect(before.error).toBeNull();
       expect(before.data.user?.email).toBe(acc.email);
 
