@@ -1,3 +1,8 @@
+import {
+  createSchemaCapability,
+  isUndefinedColumn,
+  stripExtendedColumns,
+} from "@/modules/property/services/propertySchema";
 import { toListingType } from "@/modules/property/services/propertyQueries";
 import type { Property, PropertyStatus } from "@/modules/property/services/propertyService";
 
@@ -42,8 +47,42 @@ export interface OwnerListingInput {
   hospital?: string | null;
 }
 
-const OWNER_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_approved,is_featured,video_url,video_thumbnail_url,video_duration,video_status,video_uploaded_at,created_at,locality,landmark,metro_station,it_park,college,hospital";
+const BASE_OWNER_COLUMNS =
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_approved,is_featured,created_at";
+
+/**
+ * Video and location columns from `20260815131921` and the extended video
+ * fields from `properties/20260815190000`.
+ */
+const EXTENDED_OWNER_COLUMNS =
+  "video_url,video_thumbnail_url,video_duration,video_status,video_uploaded_at,locality,landmark,metro_station,it_park,college,hospital";
+
+const OWNER_COLUMNS = `${BASE_OWNER_COLUMNS},${EXTENDED_OWNER_COLUMNS}`;
+
+/** See `propertySchema.ts` — the owner dashboard hits the same schema gap. */
+const schema = createSchemaCapability("owner-properties");
+
+function ownerColumns(useExtended: boolean): string {
+  return useExtended ? OWNER_COLUMNS : BASE_OWNER_COLUMNS;
+}
+
+/**
+ * Runs a property query against the full schema, retrying against the base
+ * column set if the video/location migration has not been applied.
+ */
+async function withSchemaFallback<T>(
+  run: (columns: string) => PromiseLike<{ data: T | null; error: { code?: string } | null }>,
+): Promise<{ data: T | null; error: { code?: string; message?: string } | null }> {
+  const tryExtended = schema.shouldTry();
+  const first = await run(ownerColumns(tryExtended));
+
+  if (first.error && tryExtended && isUndefinedColumn(first.error)) {
+    schema.record(false);
+    return run(ownerColumns(false));
+  }
+  if (!first.error && tryExtended) schema.record(true);
+  return first;
+}
 
 /**
  * Rows come back with `listing_type` as free-text, so normalise once here at the
@@ -74,14 +113,18 @@ function normaliseRow(row: { listing_type: string; status: string }): Property {
 
 export async function listOwnerProperties(ownerId: string) {
   const db = await adminDb();
-  const { data, error } = await db
-    .from("properties")
-    .select(OWNER_COLUMNS)
-    .eq("owner_id", ownerId)
-    .order("created_at", { ascending: false })
-    .limit(200);
-  if (error) throw new Error(error.message);
-  return (data ?? []).map(normaliseRow);
+  const { data, error } = await withSchemaFallback((columns) =>
+    db
+      .from("properties")
+      .select(columns)
+      .eq("owner_id", ownerId)
+      .order("created_at", { ascending: false })
+      .limit(200),
+  );
+  if (error) throw new Error(error.message ?? "Could not load listings");
+  return ((data ?? []) as unknown as Array<{ listing_type: string; status: string }>).map(
+    normaliseRow,
+  );
 }
 
 export async function createOwnerProperty(ownerId: string, input: OwnerListingInput) {
@@ -89,7 +132,9 @@ export async function createOwnerProperty(ownerId: string, input: OwnerListingIn
   const { data, error } = await db
     .from("properties")
     .insert({
-      ...input,
+      // Drops video/location keys when a read has already proven the columns
+      // absent, so creating a listing cannot fail on the un-applied migration.
+      ...stripExtendedColumns(input, schema.state()),
       owner_id: ownerId,
       // New listings are never self-published: an admin must approve them
       // before RLS will expose them to the public feed.
@@ -97,7 +142,7 @@ export async function createOwnerProperty(ownerId: string, input: OwnerListingIn
       is_featured: false,
       status: input.status ?? "available",
     })
-    .select(OWNER_COLUMNS)
+    .select(ownerColumns(schema.shouldTry()))
     .single();
   if (error) throw new Error(error.message);
   return data;
@@ -112,10 +157,10 @@ export async function updateOwnerProperty(
   // Editing content sends the listing back for re-approval.
   const { data, error } = await db
     .from("properties")
-    .update({ ...patch, is_approved: false })
+    .update({ ...stripExtendedColumns(patch, schema.state()), is_approved: false })
     .eq("id", id)
     .eq("owner_id", ownerId)
-    .select(OWNER_COLUMNS);
+    .select(ownerColumns(schema.shouldTry()));
   if (error) throw new Error(error.message);
   if (!data?.length) throw new Error("Listing not found, or it is not yours to edit.");
   return data[0];

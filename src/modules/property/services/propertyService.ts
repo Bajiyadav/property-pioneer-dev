@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { createSchemaCapability, isUndefinedColumn } from "./propertySchema";
 
 /** Typed client — `Database` is generated from the live schema. */
 const db = supabase;
@@ -58,8 +59,38 @@ export type Property = {
  * They are re-attached with safe defaults by `withVerificationDefaults` below and
  * will start flowing through automatically once the migration lands.
  */
-export const PUBLIC_PROPERTY_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,video_url,video_status,locality,landmark,metro_station,it_park,college,hospital";
+const BASE_PROPERTY_COLUMNS =
+  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+
+/**
+ * Columns added by `20260815131921_add_video_and_location_to_properties.sql`
+ * (video tours and location context).
+ */
+const EXTENDED_PROPERTY_COLUMNS =
+  "video_url,video_status,locality,landmark,metro_station,it_park,college,hospital";
+
+export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
+
+/** See `propertySchema.ts` for why this detection exists. */
+const schema = createSchemaCapability("properties");
+
+function shouldTryExtended(): boolean {
+  return schema.shouldTry();
+}
+
+function propertyColumns(useExtended: boolean): string {
+  return useExtended ? PUBLIC_PROPERTY_COLUMNS : BASE_PROPERTY_COLUMNS;
+}
+
+/** Test seam — lets a suite assert both schema states deterministically. */
+export function __resetPropertySchemaProbe() {
+  schema.reset();
+}
+
+/** Reports what the last query observed: true, false, or null when untested. */
+export function propertySchemaHasExtendedColumns(): boolean | null {
+  return schema.state();
+}
 
 /** Shape PostgREST returns for the granted column set. */
 type PropertyRow = Omit<
@@ -386,45 +417,67 @@ export interface PropertySearchParams {
   sort?: "recommended" | "newest" | "lowest_rent" | "highest_rent" | "largest_area";
 }
 
+/**
+ * Builds the public feed query.
+ *
+ * `useExtended` covers both the selected columns *and* the filters: `locality`
+ * and `landmark` are filtered and text-searched, so a query that merely trimmed
+ * the select list would still reference missing columns and still 400.
+ */
+function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: boolean) {
+  let query = db.from("properties").select(propertyColumns(useExtended)).eq("is_approved", true);
+
+  if (params) {
+    if (params.city) query = query.ilike("city", params.city);
+    if (params.listing) query = query.ilike("listing_type", params.listing);
+    if (params.beds && params.beds > 0) query = query.gte("bedrooms", params.beds);
+    if (params.baths && params.baths > 0) query = query.gte("bathrooms", params.baths);
+    if (params.type) query = query.ilike("property_type", `%${params.type}%`);
+    if (params.locality && useExtended) query = query.ilike("locality", `%${params.locality}%`);
+    if (params.minPrice && params.minPrice > 0) query = query.gte("price", params.minPrice);
+    if (params.maxPrice && params.maxPrice > 0) query = query.lte("price", params.maxPrice);
+    if (params.q) {
+      // A naive ilike across the searchable text columns.
+      const columns = ["title", "city", "address", "description"];
+      if (useExtended) columns.push("locality", "landmark");
+      query = query.or(columns.map((c) => `${c}.ilike.%${params.q}%`).join(","));
+    }
+  }
+
+  // Apply sorting
+  if (params?.sort === "newest") {
+    query = query.order("created_at", { ascending: false });
+  } else if (params?.sort === "lowest_rent") {
+    query = query.order("price", { ascending: true });
+  } else if (params?.sort === "highest_rent") {
+    query = query.order("price", { ascending: false });
+  } else if (params?.sort === "largest_area") {
+    query = query.order("area_sqft", { ascending: false });
+  } else {
+    // Default / "recommended"
+    query = query
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  return query;
+}
+
 export async function fetchPublicPropertyFeed(
   params?: PropertySearchParams,
 ): Promise<PropertyFeed> {
   try {
-    let query = db.from("properties").select(PUBLIC_PROPERTY_COLUMNS).eq("is_approved", true);
-    if (params) {
-      if (params.city) query = query.ilike("city", params.city);
-      if (params.listing) query = query.ilike("listing_type", params.listing);
-      if (params.beds && params.beds > 0) query = query.gte("bedrooms", params.beds);
-      if (params.baths && params.baths > 0) query = query.gte("bathrooms", params.baths);
-      if (params.type) query = query.ilike("property_type", `%${params.type}%`);
-      if (params.locality) query = query.ilike("locality", `%${params.locality}%`);
-      if (params.minPrice && params.minPrice > 0) query = query.gte("price", params.minPrice);
-      if (params.maxPrice && params.maxPrice > 0) query = query.lte("price", params.maxPrice);
-      if (params.q) {
-        // A naive ilike on multiple columns for text search
-        query = query.or(
-          `title.ilike.%${params.q}%,city.ilike.%${params.q}%,address.ilike.%${params.q}%,description.ilike.%${params.q}%,locality.ilike.%${params.q}%,landmark.ilike.%${params.q}%`,
-        );
-      }
-    }
+    const tryExtended = shouldTryExtended();
+    let { data, error } = await buildFeedQuery(params, tryExtended);
 
-    // Apply sorting
-    if (params?.sort === "newest") {
-      query = query.order("created_at", { ascending: false });
-    } else if (params?.sort === "lowest_rent") {
-      query = query.order("price", { ascending: true });
-    } else if (params?.sort === "highest_rent") {
-      query = query.order("price", { ascending: false });
-    } else if (params?.sort === "largest_area") {
-      query = query.order("area_sqft", { ascending: false });
-    } else {
-      // Default / "recommended"
-      query = query
-        .order("is_featured", { ascending: false })
-        .order("created_at", { ascending: false });
+    if (error && tryExtended && isUndefinedColumn(error)) {
+      // The video/location migration has not been applied to this database.
+      // Latch the capability off and serve the query the schema can answer.
+      schema.record(false);
+      ({ data, error } = await buildFeedQuery(params, false));
+    } else if (!error && tryExtended) {
+      schema.record(true);
     }
-
-    const { data, error } = await query;
 
     if (error) {
       console.error("[properties] query failed", error);
@@ -472,7 +525,10 @@ export async function fetchPublicPropertyFeed(
       return { properties: filtered, source: "fallback", error: null };
     }
     return {
-      properties: (data as PropertyRow[]).map(withVerificationDefaults),
+      // The column list is chosen at runtime, so PostgREST's generic row type is
+      // the honest static answer here; `withVerificationDefaults` is what
+      // guarantees the shape, defaulting anything the schema did not return.
+      properties: (data as unknown as PropertyRow[]).map(withVerificationDefaults),
       source: "database",
       error: null,
     };
@@ -491,14 +547,26 @@ export async function fetchPublicProperties(params?: PropertySearchParams): Prom
 }
 
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {
-  try {
-    const { data, error } = await db
+  const detailQuery = (useExtended: boolean) =>
+    db
       .from("properties")
-      .select(PUBLIC_PROPERTY_COLUMNS)
+      .select(propertyColumns(useExtended))
       .eq("id", id)
       .eq("is_approved", true)
       .maybeSingle();
-    if (!error && data) return withVerificationDefaults(data as PropertyRow);
+
+  try {
+    const tryExtended = shouldTryExtended();
+    let { data, error } = await detailQuery(tryExtended);
+
+    if (error && tryExtended && isUndefinedColumn(error)) {
+      schema.record(false);
+      ({ data, error } = await detailQuery(false));
+    } else if (!error && tryExtended) {
+      schema.record(true);
+    }
+
+    if (!error && data) return withVerificationDefaults(data as unknown as PropertyRow);
     if (error) console.error("[properties] detail query failed", error);
   } catch (err) {
     console.error("[properties] detail unreachable", err);
