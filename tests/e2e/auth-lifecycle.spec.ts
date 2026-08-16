@@ -69,9 +69,31 @@ interface StoredSession {
   user?: { id?: string; email?: string };
 }
 
+/**
+ * Runs an evaluate that may collide with an in-flight navigation.
+ *
+ * The app redirects with full page loads, so a `page.evaluate` issued just as
+ * one starts throws "Execution context was destroyed". That is a harness race,
+ * not an app defect, so settle the page and try again.
+ */
+async function evaluateSettled<T>(page: Page, fn: () => T): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      await page.waitForLoadState("domcontentloaded", { timeout: 15000 }).catch(() => undefined);
+      return await page.evaluate(fn);
+    } catch (error) {
+      lastError = error;
+      if (!String(error).includes("Execution context was destroyed")) throw error;
+      await page.waitForTimeout(500);
+    }
+  }
+  throw lastError;
+}
+
 /** Reads the Supabase session straight out of the browser's own storage. */
 async function readStoredSession(page: Page): Promise<StoredSession | null> {
-  return page.evaluate(() => {
+  return evaluateSettled(page, () => {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key || !key.startsWith("sb-") || !key.includes("auth-token")) continue;
@@ -91,7 +113,7 @@ async function readStoredSession(page: Page): Promise<StoredSession | null> {
 
 /** Every auth-ish key still present in either web storage. */
 async function readAuthStorageKeys(page: Page): Promise<string[]> {
-  return page.evaluate(() => {
+  return evaluateSettled(page, () => {
     const found: string[] = [];
     for (const store of [localStorage, sessionStorage]) {
       for (let i = 0; i < store.length; i++) {
@@ -212,9 +234,9 @@ test.describe("Authentication lifecycle", () => {
 
       // ── 2. Correct dashboard for this role, and only this role ─────────
       await openDashboardNav(page, isMobile);
-      await expect(
-        page.getByText(PORTAL_LABEL[acc.role], { exact: false }).locator("visible=true").first(),
-      ).toBeVisible({ timeout: 20000 });
+      await expect(page.getByText(PORTAL_LABEL[acc.role], { exact: false }).first()).toBeVisible({
+        timeout: 20000,
+      });
       for (const [role, label] of Object.entries(PORTAL_LABEL)) {
         if (role === acc.role) continue;
         await expect(page.getByText(label, { exact: false })).toHaveCount(0);
@@ -242,11 +264,7 @@ test.describe("Authentication lifecycle", () => {
 
       // ── 5. Navigate within the dashboard ───────────────────────────────
       const tab = SECOND_TAB[acc.role];
-      await page
-        .getByRole("button", { name: tab.label, exact: true })
-        .locator("visible=true")
-        .first()
-        .click();
+      await page.getByRole("button", { name: tab.label, exact: true }).first().click();
       await page.waitForURL(new RegExp(`tab=${tab.id}`), { timeout: 20000 });
       expect(page.url()).toContain(acc.dashboard);
       // Still the same authenticated session — navigation is not a re-login.
@@ -432,9 +450,9 @@ test.describe("Authentication lifecycle", () => {
     await signIn(page, owner.email, owner.password);
     await page.waitForURL(/\/dashboard\/owner/, { timeout: 30000 });
     await openDashboardNav(page, isMobile);
-    await expect(
-      page.getByText(PORTAL_LABEL.owner, { exact: false }).locator("visible=true").first(),
-    ).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText(PORTAL_LABEL.owner, { exact: false }).first()).toBeVisible({
+      timeout: 20000,
+    });
 
     await signOut(page, isMobile);
     await page.waitForURL(/\/auth/, { timeout: 30000 });
@@ -443,9 +461,9 @@ test.describe("Authentication lifecycle", () => {
     await page.waitForURL(/\/dashboard\/customer/, { timeout: 30000 });
 
     await openDashboardNav(page, isMobile);
-    await expect(
-      page.getByText(PORTAL_LABEL.customer, { exact: false }).locator("visible=true").first(),
-    ).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText(PORTAL_LABEL.customer, { exact: false }).first()).toBeVisible({
+      timeout: 20000,
+    });
     await expect(page.getByText(PORTAL_LABEL.owner, { exact: false })).toHaveCount(0);
 
     const session = await readStoredSession(page);
