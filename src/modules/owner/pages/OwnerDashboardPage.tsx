@@ -57,8 +57,10 @@ import {
 } from "@/modules/dashboard/components/DashboardCharts";
 import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
 import { displayName } from "@/modules/authentication/services/session";
-import { VISITS, ACTIVITY, SEARCH_PARAMS, listingImage } from "@/modules/owner/fixtures";
+import { ACTIVITY, SEARCH_PARAMS, listingImage } from "@/modules/owner/fixtures";
 import { ListingRows, OwnerSettings } from "@/modules/owner/components/OwnerDashboardParts";
+import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -132,22 +134,8 @@ function OwnerDashboard({ user }: { user: User | null }) {
     return listings.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
   }, [listings, listingQuery]);
 
-  // Real enquiries on this owner's listings, scoped server-side by owner_id.
-  const fetchLeads = useServerFn(getMyLeads);
-  const {
-    data: leads,
-    isLoading: leadsLoading,
-    isError: leadsError,
-    refetch: refetchLeads,
-  } = useQuery({ queryKey: ["owner", "leads"], queryFn: () => fetchLeads({}), retry: false });
-
-  const allLeads = useMemo(() => leads ?? [], [leads]);
-  /** Anything received in the last 48h counts as new for the filter chip. */
-  const isNew = (iso: string) => Date.now() - new Date(iso).getTime() < 48 * 3600 * 1000;
-  const visibleLeads = useMemo(
-    () => (leadFilter === "all" ? allLeads : allLeads.filter((l) => isNew(l.createdAt))),
-    [allLeads, leadFilter],
-  );
+  const myBookings = useInteractionStore((s) => s.getOwnerBookings(user?.id || ""));
+  const myChats = useInteractionStore((s) => s.getOwnerChats(user?.id || ""));
 
   const monthlyRent = useMemo(
     () => listings.reduce((sum, p) => sum + Number(p.price || 0), 0),
@@ -216,11 +204,11 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 hint="Moderated before publication"
               />
               <KpiCard
-                label="Tenant leads"
-                numericValue={allLeads.length}
+                label="Tenant messages"
+                numericValue={myChats.length}
                 icon={<Users className="h-4 w-4" />}
                 accent="blue"
-                trend={{ direction: "up", label: "+1 today" }}
+                trend={{ direction: "up", label: "Active chats" }}
               />
               <KpiCard
                 label="Est. monthly rent"
@@ -263,7 +251,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 {
                   id: "leads",
                   label: "Tenant leads",
-                  hint: `${allLeads.length} open`,
+                  hint: `${myChats.length} open`,
                   icon: <MessageSquare className="h-4 w-4" />,
                   onClick: () => setActiveTab("enquiries"),
                 },
@@ -277,7 +265,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 {
                   id: "calendar",
                   label: "Visit calendar",
-                  hint: `${VISITS.length} upcoming`,
+                  hint: `${myBookings.length} upcoming`,
                   icon: <CalendarDays className="h-4 w-4" />,
                   onClick: () => setActiveTab("calendar"),
                 },
@@ -434,7 +422,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                 />
                 <KpiCard
                   label="Visits booked"
-                  numericValue={VISITS.length}
+                  numericValue={myBookings.length}
                   icon={<CalendarDays className="h-4 w-4" />}
                   accent="emerald"
                 />
@@ -475,84 +463,10 @@ function OwnerDashboard({ user }: { user: User | null }) {
       {activeTab === "enquiries" && (
         <div className="space-y-5">
           <SectionHeader
-            title={`Tenant enquiries (${visibleLeads.length})`}
-            subtitle="Direct messages from interested tenants"
-            action={
-              <FilterChips
-                active={leadFilter}
-                onChange={setLeadFilter}
-                options={[
-                  { id: "all", label: "All" },
-                  { id: "new", label: "New only" },
-                ]}
-              />
-            }
+            title="Tenant Messages"
+            subtitle="Direct conversations with interested tenants"
           />
-          {leadsError && (
-            <ErrorState
-              title="Could not load enquiries"
-              message="Your leads could not be fetched. Please retry."
-              onRetry={() => refetchLeads()}
-            />
-          )}
-          {leadsLoading && <LoadingSkeleton rows={3} />}
-          <DataTable
-            rows={visibleLeads}
-            getKey={(l) => l.id}
-            empty={
-              <EmptyState
-                icon={<MessageSquare className="h-6 w-6" />}
-                title="No enquiries yet"
-                hint="Tenant messages on your listings will appear here."
-              />
-            }
-            columns={[
-              {
-                key: "who",
-                header: "Tenant",
-                render: (l: OwnerLead) => (
-                  <div>
-                    <p className="font-bold text-foreground">{l.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{l.phone}</p>
-                  </div>
-                ),
-              },
-              {
-                key: "property",
-                header: "Property",
-                render: (l: OwnerLead) => (
-                  <span className="text-muted-foreground">{l.propertyTitle}</span>
-                ),
-              },
-              {
-                key: "message",
-                header: "Message",
-                render: (l: OwnerLead) => (
-                  <span className="text-muted-foreground">"{l.message}"</span>
-                ),
-              },
-              {
-                key: "when",
-                header: "Received",
-                render: (l: OwnerLead) => (
-                  <span className="whitespace-nowrap text-muted-foreground">
-                    {relativeTime(l.createdAt)}
-                  </span>
-                ),
-              },
-              {
-                key: "status",
-                header: "Status",
-                className: "text-right",
-                render: (l: OwnerLead) => (
-                  <StatusPill
-                    label={isNew(l.createdAt) ? "New" : "Seen"}
-                    tone={isNew(l.createdAt) ? "info" : "neutral"}
-                  />
-                ),
-              },
-            ]}
-          />
+          <ChatInterface currentUserId={user?.id || ""} role="owner" chats={myChats} />
         </div>
       )}
 
@@ -562,7 +476,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
             title="Visit calendar"
             subtitle="Walkthroughs tenants have booked with you"
           />
-          {VISITS.length === 0 ? (
+          {myBookings.length === 0 ? (
             <EmptyState
               icon={<CalendarDays className="h-6 w-6" />}
               title="No visits scheduled"
@@ -570,25 +484,46 @@ function OwnerDashboard({ user }: { user: User | null }) {
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-3">
-              {VISITS.map((v) => (
+              {myBookings.map((v) => (
                 <div
                   key={v.id}
                   className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm"
                 >
-                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
-                    {v.day}
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                      {v.when.split(" · ")[0]}
+                    </p>
+                    <StatusPill
+                      label={v.status}
+                      tone={v.status === "Confirmed" ? "success" : "info"}
+                    />
+                  </div>
+                  <p className="font-[family-name:var(--font-display)] text-2xl font-black text-foreground">
+                    {v.when.split(" · ")[1]}
                   </p>
-                  <p className="mt-1 font-[family-name:var(--font-display)] text-2xl font-black text-foreground">
-                    {v.time}
+                  <p className="mt-2 text-xs font-bold text-foreground">Tenant</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {v.mode} for {v.propertyTitle}
                   </p>
-                  <p className="mt-2 text-xs font-bold text-foreground">{v.who}</p>
-                  <p className="text-[11px] text-muted-foreground">{v.what}</p>
-                  <button
-                    onClick={() => toast.success(`Reminder sent to ${v.who}`)}
-                    className="mt-4 w-full rounded-xl border border-border bg-secondary/60 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary"
-                  >
-                    Send reminder
-                  </button>
+                  <div className="flex gap-2 mt-4">
+                    {v.status === "Scheduled" && (
+                      <button
+                        onClick={() => {
+                          useInteractionStore.getState().updateBookingStatus(v.id, "Confirmed");
+                          toast.success(`Visit confirmed`);
+                        }}
+                        className="flex-1 rounded-xl bg-primary py-2 text-[11px] font-bold text-primary-foreground transition hover:bg-primary/90"
+                      >
+                        Confirm
+                      </button>
+                    )}
+                    <button
+                      onClick={() => toast.success(`Reminder sent`)}
+                      className="flex-1 rounded-xl border border-border bg-secondary/60 py-2 text-[11px] font-bold text-foreground transition hover:bg-secondary"
+                    >
+                      Remind
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

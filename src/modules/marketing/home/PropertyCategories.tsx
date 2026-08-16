@@ -38,36 +38,12 @@ const CATEGORIES: CategoryCard[] = [
     gradient: "from-blue-500/15 to-indigo-500/10 text-blue-600 dark:text-blue-400",
   },
   {
-    id: "villas",
-    title: "Luxury Villas",
-    subtitle: "Independent & Duplex Homes",
-    icon: Castle,
-    path: "/villas",
-    gradient: "from-amber-500/15 to-orange-500/10 text-amber-600 dark:text-amber-400",
-  },
-  {
     id: "commercial",
     title: "Commercial Spaces",
     subtitle: "Offices, Retail & Hubs",
     icon: Building2,
     path: "/commercial",
     gradient: "from-purple-500/15 to-pink-500/10 text-purple-600 dark:text-purple-400",
-  },
-  {
-    id: "plots",
-    title: "Plots & Land",
-    subtitle: "Approved Residential Layouts",
-    icon: Compass,
-    path: "/plots",
-    gradient: "from-teal-500/15 to-cyan-500/10 text-teal-600 dark:text-teal-400",
-  },
-  {
-    id: "farmlands",
-    title: "Farm Lands",
-    subtitle: "Weekend Retreats & Agro Plots",
-    icon: Trees,
-    path: "/farm-lands",
-    gradient: "from-lime-500/15 to-emerald-500/10 text-lime-600 dark:text-lime-400",
   },
 ];
 

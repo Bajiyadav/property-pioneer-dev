@@ -45,6 +45,21 @@ export type Property = {
   is_zero_brokerage?: boolean;
   is_premium?: boolean;
   created_at: string;
+  deposit?: number;
+  maintenance?: number;
+  maintenance_included?: boolean;
+  furnishing_status?: "fully-furnished" | "semi-furnished" | "unfurnished";
+  amenities?: string[];
+  admin_notes?: string;
+  owner_id?: string;
+  floor_number?: string;
+  total_rooms?: number;
+  attached_bathroom?: boolean;
+  preferred_tenant?: string[];
+  food_preference?: string;
+  lease_duration?: string;
+  pet_policy?: boolean;
+  owner_type?: string;
 };
 
 /**
@@ -415,6 +430,9 @@ export interface PropertySearchParams {
   type?: string;
   locality?: string;
   sort?: "recommended" | "newest" | "lowest_rent" | "highest_rent" | "largest_area";
+  tenantType?: string;
+  furnishing?: string;
+  amenities?: string[];
 }
 
 /**

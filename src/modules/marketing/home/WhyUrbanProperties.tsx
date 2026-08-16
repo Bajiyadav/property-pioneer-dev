@@ -66,7 +66,7 @@ const VALUE_CARDS: ValueCard[] = [
     badge: "Free for Owners",
     icon: Home,
     cta: "Post Your Property",
-    to: "/auth",
+    to: "/list-property",
   },
 ];
 

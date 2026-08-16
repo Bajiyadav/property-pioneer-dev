@@ -269,7 +269,7 @@ function SiteHeader() {
             <HeaderProfileMenu />
 
             <Link
-              to="/auth"
+              to="/list-property"
               className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-3 sm:px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
             >
               <span className="whitespace-nowrap">List Property</span>

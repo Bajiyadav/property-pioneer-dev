@@ -1,6 +1,7 @@
 import { Link, notFound, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -59,7 +60,7 @@ import { VideoPlayer } from "@/shared/components/ui/VideoPlayer";
 import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
-import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
+import { ScheduleVisitModal } from "@/modules/interactions/components/ScheduleVisitModal";
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { SimilarProperties } from "@/modules/property/components/SimilarProperties";
@@ -68,6 +69,9 @@ import { APP_NAME } from "@/config/app";
 export function PropertyDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
   const { has, toggle } = useFavorites();
+  const { user } = useAuthSession();
+  const tenantId = user?.id || "anonymous-tenant";
+
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
@@ -184,564 +188,353 @@ export function PropertyDetailPage() {
       a: "Yes, every uploaded video tour is moderated and verified before appearing publicly on Urban Properties.",
     },
   ];
-
   return (
     <div className="min-h-screen bg-background pb-28">
       <PropertyStructuredData property={property} />
 
-      {/* 1. STICKY BACK NAVIGATION & BREADCRUMBS BAR */}
-      <nav
-        aria-label="Breadcrumbs and navigation"
-        className="sticky top-16 z-30 border-b border-border/40 bg-background/85 backdrop-blur-xl transition-all"
-      >
+      {/* 1. STICKY SUMMARY BAR */}
+      <div className="sticky top-[60px] md:top-[72px] z-30 border-b border-border bg-card shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link
-            to="/properties"
-            search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="group inline-flex items-center gap-2.5 rounded-full border border-border/60 bg-card/80 px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition hover:border-primary hover:bg-card"
-          >
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/10 text-primary transition group-hover:-translate-x-0.5">
-              <ArrowLeft className="h-3.5 w-3.5" />
-            </span>
-            <span>Back to Browse</span>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center justify-center rounded-lg border border-border p-2 bg-secondary/30 min-w-[60px]">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-rose-50 text-rose-500 mb-1">
+                <Heart className="h-4 w-4" fill="currentColor" />
+              </span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase">Rent</span>
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground line-clamp-1">
+                {property.title}
+              </h1>
+              <p className="text-sm text-muted-foreground line-clamp-1">
+                {property.locality || property.city}
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-8 divide-x divide-border shrink-0">
+            <div className="flex flex-col items-center px-4">
+              <span className="text-xl font-bold text-foreground">
+                ₹{property.price.toLocaleString("en-IN")}
+              </span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                Rent
+              </span>
+            </div>
+            <div className="flex flex-col items-center px-4">
+              <span className="text-xl font-bold text-foreground">
+                {property.area_sqft || "N/A"}
+              </span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                Sq.Ft
+              </span>
+            </div>
+            <div className="flex flex-col items-center px-4">
+              <span className="text-xl font-bold text-foreground">
+                {estimatedDeposit ? `₹${estimatedDeposit.toLocaleString("en-IN")}` : "N/A"}
+              </span>
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                Deposit
+              </span>
+            </div>
+            <div className="pl-4">
+              <button className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-6 py-2.5 rounded shadow-sm transition">
+                Apply Loan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. BREADCRUMBS */}
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link to="/" className="hover:text-foreground transition">
+            Home
           </Link>
-
-          {/* Breadcrumbs */}
-          <div className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
-            <Link to="/" className="hover:text-foreground transition">
-              Home
-            </Link>
-            <span>/</span>
-            <Link
-              to="/rent/$city"
-              params={{ city: property.city.toLowerCase() }}
-              className="capitalize hover:text-foreground transition"
-            >
-              {property.city}
-            </Link>
-            {property.locality && (
-              <>
-                <span>/</span>
-                <Link
-                  to="/rent/$city/$locality"
-                  params={{
-                    city: property.city.toLowerCase(),
-                    locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  {property.locality}
-                </Link>
-              </>
-            )}
-            <span>/</span>
-            <span className="font-medium text-foreground truncate max-w-[200px]">
-              {property.title}
-            </span>
-          </div>
-        </div>
-      </nav>
-
-      <main className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        {/* 2. PROPERTY HEADER */}
-        <div className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-primary/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-                For {property.listing_type}
-              </span>
-              <span className="rounded-full bg-secondary px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-foreground">
-                {property.property_type}
-              </span>
-              <PropertyBadges property={property} />
-            </div>
-            <span className="text-xs font-mono text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-md">
-              REF: UP-HYD-{property.id.slice(0, 6).toUpperCase()}
-            </span>
-          </div>
-
-          <h1 className="mt-4 font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl lg:text-4xl">
-            {property.title}
-          </h1>
-
-          <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground sm:text-base">
-            <MapPin className="h-4 w-4 text-primary flex-none" />
-            <span>
-              {property.locality ? `${property.locality}, ` : ""}
-              {property.address ? `${property.address}, ` : ""}
-              {property.city}, Telangana
-            </span>
-          </p>
-
-          {/* Quick Action Bar */}
-          <div className="mt-6 flex flex-wrap items-center gap-2.5 border-t border-border/40 pt-6">
-            <button
-              onClick={() => {
-                toggle(property.id);
-                toast.success(saved ? "Removed from saved homes" : "Saved to your favorites");
-              }}
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition hover:scale-105 ${
-                saved
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-secondary/50 text-foreground hover:bg-secondary"
-              }`}
-            >
-              <Heart className="h-4 w-4" fill={saved ? "currentColor" : "none"} />
-              {saved ? "Saved" : "Save"}
-            </button>
-
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary/50 px-4 py-2.5 text-xs font-semibold text-foreground transition hover:scale-105 hover:bg-secondary"
-            >
-              {copiedLink ? (
-                <Check className="h-4 w-4 text-emerald-500" />
-              ) : (
-                <Share2 className="h-4 w-4" />
-              )}
-              {copiedLink ? "Copied!" : "Share"}
-            </button>
-
-            {property.video_url && (
-              <button
-                onClick={scrollToVideo}
-                className="inline-flex items-center gap-2 rounded-xl border border-emerald-600/30 bg-emerald-600/10 px-4 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-600/20 hover:scale-105"
+          <span>/</span>
+          <Link
+            to="/rent/$city"
+            params={{ city: property.city.toLowerCase() }}
+            className="capitalize hover:text-foreground transition"
+          >
+            Rent in {property.city}
+          </Link>
+          {property.locality && (
+            <>
+              <span>/</span>
+              <Link
+                to="/rent/$city/$locality"
+                params={{
+                  city: property.city.toLowerCase(),
+                  locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
+                }}
+                className="hover:text-foreground transition"
               >
-                <Play className="h-3.5 w-3.5 fill-current" /> Watch Video Tour
-              </button>
-            )}
-
-            <div className="ml-auto flex items-center gap-2">
-              <button
-                onClick={() => setScheduleOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110 hover:scale-105"
-              >
-                <Calendar className="h-4 w-4" /> Schedule Visit
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. HERO PHOTO GALLERY */}
-        <div className="mt-8 overflow-hidden rounded-3xl border border-border/50 bg-card p-3 shadow-sm">
-          <div className="relative overflow-hidden rounded-2xl bg-muted">
-            <PropertyImageBranding
-              src={property.images[activeImg] ?? property.images[0]}
-              alt={property.title}
-              watermarkSize="lg"
-              watermarkPosition="top-right"
-              containerClassName="aspect-[16/9] w-full sm:aspect-[21/9]"
-              imageClassName="transition-all duration-300"
-            />
-
-            {/* Gallery Control Badges */}
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-              <span className="rounded-full bg-black/70 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
-                📷 {activeImg + 1} of {property.images.length} Photos
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setLightboxOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md hover:bg-black/90 transition"
-                >
-                  <Maximize2 className="h-3.5 w-3.5" /> Expand Lightbox
-                </button>
-                {property.video_url && (
-                  <button
-                    onClick={scrollToVideo}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/90 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md hover:bg-emerald-600 transition"
-                  >
-                    <Play className="h-3.5 w-3.5 fill-current" /> Video Tour
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Thumbnails */}
-          {property.images.length > 1 && (
-            <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
-              {property.images.map((src, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImg(i)}
-                  className={`relative h-20 w-32 flex-none overflow-hidden rounded-xl ring-2 ring-offset-2 ring-offset-background transition ${
-                    i === activeImg
-                      ? "ring-primary scale-105"
-                      : "ring-transparent opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  <PropertyImageBranding
-                    src={src}
-                    alt=""
-                    watermarkSize="xs"
-                    watermarkPosition="bottom-right"
-                    containerClassName="h-full w-full"
-                  />
-                </button>
-              ))}
-            </div>
+                {property.locality}
+              </Link>
+            </>
           )}
+          <span>/</span>
+          <span className="font-medium text-foreground truncate max-w-[200px]">
+            {property.title}
+          </span>
         </div>
+      </div>
 
-        {/* 4. MAIN DETAILS & SIDEBAR CONVERSION GRID */}
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
-          {/* Main Info Stack */}
-          <div className="space-y-8">
-            {/* RENTAL TERMS & SPECIFICATIONS */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Transparent Rental Terms</h2>
-              <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <StatCard
-                  icon={<BedDouble className="h-5 w-5 text-primary" />}
-                  label="Bedrooms"
-                  value={`${property.bedrooms} BHK`}
-                />
-                <StatCard
-                  icon={<Bath className="h-5 w-5 text-primary" />}
-                  label="Bathrooms"
-                  value={`${property.bathrooms} Baths`}
-                />
-                <StatCard
-                  icon={<Maximize className="h-5 w-5 text-primary" />}
-                  label="Super Area"
-                  value={`${property.area_sqft} sq.ft`}
-                />
-                <StatCard
-                  icon={<Building className="h-5 w-5 text-primary" />}
-                  label="Property Type"
-                  value={property.property_type || "Apartment"}
-                />
-                <StatCard
-                  icon={<Clock className="h-5 w-5 text-primary" />}
-                  label="Available From"
-                  value="Immediate Move-in"
-                />
-                <StatCard
-                  icon={<Shield className="h-5 w-5 text-primary" />}
-                  label="Security Deposit"
-                  value={
-                    estimatedDeposit ? `₹${estimatedDeposit.toLocaleString("en-IN")}` : "2 Months"
-                  }
-                />
-                <StatCard
-                  icon={<Car className="h-5 w-5 text-primary" />}
-                  label="Parking"
-                  value="Covered Space"
-                />
-                <StatCard
-                  icon={<BadgeCheck className="h-5 w-5 text-emerald-600" />}
-                  label="Brokerage"
-                  value="0% Zero Fee"
-                />
-              </div>
-            </section>
-
-            {/* VIDEO TOUR (When Available) */}
-            {property.video_url && (
-              <section
-                ref={videoSectionRef}
-                className="overflow-hidden rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8"
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 mt-2">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* LEFT COLUMN: Gallery & Overview */}
+          <div className="flex-1 w-full lg:w-2/3 flex flex-col gap-6">
+            {/* Mosaic Gallery */}
+            <div className="relative grid grid-cols-3 gap-1 rounded-sm overflow-hidden h-[300px] sm:h-[450px] bg-muted">
+              {/* Main Image */}
+              <div
+                className="col-span-2 relative h-full group cursor-pointer"
+                onClick={() => setLightboxOpen(true)}
               >
-                <div className="flex items-center justify-between pb-4">
-                  <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                    <Play className="h-5 w-5 text-emerald-500 fill-current" /> High-Definition Video
-                    Tour
-                  </h2>
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-600/10 px-3 py-1 rounded-full">
-                    Verified Walkthrough
+                <img
+                  src={property.images[0]}
+                  alt="Property"
+                  className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
+                />
+                <div className="absolute top-4 left-4 flex gap-2 z-10">
+                  <span className="bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 backdrop-blur-sm">
+                    <Maximize2 className="w-3.5 h-3.5" /> Photos
+                  </span>
+                  <span className="bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 backdrop-blur-sm">
+                    <MapPin className="w-3.5 h-3.5" /> Location
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Experience a real room-by-room video walkthrough of this home before scheduling an
-                  in-person visit.
-                </p>
-                <div className="overflow-hidden rounded-2xl border border-border">
-                  <VideoPlayer src={property.video_url} poster={property.images[0]} />
-                </div>
-              </section>
-            )}
-
-            {/* ROOM BREAKDOWN */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Interior Highlights & Layout</h2>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <RoomCard
-                  title="Living Area & Family Lounge"
-                  desc="Well-ventilated living space with ample natural daylight, premium flooring, and modern lighting fixtures."
-                  image={property.images[0]}
-                />
-                <RoomCard
-                  title="Master Bedroom"
-                  desc="Spacious bedroom suite with attached bathroom and large windows overlooking the locality."
-                  image={property.images[1] ?? property.images[0]}
-                />
-                {property.images.length > 2 && (
-                  <RoomCard
-                    title="Secondary Bedroom / Study"
-                    desc="Versatile room suitable for kids, guests, or an organized work-from-home setup."
-                    image={property.images[2] ?? property.images[0]}
-                  />
-                )}
-                {property.images.length > 3 && (
-                  <RoomCard
-                    title="Modular Kitchen & Dining"
-                    desc="Efficient modular layout with stone countertops, utility connection, and ample storage cabinets."
-                    image={property.images[3] ?? property.images[0]}
-                  />
-                )}
               </div>
-            </section>
-
-            {/* AMENITIES & FEATURES */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">Amenities & Features</h2>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {[
-                  { name: "24/7 Security & CCTV", icon: Shield },
-                  { name: "100% Power Backup", icon: Zap },
-                  { name: "Covered Parking", icon: Car },
-                  { name: "High-Speed Internet Ready", icon: Wifi },
-                  { name: "Elevator Access", icon: Building2 },
-                  { name: "24/7 Water Supply", icon: CheckCircle2 },
-                  { name: "Vastu Compliant", icon: Compass },
-                  { name: "Gated Peaceful Community", icon: Sparkles },
-                  { name: "Waste Disposal", icon: CheckCircle2 },
-                ].map((item, idx) => {
-                  const IconComp = item.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-3.5 text-xs font-semibold text-foreground"
+              {/* Right Images */}
+              <div className="col-span-1 grid grid-rows-2 gap-1 h-full">
+                <div
+                  className="relative h-full group cursor-pointer"
+                  onClick={() => setLightboxOpen(true)}
+                >
+                  <img
+                    src={property.images[1] || property.images[0]}
+                    alt="Property"
+                    className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
+                  />
+                  <div className="absolute top-4 right-4 z-10">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggle(property.id);
+                      }}
+                      className="bg-black/60 text-white px-3 py-1.5 text-xs font-bold rounded flex items-center gap-1.5 hover:bg-black/80 backdrop-blur-sm"
                     >
-                      <IconComp className="h-4 w-4 text-primary flex-none" />
-                      <span>{item.name}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* VERIFIED LOCATION & NEARBY TRANSIT / HUBS */}
-            {(property.locality ||
-              property.landmark ||
-              property.metro_station ||
-              property.it_park ||
-              property.college ||
-              property.hospital) && (
-              <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" /> Location & Nearby Hubs
-                </h2>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {property.locality && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <Compass className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Locality</p>
-                        <p className="text-sm font-bold text-foreground">{property.locality}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.landmark && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Landmark</p>
-                        <p className="text-sm font-bold text-foreground">{property.landmark}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.metro_station && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <TrainTrack className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Metro Transit</p>
-                        <p className="text-sm font-bold text-foreground">
-                          {property.metro_station}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.it_park && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <Building2 className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">IT & Business Park</p>
-                        <p className="text-sm font-bold text-foreground">{property.it_park}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.hospital && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <Hospital className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Healthcare</p>
-                        <p className="text-sm font-bold text-foreground">{property.hospital}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {property.college && (
-                    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-secondary/30 p-4">
-                      <GraduationCap className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Education</p>
-                        <p className="text-sm font-bold text-foreground">{property.college}</p>
-                      </div>
-                    </div>
-                  )}
+                      <Heart className="w-3.5 h-3.5" fill={saved ? "currentColor" : "none"} />
+                      <span className="hidden sm:inline">Shortlist</span>
+                    </button>
+                  </div>
                 </div>
-              </section>
-            )}
+                <div
+                  className="relative h-full group cursor-pointer"
+                  onClick={() => setLightboxOpen(true)}
+                >
+                  <img
+                    src={property.images[2] || property.images[0]}
+                    alt="Property"
+                    className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition duration-300 group-hover:bg-black/60">
+                    <span className="text-white text-3xl font-bold">
+                      +{Math.max(0, property.images.length - 2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            {/* DESCRIPTION */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground">About This Property</h2>
-              <p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground text-sm sm:text-base">
+            {/* Nearby Tags */}
+            <div className="flex items-center gap-2 flex-wrap text-sm border border-border/60 p-3 rounded-sm bg-card shadow-sm">
+              <span className="font-semibold text-muted-foreground mr-1 text-xs">Nearby:</span>
+              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
+                Sundar Nagar Colony
+              </span>
+              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
+                Kondapur
+              </span>
+              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
+                Red Fox Hotel
+              </span>
+              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
+                Yashoda Hospitals
+              </span>
+              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
+                JNTU College
+              </span>
+            </div>
+
+            {/* Overview */}
+            <div className="border border-border/60 rounded-sm bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-bold border-b-2 border-rose-500 pb-2 inline-block mb-4">
+                Overview
+              </h2>
+              <p className="whitespace-pre-line text-sm text-foreground/80 leading-relaxed">
                 {property.description}
               </p>
-            </section>
+            </div>
 
-            {/* FAQ SECTION */}
-            <section className="rounded-3xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
-              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-primary" /> Frequently Asked Questions
+            {/* Activity */}
+            <div className="border border-border/60 rounded-sm bg-card p-6 shadow-sm">
+              <h2 className="text-lg font-bold border-b-2 border-rose-500 pb-2 inline-block mb-4">
+                Activity On This Property
               </h2>
-              <div className="mt-6 divide-y divide-border/40">
-                {faqs.map((faq, idx) => (
-                  <div key={idx} className="py-4 first:pt-0 last:pb-0">
-                    <button
-                      onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                      className="flex w-full items-center justify-between text-left text-sm font-semibold text-foreground"
-                    >
-                      <span>{faq.q}</span>
-                      <ChevronDown
-                        className={`h-4 w-4 text-muted-foreground transition-transform ${
-                          openFaq === idx ? "rotate-180 text-primary" : ""
-                        }`}
-                      />
-                    </button>
-                    {openFaq === idx && (
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                        {faq.a}
-                      </p>
-                    )}
+              <div className="flex items-center gap-6 mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-rose-50 rounded-full text-rose-500">
+                    <User className="w-4 h-4" />
                   </div>
-                ))}
+                  <div>
+                    <p className="text-sm font-bold">142</p>
+                    <p className="text-xs text-muted-foreground">Views</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-rose-50 rounded-full text-rose-500">
+                    <Heart className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">24</p>
+                    <p className="text-xs text-muted-foreground">Shortlists</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-rose-50 rounded-full text-rose-500">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">12</p>
+                    <p className="text-xs text-muted-foreground">Contacts</p>
+                  </div>
+                </div>
               </div>
-            </section>
+            </div>
           </div>
 
-          {/* SIDEBAR CONVERSION PANEL */}
-          <aside className="space-y-6 lg:sticky lg:top-32 lg:h-fit">
-            <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-lg sm:p-8">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                {property.listing_type === "rent" ? "Monthly Rent" : "Asking Price"}
-              </span>
-
-              <div className="mt-2 flex items-baseline justify-between">
-                <p className="font-[family-name:var(--font-display)] text-3xl font-black text-foreground sm:text-4xl">
-                  {formatPrice(property.price, property.listing_type)}
-                </p>
-                {property.listing_type === "rent" && (
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-600/10 px-2.5 py-1 rounded-full">
-                    No Platform Fee
-                  </span>
-                )}
-              </div>
-
-              {property.listing_type === "rent" && (
-                <div className="mt-4 grid grid-cols-2 gap-2 text-xs border-t border-border/40 pt-4">
+          {/* RIGHT COLUMN: Details Grid & CTAs */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6">
+            <div className="border border-border/60 rounded-sm bg-card shadow-sm">
+              <div className="grid grid-cols-2">
+                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
+                  <BedDouble className="w-5 h-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <span className="text-muted-foreground">Security Deposit</span>
-                    <p className="font-bold text-foreground mt-0.5">
-                      ₹{(property.price * 2).toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Notice Period</span>
-                    <p className="font-bold text-foreground mt-0.5">1 Month</p>
+                    <p className="text-sm font-bold text-foreground">{property.bedrooms} BHK</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Room Type</p>
                   </div>
                 </div>
-              )}
-
-              <div className="my-6 h-px bg-border/40" />
-
-              {/* Verified Owner Trust Widget */}
-              <div className="flex items-center gap-3 rounded-2xl border border-emerald-600/30 bg-emerald-600/5 p-4">
-                <div className="grid h-10 w-10 place-items-center rounded-full bg-emerald-600 text-white">
-                  <CheckCircle2 className="h-5 w-5" />
+                <div className="flex items-start gap-3 p-4 border-b border-border/60">
+                  <Building2 className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{property.property_type}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Property Type</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-foreground">Verified Direct Owner</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Connect directly with the landlord. No middlemen or broker fee.
-                  </p>
+                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
+                  <User className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Any</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Preferred Tenant</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 border-b border-border/60">
+                  <CheckCircle2 className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Immediately</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Possession</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
+                  <Car className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Available</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Parking</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 border-b border-border/60">
+                  <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">1-3 Years</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Age of Building</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 border-r border-border/60">
+                  <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Yes</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Balcony</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 border-border/60">
+                  <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Today</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Posted On</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Conversion Action Buttons */}
-              <div className="mt-6 space-y-3">
-                <WhatsAppButton
-                  propertyId={property.id}
-                  className="w-full h-12 text-sm font-bold shadow-sm"
-                />
-
+              <div className="p-4 flex gap-3 border-t border-border/60 border-dashed bg-secondary/5">
+                <button
+                  onClick={() => setEnquiryOpen(true)}
+                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
+                >
+                  Contact
+                </button>
                 <button
                   onClick={() => setScheduleOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xs font-bold text-primary-foreground transition hover:brightness-110 shadow-md active:scale-95"
+                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
                 >
-                  <Calendar className="h-4 w-4" /> Schedule Visit Walkthrough
-                </button>
-
-                {property.video_url && (
-                  <button
-                    onClick={scrollToVideo}
-                    className="w-full flex items-center justify-center gap-2 rounded-2xl border border-emerald-600/30 bg-emerald-600/10 px-4 py-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-600/20"
-                  >
-                    <Play className="h-4 w-4 fill-current" /> Watch Video Tour
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setEnquiryOpen((v) => !v)}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-xs font-bold text-foreground transition hover:bg-secondary"
-                >
-                  <Mail className="h-4 w-4" /> Email Owner Directly
-                </button>
-
-                <button
-                  onClick={() => setEmiOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-transparent px-4 py-2.5 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
-                >
-                  <Scale className="h-3.5 w-3.5" /> Rent Budget & Expense Calculator
-                </button>
-
-                <button
-                  onClick={() => setReportOpen(true)}
-                  className="w-full text-center text-[11px] font-medium text-muted-foreground hover:text-rose-500 transition pt-2 block"
-                >
-                  🚩 Report inaccurate details or broker spam
+                  Schedule Visit
                 </button>
               </div>
 
-              {enquiryOpen && (
-                <div className="mt-4 border-t border-border/40 pt-4">
-                  <EnquiryForm propertyId={property.id} onSent={() => setEnquiryOpen(false)} />
+              <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-t border-border/60">
+                <div className="flex items-start gap-2 mb-3">
+                  <Shield className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                  <p className="text-xs font-medium text-emerald-900 dark:text-emerald-100 leading-tight">
+                    Report what was not correct in this property
+                  </p>
                 </div>
-              )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setReportOpen(true)}
+                    className="flex-1 text-xs font-semibold bg-background border border-border px-3 py-2 rounded hover:bg-secondary transition"
+                  >
+                    Listed by Broker
+                  </button>
+                  <button
+                    onClick={() => setReportOpen(true)}
+                    className="flex-1 text-xs font-semibold bg-background border border-border px-3 py-2 rounded hover:bg-secondary transition"
+                  >
+                    Rented Out
+                  </button>
+                </div>
+              </div>
             </div>
-          </aside>
+
+            {enquiryOpen && (
+              <div className="rounded-sm border border-border/60 bg-card p-4 shadow-sm">
+                <h3 className="font-bold mb-4">Send Message to Owner</h3>
+                <EnquiryForm
+                  propertyId={property.id}
+                  ownerId={property.owner_id || property.id}
+                  tenantId={tenantId}
+                  onSent={() => setEnquiryOpen(false)}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 5. SIMILAR RENTALS RECOMMENDATION SECTION */}
-        <SimilarProperties currentProperty={property} />
+        <div className="mt-12">
+          <SimilarProperties currentProperty={property} />
+        </div>
 
         {/* MODAL COMPONENTS */}
         <EmiCalculatorModal
@@ -759,32 +552,12 @@ export function PropertyDetailPage() {
         <ScheduleVisitModal
           propertyId={property.id}
           propertyTitle={property.title}
+          ownerId={property.owner_id || property.id}
+          tenantId={tenantId}
           isOpen={scheduleOpen}
           onClose={() => setScheduleOpen(false)}
         />
       </main>
-
-      {/* 6. MOBILE STICKY BOTTOM CONVERSION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur-xl shadow-2xl lg:hidden">
-        <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
-          <div>
-            <span className="text-[10px] uppercase font-semibold text-muted-foreground">Rent</span>
-            <p className="text-base font-extrabold text-foreground">
-              {formatPrice(property.price, property.listing_type)}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 flex-1 justify-end">
-            <WhatsAppButton propertyId={property.id} className="h-10 px-3 text-xs font-bold" />
-            <button
-              onClick={() => setScheduleOpen(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition active:scale-95"
-            >
-              <Calendar className="h-3.5 w-3.5" /> Schedule Visit
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* 7. FULLSCREEN LIGHTBOX MODAL */}
       {lightboxOpen && (

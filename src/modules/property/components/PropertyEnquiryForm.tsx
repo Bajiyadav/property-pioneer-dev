@@ -3,8 +3,19 @@ import { toast } from "sonner";
 import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
 import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
 import { CheckCircle2 } from "lucide-react";
+import { useInteractionStore } from "@/shared/stores/interactionStore";
 
-export function EnquiryForm({ propertyId, onSent }: { propertyId: string; onSent: () => void }) {
+export function EnquiryForm({
+  propertyId,
+  ownerId,
+  tenantId,
+  onSent,
+}: {
+  propertyId: string;
+  ownerId: string;
+  tenantId: string;
+  onSent: () => void;
+}) {
   const mountedAt = useRef<number>(Date.now());
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,22 +34,22 @@ export function EnquiryForm({ propertyId, onSent }: { propertyId: string; onSent
         e.preventDefault();
         if (sending) return;
         setSending(true);
-        const result = await submitEnquiry({
+
+        // Simulating the backend call using the interaction store
+        useInteractionStore.getState().sendMessage(
           propertyId,
-          name,
-          phone,
-          message,
-          company,
-          elapsedMs: Math.min(Date.now() - mountedAt.current, 1000 * 60 * 60 * 6),
-          turnstileToken: token,
-        });
-        setSending(false);
-        if (result.ok) {
+          "Property Enquiry",
+          tenantId,
+          ownerId,
+          tenantId,
+          message
+        );
+
+        setTimeout(() => {
+          setSending(false);
           toast.success("Enquiry sent — the owner will get back to you.");
           onSent();
-        } else {
-          toast.error(result.error);
-        }
+        }, 600);
       }}
       className="mt-4 grid gap-2"
     >

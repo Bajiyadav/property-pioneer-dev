@@ -73,12 +73,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* 1. Hero Section (Hyderabad Focus) */}
-      <HeroSection
-        query={q}
-        onQueryChange={setQ}
-        onSearch={handleSearchSubmit}
-        onOpenOwnerWizard={() => setShowOwnerWizard(true)}
-      />
+      <HeroSection query={q} onQueryChange={setQ} onSearch={handleSearchSubmit} />
 
       {/* 2. Real Estate Quote Banner */}
       <QuoteBanner />

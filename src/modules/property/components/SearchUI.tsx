@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, SlidersHorizontal, LayoutGrid, MapPin, X } from "lucide-react";
+import { Search, SlidersHorizontal, List, MapPin, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { PropertyMapView } from "@/modules/property/components/PropertyMapView";
@@ -82,6 +82,9 @@ export function SearchUI({
       baths: undefined,
       type: undefined,
       sort: undefined,
+      tenantType: undefined,
+      furnishing: undefined,
+      amenities: undefined,
       // intentionally keeping city and locality as they are part of the route for /rent/*
     });
   };
@@ -196,46 +199,91 @@ export function SearchUI({
         <select
           value={search.type || ""}
           onChange={(e) => update({ type: e.target.value })}
-          className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none"
+          className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none cursor-pointer"
           aria-label="Select property type"
         >
-          <option value="">Any</option>
+          <option value="">Any Type</option>
           <option value="Apartment">Apartment</option>
           <option value="Villa">Villa</option>
           <option value="Independent House">Independent House</option>
-          <option value="Studio">Studio</option>
+          <option value="Studio">1 RK / Studio</option>
           <option value="PG">PG / Co-living</option>
+          <option value="Gated Society">Gated Society</option>
         </select>
       </div>
 
-      {/* Coming Soon Filters */}
-      <div className="space-y-4 pt-4 border-t border-border/50">
-        <div className="text-xs font-semibold text-primary uppercase tracking-wider">
-          Coming Soon
+      {/* Tenant Type */}
+      <div className="space-y-3 pt-4 border-t border-border/50">
+        <label className="text-sm font-semibold text-foreground">Preferred Tenant</label>
+        <div className="flex gap-2">
+          {["Family", "Bachelors", "Any"].map((t) => {
+            const isActive = search.tenantType === t;
+            return (
+              <button
+                key={t}
+                onClick={() => update({ tenantType: isActive ? undefined : t })}
+                className={`flex-1 rounded-xl py-2 text-xs font-medium transition ${
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                }`}
+              >
+                {t}
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        <div className="space-y-2 opacity-50 pointer-events-none grayscale">
-          <label className="text-sm font-semibold text-foreground">Furnishing</label>
-          <div className="flex gap-2">
-            <button className="flex-1 rounded-xl bg-secondary py-2 text-xs font-medium text-muted-foreground">
-              Full
-            </button>
-            <button className="flex-1 rounded-xl bg-secondary py-2 text-xs font-medium text-muted-foreground">
-              Semi
-            </button>
-            <button className="flex-1 rounded-xl bg-secondary py-2 text-xs font-medium text-muted-foreground">
-              None
-            </button>
-          </div>
+      {/* Furnishing Status */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-foreground">Furnishing</label>
+        <div className="flex gap-2">
+          {["Full", "Semi", "None"].map((f) => {
+            const isActive = search.furnishing === f;
+            return (
+              <button
+                key={f}
+                onClick={() => update({ furnishing: isActive ? undefined : f })}
+                className={`flex-1 rounded-xl py-2 text-xs font-medium transition ${
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                }`}
+              >
+                {f}
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        <div className="space-y-2 opacity-50 pointer-events-none grayscale">
-          <label className="text-sm font-semibold text-foreground">Amenities</label>
-          <div className="flex flex-wrap gap-2">
-            <button className="rounded-lg border border-border px-3 py-1 text-xs">Gym</button>
-            <button className="rounded-lg border border-border px-3 py-1 text-xs">Pool</button>
-            <button className="rounded-lg border border-border px-3 py-1 text-xs">Parking</button>
-          </div>
+      {/* Amenities */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-foreground">Amenities</label>
+        <div className="flex flex-wrap gap-2">
+          {["Gym", "Pool", "Parking", "Security", "Lift", "Power Backup"].map((amenity) => {
+            const isActive = search.amenities?.includes(amenity);
+            return (
+              <button
+                key={amenity}
+                onClick={() => {
+                  const current = search.amenities || [];
+                  const updated = isActive
+                    ? current.filter((a: string) => a !== amenity)
+                    : [...current, amenity];
+                  update({ amenities: updated.length ? updated : undefined });
+                }}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                  isActive
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-transparent text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                {amenity}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -273,7 +321,7 @@ export function SearchUI({
                     : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 }`}
               >
-                <LayoutGrid className="h-3.5 w-3.5" /> Grid
+                <List className="h-3.5 w-3.5" /> List
               </button>
               <button
                 onClick={() => setViewMode("map")}
@@ -380,11 +428,21 @@ export function SearchUI({
             </div>
           </div>
 
-          {/* Results */}
           {isLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-[4/3] animate-pulse rounded-3xl bg-muted/60" />
+                <div
+                  key={i}
+                  className="flex flex-col sm:flex-row h-auto sm:h-64 animate-pulse rounded-xl bg-muted/30 border border-border"
+                >
+                  <div className="w-full sm:w-[280px] shrink-0 h-48 sm:h-full bg-muted/60" />
+                  <div className="p-4 flex-1">
+                    <div className="h-6 w-3/4 bg-muted/60 rounded mb-4" />
+                    <div className="h-4 w-1/2 bg-muted/60 rounded mb-6" />
+                    <div className="h-16 w-full bg-muted/40 rounded mb-4" />
+                    <div className="h-10 w-32 bg-muted/60 rounded ml-auto" />
+                  </div>
+                </div>
               ))}
             </div>
           ) : properties.length === 0 ? (
@@ -440,7 +498,7 @@ export function SearchUI({
               </div>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-6">
               {properties.map((p) => (
                 <PropertyCard key={p.id} property={p} />
               ))}

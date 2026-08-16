@@ -100,68 +100,106 @@ function formatDate(value: string) {
   });
 }
 
+import { AdminSidebar } from "@/modules/admin/components/AdminSidebar";
+import { DashboardAnalytics } from "@/modules/admin/components/DashboardAnalytics";
+import { PropertiesDataTable } from "@/modules/admin/components/PropertiesDataTable";
+import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+
 function AdminShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { signOut } = useAuthSession();
+  const [signingOut, setSigningOut] = useState(false);
 
   async function handleSignOut() {
-    await signOut();
-    navigate({ to: "/auth", replace: true });
+    setSigningOut(true);
+    try {
+      await signOut();
+      navigate({ to: "/auth", replace: true });
+    } finally {
+      setSigningOut(false);
+    }
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <BrandMark size="sm" />
-          <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-foreground">
-            Admin dashboard
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Listings, leads, and platform activity in one place.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
-          <LogOut className="h-4 w-4" /> Sign out
+    <div className="min-h-screen bg-neutral-50 flex flex-col pt-16">
+      {/*
+        Sign-out lives here because the admin portal has no other exit: it does
+        not use DashboardLayout, so the sidebar sign-out button that every other
+        dashboard gets is not present. `handleSignOut` was defined but never
+        rendered, which left admins with no way to end their session from this
+        page at all.
+      */}
+      <div className="flex w-full max-w-[1600px] mx-auto items-center justify-end px-8 py-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          data-testid="sidebar-signout"
+          aria-label="Sign out"
+          className="gap-2"
+        >
+          <LogOut className="h-4 w-4" /> {signingOut ? "Signing out…" : "Sign out"}
         </Button>
       </div>
-      <div className="mt-8">{children}</div>
+      <div className="flex-1 flex w-full max-w-[1600px] mx-auto">{children}</div>
     </div>
   );
 }
 
-/**
- * Admin dashboard component.
- *
- * By the time this mounts the `beforeLoad` guard has already verified
- * the user is an admin, so no further access-check UI is needed.
- */
 function AdminDashboard() {
+  const [currentView, setCurrentView] = useState("dashboard");
+
+  const pending = useAdminPropertyStore((s) => s.getPendingProperties());
+  const active = useAdminPropertyStore((s) => s.getActiveProperties());
+  const rejected = useAdminPropertyStore((s) => s.getRejectedProperties());
+  const expired = useAdminPropertyStore((s) => s.getExpiredProperties());
+
+  const renderContent = () => {
+    switch (currentView) {
+      case "dashboard":
+        return <DashboardAnalytics />;
+      case "pending":
+        return (
+          <PropertiesDataTable
+            properties={pending}
+            title="Pending Approvals"
+            showReviewActions={true}
+          />
+        );
+      case "active":
+        return (
+          <PropertiesDataTable
+            properties={active}
+            title="Active Listings"
+            showReviewActions={false}
+          />
+        );
+      case "rejected":
+        return (
+          <PropertiesDataTable
+            properties={rejected}
+            title="Rejected Listings"
+            showReviewActions={false}
+          />
+        );
+      case "expired":
+        return (
+          <PropertiesDataTable
+            properties={expired}
+            title="Expired & Archived"
+            showReviewActions={false}
+          />
+        );
+      default:
+        return <DashboardAnalytics />;
+    }
+  };
+
   return (
     <AdminShell>
-      <MetricsPanel />
-      <Tabs defaultValue="listings" className="mt-10">
-        <TabsList>
-          <TabsTrigger value="listings" className="gap-1.5">
-            <Building2 className="h-4 w-4" /> Listings
-          </TabsTrigger>
-          <TabsTrigger value="enquiries" className="gap-1.5">
-            <Inbox className="h-4 w-4" /> Enquiries
-          </TabsTrigger>
-          <TabsTrigger value="audit" className="gap-1.5">
-            <ScrollText className="h-4 w-4" /> Activity
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="listings" className="mt-6">
-          <ListingsPanel />
-        </TabsContent>
-        <TabsContent value="enquiries" className="mt-6">
-          <EnquiriesPanel />
-        </TabsContent>
-        <TabsContent value="audit" className="mt-6">
-          <AuditPanel />
-        </TabsContent>
-      </Tabs>
+      <AdminSidebar currentView={currentView} setView={setCurrentView} />
+      <div className="flex-1 p-8">{renderContent()}</div>
     </AdminShell>
   );
 }

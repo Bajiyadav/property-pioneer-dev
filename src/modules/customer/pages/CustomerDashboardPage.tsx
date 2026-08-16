@@ -50,21 +50,15 @@ import {
 import { TrendAreaChart, DonutChart } from "@/modules/dashboard/components/DashboardCharts";
 import { displayName } from "@/modules/authentication/services/session";
 import { readRecentSearches, type RecentSearch } from "@/modules/dashboard/services/dashboardData";
-import {
-  Booking,
-  Enquiry,
-  BOOKINGS,
-  ENQUIRIES,
-  NOTIFICATIONS,
-  VIEW_TREND,
-  SEARCH_PARAMS,
-} from "@/modules/customer/fixtures";
+import { VIEW_TREND, SEARCH_PARAMS } from "@/modules/customer/fixtures";
 import {
   ListingGrid,
   RecentSearchesPanel,
   ProfilePanel,
   SettingsPanel,
 } from "@/modules/customer/components/CustomerDashboardParts";
+import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -117,11 +111,15 @@ function CustomerDashboard({ user }: { user: User | null }) {
     return savedHomes.filter((p) => `${p.title} ${p.city} ${p.address}`.toLowerCase().includes(q));
   }, [savedHomes, savedQuery]);
 
+  const myBookings = useInteractionStore((s) => s.getTenantBookings(user?.id || ""));
+  const myChats = useInteractionStore((s) => s.getTenantChats(user?.id || ""));
+  const myNotifications = useInteractionStore((s) => s.getUserNotifications(user?.id || ""));
+
   const visibleBookings = useMemo(() => {
-    if (bookingFilter === "all") return BOOKINGS;
-    if (bookingFilter === "upcoming") return BOOKINGS.filter((b) => b.status !== "Completed");
-    return BOOKINGS.filter((b) => b.status === "Completed");
-  }, [bookingFilter]);
+    if (bookingFilter === "all") return myBookings;
+    if (bookingFilter === "upcoming") return myBookings.filter((b) => b.status !== "Completed");
+    return myBookings.filter((b) => b.status === "Completed");
+  }, [bookingFilter, myBookings]);
 
   const cityMix = useMemo(() => {
     const counts = new Map<string, number>();
@@ -168,17 +166,17 @@ function CustomerDashboard({ user }: { user: User | null }) {
               />
               <KpiCard
                 label="Upcoming visits"
-                numericValue={BOOKINGS.filter((b) => b.status !== "Completed").length}
+                numericValue={myBookings.filter((b) => b.status !== "Completed").length}
                 icon={<Calendar className="h-4 w-4" />}
                 accent="blue"
-                trend={{ direction: "up", label: "1 tomorrow" }}
+                trend={{ direction: "up", label: "Scheduled" }}
               />
               <KpiCard
-                label="Active enquiries"
-                numericValue={ENQUIRIES.length}
+                label="Active chats"
+                numericValue={myChats.length}
                 icon={<MessageSquare className="h-4 w-4" />}
                 accent="purple"
-                hint="Avg reply < 15m"
+                hint="With owners"
               />
               <KpiCard
                 label="Listings available"
@@ -287,7 +285,21 @@ function CustomerDashboard({ user }: { user: User | null }) {
 
             <div className="rounded-3xl border border-border/60 bg-card p-5">
               <SectionHeader title="Recent activity" />
-              <ActivityTimeline items={NOTIFICATIONS} />
+              <ActivityTimeline
+                items={
+                  myNotifications.length > 0
+                    ? myNotifications
+                    : [
+                        {
+                          id: "placeholder",
+                          title: "Welcome to Urban Properties",
+                          detail: "Start exploring and favoriting properties to see activity here.",
+                          time: "Just now",
+                          tone: "info",
+                        },
+                      ]
+                }
+              />
             </div>
           </div>
         </div>
@@ -428,7 +440,21 @@ function CustomerDashboard({ user }: { user: User | null }) {
             subtitle="Price drops, visit confirmations, and new matches"
           />
           <div className="rounded-3xl border border-border/60 bg-card p-6">
-            <ActivityTimeline items={NOTIFICATIONS} />
+            <ActivityTimeline
+              items={
+                myNotifications.length > 0
+                  ? myNotifications
+                  : [
+                      {
+                        id: "placeholder",
+                        title: "No notifications yet",
+                        detail: "We'll let you know when owners reply to you.",
+                        time: "Now",
+                        tone: "neutral",
+                      },
+                    ]
+              }
+            />
           </div>
           <Link
             to="/notifications"
@@ -498,55 +524,8 @@ function CustomerDashboard({ user }: { user: User | null }) {
 
       {activeTab === "enquiries" && (
         <div className="space-y-5">
-          <SectionHeader
-            title="Your enquiries"
-            subtitle="Messages you've sent to property owners"
-          />
-          <DataTable
-            rows={ENQUIRIES}
-            getKey={(e) => e.id}
-            empty={
-              <EmptyState
-                icon={<MessageSquare className="h-6 w-6" />}
-                title="No enquiries yet"
-                hint="Message an owner from any listing to start a conversation."
-              />
-            }
-            columns={[
-              {
-                key: "property",
-                header: "Property",
-                render: (e: Enquiry) => (
-                  <span className="font-bold text-foreground">{e.title}</span>
-                ),
-              },
-              {
-                key: "message",
-                header: "Message",
-                render: (e: Enquiry) => (
-                  <span className="text-muted-foreground">"{e.message}"</span>
-                ),
-              },
-              {
-                key: "sent",
-                header: "Sent",
-                render: (e: Enquiry) => (
-                  <span className="whitespace-nowrap text-muted-foreground">{e.sent}</span>
-                ),
-              },
-              {
-                key: "status",
-                header: "Status",
-                className: "text-right",
-                render: (e: Enquiry) => (
-                  <StatusPill
-                    label={e.status}
-                    tone={e.status === "Owner responded" ? "success" : "warning"}
-                  />
-                ),
-              },
-            ]}
-          />
+          <SectionHeader title="Messages" subtitle="Your conversations with property owners" />
+          <ChatInterface currentUserId={user?.id || ""} role="tenant" chats={myChats} />
         </div>
       )}
 

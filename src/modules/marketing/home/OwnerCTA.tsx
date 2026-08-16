@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { CheckCircle2, ArrowRight, Sparkles, Shield, Zap } from "lucide-react";
-
 export function OwnerCTA({ onOpenWizard }: { onOpenWizard?: () => void }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
@@ -33,13 +33,12 @@ export function OwnerCTA({ onOpenWizard }: { onOpenWizard?: () => void }) {
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={onOpenWizard}
+            <Link
+              to="/list-property"
               className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-sm font-bold text-slate-950 transition-all hover:bg-emerald-50 hover:shadow-xl hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
             >
               Post Property FREE <ArrowRight className="h-4 w-4" />
-            </button>
+            </Link>
             <span className="text-xs text-white/80 font-medium">
               ⚡ Direct tenant enquiries with no middleman fees
             </span>
