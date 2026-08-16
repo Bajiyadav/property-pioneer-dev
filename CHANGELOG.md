@@ -1,3 +1,9 @@
+## v0.8.1 — 2026-08-16
+
+### Fixes
+- fix(types): resolve all TS errors blocking pre-push hook (0a5ef9a)
+- fix(dashboard): restore sign-out by stopping an infinite render loop (74b72ad)
+
 ## v0.8.0 — 2026-08-16
 
 ### Features
