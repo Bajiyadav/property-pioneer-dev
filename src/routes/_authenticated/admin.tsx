@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -21,50 +21,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  checkIsAdmin,
   getAdminAuditLogs,
   getAdminEnquiries,
   getAdminOverview,
   getAdminProperties,
   updateAdminProperty,
 } from "@/modules/admin/services/adminFunctions";
+import { RequireRole } from "@/modules/dashboard/components/RequireRole";
 
+/**
+ * Authorization for this route is a component guard, not a `beforeLoad`.
+ *
+ * `beforeLoad` cannot do the job here. The Supabase session lives in
+ * localStorage and the bearer token is attached by a *client* middleware, so
+ * during SSR the check has no credentials to work with: it failed with "no
+ * authorization header" for everyone, real admins included, which is why
+ * opening /admin directly used to bounce straight back out. Skipping it on the
+ * server is no better — `beforeLoad` does not re-run on hydration, so the admin
+ * shell would be server-rendered for whoever asked for the URL.
+ *
+ * `RequireRole` resolves the role from the RLS-protected `user_roles` table and
+ * renders nothing but a checking state until that answer arrives, so no admin
+ * chrome reaches a non-admin at any point. Every server function behind the
+ * panels still runs its own `assertAdmin`, so the data is guarded independently
+ * of this component.
+ */
 export const Route = createFileRoute("/_authenticated/admin")({
-  /**
-   * Route-level authorization gate. Runs before the component mounts so
-   * non-admin users never see the admin shell, skeleton loaders, or any
-   * privileged UI at all — they are silently redirected to their own
-   * dashboard.
-   *
-   * Skipped during SSR. The Supabase session lives in localStorage, so a
-   * server render has no way to see it: the bearer token is attached by a
-   * *client* middleware. Running the check server-side therefore failed with
-   * "no authorization header" for everyone — including real admins — and
-   * bounced them off the page, which is why opening /admin directly used to
-   * be impossible. The check runs on the client pass instead, before the
-   * component mounts.
-   *
-   * Skipping it costs nothing in security: every server function the panels
-   * call runs its own `assertAdmin`, so a client that bypassed this guard
-   * entirely would still get "Forbidden" and no data.
-   */
-  beforeLoad: async () => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const result = await checkIsAdmin({});
-      if (!result?.isAdmin) {
-        throw redirect({ to: "/dashboard", replace: true });
-      }
-    } catch (error) {
-      // Re-throw redirects so TanStack Router handles them
-      if (error instanceof Response || (error && typeof error === "object" && "to" in error)) {
-        throw error;
-      }
-      // Auth errors (not signed in, expired or revoked token) → sign-in page.
-      throw redirect({ to: "/auth", replace: true });
-    }
-  },
   head: () => ({
     meta: [
       { title: "Admin dashboard — Urban Rental Flats" },
@@ -82,15 +64,23 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminDashboard,
+  component: GuardedAdminDashboard,
   errorComponent: ({ error }) => (
-    <AdminShell>
-      <p role="alert" className="text-sm text-muted-foreground">
-        {error.message}
-      </p>
-    </AdminShell>
+    <RequireRole role="admin">
+      {() => (
+        <AdminShell>
+          <p role="alert" className="text-sm text-muted-foreground">
+            {error.message}
+          </p>
+        </AdminShell>
+      )}
+    </RequireRole>
   ),
 });
+
+function GuardedAdminDashboard() {
+  return <RequireRole role="admin">{() => <AdminDashboard />}</RequireRole>;
+}
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat("en-IN", {

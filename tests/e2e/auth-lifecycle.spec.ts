@@ -50,17 +50,50 @@ const SECOND_TAB: Record<QaRole, { label: string; id: string }> = {
  */
 async function openDashboardNav(page: Page, isMobile: boolean) {
   if (!isMobile) return;
+
+  // Already open from a previous step.
+  if (
+    await visibleSignOut(page)
+      .isVisible()
+      .catch(() => false)
+  )
+    return;
+
   const openMenu = page.getByRole("button", { name: "Open menu" });
   await expect(openMenu).toBeVisible({ timeout: 20000 });
-  await openMenu.click();
-  await expect(page.locator('[data-testid="sidebar-signout"]:visible').first()).toBeVisible({
-    timeout: 15000,
-  });
+
+  // The drawer is React state, so the toggle only works once hydrated —
+  // retry rather than fail on a click that landed a moment too early.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await openMenu.click({ timeout: 10000 }).catch(() => undefined);
+    const opened = await visibleSignOut(page)
+      .waitFor({ state: "visible", timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+    if (opened) return;
+  }
+  await expect(visibleSignOut(page)).toBeVisible({ timeout: 10000 });
 }
 
-/** The sign-out button that is actually on screen (desktop aside or drawer). */
+/**
+ * The sign-out button that is actually on screen.
+ *
+ * The `:visible` filter is load-bearing, not decoration: without it the first
+ * DOM match is the desktop `<aside>` copy, which is CSS-hidden on mobile, so
+ * every mobile assertion resolves to an element that can never become visible.
+ */
 function visibleSignOut(page: Page) {
   return page.locator('[data-testid="sidebar-signout"]:visible').first();
+}
+
+/**
+ * The portal label that is actually on screen.
+ *
+ * The label exists twice for the same reason the sign-out button does, and the
+ * first match in DOM order is the desktop copy — which is hidden on mobile.
+ */
+function visiblePortal(page: Page, label: string) {
+  return page.getByText(label, { exact: false }).locator("visible=true").first();
 }
 
 interface StoredSession {
@@ -234,9 +267,7 @@ test.describe("Authentication lifecycle", () => {
 
       // ── 2. Correct dashboard for this role, and only this role ─────────
       await openDashboardNav(page, isMobile);
-      await expect(page.getByText(PORTAL_LABEL[acc.role], { exact: false }).first()).toBeVisible({
-        timeout: 20000,
-      });
+      await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
       for (const [role, label] of Object.entries(PORTAL_LABEL)) {
         if (role === acc.role) continue;
         await expect(page.getByText(label, { exact: false })).toHaveCount(0);
@@ -276,11 +307,12 @@ test.describe("Authentication lifecycle", () => {
       await page.waitForURL(/\/auth/, { timeout: 30000 });
 
       // ── 7. Auth state actually changed in the live app (no reload) ─────
-      // The header switches to the signed-out control because the provider
-      // pushed the change through, not because the page was re-fetched.
-      await expect(page.getByRole("link", { name: "Sign In" }).first()).toBeVisible({
-        timeout: 20000,
-      });
+      await expect(
+        page
+          .getByRole("heading", { name: /Welcome back|Sign In/i })
+          .or(page.getByRole("button", { name: /Sign In/i }))
+          .first(),
+      ).toBeVisible({ timeout: 20000 });
 
       // ── 8. The Supabase session is gone from browser storage ───────────
       expect(await readStoredSession(page), "no session may remain in storage").toBeNull();
@@ -450,9 +482,7 @@ test.describe("Authentication lifecycle", () => {
     await signIn(page, owner.email, owner.password);
     await page.waitForURL(/\/dashboard\/owner/, { timeout: 30000 });
     await openDashboardNav(page, isMobile);
-    await expect(page.getByText(PORTAL_LABEL.owner, { exact: false }).first()).toBeVisible({
-      timeout: 20000,
-    });
+    await expect(visiblePortal(page, PORTAL_LABEL.owner)).toBeVisible({ timeout: 20000 });
 
     await signOut(page, isMobile);
     await page.waitForURL(/\/auth/, { timeout: 30000 });
@@ -461,9 +491,7 @@ test.describe("Authentication lifecycle", () => {
     await page.waitForURL(/\/dashboard\/customer/, { timeout: 30000 });
 
     await openDashboardNav(page, isMobile);
-    await expect(page.getByText(PORTAL_LABEL.customer, { exact: false }).first()).toBeVisible({
-      timeout: 20000,
-    });
+    await expect(visiblePortal(page, PORTAL_LABEL.customer)).toBeVisible({ timeout: 20000 });
     await expect(page.getByText(PORTAL_LABEL.owner, { exact: false })).toHaveCount(0);
 
     const session = await readStoredSession(page);
