@@ -1,7 +1,8 @@
-import { createFileRoute, Link, type LinkProps } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, type LinkProps } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import {
   User,
   Mail,
@@ -56,6 +57,8 @@ function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [savingName, setSavingName] = useState("");
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
+  const { signOut } = useAuthSession();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -90,8 +93,9 @@ function ProfilePage() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/";
+    await signOut();
+    toast.success("Signed out successfully");
+    navigate({ to: "/auth", replace: true });
   };
 
   if (loading) {

@@ -240,7 +240,7 @@ export function ErrorState({
 }
 
 /** Banner shown when a panel is displaying seed data instead of live records. */
-export function DemoDataNotice({ reason }: { reason?: string | null }) {
+export function SampleDataNotice({ reason }: { reason?: string | null }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3.5">
       <TriangleAlert className="mt-0.5 h-4 w-4 flex-none text-amber-500" />

@@ -9,7 +9,7 @@ import urfLogo from "@/assets/urf-logo.png.asset.json";
 export function UrbanLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <div
-      className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-700 p-1.5 shadow-md ring-1 ring-emerald-400/30 text-white ${className}`}
+      className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 p-1.5 shadow-md ring-1 ring-white/20 text-white ${className}`}
     >
       <svg
         viewBox="0 0 24 24"
@@ -18,11 +18,11 @@ export function UrbanLogoIcon({ className = "h-8 w-8" }: { className?: string })
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="h-full w-full"
+        className="h-full w-full drop-shadow-sm"
       >
         <path d="M3 21H21" />
         <path d="M6 21V9L12 4L18 9V21" />
-        <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.25" />
+        <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.3" />
         <path d="M9 10H10" />
         <path d="M14 10H15" />
       </svg>
@@ -50,7 +50,12 @@ export function BrandMark({
 
   const logoSizeClass = size === "sm" ? "h-7 w-7" : size === "lg" ? "h-11 w-11" : "h-9 w-9";
   const imgLogoClass = size === "sm" ? "h-7 w-auto" : size === "lg" ? "h-11 w-auto" : "h-9 w-auto";
-  const textClass = size === "sm" ? "text-base" : size === "lg" ? "text-2xl" : "text-xl";
+  const textClass =
+    size === "sm"
+      ? "text-base font-semibold"
+      : size === "lg"
+        ? "text-2xl font-bold"
+        : "text-xl font-bold";
 
   const isLocalHostAsset = urfLogo?.url && urfLogo.url.startsWith("/__l5e/");
 
@@ -62,7 +67,7 @@ export function BrandMark({
         <img
           src={urfLogo.url}
           alt={`${BRAND.name} logo`}
-          className={imgLogoClass}
+          className={`${imgLogoClass} rounded-lg shadow-sm`}
           loading="eager"
           decoding="async"
           onError={() => setImgError(true)}
@@ -73,19 +78,19 @@ export function BrandMark({
         (responsiveName ? (
           <>
             <span
-              className={`hidden font-[family-name:var(--font-display)] font-semibold tracking-tight text-foreground sm:inline ${textClass}`}
+              className={`hidden font-[family-name:var(--font-display)] tracking-tight text-foreground sm:inline ${textClass}`}
             >
               {BRAND.name}
             </span>
             <span
-              className={`font-[family-name:var(--font-display)] font-semibold tracking-tight text-foreground sm:hidden ${textClass}`}
+              className={`font-[family-name:var(--font-display)] tracking-tight text-foreground sm:hidden ${textClass}`}
             >
               {BRAND.shortName}
             </span>
           </>
         ) : (
           <span
-            className={`font-[family-name:var(--font-display)] font-semibold tracking-tight text-foreground ${textClass}`}
+            className={`font-[family-name:var(--font-display)] tracking-tight text-foreground ${textClass}`}
           >
             {BRAND.name}
           </span>

@@ -28,7 +28,7 @@ import {
   ActivityTimeline,
   CardSkeleton,
   DataTable,
-  DemoDataNotice,
+  SampleDataNotice,
   EmptyState,
   ErrorState,
   FilterChips,
@@ -172,7 +172,7 @@ function AgentDashboard({ user }: { user: User | null }) {
     >
       {activeTab === "overview" && (
         <div className="space-y-8">
-          {isSampleData && <DemoDataNotice reason={feed?.error} />}
+          {isSampleData && <SampleDataNotice reason={feed?.error} />}
 
           {isLoading ? (
             <CardSkeleton />

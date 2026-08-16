@@ -7,7 +7,7 @@ import { type UserRole } from "@/config/roles";
 import { BrandMark } from "@/shared/components/BrandMark";
 import { Breadcrumbs } from "@/modules/dashboard/components/DashboardKit";
 import { displayName, initialsFor } from "@/modules/authentication/services/session";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export interface NavItem {
   id: string;
@@ -71,6 +71,7 @@ export function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuthSession();
 
   const meta = ROLE_META[role];
   const activeLabel = navItems.find((n) => n.id === activeTab)?.label ?? "Overview";
@@ -91,14 +92,15 @@ export function DashboardLayout({
 
   const handleSignOut = async () => {
     setSigningOut(true);
-    const { error } = await supabase.auth.signOut();
-    setSigningOut(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate({ to: "/auth", replace: true });
+    } catch (err) {
+      toast.error("Error signing out. Please try again.");
+    } finally {
+      setSigningOut(false);
     }
-    toast.success("Signed out successfully");
-    navigate({ to: "/", replace: true });
   };
 
   const sidebarInner = (
@@ -186,6 +188,8 @@ export function DashboardLayout({
         <button
           onClick={handleSignOut}
           disabled={signingOut}
+          data-testid="sidebar-signout"
+          aria-label="Sign out"
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-500/30 bg-rose-500/5 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-50 dark:text-rose-400"
         >
           <LogOut className="h-3.5 w-3.5" />

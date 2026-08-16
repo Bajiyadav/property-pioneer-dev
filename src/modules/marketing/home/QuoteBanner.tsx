@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
-import { Quote } from "lucide-react";
+import { Quote, Sparkles } from "lucide-react";
 
 const QUOTES = [
   "Your next home is closer than you think.",
   "Every great journey begins with the right address.",
-  "Verified homes. Honest pricing. Better living.",
+  "Moderated listings. Honest pricing. Better living.",
   "Built for Hyderabad. Ready for India.",
   "Finding a home should feel exciting—not stressful.",
-  "No brokerage. No surprises. Just better homes.",
+  "Direct owner connect. No platform commission.",
 ];
 
 export function QuoteBanner() {
-  // Picking a random quote during render makes the server and client markup
-  // disagree, which fails hydration. Render a stable quote first, then rotate.
   const [quote, setQuote] = useState(QUOTES[0]);
 
   useEffect(() => {
@@ -20,15 +18,20 @@ export function QuoteBanner() {
   }, []);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-secondary p-8 text-center shadow-lg">
-        <Quote className="mx-auto h-8 w-8 text-primary/40" />
-        <blockquote className="mt-3 text-xl font-serif font-medium italic text-foreground sm:text-2xl">
-          "{quote}"
+    <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-r from-card via-card to-secondary/60 p-8 sm:p-10 text-center shadow-[var(--shadow-card)] ring-1 ring-white/10">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <Quote className="mx-auto h-7 w-7 text-primary/40 rotate-180" />
+        <blockquote className="mt-3 font-[family-name:var(--font-display)] text-xl sm:text-2xl md:text-3xl font-medium italic text-foreground tracking-tight max-w-3xl mx-auto">
+          &ldquo;{quote}&rdquo;
         </blockquote>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Urban Properties • The Hyderabad Standard
-        </p>
+
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <span>Urban Properties</span>
+          <span>•</span>
+          <span className="text-primary font-bold">Hyderabad Standard</span>
+        </div>
       </div>
     </section>
   );

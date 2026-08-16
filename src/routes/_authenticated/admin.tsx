@@ -1,19 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  BadgeCheck,
-  Building2,
-  Inbox,
-  ScrollText,
-  ShieldAlert,
-  Sparkles,
-  LogOut,
-} from "lucide-react";
+import { BadgeCheck, Building2, Inbox, ScrollText, Sparkles, LogOut } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { BrandMark } from "@/shared/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +30,41 @@ import {
 } from "@/modules/admin/services/adminFunctions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  /**
+   * Route-level authorization gate. Runs before the component mounts so
+   * non-admin users never see the admin shell, skeleton loaders, or any
+   * privileged UI at all — they are silently redirected to their own
+   * dashboard.
+   *
+   * Skipped during SSR. The Supabase session lives in localStorage, so a
+   * server render has no way to see it: the bearer token is attached by a
+   * *client* middleware. Running the check server-side therefore failed with
+   * "no authorization header" for everyone — including real admins — and
+   * bounced them off the page, which is why opening /admin directly used to
+   * be impossible. The check runs on the client pass instead, before the
+   * component mounts.
+   *
+   * Skipping it costs nothing in security: every server function the panels
+   * call runs its own `assertAdmin`, so a client that bypassed this guard
+   * entirely would still get "Forbidden" and no data.
+   */
+  beforeLoad: async () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const result = await checkIsAdmin({});
+      if (!result?.isAdmin) {
+        throw redirect({ to: "/dashboard", replace: true });
+      }
+    } catch (error) {
+      // Re-throw redirects so TanStack Router handles them
+      if (error instanceof Response || (error && typeof error === "object" && "to" in error)) {
+        throw error;
+      }
+      // Auth errors (not signed in, expired or revoked token) → sign-in page.
+      throw redirect({ to: "/auth", replace: true });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Admin dashboard — Urban Rental Flats" },
@@ -85,12 +112,10 @@ function formatDate(value: string) {
 
 function AdminShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { signOut } = useAuthSession();
 
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
+  async function handleSignOut() {
+    await signOut();
     navigate({ to: "/auth", replace: true });
   }
 
@@ -106,7 +131,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
             Listings, leads, and platform activity in one place.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={signOut} className="gap-2">
+        <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
           <LogOut className="h-4 w-4" /> Sign out
         </Button>
       </div>
@@ -115,42 +140,13 @@ function AdminShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Admin dashboard component.
+ *
+ * By the time this mounts the `beforeLoad` guard has already verified
+ * the user is an admin, so no further access-check UI is needed.
+ */
 function AdminDashboard() {
-  const check = useServerFn(checkIsAdmin);
-  const { data, isPending } = useQuery({
-    queryKey: ["admin", "access"],
-    queryFn: () => check({}),
-  });
-
-  if (isPending) {
-    return (
-      <AdminShell>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
-          ))}
-        </div>
-      </AdminShell>
-    );
-  }
-
-  if (!data?.isAdmin) {
-    return (
-      <AdminShell>
-        <Card className="flex flex-col items-start gap-3 p-6">
-          <ShieldAlert className="h-6 w-6 text-primary" />
-          <h2 className="font-serif text-xl font-semibold text-foreground">
-            Admin access required
-          </h2>
-          <p className="max-w-prose text-sm text-muted-foreground">
-            You're signed in, but this account doesn't have the admin role yet. Ask a platform
-            administrator to grant it, then reload this page.
-          </p>
-        </Card>
-      </AdminShell>
-    );
-  }
-
   return (
     <AdminShell>
       <MetricsPanel />

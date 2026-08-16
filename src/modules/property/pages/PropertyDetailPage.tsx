@@ -41,6 +41,7 @@ import {
   Hospital,
   HelpCircle,
   ChevronDown,
+  Video,
 } from "lucide-react";
 import {
   fetchProperty,
@@ -88,6 +89,22 @@ export function PropertyDetailPage() {
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Keyboard navigation for full-screen media lightbox
+  useEffect(() => {
+    if (!lightboxOpen || !property?.images?.length) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowLeft") {
+        setActiveImg((prev) => (prev > 0 ? prev - 1 : property.images.length - 1));
+      }
+      if (e.key === "ArrowRight") {
+        setActiveImg((prev) => (prev < property.images.length - 1 ? prev + 1 : 0));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen, property?.images]);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
@@ -152,7 +169,7 @@ export function PropertyDetailPage() {
   const faqs = [
     {
       q: "Is there any brokerage or platform commission on this property?",
-      a: "No. Urban Properties is 100% direct-from-owner with zero brokerage charges for tenants.",
+      a: "No. Urban Properties charges no platform commission for browsing or contacting listing owners.",
     },
     {
       q: "How do I schedule an in-person or video visit?",
@@ -634,7 +651,7 @@ export function PropertyDetailPage() {
                 </p>
                 {property.listing_type === "rent" && (
                   <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-600/10 px-2.5 py-1 rounded-full">
-                    Zero Brokerage
+                    No Platform Fee
                   </span>
                 )}
               </div>

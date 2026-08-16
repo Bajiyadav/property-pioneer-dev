@@ -9,7 +9,6 @@ import {
   Bell,
   Settings,
   LogOut,
-  PlusCircle,
   Building2,
   BarChart3,
   Users,
@@ -18,20 +17,19 @@ import {
   FileBarChart,
   ChevronDown,
   CheckCircle2,
+  LogIn,
 } from "lucide-react";
 import { getDashboardRoute, type UserRole } from "@/config/roles";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export function HeaderProfileMenu({ user }: { user?: { email?: string | null } | null }) {
+export function HeaderProfileMenu() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Authoritative role — matches whatever the dashboards will actually let the
-  // user open, so the menu can never advertise a portal they can't reach.
-  const { role }: { role: UserRole } = useAuthSession();
+  // Authoritative auth state & role from centralized AuthContext
+  const { role, user, status, signOut } = useAuthSession();
   const dashboardPath = getDashboardRoute(role);
 
   useEffect(() => {
@@ -46,10 +44,23 @@ export function HeaderProfileMenu({ user }: { user?: { email?: string | null } |
 
   const handleLogout = async () => {
     setOpen(false);
-    await supabase.auth.signOut();
+    await signOut();
     toast.success("Signed out successfully");
-    navigate({ to: "/" });
+    navigate({ to: "/auth", replace: true });
   };
+
+  // If user is not authenticated, render a clean Sign In link
+  if (status !== "authenticated" || !user) {
+    return (
+      <Link
+        to="/auth"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-secondary/50 px-3.5 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:bg-secondary"
+      >
+        <LogIn className="h-3.5 w-3.5 text-primary" />
+        <span>Sign In</span>
+      </Link>
+    );
+  }
 
   const getInitials = () => {
     if (user?.email) return user.email.slice(0, 2).toUpperCase();
@@ -97,7 +108,7 @@ export function HeaderProfileMenu({ user }: { user?: { email?: string | null } |
             </div>
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-foreground truncate">
-                {user?.email || `Verified ${role.toUpperCase()} User`}
+                {user.email || `Verified ${role.toUpperCase()} User`}
               </p>
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 capitalize">
                 <CheckCircle2 className="h-3 w-3" /> {role} Role Verified
@@ -141,31 +152,9 @@ export function HeaderProfileMenu({ user }: { user?: { email?: string | null } |
                 <div className="my-1 border-t border-border/30" />
                 <MenuItem
                   to="/dashboard/owner"
-                  search={{ tab: "add" }}
-                  icon={PlusCircle}
-                  label="Add Property"
-                  onClick={() => setOpen(false)}
-                  highlight
-                />
-                <MenuItem
-                  to="/dashboard/owner"
-                  search={{ tab: "properties" }}
+                  search={{ tab: "listings" }}
                   icon={Building2}
                   label="My Listings"
-                  onClick={() => setOpen(false)}
-                />
-                <MenuItem
-                  to="/dashboard/owner"
-                  search={{ tab: "analytics" }}
-                  icon={BarChart3}
-                  label="Analytics"
-                  onClick={() => setOpen(false)}
-                />
-                <MenuItem
-                  to="/dashboard/owner"
-                  search={{ tab: "leads" }}
-                  icon={Users}
-                  label="Leads"
                   onClick={() => setOpen(false)}
                 />
               </>
@@ -178,14 +167,7 @@ export function HeaderProfileMenu({ user }: { user?: { email?: string | null } |
                   to="/dashboard/agent"
                   search={{ tab: "clients" }}
                   icon={Users}
-                  label="Clients CRM"
-                  onClick={() => setOpen(false)}
-                />
-                <MenuItem
-                  to="/dashboard/agent"
-                  search={{ tab: "listings" }}
-                  icon={Building2}
-                  label="Listings"
+                  label="Assigned Leads"
                   onClick={() => setOpen(false)}
                 />
                 <MenuItem
@@ -276,7 +258,6 @@ function MenuItem({
   highlight = false,
 }: {
   to: string;
-  /** Query params for the target route, e.g. the dashboard `tab`. */
   search?: Record<string, string>;
   icon: React.ElementType;
   label: string;

@@ -37,6 +37,7 @@ import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
 import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_authenticated/dashboard/customer'
 import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
+import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
@@ -190,6 +191,12 @@ const AuthenticatedDashboardOwnerRoute =
     path: '/owner',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const ApiAuthLoginNotificationRoute =
+  ApiAuthLoginNotificationRouteImport.update({
+    id: '/api/auth/login-notification',
+    path: '/api/auth/login-notification',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   id: '/api/public/enquiries',
   path: '/api/public/enquiries',
@@ -263,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -298,6 +306,7 @@ export interface FileRoutesByTo {
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -337,6 +346,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/dashboard/agent'
     | '/dashboard/customer'
     | '/dashboard/owner'
+    | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/dashboard/'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/dashboard/agent'
     | '/dashboard/customer'
     | '/dashboard/owner'
+    | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/dashboard'
@@ -449,6 +461,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/agent'
     | '/_authenticated/dashboard/customer'
     | '/_authenticated/dashboard/owner'
+    | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/_authenticated/dashboard/'
@@ -480,6 +493,7 @@ export interface RootRouteChildren {
   VillasRoute: typeof VillasRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   RentIndexRoute: typeof RentIndexRoute
+  ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   RentCityLocalityRoute: typeof RentCityLocalityRoute
   RentCityIndexRoute: typeof RentCityIndexRoute
@@ -688,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardOwnerRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/api/auth/login-notification': {
+      id: '/api/auth/login-notification'
+      path: '/api/auth/login-notification'
+      fullPath: '/api/auth/login-notification'
+      preLoaderRoute: typeof ApiAuthLoginNotificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/enquiries': {
       id: '/api/public/enquiries'
       path: '/api/public/enquiries'
@@ -816,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
   VillasRoute: VillasRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   RentIndexRoute: RentIndexRoute,
+  ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   RentCityLocalityRoute: RentCityLocalityRoute,
   RentCityIndexRoute: RentCityIndexRoute,

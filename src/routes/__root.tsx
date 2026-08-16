@@ -3,7 +3,6 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -23,11 +22,10 @@ import {
   getOgImageUrl,
   APP_URL,
 } from "@/config/app";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
 import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
+import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 
 function NotFoundComponent() {
   return (
@@ -113,15 +111,15 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const router = useRouter();
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
     name: APP_NAME,
     url: APP_URL,
-    logo: `${APP_URL}/favicon.ico`,
+    logo: `${APP_URL}/og-image.png`,
     description: APP_DESCRIPTION,
+    priceRange: "₹₹",
     areaServed: "India",
     address: {
       "@type": "PostalAddress",
@@ -135,60 +133,37 @@ function RootComponent() {
     ],
   };
 
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
-    });
-    return () => data.subscription.unsubscribe();
-  }, [router, queryClient]);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-        <SiteFooter />
-      </div>
-      <Toaster position="top-center" richColors />
+      <AuthProvider>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <div className="flex min-h-screen flex-col">
+          <SiteHeader />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <SiteFooter />
+        </div>
+        <Toaster position="top-center" richColors />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
 
 function SiteHeader() {
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [waitlistCategory, setWaitlistCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    let active = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (active) {
-        setSignedIn(Boolean(data.session));
-        setUser(data.session?.user ?? null);
-      }
-    });
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSignedIn(Boolean(session));
-      setUser(session?.user ?? null);
-    });
-
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 15);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      active = false;
-      data.subscription.unsubscribe();
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
@@ -196,18 +171,22 @@ function SiteHeader() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md transition-all duration-300 ${scrolled ? "py-2 shadow-md bg-background/95" : "py-3.5"}`}
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "glass-nav border-b border-border/80 py-2.5 shadow-[var(--shadow-card)]"
+            : "border-b border-border/40 bg-background/90 backdrop-blur-md py-3.5"
+        }`}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center">
+          <Link to="/" aria-label={`${BRAND.name} home`} className="flex items-center group">
             <BrandMark responsiveName />
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold bg-secondary/60 p-1 rounded-full border border-border/50 backdrop-blur-sm">
             <Link
               to="/"
-              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Home
             </Link>
@@ -221,62 +200,65 @@ function SiteHeader() {
                 maxPrice: 0,
                 beds: 0,
               }}
-              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Rent
             </Link>
 
             <Link
               to="/buy"
-              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="relative inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Buy
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+              <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
                 New
               </span>
             </Link>
 
             <Link
               to="/commercial"
-              className="relative inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="relative inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Commercial
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+              <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
                 New
               </span>
             </Link>
 
             <a
               href="#why-us"
-              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
-              About
+              Why Us
             </a>
             <a
               href="#contact"
-              className="rounded-full px-3 py-1.5 text-foreground/80 transition hover:bg-secondary hover:text-foreground"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Contact
             </a>
           </nav>
 
           {/* User Actions & CTAs */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Link
               to="/favorites"
               aria-label="Saved Properties"
-              className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition"
+              className="p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"
             >
               <Heart className="h-4 w-4" />
             </Link>
 
-            <HeaderProfileMenu user={user} />
+            <HeaderProfileMenu />
 
             <Link
               to="/auth"
-              className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-emerald-500"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
             >
-              List Property FREE
+              <span>List Property</span>
+              <span className="bg-white/20 text-white rounded-full px-1.5 py-0.2 text-[10px] uppercase font-bold">
+                FREE
+              </span>
             </Link>
           </div>
         </div>
@@ -294,22 +276,34 @@ function SiteHeader() {
 
 function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-secondary/40">
-      <div className="mx-auto max-w-6xl px-6 py-12">
+    <footer className="border-t border-border/80 bg-gradient-to-b from-secondary/30 via-secondary/60 to-secondary">
+      <div className="mx-auto max-w-6xl px-6 py-14">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:grid-cols-6">
-          {/* Brand */}
+          {/* Brand & Mission */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <BrandMark size="sm" />
-            <p className="mt-3 max-w-xs text-xs text-muted-foreground leading-relaxed">
-              {BRAND.tagline} — a Hyderabad property marketplace with no platform commission.
+            <p className="mt-3.5 max-w-sm text-xs text-muted-foreground leading-relaxed">
+              {BRAND.tagline} — Hyderabad&apos;s verified direct-owner marketplace with 0% brokerage
+              and moderator-reviewed listings.
             </p>
-            <div className="mt-4 flex items-center gap-3">
+
+            {/* Verified Trust Badges */}
+            <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1 bg-card/80 border border-border/60 rounded-full px-2.5 py-1 shadow-2xs">
+                🛡️ Direct Owner Listings
+              </span>
+              <span className="inline-flex items-center gap-1 bg-card/80 border border-border/60 rounded-full px-2.5 py-1 shadow-2xs">
+                ⚡ No Platform Commission
+              </span>
+            </div>
+
+            <div className="mt-5 flex items-center gap-3">
               <a
                 href="https://instagram.com/urbanproperties.in"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="grid h-8 w-8 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary transition"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:border-primary transition hover:scale-110 active:scale-95 shadow-2xs"
               >
                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -320,7 +314,7 @@ function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
-                className="grid h-8 w-8 place-items-center rounded-full border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary transition"
+                className="grid h-8 w-8 place-items-center rounded-full border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:border-primary transition hover:scale-110 active:scale-95 shadow-2xs"
               >
                 <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -405,140 +399,119 @@ function SiteFooter() {
                   Help Center
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Popular Hubs */}
+          <div>
+            <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
+              Popular Hubs
+            </h3>
+            <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/agents" className="hover:text-foreground transition">
-                  Partner Agents
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "Gachibowli",
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Gachibowli
                 </Link>
               </li>
               <li>
-                <Link to="/auth" className="hover:text-foreground transition">
-                  List Property FREE
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "Madhapur",
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Madhapur
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "Kondapur",
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Kondapur
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "Financial District",
+                    city: "Hyderabad",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Financial District
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Popular Cities */}
+          {/* Legal & Trust */}
           <div>
             <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
-              Popular Cities
+              Trust &amp; Legal
             </h3>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link
-                  to="/properties"
-                  search={{
-                    q: "",
-                    city: "Hyderabad",
-                    listing: "",
-                    minPrice: 0,
-                    maxPrice: 0,
-                    beds: 0,
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  Flats in Hyderabad
+                <Link to="/help" className="hover:text-foreground transition">
+                  Moderation Policy
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/properties"
-                  search={{
-                    q: "",
-                    city: "Jaipur",
-                    listing: "",
-                    minPrice: 0,
-                    maxPrice: 0,
-                    beds: 0,
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  Flats in Jaipur
+                <Link to="/help" className="hover:text-foreground transition">
+                  Direct Owner Terms
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/properties"
-                  search={{
-                    q: "",
-                    city: "Lucknow",
-                    listing: "",
-                    minPrice: 0,
-                    maxPrice: 0,
-                    beds: 0,
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  Flats in Lucknow
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/properties"
-                  search={{
-                    q: "",
-                    city: "Indore",
-                    listing: "",
-                    minPrice: 0,
-                    maxPrice: 0,
-                    beds: 0,
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  Flats in Indore
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/properties"
-                  search={{
-                    q: "",
-                    city: "Vizag",
-                    listing: "",
-                    minPrice: 0,
-                    maxPrice: 0,
-                    beds: 0,
-                  }}
-                  className="hover:text-foreground transition"
-                >
-                  Flats in Vizag
-                </Link>
-              </li>
-            </ul>
-          </div>
-          {/* Legal */}
-          <div>
-            <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
-              Legal
-            </h3>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              <li>
-                <a href="/privacy-policy" className="hover:text-foreground transition">
+                <Link to="/help" className="hover:text-foreground transition">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/terms-of-service" className="hover:text-foreground transition">
+                <Link to="/help" className="hover:text-foreground transition">
                   Terms of Service
-                </a>
-              </li>
-              <li>
-                <a href="/cookie-policy" className="hover:text-foreground transition">
-                  Cookie Policy
-                </a>
-              </li>
-              <li>
-                <a href="/refund-policy" className="hover:text-foreground transition">
-                  Refund Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-border/40 pt-6 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-8 sm:flex-row">
           <p className="text-xs text-muted-foreground">{APP_COPYRIGHT}</p>
-          <p className="text-xs text-muted-foreground">Made with ❤️ in Hyderabad, India</p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
+            <span>✨ 100% Free for Direct Owners</span>
+            <span>•</span>
+            <span>Hyderabad, Telangana, India</span>
+          </div>
         </div>
       </div>
     </footer>

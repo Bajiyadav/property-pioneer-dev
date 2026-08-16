@@ -38,11 +38,10 @@ export function RequireRole({
     if (status !== "authenticated" || !roleVerified || allowed) return;
     const timer = setTimeout(() => {
       navigate({
-        to: getDashboardRoute(actualRole),
-        search: { tab: "overview" },
+        href: `${getDashboardRoute(actualRole)}?tab=overview`,
         replace: true,
       });
-    }, 1400);
+    }, 400);
     return () => clearTimeout(timer);
   }, [status, roleVerified, allowed, actualRole, navigate]);
 

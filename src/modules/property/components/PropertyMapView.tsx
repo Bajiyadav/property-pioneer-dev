@@ -154,14 +154,14 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Brokerage</span>
+                <span className="text-muted-foreground">Platform Commission</span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  0% Zero Fee
+                  No Platform Fee
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Verified Direct Owners</span>
-                <span className="font-bold text-foreground">100% Verified</span>
+                <span className="text-muted-foreground">Listing Status</span>
+                <span className="font-bold text-foreground">Moderated</span>
               </div>
             </div>
 

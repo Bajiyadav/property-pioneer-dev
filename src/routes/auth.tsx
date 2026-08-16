@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
-import { getDashboardRoute, isUserRole, setActiveRole } from "@/config/roles";
+import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
 import { ShieldCheck, Globe, MessageCircle, Github } from "lucide-react";
 
@@ -40,31 +40,26 @@ type AuthMode = "signin" | "signup";
 type AccountRole = "customer" | "owner" | "agent";
 
 function AuthPage() {
-  const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [role, setRole] = useState<AccountRole>("customer");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (data.session) {
+        window.location.href = "/dashboard";
+      }
     });
-  }, [navigate]);
+  }, []);
 
   const handleSuccess = (userObj: { name: string; email: string; phone: string; role: string }) => {
-    // The active role drives dashboard dispatch and the header menu, so persist
-    // it in every environment — not just dev.
     const destRole = isUserRole(userObj.role) ? userObj.role : "customer";
-    setActiveRole(destRole);
 
     toast.success(`Welcome ${userObj.name}! Signed in as ${destRole.toUpperCase()}`);
 
     const target = redirect ? safeRedirect(redirect) : null;
-    if (target) {
-      navigate({ href: target, replace: true });
-      return;
-    }
-    navigate({ to: getDashboardRoute(destRole), search: { tab: "overview" }, replace: true });
+    const dest = target || `${getDashboardRoute(destRole)}?tab=overview`;
+    window.location.href = dest;
   };
 
   return (
@@ -73,14 +68,14 @@ function AuthPage() {
 
       <div className="mt-4 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-          <ShieldCheck className="h-3.5 w-3.5" /> ISO 27001 & OWASP Certified Security
+          <ShieldCheck className="h-3.5 w-3.5" /> Encrypted & Secure Authentication
         </span>
         <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl">
-          {mode === "signin" ? "Sign In to Urban Properties" : "Create Permanent Account"}
+          {mode === "signin" ? "Sign In to Urban Properties" : "Create Account"}
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
           {mode === "signin"
-            ? "Enter your verified credentials to access your saved homes & dashboards."
+            ? "Enter your credentials to access your saved homes & dashboards."
             : "Create an account to save homes, send enquiries, or list a property."}
         </p>
       </div>

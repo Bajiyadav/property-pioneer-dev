@@ -2,15 +2,12 @@
  * Authoritative session + role resolution.
  *
  * Role precedence (highest first):
- *  1. `user_roles` table — the only trustworthy source for privileged roles.
- *     RLS policy "Users can view their own roles" scopes this to the caller.
+ *  1. `user_roles` table — the authoritative, RLS-protected source for all roles.
  *  2. `user_metadata.role` — the persona chosen at sign-up (customer/owner/agent).
  *     User-writable, so it may NEVER grant admin.
  *  3. "customer" — safe default.
  *
- * The legacy `demo_user_role` localStorage key is dev-only and is deliberately
- * ignored in production builds: it is client-writable and must not be able to
- * unlock the admin portal.
+ * Client-writable keys (e.g. localStorage) are never trusted for authorization.
  */
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,10 +36,28 @@ function personaFromMetadata(user: User | null): UserRole {
 }
 
 /**
- * Reads the caller's rows from `user_roles`. Returns true when the caller holds
- * the platform admin role. Any failure (table missing, RLS, offline) resolves
- * to `false` — losing admin is safe, wrongly granting it is not.
+ * Reads the caller's rows from `user_roles` and determines the highest granted role.
+ * Precedence: admin > agent > owner > customer.
  */
+export async function resolveRoleFromDatabase(userId: string): Promise<UserRole | null> {
+  try {
+    const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+
+    if (error || !data || data.length === 0) return null;
+
+    const roles = data.map((r) => r.role);
+    if (roles.includes("admin")) return "admin";
+    if (roles.includes("agent")) return "agent";
+    if (roles.includes("owner")) return "owner";
+    if (roles.includes("customer") || roles.includes("user")) return "customer";
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Reads the caller's rows from `user_roles`. Returns true when the caller holds the admin role. */
 export async function hasAdminRole(userId: string): Promise<boolean> {
   try {
     const { data, error } = await supabase
@@ -58,6 +73,13 @@ export async function hasAdminRole(userId: string): Promise<boolean> {
   }
 }
 
+/** Resolves the role for an already-known session. */
+export async function resolveRoleForSession(session: Session): Promise<UserRole> {
+  const dbRole = await resolveRoleFromDatabase(session.user.id);
+  if (dbRole) return dbRole;
+  return personaFromMetadata(session.user);
+}
+
 /** Resolves the current session and the caller's effective role. */
 export async function resolveSession(): Promise<ResolvedSession> {
   const { data, error } = await supabase.auth.getSession();
@@ -65,20 +87,14 @@ export async function resolveSession(): Promise<ResolvedSession> {
 
   const session = data.session;
   const user = session.user;
-  const isAdmin = await hasAdminRole(user.id);
+  const role = await resolveRoleForSession(session);
 
   return {
     session,
     user,
-    role: isAdmin ? "admin" : personaFromMetadata(user),
+    role,
     roleVerified: true,
   };
-}
-
-/** Resolves the role for an already-known session (skips the getSession call). */
-export async function resolveRoleForSession(session: Session): Promise<UserRole> {
-  const isAdmin = await hasAdminRole(session.user.id);
-  return isAdmin ? "admin" : personaFromMetadata(session.user);
 }
 
 /** Best display name available for a signed-in user. */

@@ -17,6 +17,8 @@ import {
   validateFullName,
   validateIndianPhone,
 } from "@/modules/authentication/services/passwordPolicy";
+import { resolveRoleFromDatabase } from "@/modules/authentication/services/session";
+import { isUserRole, type UserRole } from "@/config/roles";
 
 export function EnterprisePasswordForm({
   mode = "signup",
@@ -127,7 +129,15 @@ export function EnterprisePasswordForm({
 
       const user = data.user;
       const resolvedName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
-      const resolvedRole = user?.user_metadata?.role || role;
+      let resolvedRole: UserRole = "customer";
+      if (user) {
+        const dbRole = await resolveRoleFromDatabase(user.id);
+        resolvedRole =
+          dbRole ||
+          (isUserRole(user.user_metadata?.role) && user.user_metadata.role !== "admin"
+            ? user.user_metadata.role
+            : "customer");
+      }
       toast.success(`Welcome back, ${resolvedName}!`);
       onSuccess({ name: resolvedName, email: user?.email || email, phone, role: resolvedRole });
     }
@@ -241,7 +251,7 @@ export function EnterprisePasswordForm({
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action="javascript:void(0);" onSubmit={handleSubmit} className="space-y-4">
           {mode === "signup" && (
             <div>
               <label className="block text-xs font-bold text-foreground mb-1">

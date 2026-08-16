@@ -56,19 +56,22 @@ export async function sendTransactionalEmail(payload: EmailPayload): Promise<Ema
     };
   }
 
-  // Server-side provider detection (e.g. RESEND_API_KEY or SMTP)
+  // Provider credentials are server-only. A browser can never hold RESEND_API_KEY,
+  // so a client-side call is reported as unconfigured rather than half-attempted —
+  // callers must route through the server (see `notifyLoginSecurityEvent`).
   const isServer = typeof window === "undefined";
   const apiKey = isServer ? process.env?.RESEND_API_KEY : undefined;
 
   if (!apiKey) {
-    // Honest unconfigured state: never fake a successful remote SMTP delivery
+    // Honest unconfigured state: never fake a successful remote delivery.
     return {
       status: "unconfigured",
       eventType: payload.eventType,
       recipient: payload.to,
       timestamp,
-      details:
-        "Email provider credentials are not configured in environment. Notification logged for dispatch upon provider provisioning.",
+      details: isServer
+        ? "RESEND_API_KEY is not configured in this environment. Delivery is pending external provider provisioning."
+        : "Email dispatch was attempted in the browser, where provider credentials are unavailable by design.",
     };
   }
 
