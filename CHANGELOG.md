@@ -1,3 +1,16 @@
+## v0.8.0 — 2026-08-16
+
+### Features
+- feat: complete rent and interaction core loops, fix linting (fcf7ce9)
+
+### Fixes
+- fix(auth): stop self-registration from granting its own role (f234307)
+
+### Migration notes
+- supabase/migrations/20260817000000_restrict_self_registration_to_customer.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.7.6 — 2026-08-16
 
 ### Fixes
