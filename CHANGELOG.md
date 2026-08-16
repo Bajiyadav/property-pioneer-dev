@@ -1,3 +1,17 @@
+## v0.7.3 — 2026-08-16
+
+### Fixes
+- fix(ci): resync package-lock so npm ci can install (07c746a)
+- fix(routing): let the locality route actually render (4087ee0)
+- fix(ui): stop the header overflowing at 320px (4f42c50)
+- fix(db): make the video/location migration idempotent and collision-safe (22d5bbf)
+- fix(property): survive the un-applied video/location migration (5f48796)
+
+### Migration notes
+- supabase/migrations/20260815131921_add_video_and_location_to_properties.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.7.2 — 2026-08-16
 
 ### Fixes
