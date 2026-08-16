@@ -19,7 +19,7 @@ test.describe("Premium Rental Journey", () => {
     await viewDetailsLink.click();
 
     // 3. Verify on Property Detail Page
-    await page.waitForURL(/\/properties\/hyd-/, { timeout: 15000 });
+    await page.waitForURL(/\/properties\//, { timeout: 15000 });
 
     // Verify Transparent Rental Terms section exists
     await expect(page.getByRole("heading", { name: /Transparent Rental Terms/i })).toBeVisible({

@@ -32,6 +32,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as RentIndexRouteImport } from './routes/rent.index'
+import { Route as RentCityRouteImport } from './routes/rent.$city'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
@@ -39,7 +40,6 @@ import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
-import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
 import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
@@ -161,6 +161,11 @@ const RentIndexRoute = RentIndexRouteImport.update({
   path: '/rent/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RentCityRoute = RentCityRouteImport.update({
+  id: '/rent/$city',
+  path: '/rent/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/',
@@ -202,15 +207,10 @@ const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   path: '/api/public/enquiries',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RentCityIndexRoute = RentCityIndexRouteImport.update({
-  id: '/rent/$city/',
-  path: '/rent/$city/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RentCityLocalityRoute = RentCityLocalityRouteImport.update({
-  id: '/rent/$city/$locality',
-  path: '/rent/$city/$locality',
-  getParentRoute: () => rootRouteImport,
+  id: '/$locality',
+  path: '/$locality',
+  getParentRoute: () => RentCityRoute,
 } as any)
 const ApiPublicPropertiesIdContactRoute =
   ApiPublicPropertiesIdContactRouteImport.update({
@@ -264,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rent/$city': typeof RentCityRouteWithChildren
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -274,7 +275,6 @@ export interface FileRoutesByFullPath {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
-  '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -300,6 +300,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rent/$city': typeof RentCityRouteWithChildren
   '/properties': typeof PropertiesIndexRoute
   '/rent': typeof RentIndexRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -310,7 +311,6 @@ export interface FileRoutesByTo {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
-  '/rent/$city': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -340,6 +340,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth_/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rent/$city': typeof RentCityRouteWithChildren
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -350,7 +351,6 @@ export interface FileRoutesById {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
-  '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -380,6 +380,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/auth/callback'
     | '/properties/$id'
+    | '/rent/$city'
     | '/properties/'
     | '/rent/'
     | '/dashboard/admin'
@@ -390,7 +391,6 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/dashboard/'
-    | '/rent/$city/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -416,6 +416,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth/callback'
     | '/properties/$id'
+    | '/rent/$city'
     | '/properties'
     | '/rent'
     | '/dashboard/admin'
@@ -426,7 +427,6 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/dashboard'
-    | '/rent/$city'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -455,6 +455,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/auth_/callback'
     | '/properties/$id'
+    | '/rent/$city'
     | '/properties/'
     | '/rent/'
     | '/_authenticated/dashboard/admin'
@@ -465,7 +466,6 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
     | '/_authenticated/dashboard/'
-    | '/rent/$city/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -492,11 +492,10 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VillasRoute: typeof VillasRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  RentCityRoute: typeof RentCityRouteWithChildren
   RentIndexRoute: typeof RentIndexRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
-  RentCityLocalityRoute: typeof RentCityLocalityRoute
-  RentCityIndexRoute: typeof RentCityIndexRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
   ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
@@ -667,6 +666,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rent/$city': {
+      id: '/rent/$city'
+      path: '/rent/$city'
+      fullPath: '/rent/$city'
+      preLoaderRoute: typeof RentCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/'
@@ -716,19 +722,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEnquiriesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rent/$city/': {
-      id: '/rent/$city/'
-      path: '/rent/$city'
-      fullPath: '/rent/$city/'
-      preLoaderRoute: typeof RentCityIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/rent/$city/$locality': {
       id: '/rent/$city/$locality'
-      path: '/rent/$city/$locality'
+      path: '/$locality'
       fullPath: '/rent/$city/$locality'
       preLoaderRoute: typeof RentCityLocalityRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof RentCityRoute
     }
     '/api/public/properties/$id/contact': {
       id: '/api/public/properties/$id/contact'
@@ -817,6 +816,18 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
   PropertiesRouteChildren,
 )
 
+interface RentCityRouteChildren {
+  RentCityLocalityRoute: typeof RentCityLocalityRoute
+}
+
+const RentCityRouteChildren: RentCityRouteChildren = {
+  RentCityLocalityRoute: RentCityLocalityRoute,
+}
+
+const RentCityRouteWithChildren = RentCityRoute._addFileChildren(
+  RentCityRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -836,11 +847,10 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VillasRoute: VillasRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  RentCityRoute: RentCityRouteWithChildren,
   RentIndexRoute: RentIndexRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
-  RentCityLocalityRoute: RentCityLocalityRoute,
-  RentCityIndexRoute: RentCityIndexRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,
   ApiPublicPropertiesIdSaveRoute: ApiPublicPropertiesIdSaveRoute,

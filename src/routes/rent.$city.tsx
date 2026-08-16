@@ -5,7 +5,7 @@ import type { PropertySearchParams } from "@/modules/property/services/propertyQ
 import { SearchUI } from "@/modules/property/components/SearchUI";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
-export const Route = createFileRoute("/rent/$city/")({
+export const Route = createFileRoute("/rent/$city")({
   validateSearch: (search: Record<string, unknown>): PropertySearchParams => ({
     q: search.q as string | undefined,
     locality: search.locality as string | undefined,
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/rent/$city/")({
 function RentCityPage() {
   const { city } = Route.useParams();
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/rent/$city/" });
+  const navigate = useNavigate({ from: "/rent/$city" });
 
   const formattedCity = city.charAt(0).toUpperCase() + city.slice(1).replace("-", " ");
 
