@@ -1,3 +1,8 @@
+## v0.7.4 — 2026-08-16
+
+### Fixes
+- fix(ci): repair the lock entries npm prunes on non-wasm platforms (81dffb7)
+
 ## v0.7.3 — 2026-08-16
 
 ### Fixes
