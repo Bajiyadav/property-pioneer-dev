@@ -1,3 +1,11 @@
+## v0.7.6 — 2026-08-16
+
+### Fixes
+- fix(cd): stop reporting success for deployments that never happened (7dabec0)
+
+### Refactoring
+- refactor(dashboard): use typed navigation for role redirects (9802bf8)
+
 ## v0.7.5 — 2026-08-16
 
 ### Fixes
