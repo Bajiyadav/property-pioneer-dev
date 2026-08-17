@@ -199,6 +199,7 @@ export function PropertyCard({ property }: { property: Property }) {
             <button
               type="button"
               onClick={handleShare}
+              aria-label={copied ? "Link copied" : "Copy link to this property"}
               className="grid h-9 w-9 place-items-center rounded-md border border-border bg-transparent hover:bg-secondary transition-all"
             >
               {copied ? (
@@ -251,7 +252,7 @@ export function PropertyCard({ property }: { property: Property }) {
           </span>
           <span className="inline-flex items-center rounded-md bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 border border-emerald-200">
             <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-            Zero Brokerage
+            No Commission
           </span>
         </div>
 

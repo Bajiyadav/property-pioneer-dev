@@ -105,6 +105,9 @@ export function TabbedSearchBox({
                   value={type}
                   checked={propertyType === type}
                   onChange={(e) => setPropertyType(e.target.value)}
+                  // The visible text is a sibling span, not a <label for>, so
+                  // the control needs its own name for assistive tech.
+                  aria-label={`Property type: ${type}`}
                   className="sr-only"
                 />
               </label>
@@ -122,6 +125,7 @@ export function TabbedSearchBox({
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              aria-label="City"
               className="bg-transparent text-sm font-medium text-foreground outline-none w-full py-2 cursor-pointer appearance-none"
             >
               <option value="Hyderabad">Hyderabad</option>
@@ -140,6 +144,8 @@ export function TabbedSearchBox({
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Search upto 3 localities or landmarks"
+              // A placeholder is not an accessible name — it disappears on input.
+              aria-label="Search localities or landmarks"
               className="w-full bg-transparent text-sm py-2 sm:py-3 outline-none placeholder:text-muted-foreground text-foreground"
             />
             <button

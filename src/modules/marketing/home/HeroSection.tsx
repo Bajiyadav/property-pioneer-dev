@@ -15,13 +15,20 @@ export function HeroSection({
     <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-white">
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
         {/* Main Heading */}
+        {/*
+          The old headline claimed a global superlative we cannot substantiate,
+          and called listings "verified" when the review is moderation, not
+          verification.
+          The differentiator that is actually true — no commission charged by
+          us, and you talk to the owner — is the stronger claim anyway.
+        */}
         <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-5xl tracking-tight max-w-3xl">
-          World's Largest NoBrokerage Property Site
+          Rent and buy in Hyderabad, direct from owners
         </h1>
 
         <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl">
-          Direct owner contact, zero brokerage, and verified listings. Find your next home or
-          commercial space without paying months of rent as commission.
+          Contact owners directly and pay us no commission. Every listing is reviewed by our team
+          before it goes live.
         </p>
 
         {/* Tabbed Search Box */}
@@ -58,8 +65,8 @@ export function HeroSection({
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">100% Verified</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Owners & Tenants</p>
+              <h3 className="font-bold text-slate-900 text-sm">Moderated Listings</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Reviewed before going live</p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2">
@@ -67,8 +74,8 @@ export function HeroSection({
               <Zap className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Zero Brokerage</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Save thousands</p>
+              <h3 className="font-bold text-slate-900 text-sm">No Platform Commission</h3>
+              <p className="text-xs text-slate-500 mt-0.5">We charge you nothing</p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2 col-span-2 sm:col-span-1">
