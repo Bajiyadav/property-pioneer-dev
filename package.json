@@ -1,8 +1,9 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
+  "_engines_note": "Vercel reads engines.node in preference to the project's Node setting, and resolves a range to the newest matching major. A floor like >=22 therefore floats production onto every new Node major the day it ships, while CI still validates on 22 — so keep this an exact major. It matches NODE_VERSION in .github/workflows and the Vercel project setting. npm is pinned because npm 10 and 11 disagree about optional peers and produce lockfiles the other rejects, which broke `npm ci` in CI three times. Developers on a newer Node will see an EBADENGINE warning; engine-strict is off, so it is advisory.",
   "engines": {
-    "node": ">=22",
+    "node": "22.x",
     "npm": "10.x"
   },
   "packageManager": "npm@10.9.9",
