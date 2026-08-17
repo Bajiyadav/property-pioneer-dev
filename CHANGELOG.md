@@ -1,3 +1,8 @@
+## v0.15.4 — 2026-08-17
+
+### Fixes
+- fix(seo): close four indexing defects found by auditing the live site (4d572ae)
+
 ## v0.15.3 — 2026-08-17
 
 ### Fixes
