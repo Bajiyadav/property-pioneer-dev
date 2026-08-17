@@ -29,8 +29,6 @@ export function QuoteBanner() {
 
         <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           <span>Seedha Properties</span>
-          <span>•</span>
-          <span className="text-primary font-bold">Hyderabad Standard</span>
         </div>
       </div>
     </section>

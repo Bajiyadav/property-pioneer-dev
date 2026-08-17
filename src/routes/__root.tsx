@@ -546,8 +546,6 @@ function SiteFooter() {
           <p className="text-xs text-muted-foreground">{APP_COPYRIGHT}</p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
             <span>✨ 100% Free for Direct Owners</span>
-            <span>•</span>
-            <span>Hyderabad, Telangana, India</span>
           </div>
         </div>
       </div>

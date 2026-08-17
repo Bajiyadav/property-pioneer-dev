@@ -6,7 +6,6 @@ import {
   MessageSquare,
   ArrowRight,
   CheckCircle2,
-  Sparkles,
   Lock,
   Clock,
 } from "lucide-react";
@@ -75,9 +74,6 @@ export function WhySeedhaProperties() {
     <section className="bg-gradient-to-b from-secondary/40 via-background to-secondary/30 py-16 sm:py-24 border-y border-border/60">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-primary mb-3">
-            <Sparkles className="h-3.5 w-3.5" /> The Hyderabad Standard
-          </div>
           <h2 className="font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-4xl tracking-tight">
             Built for Transparency &amp; Trust
           </h2>
