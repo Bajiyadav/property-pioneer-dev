@@ -1,3 +1,9 @@
+## v0.11.0 — 2026-08-17
+
+### Features
+- feat: update property specs and permissions (75853e5)
+- feat: update property specs and permissions (dfd7b38)
+
 ## v0.10.0 — 2026-08-17
 
 ### Features
