@@ -1,3 +1,9 @@
+## v0.13.3 — 2026-08-17
+
+### Fixes
+- fix(build): pin engines.node back to an exact major (2395b85)
+- chore(deps): take the tooling bumps from PR #12 without its lockfile (cd587cd)
+
 ## v0.13.2 — 2026-08-17
 
 ### Fixes
