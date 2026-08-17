@@ -1,19 +1,36 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Seedha Properties — crawler rules
+#
+# A named user-agent group REPLACES the wildcard group for that crawler; the two
+# are not merged. The previous file gave Googlebot and Bingbot their own groups
+# containing only "Allow: /", so the Disallow rules below applied to every crawler
+# EXCEPT the two that matter most — leaving /admin, /dashboard/ and /api/ open to
+# Google and Bing.
+#
+# There is therefore one group. Every crawler gets the same rules, and adding a
+# named group in future means repeating every Disallow inside it.
 
 User-agent: *
 Allow: /
-Disallow: /api/
-Disallow: /dashboard/
+
+# Authenticated surfaces. Nothing here is useful in a search result, and several
+# of these render another person's data once signed in.
 Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /notifications
+Disallow: /favorites
+Disallow: /auth
+Disallow: /list-property/wizard
+
+# Internal endpoints — never a landing page.
+Disallow: /api/
+
+# Filter permutations. The listing pages canonicalise to their clean path, so
+# these add crawl load without adding an indexable page. The bare /properties,
+# /rent, /buy and /commercial paths stay crawlable.
+Disallow: /*?*minPrice=
+Disallow: /*?*maxPrice=
+Disallow: /*?*beds=
+Disallow: /*?*sort=
 
 Sitemap: https://seedhaproperties.com/sitemap.xml

@@ -13,12 +13,40 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { APP_NAME } from "@/config/app";
+import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 import { OwnerPlans } from "@/modules/billing/components/OwnerPlans";
 import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/list-property")({
+  /*
+   * This page had no metadata at all, so it inherited the root's generic title
+   * and description. It is the platform's main acquisition page — an owner
+   * searching "post property for rent Hyderabad free" should land here — and
+   * without a title of its own it could not compete for that query.
+   *
+   * The description states the two things that are actually true and
+   * differentiating: listing is free, and there is no commission. Neither is a
+   * claim we cannot back.
+   */
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/list-property");
+    const title = `Post Your Property Free — ${APP_NAME}`;
+    const description =
+      "List your flat, house or commercial space in Hyderabad for free. No listing fee and no platform commission — tenants and buyers contact you directly on WhatsApp.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { name: "robots", content: "index, follow" },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: getOgImageUrl() },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
   component: ListPropertyLandingPage,
 });
 

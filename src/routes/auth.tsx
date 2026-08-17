@@ -30,7 +30,12 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: `Enterprise authentication & secure login for ${APP_NAME}.` },
       { property: "og:title", content: `Sign in — ${APP_NAME}` },
       { property: "og:type", content: "website" },
-      { name: "robots", content: "index, follow" },
+      {
+        // A sign-in form is not a search result. Indexing it splits authority
+        // away from the landing pages and puts a dead end in front of searchers.
+        name: "robots",
+        content: "noindex, follow",
+      },
     ],
   }),
   component: AuthPage,
