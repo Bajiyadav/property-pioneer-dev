@@ -1,3 +1,8 @@
+## v0.14.1 — 2026-08-17
+
+### Fixes
+- fix(property-card): stop the card clipping its own title, price and button (c8bd001)
+
 ## v0.14.0 — 2026-08-17
 
 ### Features
