@@ -1,3 +1,8 @@
+## v0.13.0 — 2026-08-17
+
+### Features
+- feat(brand): rename the platform to Seedha Properties (cd8c8e2)
+
 ## v0.12.4 — 2026-08-17
 
 ### Fixes
