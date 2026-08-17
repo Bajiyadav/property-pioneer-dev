@@ -1,7 +1,7 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
-  "_engines_note": "Vercel reads engines.node in preference to the project's Node setting, and resolves a range to the newest matching major. A floor like >=22 therefore floats production onto every new Node major the day it ships, while CI still validates on 22 — so keep this an exact major. It matches NODE_VERSION in .github/workflows and the Vercel project setting. npm is pinned because npm 10 and 11 disagree about optional peers and produce lockfiles the other rejects, which broke `npm ci` in CI three times. Developers on a newer Node will see an EBADENGINE warning; engine-strict is off, so it is advisory.",
+  "_engines_note": "Vercel reads engines.node in preference to the project's Node setting, and resolves a range to the newest matching major. A floor like >=22 therefore floats production onto every new Node major the day it ships, while CI still validates on 22 \u2014 so keep this an exact major. It matches NODE_VERSION in .github/workflows and the Vercel project setting. npm is pinned because npm 10 and 11 disagree about optional peers and produce lockfiles the other rejects, which broke `npm ci` in CI three times. Developers on a newer Node will see an EBADENGINE warning; engine-strict is off, so it is advisory.",
   "engines": {
     "node": "22.x",
     "npm": "10.x"
@@ -90,7 +90,6 @@
     "@commitlint/cli": "^21.2.1",
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^9.32.0",
-    "@lovable.dev/vite-tanstack-config": "2.8.5",
     "@playwright/test": "^1.62.1",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
@@ -104,6 +103,7 @@
     "eslint-plugin-react-refresh": "^0.5.4",
     "globals": "^15.15.0",
     "husky": "^9.1.7",
+    "lightningcss": "^1.33.0",
     "lint-staged": "^17.3.0",
     "nitro": "3.0.260603-beta",
     "prettier": "^3.7.3",
