@@ -1,3 +1,8 @@
+## v0.13.2 — 2026-08-17
+
+### Fixes
+- fix(seo): stop shipping two conflicting canonical tags on every inner page (b13ebf3)
+
 ## v0.13.1 — 2026-08-17
 
 ### Fixes
