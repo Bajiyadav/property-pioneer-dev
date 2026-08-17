@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as CommercialRouteImport } from './routes/commercial'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
@@ -26,6 +27,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as VillasRouteImport } from './routes/villas'
+import { Route as WhyUsRouteImport } from './routes/why-us'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
@@ -81,6 +83,11 @@ const CommercialRoute = CommercialRouteImport.update({
   path: '/commercial',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmLandsRoute = FarmLandsRouteImport.update({
   id: '/farm-lands',
   path: '/farm-lands',
@@ -129,6 +136,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const VillasRoute = VillasRouteImport.update({
   id: '/villas',
   path: '/villas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhyUsRoute = WhyUsRouteImport.update({
+  id: '/why-us',
+  path: '/why-us',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -250,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/contact': typeof ContactRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -260,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
+  '/why-us': typeof WhyUsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
@@ -288,6 +302,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/contact': typeof ContactRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -297,6 +312,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
+  '/why-us': typeof WhyUsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
@@ -326,6 +342,7 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/contact': typeof ContactRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -336,6 +353,7 @@ export interface FileRoutesById {
   '/properties': typeof PropertiesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/villas': typeof VillasRoute
+  '/why-us': typeof WhyUsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth_/callback': typeof AuthCallbackRoute
@@ -366,6 +384,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/contact'
     | '/farm-lands'
     | '/favorites'
     | '/help'
@@ -376,6 +395,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/sitemap.xml'
     | '/villas'
+    | '/why-us'
     | '/admin'
     | '/dashboard'
     | '/auth/callback'
@@ -404,6 +424,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/contact'
     | '/farm-lands'
     | '/favorites'
     | '/help'
@@ -413,6 +434,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/sitemap.xml'
     | '/villas'
+    | '/why-us'
     | '/admin'
     | '/auth/callback'
     | '/properties/$id'
@@ -441,6 +463,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/contact'
     | '/farm-lands'
     | '/favorites'
     | '/help'
@@ -451,6 +474,7 @@ export interface FileRouteTypes {
     | '/properties'
     | '/sitemap.xml'
     | '/villas'
+    | '/why-us'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/auth_/callback'
@@ -481,6 +505,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   BuyRoute: typeof BuyRoute
   CommercialRoute: typeof CommercialRoute
+  ContactRoute: typeof ContactRoute
   FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
@@ -491,6 +516,7 @@ export interface RootRouteChildren {
   PropertiesRoute: typeof PropertiesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VillasRoute: typeof VillasRoute
+  WhyUsRoute: typeof WhyUsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   RentIndexRoute: typeof RentIndexRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
@@ -553,6 +579,13 @@ declare module '@tanstack/react-router' {
       path: '/commercial'
       fullPath: '/commercial'
       preLoaderRoute: typeof CommercialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/farm-lands': {
@@ -623,6 +656,13 @@ declare module '@tanstack/react-router' {
       path: '/villas'
       fullPath: '/villas'
       preLoaderRoute: typeof VillasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/why-us': {
+      id: '/why-us'
+      path: '/why-us'
+      fullPath: '/why-us'
+      preLoaderRoute: typeof WhyUsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -825,6 +865,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   BuyRoute: BuyRoute,
   CommercialRoute: CommercialRoute,
+  ContactRoute: ContactRoute,
   FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
@@ -835,6 +876,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropertiesRoute: PropertiesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VillasRoute: VillasRoute,
+  WhyUsRoute: WhyUsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   RentIndexRoute: RentIndexRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,

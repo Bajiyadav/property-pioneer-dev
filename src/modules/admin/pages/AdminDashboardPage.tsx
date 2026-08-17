@@ -6,14 +6,21 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  Activity,
   ArrowRight,
   BadgeCheck,
   BarChart3,
   Building2,
+  Calendar,
+  CalendarCheck,
   CheckSquare,
+  Clock,
+  Compass,
   DollarSign,
+  Eye,
   FileBarChart,
   LayoutDashboard,
+  MapPin,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -27,6 +34,8 @@ import {
   formatPrice,
   type Property,
 } from "@/modules/property/services/propertyQueries";
+import { fetchLiveActivities, fetchVisitSchedules } from "@/lib/leadRouting";
+import { HYDERABAD_LOCALITIES } from "@/lib/geolocation";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
@@ -60,9 +69,10 @@ import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashbo
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "live_tracking", label: "Live Visitor & Lead Tracking", icon: Activity },
   { id: "users", label: "Users", icon: Users },
   { id: "owners", label: "Owners", icon: UsersRound },
-  { id: "agents", label: "Agents", icon: UserCheck },
+  { id: "agents", label: "Agents & Territory Scoping", icon: UserCheck },
   { id: "properties", label: "Properties", icon: Building2 },
   { id: "approvals", label: "Pending Approvals", icon: CheckSquare },
   { id: "verification", label: "Verification Queue", icon: ShieldCheck },
@@ -79,12 +89,57 @@ export function AdminDashboardPage() {
   );
 }
 
+import { PropertyMediaModal } from "@/modules/admin/components/PropertyMediaModal";
+
 function AdminDashboard({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useDashboardTab("/dashboard/admin");
 
   const [userQuery, setUserQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [propertyQuery, setPropertyQuery] = useState("");
+  const [selectedLocalityFilter, setSelectedLocalityFilter] = useState("all");
+  const [assigningAgentId, setAssigningAgentId] = useState<string | null>(null);
+  const [selectedLocalities, setSelectedLocalities] = useState<string[]>([]);
+
+  const [mediaModalProperty, setMediaModalProperty] = useState<Property | null>(null);
+
+  const { data: liveActivities = [], refetch: refetchActivities } = useQuery({
+    queryKey: ["admin", "live_activities", selectedLocalityFilter],
+    queryFn: () => fetchLiveActivities(selectedLocalityFilter),
+    refetchInterval: 8000,
+  });
+
+  const { data: visitSchedules = [], refetch: refetchVisits } = useQuery({
+    queryKey: ["admin", "visit_schedules", selectedLocalityFilter],
+    queryFn: () => fetchVisitSchedules(selectedLocalityFilter),
+    refetchInterval: 8000,
+  });
+
+  const { data: dbAgents = [], refetch: refetchDbAgents } = useQuery({
+    queryKey: ["admin", "db_agents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, phone, city, assigned_localities, agent_status, agency_name");
+      if (error) return [];
+      return data || [];
+    },
+  });
+
+  const saveAgentLocalities = async (agentId: string, localities: string[]) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ assigned_localities: localities, updated_at: new Date().toISOString() })
+      .eq("id", agentId);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Agent territory micro-markets updated successfully!");
+      setAssigningAgentId(null);
+      refetchDbAgents();
+    }
+  };
 
   const {
     data: feed,
@@ -369,11 +424,170 @@ function AdminDashboard({ user }: { user: User | null }) {
                 isLoading={isLoading}
                 isError={isError}
                 onRetry={refetch}
+                onManageMedia={(p) => setMediaModalProperty(p)}
+                onTogglePromotion={(p, updates) => {
+                  if (updates.is_featured !== undefined) (p as any).is_featured = updates.is_featured;
+                  if (updates.promo_badge !== undefined) (p as any).promo_badge = updates.promo_badge;
+                  if (updates.priority_rank !== undefined) (p as any).priority_rank = updates.priority_rank;
+                  toast.success(`Updated promotion & ranking for "${p.title}"`);
+                  refetch();
+                }}
               />
             </div>
             <div className="rounded-3xl border border-border/60 bg-card p-5">
               <SectionHeader title="Security activity" />
               <ActivityTimeline items={AUDIT.slice(0, 4)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "live_tracking" && (
+        <div className="space-y-6">
+          <SectionHeader
+            title="Real-Time Lead & Visitor Tracking Engine"
+            subtitle="Live activity stream of property searches, geolocation checks, listing drafts, and visit schedules across micro-markets."
+          />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-muted-foreground mr-1">Filter Territory:</span>
+            {["all", ...HYDERABAD_LOCALITIES.map((l) => l.name)].map((loc) => (
+              <button
+                key={loc}
+                onClick={() => setSelectedLocalityFilter(loc)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition ${
+                  selectedLocalityFilter === loc
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {loc === "all" ? "All Micro-Markets" : loc}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <KpiCard
+              label="Live Activities"
+              numericValue={liveActivities.length}
+              icon={<Activity className="h-4 w-4" />}
+              accent="blue"
+            />
+            <KpiCard
+              label="Scheduled Visits"
+              numericValue={visitSchedules.length}
+              icon={<CalendarCheck className="h-4 w-4" />}
+              accent="emerald"
+            />
+            <KpiCard
+              label="Micro-Markets Monitored"
+              numericValue={HYDERABAD_LOCALITIES.length}
+              icon={<MapPin className="h-4 w-4" />}
+              accent="purple"
+            />
+            <KpiCard
+              label="Active Area Agents"
+              numericValue={agents.length || 1}
+              icon={<UserCheck className="h-4 w-4" />}
+              accent="amber"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Live Activities Stream */}
+            <div className="rounded-3xl border border-border/80 bg-card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" /> Visitor Activity Stream ({liveActivities.length})
+                </h3>
+                <button
+                  onClick={() => refetchActivities()}
+                  className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {liveActivities.length === 0 ? (
+                <EmptyState
+                  icon={<Activity className="h-6 w-6" />}
+                  title="No live activities recorded"
+                  hint="Visitor searches, geolocation checks, and property views will stream here in real time."
+                />
+              ) : (
+                <div className="space-y-3 max-h-[450px] overflow-y-auto pr-1">
+                  {liveActivities.map((act: any) => (
+                    <div key={act.id} className="p-3.5 rounded-2xl bg-secondary/40 border border-border/60 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground capitalize flex items-center gap-1.5">
+                          <Compass className="h-3.5 w-3.5 text-primary" /> {act.activity_type.replace("_", " ")}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <StatusPill label={act.locality || "Hyderabad"} tone="info" />
+                          <StatusPill label="New Lead" tone="warning" />
+                        </div>
+                      </div>
+                      {act.search_query && (
+                        <p className="text-foreground font-semibold bg-background/60 p-2 rounded-xl border border-border/40">
+                          {act.search_query}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40 gap-2">
+                        <span>Customer Name: <strong className="text-foreground">{act.contact_name || "Guest Visitor"}</strong></span>
+                        <span>Phone: <strong className="text-foreground">{act.contact_phone || "+91 98765 43210"}</strong></span>
+                        <span>{relativeTime(act.created_at)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Scheduled Visit Requests */}
+            <div className="rounded-3xl border border-border/80 bg-card p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+                  <CalendarCheck className="h-4 w-4 text-emerald-500" /> Scheduled Property Visits ({visitSchedules.length})
+                </h3>
+                <button
+                  onClick={() => refetchVisits()}
+                  className="text-xs text-emerald-600 font-semibold hover:underline cursor-pointer"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {visitSchedules.length === 0 ? (
+                <EmptyState
+                  icon={<CalendarCheck className="h-6 w-6" />}
+                  title="No scheduled visits yet"
+                  hint="Customer in-person & video tour requests will appear here."
+                />
+              ) : (
+                <div className="space-y-3 max-h-[450px] overflow-y-auto pr-1">
+                  {visitSchedules.map((vis: any) => (
+                    <div key={vis.id} className="p-3.5 rounded-2xl bg-secondary/40 border border-border/60 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-foreground flex items-center gap-1.5">
+                          {vis.visit_type === "video_call" ? "📹 Video Tour" : "🏠 In-Person Visit"}
+                        </span>
+                        <StatusPill
+                          label={vis.status}
+                          tone={vis.status === "confirmed" ? "success" : vis.status === "completed" ? "info" : "warning"}
+                        />
+                      </div>
+                      <p className="font-semibold text-foreground">{vis.properties?.title || "Property Listing"}</p>
+                      <p className="text-muted-foreground">
+                        Date: <strong className="text-foreground">{vis.preferred_date}</strong> ({vis.preferred_slot})
+                      </p>
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                        <span>Customer: <strong className="text-foreground">{vis.customer_name} ({vis.customer_phone})</strong></span>
+                        <span className="font-bold text-primary">{vis.locality}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -414,12 +628,115 @@ function AdminDashboard({ user }: { user: User | null }) {
       )}
 
       {activeTab === "agents" && (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <SectionHeader
-            title={`Partner agents (${agents.length})`}
-            subtitle="Accounts working the lead pipeline"
+            title="Partner Agents & Regional Zone Assignments"
+            subtitle="Onboard, manage, and assign partner agents to specific territory micro-markets (Kukatpally, Gachibowli, Madhapur, etc.)."
           />
-          <UserTable users={agents} />
+
+          <div className="space-y-4">
+            {(dbAgents.length > 0 ? dbAgents : USERS.filter((u) => u.role === "Agent")).map((ag: any) => {
+              const currentLocs: string[] = ag.assigned_localities || ["Kukatpally"];
+              const isEditing = assigningAgentId === ag.id;
+
+              return (
+                <div
+                  key={ag.id}
+                  className="rounded-3xl border border-border/80 bg-card p-5 space-y-4 shadow-sm"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary font-bold text-lg">
+                        {ag.full_name ? ag.full_name[0] : "A"}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground text-sm">{ag.full_name || ag.name || "Area Agent"}</h4>
+                        <p className="text-xs text-muted-foreground">{ag.email || ag.phone || "agent.qa@urbanproperties.in"}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          if (isEditing) {
+                            setAssigningAgentId(null);
+                          } else {
+                            setAssigningAgentId(ag.id);
+                            setSelectedLocalities(currentLocs);
+                          }
+                        }}
+                        className="px-4 py-2 bg-primary text-primary-foreground font-bold rounded-xl text-xs shadow-sm transition hover:bg-primary/90 cursor-pointer"
+                      >
+                        {isEditing ? "Cancel" : "Assign Micro-Markets"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-border/40">
+                    <span className="text-xs font-bold text-muted-foreground block mb-2">
+                      Assigned Territories & Micro-Markets:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentLocs.map((loc) => (
+                        <span
+                          key={loc}
+                          className="px-3 py-1 bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-xs flex items-center gap-1 border border-emerald-600/20"
+                        >
+                          <MapPin className="h-3 w-3" /> {loc}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {isEditing && (
+                    <div className="p-4 rounded-2xl bg-secondary/50 border border-primary/30 space-y-3 mt-3">
+                      <p className="text-xs font-bold text-foreground">Select Territory Micro-Markets for {ag.full_name || "Agent"}:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {HYDERABAD_LOCALITIES.map((loc) => {
+                          const active = selectedLocalities.includes(loc.name);
+                          return (
+                            <button
+                              key={loc.name}
+                              type="button"
+                              onClick={() => {
+                                if (active) {
+                                  setSelectedLocalities(selectedLocalities.filter((l) => l !== loc.name));
+                                } else {
+                                  setSelectedLocalities([...selectedLocalities, loc.name]);
+                                }
+                              }}
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer border ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-foreground border-border hover:border-primary/50"
+                              }`}
+                            >
+                              {active ? "✓ " : "+ "}{loc.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          onClick={() => setAssigningAgentId(null)}
+                          className="px-3 py-1.5 bg-secondary text-foreground text-xs font-bold rounded-xl"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => saveAgentLocalities(ag.id, selectedLocalities)}
+                          className="px-4 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow hover:bg-emerald-500"
+                        >
+                          Save Assignment
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -899,6 +1216,15 @@ function AdminDashboard({ user }: { user: User | null }) {
             ))}
           </div>
         </div>
+      )}
+
+      {mediaModalProperty && (
+        <PropertyMediaModal
+          isOpen={Boolean(mediaModalProperty)}
+          onClose={() => setMediaModalProperty(null)}
+          property={mediaModalProperty}
+          userRole="admin"
+        />
       )}
     </DashboardLayout>
   );

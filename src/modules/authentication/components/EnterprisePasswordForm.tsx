@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   evaluatePasswordRules,
   validateFullName,
+  sanitizeFullName,
   validateIndianPhone,
 } from "@/modules/authentication/services/passwordPolicy";
 import { resolveRoleFromDatabase } from "@/modules/authentication/services/session";
@@ -272,7 +273,8 @@ export function EnterprisePasswordForm({
                 type="text"
                 required
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(sanitizeFullName(e.target.value))}
+                onBlur={(e) => setName(sanitizeFullName(e.target.value))}
                 placeholder="e.g. Suresh Kumar"
                 autoComplete="name"
                 className={`w-full rounded-xl border px-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 ${

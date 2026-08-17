@@ -140,3 +140,30 @@ export function validateFullName(name: string): boolean {
   const trimmed = name.trim();
   return trimmed.length >= 3 && trimmed.length <= 80 && /^[a-zA-Z\s]+$/.test(trimmed);
 }
+
+/**
+ * Sanitizes full name and prevents duplicate concatenation caused by browser autofill algorithms.
+ */
+export function sanitizeFullName(input: string): string {
+  if (!input) return "";
+
+  // Strip invalid characters and collapse spaces
+  let clean = input.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ");
+  const trimmed = clean.trim();
+
+  // Detect word-level duplication e.g. "Suresh Kumar Suresh Kumar" or "Suresh Suresh"
+  if (trimmed.length >= 4) {
+    const words = trimmed.split(" ");
+    if (words.length >= 2 && words.length % 2 === 0) {
+      const half = words.length / 2;
+      const firstHalf = words.slice(0, half).join(" ");
+      const secondHalf = words.slice(half).join(" ");
+      if (firstHalf.toLowerCase() === secondHalf.toLowerCase()) {
+        clean = firstHalf;
+      }
+    }
+  }
+
+  return clean;
+}
+

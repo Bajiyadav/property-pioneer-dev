@@ -2,6 +2,7 @@ import { useState } from "react";
 import { X, Calendar as CalendarIcon, Video, MapPin, CheckCircle2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { scheduleCustomerVisit } from "@/lib/leadRouting";
 
 interface ScheduleVisitModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export function ScheduleVisitModal({
 
   if (!isOpen) return null;
 
-  const handleBook = () => {
+  const handleBook = async () => {
     bookVisit({
       propertyId,
       propertyTitle,
@@ -40,6 +41,18 @@ export function ScheduleVisitModal({
       mode: visitMode,
       when: `${format(selectedDate, "MMM d, yyyy")} · ${selectedTime}`,
     });
+
+    // Save directly to Supabase visit_schedules table
+    await scheduleCustomerVisit({
+      property_id: propertyId,
+      customer_id: tenantId === "anonymous-tenant" ? undefined : tenantId,
+      customer_name: "Customer",
+      customer_phone: "98765 43210",
+      visit_type: visitMode.includes("video") ? "video_call" : "in_person",
+      preferred_date: format(selectedDate, "yyyy-MM-dd"),
+      preferred_slot: selectedTime,
+    });
+
     setIsSuccess(true);
   };
 

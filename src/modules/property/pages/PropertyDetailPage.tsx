@@ -64,6 +64,7 @@ import { ScheduleVisitModal } from "@/modules/interactions/components/ScheduleVi
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { SimilarProperties } from "@/modules/property/components/SimilarProperties";
+import { logLiveActivity } from "@/lib/leadRouting";
 import { APP_NAME } from "@/config/app";
 
 export function PropertyDetailPage() {
@@ -93,6 +94,19 @@ export function PropertyDetailPage() {
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
+
+  // Real-time visitor page view tracking dispatched to territory area agents
+  useEffect(() => {
+    if (!property?.id) return;
+    logLiveActivity({
+      property_id: property.id,
+      locality: property.locality || "Kukatpally",
+      contact_name: user?.user_metadata?.full_name || "Guest Visitor",
+      contact_phone: user?.phone || undefined,
+      activity_type: "property_view",
+      search_query: `Viewed listing: ${property.title || "Property"}`,
+    });
+  }, [property?.id, user]);
 
   // Keyboard navigation for full-screen media lightbox
   useEffect(() => {

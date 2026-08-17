@@ -88,15 +88,19 @@ function CustomerDashboard({ user }: { user: User | null }) {
   const [savedQuery, setSavedQuery] = useState("");
   const [bookingFilter, setBookingFilter] = useState("all");
 
-  const {
-    data: feed,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["property-feed"],
-    queryFn: fetchPropertyFeed,
-    staleTime: 5 * 60 * 1000,
+  const { data: myVisits = [] } = useQuery({
+    queryKey: ["customer", "my_visits", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from("visit_schedules")
+        .select("*, properties(title, city, locality, address)")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) return [];
+      return data || [];
+    },
+    enabled: Boolean(user?.id),
   });
 
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
@@ -496,52 +500,44 @@ function CustomerDashboard({ user }: { user: User | null }) {
       {activeTab === "bookings" && (
         <div className="space-y-5">
           <SectionHeader
-            title="Bookings & site visits"
-            subtitle="Walkthroughs and video tours you've scheduled"
-            action={
-              <FilterChips
-                active={bookingFilter}
-                onChange={setBookingFilter}
-                options={[
-                  { id: "all", label: "All" },
-                  { id: "upcoming", label: "Upcoming" },
-                  { id: "past", label: "Completed" },
-                ]}
-              />
-            }
+            title={`Bookings & Site Visits (${myVisits.length})`}
+            subtitle="In-person walkthroughs and video tours you've scheduled"
           />
-          {visibleBookings.length === 0 ? (
+          {myVisits.length === 0 ? (
             <EmptyState
               icon={<CalendarCheck className="h-6 w-6" />}
-              title="No bookings in this view"
-              hint="Schedule a visit from any property page and it will appear here."
+              title="No property visits scheduled yet"
+              hint="Click 'Schedule Visit' on any property detail page to book an in-person or live video tour."
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
-              {visibleBookings.map((b) => (
+              {myVisits.map((v: any) => (
                 <div
-                  key={b.id}
-                  className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm transition hover:border-primary/40"
+                  key={v.id}
+                  className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm space-y-3"
                 >
                   <div className="flex items-center justify-between">
+                    <span className="font-bold text-foreground text-xs flex items-center gap-1.5">
+                      {v.visit_type === "video_call" ? "📹 Video Tour" : "🏠 In-Person Visit"}
+                    </span>
                     <StatusPill
-                      label={b.status}
-                      tone={
-                        b.status === "Confirmed"
-                          ? "success"
-                          : b.status === "Scheduled"
-                            ? "info"
-                            : "neutral"
-                      }
+                      label={v.status}
+                      tone={v.status === "confirmed" ? "success" : v.status === "completed" ? "info" : "warning"}
                     />
-                    <span className="text-[11px] font-medium text-muted-foreground">{b.mode}</span>
                   </div>
-                  <h3 className="mt-3 text-sm font-bold text-foreground">{b.propertyTitle}</h3>
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5 text-primary" /> {b.when}
-                  </p>
-                  <p className="mt-3 border-t border-border/40 pt-2 text-[11px] text-muted-foreground">
-                    Owner: <span className="font-semibold text-foreground">{b.ownerId}</span>
+
+                  <div>
+                    <h4 className="font-bold text-foreground text-sm">{v.properties?.title || "Property Listing"}</h4>
+                    <p className="text-xs text-primary font-bold">{v.locality}</p>
+                  </div>
+
+                  <div className="p-2.5 rounded-2xl bg-secondary/50 border border-border/50 text-xs">
+                    <p className="text-muted-foreground font-medium">Preferred Date &amp; Slot:</p>
+                    <p className="font-bold text-foreground">{v.preferred_date} ({v.preferred_slot})</p>
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                    Contact: <strong className="text-foreground">{v.customer_name} ({v.customer_phone})</strong>
                   </p>
                 </div>
               ))}

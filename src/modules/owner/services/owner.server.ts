@@ -222,17 +222,22 @@ export async function createVideoUploadUrl(ownerId: string, filename: string, mi
   const path = `${ownerId}/${propertyIdPlaceholder}/${Date.now()}-${safe || "video"}.${ext}`;
 
   const db = await adminDb();
-  // Get a signed URL valid for 1 hour to allow direct client upload
-  const { data, error } = await db.storage.from("property_videos").createSignedUploadUrl(path);
+  // Try property-videos first, fallback to property_videos
+  let uploadRes = await db.storage.from("property-videos").createSignedUploadUrl(path);
+  let targetBucket = "property-videos";
+  if (uploadRes.error) {
+    uploadRes = await db.storage.from("property_videos").createSignedUploadUrl(path);
+    targetBucket = "property_videos";
+  }
 
-  if (error) throw new Error(error.message);
+  if (uploadRes.error) throw new Error(uploadRes.error.message);
 
-  const { data: publicData } = db.storage.from("property_videos").getPublicUrl(path);
+  const { data: publicData } = db.storage.from(targetBucket).getPublicUrl(path);
 
   return {
-    signedUrl: data.signedUrl,
+    signedUrl: uploadRes.data.signedUrl,
     path,
-    token: data.token,
+    token: uploadRes.data.token,
     publicUrl: publicData.publicUrl,
   };
 }

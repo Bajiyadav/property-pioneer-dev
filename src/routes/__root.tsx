@@ -109,6 +109,8 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { MobileBottomNav } from "@/app/layouts/MobileBottomNav";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -140,12 +142,13 @@ function RootComponent() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col pb-14 md:pb-0">
           <SiteHeader />
           <main className="flex-1">
             <Outlet />
           </main>
           <SiteFooter />
+          <MobileBottomNav />
         </div>
         <Toaster position="top-center" richColors />
       </AuthProvider>
@@ -229,18 +232,18 @@ function SiteHeader() {
               </span>
             </Link>
 
-            <a
-              href="#why-us"
+            <Link
+              to="/why-us"
               className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Why Us
-            </a>
-            <a
-              href="#contact"
+            </Link>
+            <Link
+              to="/contact"
               className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/*
