@@ -57,5 +57,24 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Off for route files, because the rule cannot give actionable advice here.
+    //
+    // A TanStack Start route file must export `Route` and must keep its page
+    // component local, because the component is passed to `createFileRoute`
+    // rather than exported. eslint-plugin-react-refresh 0.5 added a
+    // `localComponents` check that fires on exactly that shape, taking this
+    // repo from 1 warning to 42. Whitelisting `Route` via `allowExportNames`
+    // does not silence it — the check is about the unexported component, and
+    // the rule's own suggestions ("move your component to a separate file")
+    // would mean splitting every route in two to satisfy a dev-only hint.
+    //
+    // Scope is deliberately just `src/routes/**`: the rule still runs, and
+    // still catches real Fast Refresh problems, everywhere else.
+    files: ["src/routes/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
   eslintPluginPrettier,
 );
