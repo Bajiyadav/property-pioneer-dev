@@ -9,7 +9,6 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
 import { Heart } from "lucide-react";
 import { BrandMark } from "@/shared/components/BrandMark";
@@ -80,7 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           rel: "stylesheet",
           href: appCss,
         },
-        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        // Our own mark, generated from the BrandMark house glyph. The file that
+        // shipped here was Lovable's heart logo — the icon visitors saw in the
+        // browser tab. /favicon.ico stays because browsers probe it directly.
+        { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+        { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+        { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+        { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         {
@@ -231,30 +237,32 @@ function SiteHeader() {
               </span>
             </Link>
 
-            <a
-              href="/#why-us"
+            <Link
+              to="/"
+              hash="why-us"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
               onClick={(e) => {
                 if (window.location.pathname === "/") {
                   e.preventDefault();
                   document.getElementById("why-us")?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Why Us
-            </a>
-            <a
-              href="/#contact"
+            </Link>
+            <Link
+              to="/"
+              hash="contact"
+              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
               onClick={(e) => {
                 if (window.location.pathname === "/") {
                   e.preventDefault();
                   document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
                 }
               }}
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/*
