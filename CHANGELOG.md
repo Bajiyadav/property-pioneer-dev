@@ -1,3 +1,8 @@
+## v0.13.6 — 2026-08-17
+
+### Fixes
+- fix(listing): store the owner's phone, so enquiries reach the owner (bab11b0)
+
 ## v0.13.5 — 2026-08-17
 
 ### Fixes
