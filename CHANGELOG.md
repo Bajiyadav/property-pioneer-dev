@@ -1,3 +1,8 @@
+## v0.13.1 — 2026-08-17
+
+### Fixes
+- fix(admin): commit the EmployeeAccessForm the dashboard imports (7d20bcd)
+
 ## v0.13.0 — 2026-08-17
 
 ### Features
