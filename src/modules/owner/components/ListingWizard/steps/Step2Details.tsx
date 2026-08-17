@@ -6,15 +6,29 @@ import type { StepProps } from "../types";
 
 export function Step2Details({ data, updateData }: StepProps) {
   const propertyTypes = [
-    { value: "Apartment", label: "Apartment / Flat", icon: Building2 },
+    { value: "Apartment", label: "Apartment", icon: Building2 },
     { value: "Independent House", label: "Independent House", icon: Home },
-    { value: "Villa", label: "Gated Villa", icon: Castle },
-    { value: "Commercial Office", label: "Commercial Office", icon: Building },
-    { value: "Studio", label: "1 RK / Studio", icon: Layers },
+    { value: "Duplex", label: "Duplex", icon: Layers },
+    { value: "Independent Floor", label: "Independent Floor", icon: Layers },
+    { value: "Villa", label: "Villa", icon: Castle },
+    { value: "Penthouse", label: "Penthouse", icon: Sparkles },
+    { value: "Studio", label: "Studio", icon: Building },
+    { value: "Farm House", label: "Farm House", icon: Home },
   ];
 
-  const bhkTypes = [1, 2, 3, 4, 5];
+  const bhkTypes = ["1 RK", "1 BHK", "1.5 BHK", "2 BHK", "3+ BHK"];
   const bathroomOptions = [1, 2, 3, 4];
+  const areaUnitOptions = [
+    "Sq.ft",
+    "Sq.yards",
+    "Sq.m",
+    "Acres",
+    "Bigha",
+    "Hectare",
+    "Marla",
+    "Kanal",
+    "Biswa",
+  ];
   const furnishingTypes = [
     {
       value: "fully-furnished",
@@ -29,7 +43,23 @@ export function Step2Details({ data, updateData }: StepProps) {
     { value: "unfurnished", label: "Unfurnished", desc: "Basic fixtures and fittings only" },
   ] as const;
 
-  const floorOptions = ["Ground", "1 to 3", "4 to 6", "7 to 9", "10+ (High Rise)"];
+  const propertyAgeOptions = [
+    "Under Construction",
+    "0-1 Years",
+    "1-5 Years",
+    "5-10 Years",
+    "10+ Years",
+  ];
+  const facingOptions = [
+    "North",
+    "East",
+    "West",
+    "South",
+    "North-East",
+    "North-West",
+    "South-East",
+    "South-West",
+  ];
 
   return (
     <div className="space-y-8">
@@ -80,19 +110,19 @@ export function Step2Details({ data, updateData }: StepProps) {
             <Label className="text-sm font-semibold text-foreground">BHK Configuration *</Label>
             <div className="flex flex-wrap gap-2">
               {bhkTypes.map((bhk) => {
-                const isSelected = data.bedrooms === bhk;
+                const isSelected = data.bhk_type === bhk;
                 return (
                   <button
                     key={bhk}
                     type="button"
-                    onClick={() => updateData({ bedrooms: bhk })}
-                    className={`h-11 min-w-[52px] px-3.5 rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer ${
+                    onClick={() => updateData({ bhk_type: bhk })}
+                    className={`h-11 px-3.5 rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer ${
                       isSelected
                         ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
                         : "bg-secondary/40 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
                     }`}
                   >
-                    {bhk} {bhk === 5 ? "BHK+" : "BHK"}
+                    {bhk}
                   </button>
                 );
               })}
@@ -130,36 +160,120 @@ export function Step2Details({ data, updateData }: StepProps) {
               <Label htmlFor="area" className="text-sm font-semibold text-foreground">
                 Built-up Area *
               </Label>
-              <span className="text-xs font-bold text-primary">{data.area_sqft || 0} Sq.Ft</span>
             </div>
+            <div className="flex gap-2">
+              <Input
+                id="area"
+                type="number"
+                placeholder="e.g. 1250"
+                value={data.area_sqft || ""}
+                className="h-11 flex-1 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateData({ area_sqft: parseInt(e.target.value) || 0 })
+                }
+              />
+              <select
+                className="h-11 rounded-xl border border-border/80 bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer w-[120px]"
+                value={data.area_unit || "Sq.ft"}
+                onChange={(e) => updateData({ area_unit: e.target.value })}
+              >
+                {areaUnitOptions.map((unit) => (
+                  <option key={unit} value={unit}>
+                    {unit}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            <Label className="text-sm font-semibold text-foreground">Floor Details *</Label>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                placeholder="Exact Floor"
+                value={data.exact_floor || ""}
+                className="h-11 flex-1 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+                onChange={(e) => updateData({ exact_floor: parseInt(e.target.value) || 0 })}
+              />
+              <span className="flex items-center text-sm text-muted-foreground">of</span>
+              <Input
+                type="number"
+                placeholder="Total Floors"
+                value={data.total_floors || ""}
+                className="h-11 flex-1 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+                onChange={(e) => updateData({ total_floors: parseInt(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Critical Property Specs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-2.5">
+            <Label className="text-sm font-semibold text-foreground">Property Age</Label>
+            <select
+              className="flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              value={data.property_age || "0-1 Years"}
+              onChange={(e) => updateData({ property_age: e.target.value })}
+            >
+              {propertyAgeOptions.map((age) => (
+                <option key={age} value={age}>
+                  {age}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2.5">
+            <Label className="text-sm font-semibold text-foreground">Facing (Vastu)</Label>
+            <select
+              className="flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              value={data.facing || "East"}
+              onChange={(e) => updateData({ facing: e.target.value })}
+            >
+              {facingOptions.map((face) => (
+                <option key={face} value={face}>
+                  {face}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2.5">
+            <Label className="text-sm font-semibold text-foreground">Balconies</Label>
             <Input
-              id="area"
               type="number"
-              placeholder="e.g. 1250"
-              value={data.area_sqft || ""}
-              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ area_sqft: parseInt(e.target.value) || 0 })
-              }
+              min="0"
+              placeholder="e.g. 2"
+              value={data.balconies !== undefined ? data.balconies : ""}
+              className="h-11 w-full rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+              onChange={(e) => updateData({ balconies: parseInt(e.target.value) || 0 })}
             />
           </div>
 
           <div className="space-y-2.5">
-            <Label htmlFor="floor" className="text-sm font-semibold text-foreground">
-              Floor Level *
-            </Label>
-            <select
-              id="floor"
-              className="flex h-11 w-full items-center justify-between rounded-xl border border-border/80 bg-background px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              value={data.floor_number}
-              onChange={(e) => updateData({ floor_number: e.target.value })}
-            >
-              {floorOptions.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
+            <Label className="text-sm font-semibold text-foreground">Covered Parking</Label>
+            <Input
+              type="number"
+              min="0"
+              placeholder="e.g. 1"
+              value={data.parking_covered !== undefined ? data.parking_covered : ""}
+              className="h-11 w-full rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+              onChange={(e) => updateData({ parking_covered: parseInt(e.target.value) || 0 })}
+            />
+          </div>
+
+          <div className="space-y-2.5">
+            <Label className="text-sm font-semibold text-foreground">Open Parking</Label>
+            <Input
+              type="number"
+              min="0"
+              placeholder="e.g. 0"
+              value={data.parking_open !== undefined ? data.parking_open : ""}
+              className="h-11 w-full rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium"
+              onChange={(e) => updateData({ parking_open: parseInt(e.target.value) || 0 })}
+            />
           </div>
         </div>
 

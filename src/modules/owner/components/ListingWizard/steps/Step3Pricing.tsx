@@ -47,6 +47,20 @@ export function Step3Pricing({ data, updateData }: StepProps) {
       </div>
 
       <div className="space-y-7">
+        {/* Availability */}
+        <div className="space-y-2.5">
+          <Label htmlFor="available_from" className="text-sm font-semibold text-foreground">
+            Available From *
+          </Label>
+          <Input
+            id="available_from"
+            type="date"
+            value={data.available_from || ""}
+            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 font-medium w-full sm:w-1/2"
+            onChange={(e) => updateData({ available_from: e.target.value })}
+          />
+        </div>
+
         {/* Pricing Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2.5">
@@ -110,6 +124,20 @@ export function Step3Pricing({ data, updateData }: StepProps) {
               ₹{(data.deposit || 0).toLocaleString("en-IN")} refundable deposit
             </p>
           </div>
+        </div>
+
+        {/* Rent Negotiable */}
+        <div className="flex items-center space-x-3">
+          <input
+            type="checkbox"
+            id="rent_negotiable"
+            checked={data.rent_negotiable || false}
+            onChange={(e) => updateData({ rent_negotiable: e.target.checked })}
+            className="w-5 h-5 text-primary rounded border-border focus:ring-primary/20 cursor-pointer"
+          />
+          <Label htmlFor="rent_negotiable" className="text-sm font-medium cursor-pointer">
+            Price / Rent is negotiable
+          </Label>
         </div>
 
         {/* Maintenance */}

@@ -232,13 +232,25 @@ function SiteHeader() {
             </Link>
 
             <a
-              href="#why-us"
+              href="/#why-us"
+              onClick={(e) => {
+                if (window.location.pathname === "/") {
+                  e.preventDefault();
+                  document.getElementById("why-us")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
               className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Why Us
             </a>
             <a
-              href="#contact"
+              href="/#contact"
+              onClick={(e) => {
+                if (window.location.pathname === "/") {
+                  e.preventDefault();
+                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
               className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Contact
@@ -372,16 +384,6 @@ function SiteFooter() {
               <li>
                 <Link to="/commercial" className="hover:text-foreground transition">
                   Commercial Spaces
-                </Link>
-              </li>
-              <li>
-                <Link to="/villas" className="hover:text-foreground transition">
-                  Luxury Villas
-                </Link>
-              </li>
-              <li>
-                <Link to="/plots" className="hover:text-foreground transition">
-                  Plots &amp; Land
                 </Link>
               </li>
             </ul>

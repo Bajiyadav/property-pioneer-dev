@@ -32,6 +32,22 @@ export function Step1Location({ data, updateData }: StepProps) {
       </div>
 
       <div className="space-y-6">
+        {/* Your Name */}
+        <div className="space-y-2.5">
+          <Label htmlFor="owner_name" className="text-sm font-semibold text-foreground">
+            Your Name *
+          </Label>
+          <Input
+            id="owner_name"
+            placeholder="Enter your full name"
+            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+            value={data.owner_name || ""}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              updateData({ owner_name: e.target.value })
+            }
+          />
+        </div>
+
         {/* City Selection Pills */}
         <div className="space-y-2.5">
           <Label className="text-sm font-semibold text-foreground">Select City *</Label>
@@ -53,6 +69,26 @@ export function Step1Location({ data, updateData }: StepProps) {
                 </button>
               );
             })}
+          </div>
+        </div>
+
+        {/* Building / Project / Society */}
+        <div className="space-y-2.5">
+          <Label htmlFor="project_name" className="text-sm font-semibold text-foreground">
+            Building/Project/Society{" "}
+            <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+          </Label>
+          <div className="relative">
+            <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="project_name"
+              placeholder="e.g. Prestige High Fields, My Home Bhooja"
+              className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+              value={data.project_name || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ project_name: e.target.value })
+              }
+            />
           </div>
         </div>
 

@@ -7,59 +7,193 @@ import { z } from "zod";
 /** Context injected by `requireSupabaseAuth` — an RLS-scoped client plus the caller's id. */
 type AuthContext = { supabase: SupabaseClient<Database>; userId: string };
 
-// Role check runs through the caller's own RLS-scoped view of user_roles
-// (policy: auth.uid() = user_id), so it cannot be used to probe other users.
-async function isAdmin(context: AuthContext) {
+export type EmployeeRole = "support" | "moderator" | "analyst" | "ops" | "admin";
+export type EmployeeAccess = {
+  role: EmployeeRole;
+  regions: string[];
+};
+
+// Check if the user has an employee_access row
+async function getEmployeeAccess(context: AuthContext): Promise<EmployeeAccess | null> {
   const { data, error } = await context.supabase
-    .from("user_roles")
-    .select("role")
+    .from("employee_access")
+    .select("role, regions")
     .eq("user_id", context.userId)
-    .eq("role", "admin")
     .maybeSingle();
-  if (error) throw new Error("Could not verify permissions");
-  return Boolean(data);
+
+  if (error || !data) return null;
+  return {
+    role: data.role as EmployeeRole,
+    regions: data.regions || [],
+  };
 }
 
-async function assertAdmin(context: AuthContext) {
-  if (!(await isAdmin(context))) throw new Error("Forbidden");
+async function assertEmployee(context: AuthContext): Promise<EmployeeAccess> {
+  const access = await getEmployeeAccess(context);
+  if (!access) throw new Error("Forbidden: Not an employee");
+  return access;
 }
 
-export const checkIsAdmin = createServerFn({ method: "GET" })
+export const checkEmployeeAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return { isAdmin: await isAdmin(context as AuthContext), userId: context.userId };
+    return { access: await getEmployeeAccess(context as AuthContext), userId: context.userId };
   });
 
 export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as AuthContext);
-    const { loadOverview } = await import("./admin.server");
-    return loadOverview();
+    const authCtx = context as AuthContext;
+    await assertEmployee(authCtx);
+
+    const weekAgoStr = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const [
+      { count: totalProps },
+      { count: approvedProps },
+      { count: featuredProps },
+      { count: rentProps },
+      { count: saleProps },
+      { count: totalEnq },
+      { count: recentEnq },
+      { data: cityData },
+    ] = await Promise.all([
+      authCtx.supabase.from("properties").select("*", { count: "exact", head: true }),
+      authCtx.supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("is_approved", true),
+      authCtx.supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("is_featured", true),
+      authCtx.supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("listing_type", "rent"),
+      authCtx.supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("listing_type", "sale"),
+      authCtx.supabase.from("enquiries").select("*", { count: "exact", head: true }),
+      authCtx.supabase
+        .from("enquiries")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", weekAgoStr),
+      authCtx.supabase.from("properties").select("city"),
+    ]);
+
+    // Aggregate cities on the subset returned
+    const cityCounts: Record<string, number> = {};
+    for (const p of cityData || []) {
+      if (!p.city) continue;
+      cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
+    }
+    const cities = Object.entries(cityCounts)
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      totalProperties: totalProps || 0,
+      approvedProperties: approvedProps || 0,
+      pendingProperties: (totalProps || 0) - (approvedProps || 0),
+      featuredProperties: featuredProps || 0,
+      forRent: rentProps || 0,
+      forSale: saleProps || 0,
+      totalEnquiries: totalEnq || 0,
+      enquiriesLast7Days: recentEnq || 0,
+      cities,
+    };
   });
 
 export const getAdminProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as AuthContext);
-    const { loadProperties } = await import("./admin.server");
-    return loadProperties();
+    const authCtx = context as AuthContext;
+    await assertEmployee(authCtx);
+    const { data } = await authCtx.supabase
+      .from("properties")
+      .select(
+        "id, title, city, locality, region, listing_type, status, price, created_at, is_approved, is_featured, video_url, video_status",
+      )
+      .order("created_at", { ascending: false });
+    return data || [];
   });
 
 export const getAdminEnquiries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as AuthContext);
-    const { loadEnquiries } = await import("./admin.server");
-    return loadEnquiries();
+    const authCtx = context as AuthContext;
+    await assertEmployee(authCtx);
+    const { data } = await authCtx.supabase
+      .from("enquiries")
+      .select(
+        "id, name, email, phone, message, created_at, property_id, properties (title, city, region)",
+      )
+      .order("created_at", { ascending: false });
+    return data || [];
   });
 
 export const getAdminAuditLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as AuthContext);
-    const { loadAuditLogs } = await import("./admin.server");
-    return loadAuditLogs();
+    const authCtx = context as AuthContext;
+    const access = await assertEmployee(authCtx);
+    if (access.role !== "admin") return []; // Only admin sees global audit logs for now
+    const { data } = await authCtx.supabase
+      .from("audit_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return data || [];
+  });
+
+export const getEmployeeActivity = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const authCtx = context as AuthContext;
+    const access = await assertEmployee(authCtx);
+    if (access.role !== "admin" && access.role !== "ops") return []; // Admins/Ops can view activity
+
+    // 1. Fetch all employees
+    const { data: employees } = await authCtx.supabase
+      .from("employee_access")
+      .select("user_id, role, regions");
+    if (!employees || employees.length === 0) return [];
+
+    const employeeIds = employees.map((e) => e.user_id);
+
+    // 2. Fetch audit logs for these employees
+    const { data: logs } = await authCtx.supabase
+      .from("audit_logs")
+      .select("*")
+      .in("actor_id", employeeIds)
+      .in("event", ["property_updated", "employee_access_updated"]) // Filter to relevant events
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (!logs || logs.length === 0) return [];
+
+    // 3. Fetch profiles for these employees to get names
+    const { data: profiles } = await authCtx.supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", employeeIds);
+
+    // 4. Combine data
+    const enrichedLogs = logs.map((log) => {
+      const employee = employees.find((e) => e.user_id === log.actor_id);
+      const profile = profiles?.find((p) => p.id === log.actor_id);
+      return {
+        ...log,
+        employee_role: employee?.role,
+        employee_name: profile?.full_name || "Unknown Employee",
+        employee_avatar: profile?.avatar_url,
+      };
+    });
+
+    return enrichedLogs;
   });
 
 export const updateAdminProperty = createServerFn({ method: "POST" })
@@ -76,8 +210,69 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as AuthContext);
-    const { applyPropertyUpdate } = await import("./admin.server");
+    const authCtx = context as AuthContext;
+    await assertEmployee(authCtx);
     const { id, ...patch } = data;
-    return applyPropertyUpdate(id, patch);
+    const { error } = await authCtx.supabase.from("properties").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+
+    // Log employee action
+    await authCtx.supabase.from("audit_logs").insert({
+      event: "property_updated",
+      actor_id: authCtx.userId,
+      subject_type: "properties",
+      subject_id: id,
+      outcome: "success",
+      details: patch as Record<string, unknown>,
+    });
+
+    return { ok: true };
+  });
+
+export const upsertEmployeeAccess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({
+        email: z.string().email(),
+        role: z.enum(["support", "moderator", "analyst", "ops", "admin"]),
+        regions: z.array(z.string()),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const authCtx = context as AuthContext;
+    const access = await assertEmployee(authCtx);
+    if (access.role !== "admin") throw new Error("Forbidden: Only admins can manage access");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: usersData, error: usersErr } = await supabaseAdmin.auth.admin.listUsers();
+    if (usersErr) throw new Error(usersErr.message);
+
+    const targetUser = usersData.users.find((u) => u.email === data.email);
+    if (!targetUser) throw new Error("User with that email not found");
+
+    const { error: upsertErr } = await authCtx.supabase.from("employee_access").upsert(
+      {
+        user_id: targetUser.id,
+        role: data.role,
+        regions: data.regions,
+        created_by: authCtx.userId,
+      },
+      { onConflict: "user_id" },
+    );
+
+    if (upsertErr) throw new Error(upsertErr.message);
+
+    // Log admin action
+    await authCtx.supabase.from("audit_logs").insert({
+      event: "employee_access_updated",
+      actor_id: authCtx.userId,
+      subject_type: "auth.users",
+      subject_id: targetUser.id,
+      outcome: "success",
+      details: { role: data.role, regions: data.regions },
+    });
+
+    return { ok: true };
   });

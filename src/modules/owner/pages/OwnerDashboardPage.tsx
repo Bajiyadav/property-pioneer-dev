@@ -75,7 +75,9 @@ const NAV_ITEMS: NavItem[] = [
 
 export function OwnerDashboardPage() {
   return (
-    <RequireRole role="owner">{(session) => <OwnerDashboard user={session.user} />}</RequireRole>
+    <RequireRole role={["owner", "customer"]}>
+      {(session) => <OwnerDashboard user={session.user} />}
+    </RequireRole>
   );
 }
 

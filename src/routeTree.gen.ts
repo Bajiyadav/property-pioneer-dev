@@ -17,22 +17,20 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as CommercialRouteImport } from './routes/commercial'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
-import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as PlotsRouteImport } from './routes/plots'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
-import { Route as VillasRouteImport } from './routes/villas'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
+import { Route as ListPropertyWizardRouteImport } from './routes/list-property.wizard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as RentIndexRouteImport } from './routes/rent.index'
@@ -96,11 +94,6 @@ const CookiePolicyRoute = CookiePolicyRouteImport.update({
   path: '/cookie-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FarmLandsRoute = FarmLandsRouteImport.update({
-  id: '/farm-lands',
-  path: '/farm-lands',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
@@ -119,11 +112,6 @@ const ListPropertyRoute = ListPropertyRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlotsRoute = PlotsRouteImport.update({
-  id: '/plots',
-  path: '/plots',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
@@ -156,11 +144,6 @@ const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
   path: '/terms-of-service',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VillasRoute = VillasRouteImport.update({
-  id: '/villas',
-  path: '/villas',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -175,6 +158,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth_/callback',
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ListPropertyWizardRoute = ListPropertyWizardRouteImport.update({
+  id: '/wizard',
+  path: '/wizard',
+  getParentRoute: () => ListPropertyRoute,
 } as any)
 const PropertiesIndexRoute = PropertiesIndexRouteImport.update({
   id: '/',
@@ -315,22 +303,20 @@ export interface FileRoutesByFullPath {
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
-  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/list-property': typeof ListPropertyRoute
+  '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
-  '/plots': typeof PlotsRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
-  '/villas': typeof VillasRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
+  '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
@@ -363,19 +349,17 @@ export interface FileRoutesByTo {
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
-  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/list-property': typeof ListPropertyRoute
+  '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
-  '/plots': typeof PlotsRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
-  '/villas': typeof VillasRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/rent': typeof RentIndexRoute
@@ -410,22 +394,20 @@ export interface FileRoutesById {
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
-  '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/list-property': typeof ListPropertyRoute
+  '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
-  '/plots': typeof PlotsRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
-  '/villas': typeof VillasRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth_/callback': typeof AuthCallbackRoute
+  '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
@@ -460,22 +442,20 @@ export interface FileRouteTypes {
     | '/buy'
     | '/commercial'
     | '/cookie-policy'
-    | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
-    | '/plots'
     | '/privacy-policy'
     | '/profile'
     | '/properties'
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
-    | '/villas'
     | '/admin'
     | '/dashboard'
     | '/auth/callback'
+    | '/list-property/wizard'
     | '/properties/$id'
     | '/properties/'
     | '/rent/'
@@ -508,19 +488,17 @@ export interface FileRouteTypes {
     | '/buy'
     | '/commercial'
     | '/cookie-policy'
-    | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
-    | '/plots'
     | '/privacy-policy'
     | '/profile'
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
-    | '/villas'
     | '/auth/callback'
+    | '/list-property/wizard'
     | '/properties/$id'
     | '/properties'
     | '/rent'
@@ -554,22 +532,20 @@ export interface FileRouteTypes {
     | '/buy'
     | '/commercial'
     | '/cookie-policy'
-    | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
-    | '/plots'
     | '/privacy-policy'
     | '/profile'
     | '/properties'
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
-    | '/villas'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/auth_/callback'
+    | '/list-property/wizard'
     | '/properties/$id'
     | '/properties/'
     | '/rent/'
@@ -604,19 +580,16 @@ export interface RootRouteChildren {
   BuyRoute: typeof BuyRoute
   CommercialRoute: typeof CommercialRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
-  FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
-  ListPropertyRoute: typeof ListPropertyRoute
+  ListPropertyRoute: typeof ListPropertyRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
-  PlotsRoute: typeof PlotsRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RefundPolicyRoute: typeof RefundPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
-  VillasRoute: typeof VillasRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   RentIndexRoute: typeof RentIndexRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
@@ -688,13 +661,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CookiePolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/farm-lands': {
-      id: '/farm-lands'
-      path: '/farm-lands'
-      fullPath: '/farm-lands'
-      preLoaderRoute: typeof FarmLandsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/favorites': {
       id: '/favorites'
       path: '/favorites'
@@ -721,13 +687,6 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plots': {
-      id: '/plots'
-      path: '/plots'
-      fullPath: '/plots'
-      preLoaderRoute: typeof PlotsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy-policy': {
@@ -772,13 +731,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsOfServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/villas': {
-      id: '/villas'
-      path: '/villas'
-      fullPath: '/villas'
-      preLoaderRoute: typeof VillasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -799,6 +751,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/list-property/wizard': {
+      id: '/list-property/wizard'
+      path: '/wizard'
+      fullPath: '/list-property/wizard'
+      preLoaderRoute: typeof ListPropertyWizardRouteImport
+      parentRoute: typeof ListPropertyRoute
     }
     '/properties/': {
       id: '/properties/'
@@ -1023,6 +982,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ListPropertyRouteChildren {
+  ListPropertyWizardRoute: typeof ListPropertyWizardRoute
+}
+
+const ListPropertyRouteChildren: ListPropertyRouteChildren = {
+  ListPropertyWizardRoute: ListPropertyWizardRoute,
+}
+
+const ListPropertyRouteWithChildren = ListPropertyRoute._addFileChildren(
+  ListPropertyRouteChildren,
+)
+
 interface PropertiesRouteChildren {
   PropertiesIdRoute: typeof PropertiesIdRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
@@ -1046,19 +1017,16 @@ const rootRouteChildren: RootRouteChildren = {
   BuyRoute: BuyRoute,
   CommercialRoute: CommercialRoute,
   CookiePolicyRoute: CookiePolicyRoute,
-  FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
-  ListPropertyRoute: ListPropertyRoute,
+  ListPropertyRoute: ListPropertyRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
-  PlotsRoute: PlotsRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   RefundPolicyRoute: RefundPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
-  VillasRoute: VillasRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   RentIndexRoute: RentIndexRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,

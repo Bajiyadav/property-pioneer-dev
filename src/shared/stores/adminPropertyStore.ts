@@ -80,8 +80,7 @@ export const useAdminPropertyStore = create<AdminPropertyState>()(
       getPendingProperties: () => get().properties.filter((p) => p.status === "pending"),
       getActiveProperties: () => get().properties.filter((p) => p.status === "available"),
       getRejectedProperties: () => get().properties.filter((p) => p.status === "rejected"),
-      getExpiredProperties: () =>
-        get().properties.filter((p) => p.status === "archived"),
+      getExpiredProperties: () => get().properties.filter((p) => p.status === "archived"),
     }),
     {
       name: "admin-properties-storage",

@@ -147,7 +147,7 @@ export function HeaderProfileMenu() {
             />
 
             {/* Role Specific Additions */}
-            {role === "owner" && (
+            {(role === "owner" || role === "customer") && (
               <>
                 <div className="my-1 border-t border-border/30" />
                 <MenuItem

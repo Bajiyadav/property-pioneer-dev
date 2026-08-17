@@ -36,14 +36,9 @@ export function EnquiryForm({
         setSending(true);
 
         // Simulating the backend call using the interaction store
-        useInteractionStore.getState().sendMessage(
-          propertyId,
-          "Property Enquiry",
-          tenantId,
-          ownerId,
-          tenantId,
-          message
-        );
+        useInteractionStore
+          .getState()
+          .sendMessage(propertyId, "Property Enquiry", tenantId, ownerId, tenantId, message);
 
         setTimeout(() => {
           setSending(false);

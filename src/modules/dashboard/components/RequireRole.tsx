@@ -12,6 +12,11 @@ const ROLE_LABEL: Record<UserRole, string> = {
   admin: "Platform Admin",
 };
 
+function getPrimaryRoleLabel(role: UserRole | UserRole[]): string {
+  const primary = Array.isArray(role) ? role[0] : role;
+  return ROLE_LABEL[primary];
+}
+
 /**
  * Authorization boundary for a single dashboard.
  *
@@ -23,14 +28,14 @@ export function RequireRole({
   role,
   children,
 }: {
-  role: UserRole;
+  role: UserRole | UserRole[];
   children: (session: UseAuthSession) => React.ReactNode;
 }) {
   const session = useAuthSession();
   const navigate = useNavigate();
   const { status, role: actualRole, roleVerified } = session;
 
-  const allowed = actualRole === role;
+  const allowed = Array.isArray(role) ? role.includes(actualRole) : actualRole === role;
 
   useEffect(() => {
     // Wait for the authoritative role lookup before redirecting — otherwise the
@@ -65,7 +70,7 @@ export function RequireRole({
             <ShieldAlert className="h-8 w-8" />
           </div>
           <h1 className="text-2xl font-extrabold text-foreground">
-            This is the {ROLE_LABEL[role]} area
+            This is the {getPrimaryRoleLabel(role)} area
           </h1>
           <p className="text-xs leading-relaxed text-muted-foreground">
             Your account is signed in as{" "}

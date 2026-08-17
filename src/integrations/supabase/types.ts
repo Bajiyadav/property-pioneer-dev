@@ -153,6 +153,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      employee_access: {
+        Row: {
+          id: string;
+          user_id: string;
+          role: string;
+          regions: string[];
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          role: string;
+          regions?: string[];
+          created_at?: string;
+          created_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          role?: string;
+          regions?: string[];
+          created_at?: string;
+          created_by?: string | null;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           id: string;
@@ -222,8 +249,12 @@ export type Database = {
           it_park: string | null;
           college: string | null;
           hospital: string | null;
+          region: string | null;
           created_at: string;
           updated_at: string;
+          project_name: string | null;
+          bhk_type: string | null;
+          area_unit: string | null;
         };
         Insert: {
           id?: string;
@@ -266,8 +297,12 @@ export type Database = {
           it_park?: string | null;
           college?: string | null;
           hospital?: string | null;
+          region?: string | null;
           created_at?: string;
           updated_at?: string;
+          project_name?: string | null;
+          bhk_type?: string | null;
+          area_unit?: string | null;
         };
         Update: {
           id?: string;
@@ -310,8 +345,12 @@ export type Database = {
           it_park?: string | null;
           college?: string | null;
           hospital?: string | null;
+          region?: string | null;
           created_at?: string;
           updated_at?: string;
+          project_name?: string | null;
+          bhk_type?: string | null;
+          area_unit?: string | null;
         };
         Relationships: [];
       };

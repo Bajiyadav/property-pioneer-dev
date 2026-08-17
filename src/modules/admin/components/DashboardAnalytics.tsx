@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+import { ActivityAnalyticsPanel } from "@/modules/analytics/components/ActivityAnalyticsPanel";
 import { TrendingUp, Clock, CheckCircle2, XCircle, Home } from "lucide-react";
 
 export function DashboardAnalytics() {
@@ -93,6 +94,12 @@ export function DashboardAnalytics() {
         <div className="space-y-4">
           <p className="text-sm text-neutral-500 italic">No recent activity to show.</p>
         </div>
+      </div>
+
+      {/* Visitor activity — distinct from the listing counts above. */}
+      <div className="mt-8">
+        <h2 className="mb-3 text-sm font-extrabold text-foreground">Visitor activity</h2>
+        <ActivityAnalyticsPanel />
       </div>
     </div>
   );

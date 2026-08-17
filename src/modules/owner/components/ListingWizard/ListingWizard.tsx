@@ -12,6 +12,14 @@ import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
 import type { ListingFormData } from "./types";
 
+interface ListingWizardProps {
+  initialData?: {
+    propertyType?: "Residential" | "Commercial";
+    intent?: "Rent" | "Sell" | "PG/Co-living";
+    phone?: string;
+  };
+}
+
 const steps = [
   { id: 1, name: "Location", desc: "City & Address" },
   { id: 2, name: "Details", desc: "Type & Rooms" },
@@ -21,23 +29,27 @@ const steps = [
   { id: 6, name: "Review", desc: "Verify & Submit" },
 ];
 
-export function ListingWizard() {
+export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const addProperty = useAdminPropertyStore((state) => state.addProperty);
 
   const [formData, setFormData] = useState<ListingFormData>({
+    owner_name: "",
+    project_name: "",
     city: "Hyderabad",
     locality: "",
     address: "",
     landmark: "",
-    property_type: "Apartment",
-    listing_type: "rent",
+    property_type: initialData?.propertyType === "Commercial" ? "Office" : "Apartment",
+    listing_type: initialData?.intent === "Sell" ? "sale" : "rent",
+    bhk_type: "2 BHK",
     bedrooms: 2,
     bathrooms: 2,
     floor_number: "1-3",
     total_rooms: 3,
     area_sqft: 1100,
+    area_unit: "Sq.ft",
     furnishing_status: "semi-furnished",
     preferred_tenant: ["Family"],
     food_preference: "Any",
@@ -49,6 +61,15 @@ export function ListingWizard() {
     images: [],
     title: "",
     description: "",
+    property_age: "0-1 Years",
+    total_floors: 5,
+    exact_floor: 2,
+    balconies: 1,
+    parking_covered: 1,
+    parking_open: 0,
+    facing: "East",
+    available_from: "",
+    rent_negotiable: false,
   });
 
   const updateFormData = (data: Partial<ListingFormData>) => {
@@ -56,9 +77,15 @@ export function ListingWizard() {
   };
 
   const handleNext = () => {
-    if (currentStep === 1 && !formData.locality.trim() && !formData.address.trim()) {
-      toast.error("Please enter a locality or address to proceed.");
-      return;
+    if (currentStep === 1) {
+      if (!formData.owner_name?.trim()) {
+        toast.error("Please enter your name to proceed.");
+        return;
+      }
+      if (!formData.locality.trim() && !formData.address.trim()) {
+        toast.error("Please enter a locality or address to proceed.");
+        return;
+      }
     }
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
@@ -76,7 +103,7 @@ export function ListingWizard() {
   const handleSubmit = () => {
     const title =
       formData.title ||
-      `${formData.bedrooms} BHK ${formData.property_type} in ${formData.locality || formData.city}`;
+      `${formData.bhk_type || `${formData.bedrooms} BHK`} ${formData.property_type} in ${formData.locality || formData.city}`;
 
     addProperty({
       ...formData,

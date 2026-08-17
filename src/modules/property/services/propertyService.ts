@@ -60,6 +60,15 @@ export type Property = {
   lease_duration?: string;
   pet_policy?: boolean;
   owner_type?: string;
+  property_age?: string;
+  total_floors?: number;
+  exact_floor?: number;
+  balconies?: number;
+  parking_covered?: number;
+  parking_open?: number;
+  facing?: string;
+  available_from?: string;
+  rent_negotiable?: boolean;
 };
 
 /**
@@ -82,7 +91,7 @@ const BASE_PROPERTY_COLUMNS =
  * (video tours and location context).
  */
 const EXTENDED_PROPERTY_COLUMNS =
-  "video_url,video_status,locality,landmark,metro_station,it_park,college,hospital";
+  "video_url,video_status,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable";
 
 export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
 
