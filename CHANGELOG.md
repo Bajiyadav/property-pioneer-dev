@@ -1,3 +1,8 @@
+## v0.14.0 — 2026-08-17
+
+### Features
+- feat(listing): show owners what actually happens after they submit (73b759f)
+
 ## v0.13.6 — 2026-08-17
 
 ### Fixes
