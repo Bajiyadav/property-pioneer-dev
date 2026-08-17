@@ -1,3 +1,16 @@
+## v0.10.0 — 2026-08-17
+
+### Features
+- feat(privacy): consent-gated activity tracking, policy pages and data rights (61b6a98)
+
+### Fixes
+- fix(home): drop unearned claims and name the unlabelled controls (de97efb)
+
+### Migration notes
+- supabase/migrations/20260817120000_add_customer_tracking.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.9.0 — 2026-08-17
 
 ### Features
