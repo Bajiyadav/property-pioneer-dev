@@ -140,6 +140,11 @@ export function OwnerOnboardingModal({
           area_sqft: Number(formData.areaSqft) || 900,
           property_type: formData.propertyType,
           listing_type: "rent",
+          // The modal has always asked for this at step 4 and then dropped it on
+          // the floor, because `listingSchema` had no field to receive it. That
+          // is why every row had `owner_phone` null and no enquiry ever reached
+          // an owner.
+          owner_phone: formData.phone,
           images: urls,
           video_url: finalVideoUrl,
           video_status: finalVideoUrl ? "pending" : undefined,

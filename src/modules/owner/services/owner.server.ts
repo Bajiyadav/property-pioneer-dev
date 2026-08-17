@@ -32,6 +32,8 @@ export interface OwnerListingInput {
   area_sqft: number;
   property_type: string;
   listing_type: "rent" | "sale";
+  /** Owner's WhatsApp number, digits only. The contact API reads this. */
+  owner_phone: string;
   images: string[];
   status?: "draft" | "available";
   video_url?: string | null;

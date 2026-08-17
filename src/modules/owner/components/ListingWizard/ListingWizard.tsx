@@ -11,13 +11,33 @@ import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
 import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
 import type { ListingFormData } from "./types";
+import { LISTING_PHONE_KEY } from "@/routes/list-property";
 
 interface ListingWizardProps {
   initialData?: {
     propertyType?: "Residential" | "Commercial";
     intent?: "Rent" | "Sell" | "PG/Co-living";
-    phone?: string;
+    // No `phone` here: it was declared and never read, so the number the owner
+    // typed on /list-property was silently discarded. It now arrives through
+    // sessionStorage (see readStashedPhone) and prefills `owner_phone`.
   };
+}
+
+/**
+ * Recovers the number entered on /list-property.
+ *
+ * Guarded rather than read directly: this component renders during SSR where
+ * `sessionStorage` is undefined, and private browsing can throw on access. An
+ * empty string just means the owner fills the field in, which is a fine
+ * fallback — losing the value silently, as this flow used to, is not.
+ */
+function readStashedPhone(): string {
+  try {
+    if (typeof window === "undefined") return "";
+    return window.sessionStorage.getItem(LISTING_PHONE_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }
 
 const steps = [
@@ -36,6 +56,10 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
 
   const [formData, setFormData] = useState<ListingFormData>({
     owner_name: "",
+    // Prefilled from the number given on /list-property, which used to be
+    // collected and then discarded. Read lazily inside useState's initialiser so
+    // it runs once, on the client only — sessionStorage does not exist during SSR.
+    owner_phone: readStashedPhone(),
     project_name: "",
     city: "Hyderabad",
     locality: "",
@@ -80,6 +104,12 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     if (currentStep === 1) {
       if (!formData.owner_name?.trim()) {
         toast.error("Please enter your name to proceed.");
+        return;
+      }
+      // Required, not optional: enquiries are delivered to this number, so a
+      // listing without a valid one cannot be contacted at all.
+      if (!/^[6-9]\d{9}$/.test((formData.owner_phone ?? "").replace(/\D/g, ""))) {
+        toast.error("Enter a valid 10-digit mobile number so tenants can reach you.");
         return;
       }
       if (!formData.locality.trim() && !formData.address.trim()) {

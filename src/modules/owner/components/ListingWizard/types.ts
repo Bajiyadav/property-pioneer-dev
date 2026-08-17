@@ -1,5 +1,8 @@
 export interface ListingFormData {
   owner_name?: string;
+  /** Owner's WhatsApp number. Enquiries are delivered here, so a listing
+   *  without it cannot be contacted — see the contact API route. */
+  owner_phone?: string;
   project_name?: string;
   city: string;
   pincode?: string;

@@ -21,6 +21,18 @@ const listingSchema = z.object({
   area_sqft: z.number().int().min(50).max(1_000_000),
   property_type: z.string().trim().min(2).max(40),
   listing_type: z.enum(["rent", "sale"]),
+  // Required, and validated as a real Indian mobile.
+  //
+  // This field did not exist here, so every listing was written with
+  // `owner_phone` null even though both listing flows asked the owner for a
+  // number. The contact API then fell back to a hard-coded number belonging to
+  // nobody, which meant no enquiry ever reached an owner. A listing that cannot
+  // be contacted has no purpose, so this is not optional.
+  owner_phone: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\D/g, "").replace(/^91/, ""))
+    .refine((v) => /^[6-9]\d{9}$/.test(v), "Enter a valid 10-digit Indian mobile number"),
   images: z.array(z.string().url()).max(12).default([]),
   status: z.enum(["draft", "available"]).optional(),
   video_url: z.string().url().optional().nullable(),

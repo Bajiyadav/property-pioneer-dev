@@ -13,32 +13,80 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import { APP_NAME } from "@/config/app";
 import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/list-property")({
   component: ListPropertyLandingPage,
 });
+
+/**
+ * Where the owner's number is handed to the wizard. sessionStorage rather than a
+ * search param, so personal data never enters a URL, browser history or a log.
+ * Exported so the wizard reads the same key instead of duplicating the string.
+ */
+export const LISTING_PHONE_KEY = "sp_listing_phone";
 
 function ListPropertyLandingPage() {
   const navigate = useNavigate();
   const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
   const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
   const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  /**
+   * Starts the listing flow.
+   *
+   * Two things here were wrong before and are worth stating, because both were
+   * invisible from the outside:
+   *
+   * 1. The number was passed as a search param, so it appeared in the URL. A
+   *    mobile number is personal data, and a URL is the leakiest place to put
+   *    it — it persists in browser history, in server and CDN logs, and is sent
+   *    to third parties in the `Referer` header. It also arrived JSON-quoted
+   *    (`phone=%229876543210%22`), so the value carried literal quote
+   *    characters. It now travels in sessionStorage: same tab only, gone when
+   *    the tab closes, never in a URL.
+   *
+   * 2. The wizard declared `phone` in its props and never read it, so whatever
+   *    the owner typed here was discarded. Combined with the wizard never
+   *    collecting a number of its own, no listing ever stored `owner_phone` —
+   *    which is why every "Get Owner Details" enquiry fell back to a hard-coded
+   *    number belonging to nobody. Prefilling the wizard from here is what
+   *    closes that chain.
+   *
+   * Validation is explicit rather than left to the input's `required`
+   * attribute. Native validation only checks non-empty, so "1" or "abc" used to
+   * pass straight through, and its bubble is easy to miss on a phone.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({
-      to: "/list-property/wizard",
-      search: { propertyType, intent, phone },
-    });
+
+    const digits = phone.replace(/\D/g, "").replace(/^91/, "");
+    if (!/^[6-9]\d{9}$/.test(digits)) {
+      setPhoneError(
+        digits.length === 0
+          ? "Enter your mobile number so buyers and tenants can reach you."
+          : "That does not look like a 10-digit Indian mobile number.",
+      );
+      return;
+    }
+
+    setPhoneError(null);
+    try {
+      sessionStorage.setItem(LISTING_PHONE_KEY, digits);
+    } catch {
+      // Private browsing can refuse storage. The wizard asks for the number
+      // again in that case, which is better than blocking the flow here.
+    }
+    navigate({ to: "/list-property/wizard", search: { propertyType, intent } });
   };
 
   const faqs = [
     {
-      q: "How to post a property on Property Pioneer?",
+      q: `How to post a property on ${APP_NAME}?`,
       a: "You can simply select your property type above, enter your phone number, and follow our 6-step listing wizard to add your details, pricing, and photos.",
     },
     {
@@ -67,7 +115,7 @@ function ListPropertyLandingPage() {
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-[family-name:var(--font-display)] mb-6">
               Sell or rent your property faster with{" "}
-              <span className="text-primary">Property Pioneer</span>
+              <span className="text-primary">{APP_NAME}</span>
             </h1>
             <ul className="space-y-4 text-lg text-muted-foreground mb-8">
               <li className="flex items-center gap-3">
@@ -85,13 +133,18 @@ function ListPropertyLandingPage() {
 
           <div className="w-full max-w-md mx-auto">
             <Card className="shadow-2xl border-border/50 bg-card/80 backdrop-blur-xl">
+              {/*
+                The "Broker/Builder" tab next to this one was removed. It had no
+                onClick, so it did nothing when pressed — but the deeper problem
+                is that it should not exist: this platform's entire proposition
+                is direct owner listings with no broker in the middle, and every
+                page says so. Offering brokers a signup tab contradicted the
+                product and misled anyone who pressed it.
+              */}
               <div className="flex border-b border-border/50">
-                <button className="flex-1 py-4 text-center font-bold text-primary border-b-2 border-primary bg-primary/5">
-                  Owner
-                </button>
-                <button className="flex-1 py-4 text-center font-medium text-muted-foreground hover:bg-secondary/50">
-                  Broker/Builder
-                </button>
+                <div className="flex-1 py-4 text-center font-bold text-primary border-b-2 border-primary bg-primary/5">
+                  Listing as an owner
+                </div>
               </div>
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -136,7 +189,10 @@ function ListPropertyLandingPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold text-foreground mb-3 block">
+                    <label
+                      htmlFor="listing-phone"
+                      className="text-sm font-bold text-foreground mb-3 block"
+                    >
                       Mobile number
                     </label>
                     <div className="flex gap-2">
@@ -144,14 +200,39 @@ function ListPropertyLandingPage() {
                         +91
                       </div>
                       <Input
+                        id="listing-phone"
                         type="tel"
+                        inputMode="numeric"
+                        autoComplete="tel-national"
+                        maxLength={10}
                         placeholder="Enter your mobile number"
                         className="h-12 rounded-xl text-lg"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
+                        onChange={(e) => {
+                          // Digits only, so the value cannot disagree with what
+                          // the validator will accept.
+                          setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+                          if (phoneError) setPhoneError(null);
+                        }}
+                        aria-invalid={phoneError ? true : undefined}
+                        aria-describedby={phoneError ? "listing-phone-error" : undefined}
                       />
                     </div>
+                    {phoneError ? (
+                      // Announced, not just coloured: a message only conveyed by
+                      // styling is invisible to a screen reader.
+                      <p
+                        id="listing-phone-error"
+                        role="alert"
+                        className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400"
+                      >
+                        {phoneError}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Buyers and tenants contact you on this number over WhatsApp.
+                      </p>
+                    )}
                   </div>
 
                   <Button
@@ -168,60 +249,27 @@ function ListPropertyLandingPage() {
         </div>
       </div>
 
-      {/* Testimonials */}
-      <div className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-extrabold text-center mb-12">
-            Loved by thousands of property owners
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <Card className="bg-secondary/30 border-border/50">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                      AK
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-bold text-lg">Anil Kumar</h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      Owner • 2 BHK, Delhi <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                    </p>
-                  </div>
-                </div>
-                <p className="italic text-muted-foreground mb-4">
-                  "The team at Property Pioneer was a huge help in getting my property rented out.
-                  The relationship manager was assigned immediately and guided me through the entire
-                  process."
-                </p>
-              </CardContent>
-            </Card>
+      {/*
+        The testimonials section that stood here was removed. It presented two
+        invented people — "Anil Kumar" and "Utkarsh Pratap Singh" — as verified
+        owners, complete with a green tick, under the heading "Loved by thousands
+        of property owners".
 
-            <Card className="bg-secondary/30 border-border/50">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                      UP
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="font-bold text-lg">Utkarsh Pratap Singh</h4>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      Owner • 3 BHK, Pune <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                    </p>
-                  </div>
-                </div>
-                <p className="italic text-muted-foreground mb-4">
-                  "I recently listed my 3BHK apartment using the premium package, and the experience
-                  was nothing short of exceptional. We got serious buyers very quickly."
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+        Every part of it was false. The names and quotes were written as filler.
+        The cities, Delhi and Pune, are not places this platform operates in; it
+        serves Hyderabad. The tick implied a verification that never happened. One
+        quote credited a "relationship manager" assigned "immediately", which is
+        not a service that exists here; the other credited a "premium package"
+        outcome.
+
+        Fabricated reviews are not placeholder copy — they are a representation to
+        consumers. India's Consumer Protection Act and the CCPA guidance on fake
+        reviews treat invented testimonials as an unfair trade practice, and the
+        "verified" tick makes that worse rather than better.
+
+        Restore this section only with quotes real owners have actually given and
+        agreed to publish, and only claim a verification the platform performs.
+      */}
 
       {/* Benefits */}
       <div className="py-20 bg-primary/5">

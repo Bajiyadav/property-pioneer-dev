@@ -47,6 +47,42 @@ export function Step1Location({ data, updateData }: StepProps) {
           />
         </div>
 
+        {/*
+          Owner's WhatsApp number.
+
+          Shown rather than hidden even though it is usually prefilled from
+          /list-property: this is the address every enquiry is delivered to, so
+          the owner needs to see it and be able to correct a typo. Before this
+          field existed the wizard collected no number at all, which left every
+          listing uncontactable.
+        */}
+        <div className="space-y-2.5">
+          <Label htmlFor="owner_phone" className="text-sm font-semibold text-foreground">
+            WhatsApp Number *
+          </Label>
+          <div className="flex gap-2">
+            <div className="flex h-11 items-center justify-center rounded-xl border border-border/80 bg-secondary px-3.5 text-sm font-medium text-foreground">
+              +91
+            </div>
+            <Input
+              id="owner_phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              maxLength={10}
+              placeholder="10-digit mobile number"
+              className="h-11 flex-1 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+              value={data.owner_phone || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ owner_phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
+              }
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Tenants and buyers reach you on this number. It is never shown publicly on the listing.
+          </p>
+        </div>
+
         {/* City & Pincode Input */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2.5">
