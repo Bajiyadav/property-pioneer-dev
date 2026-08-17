@@ -1,3 +1,8 @@
+## v0.13.5 — 2026-08-17
+
+### Fixes
+- fix(property-card): stop the price overflowing its column on mobile (4976668)
+
 ## v0.13.4 — 2026-08-17
 
 ### Fixes
