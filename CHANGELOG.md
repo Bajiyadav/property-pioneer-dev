@@ -1,3 +1,8 @@
+## v0.15.5 — 2026-08-17
+
+### Fixes
+- fix(seo): require real depth before submitting a city or locality page (c31bb2f)
+
 ## v0.15.4 — 2026-08-17
 
 ### Fixes
