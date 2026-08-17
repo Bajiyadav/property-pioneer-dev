@@ -91,17 +91,37 @@ export const Route = createFileRoute("/sitemap.xml")({
               .replace(/[^a-z0-9\s-]/g, "")
               .replace(/\s+/g, "-");
 
-          const rentCities = new Set<string>();
-          const saleCities = new Set<string>();
+          /*
+           * A city needs real depth before it is worth submitting.
+           *
+           * Deriving pages from inventory alone still produced /rent/mumbai and
+           * /rent/gurugram off a single listing each. One property is technically
+           * real inventory, but the page it renders is thin: a crawler is invited
+           * in and finds almost nothing, which is a weak quality signal applied
+           * across the whole site rather than just that URL.
+           *
+           * The threshold only governs the SITEMAP. These pages stay live, stay
+           * crawlable and stay linked — they are simply not submitted until they
+           * can carry a result. They appear automatically once inventory grows,
+           * with no code change.
+           */
+          const MIN_INVENTORY_FOR_SITEMAP = 3;
+
+          const rentCities = new Map<string, number>();
+          const saleCities = new Map<string, number>();
           for (const row of rows) {
             if (!row.city) continue;
-            (row.listing_type === "sale" ? saleCities : rentCities).add(slug(row.city));
+            const bucket = row.listing_type === "sale" ? saleCities : rentCities;
+            const key = slug(row.city);
+            bucket.set(key, (bucket.get(key) ?? 0) + 1);
           }
 
-          for (const city of rentCities) {
+          for (const [city, count] of rentCities) {
+            if (count < MIN_INVENTORY_FOR_SITEMAP) continue;
             entries.push({ loc: `${origin}/rent/${city}`, priority: "0.9" });
           }
-          for (const city of saleCities) {
+          for (const [city, count] of saleCities) {
+            if (count < MIN_INVENTORY_FOR_SITEMAP) continue;
             entries.push({ loc: `${origin}/buy/${city}`, priority: "0.9" });
           }
 
@@ -119,7 +139,7 @@ export const Route = createFileRoute("/sitemap.xml")({
               .not("locality", "is", null)
               .limit(5000);
 
-            const seen = new Set<string>();
+            const localityCounts = new Map<string, number>();
             for (const row of (locRows ?? []) as Array<{
               city: string | null;
               locality: string | null;
@@ -128,8 +148,10 @@ export const Route = createFileRoute("/sitemap.xml")({
               if (!row.city || !row.locality) continue;
               const base = row.listing_type === "sale" ? "buy" : "rent";
               const path = `/${base}/${slug(row.city)}/${slug(row.locality)}`;
-              if (seen.has(path)) continue;
-              seen.add(path);
+              localityCounts.set(path, (localityCounts.get(path) ?? 0) + 1);
+            }
+            for (const [path, count] of localityCounts) {
+              if (count < MIN_INVENTORY_FOR_SITEMAP) continue;
               entries.push({ loc: `${origin}${path}`, priority: "0.9" });
             }
           } catch (localityError) {
