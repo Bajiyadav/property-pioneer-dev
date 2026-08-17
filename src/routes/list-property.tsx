@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { APP_NAME } from "@/config/app";
+import { OwnerPlans } from "@/modules/billing/components/OwnerPlans";
 import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -64,12 +65,13 @@ function ListPropertyLandingPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const digits = phone.replace(/\D/g, "").replace(/^91/, "");
-    if (!/^[6-9]\d{9}$/.test(digits)) {
+    const digits = phone.replace(/[^0-9+]/g, "");
+    const pureDigits = digits.replace(/\D/g, "");
+    if (pureDigits.length < 7 || pureDigits.length > 15) {
       setPhoneError(
-        digits.length === 0
+        pureDigits.length === 0
           ? "Enter your mobile number so buyers and tenants can reach you."
-          : "That does not look like a 10-digit Indian mobile number.",
+          : "Please enter a valid phone number (7 to 15 digits).",
       );
       return;
     }
@@ -193,25 +195,19 @@ function ListPropertyLandingPage() {
                       htmlFor="listing-phone"
                       className="text-sm font-bold text-foreground mb-3 block"
                     >
-                      Mobile number
+                      Phone Number (including country code)
                     </label>
                     <div className="flex gap-2">
-                      <div className="flex items-center justify-center bg-secondary px-4 rounded-xl border border-border font-medium text-foreground">
-                        +91
-                      </div>
                       <Input
                         id="listing-phone"
                         type="tel"
-                        inputMode="numeric"
-                        autoComplete="tel-national"
-                        maxLength={10}
-                        placeholder="Enter your mobile number"
+                        maxLength={18}
+                        placeholder="e.g. +91 98765 43210 or +1 555 123 4567"
                         className="h-12 rounded-xl text-lg"
                         value={phone}
                         onChange={(e) => {
-                          // Digits only, so the value cannot disagree with what
-                          // the validator will accept.
-                          setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+                          // Allow digits, spaces, and leading plus
+                          setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
                           if (phoneError) setPhoneError(null);
                         }}
                         aria-invalid={phoneError ? true : undefined}
@@ -230,7 +226,8 @@ function ListPropertyLandingPage() {
                       </p>
                     ) : (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Buyers and tenants contact you on this number over WhatsApp.
+                        Buyers and tenants contact you on this number. Include your country code
+                        starting with +.
                       </p>
                     )}
                   </div>
@@ -238,9 +235,9 @@ function ListPropertyLandingPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+                    className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all uppercase tracking-wider"
                   >
-                    Start Now
+                    START NOW
                   </Button>
                 </form>
               </CardContent>
@@ -369,6 +366,13 @@ function ListPropertyLandingPage() {
           </div>
         </div>
       </div>
+
+      {/*
+        Optional paid assistance, placed after the free-listing benefits and before
+        the FAQ. Order matters here: an owner should have read that listing is free
+        before they meet a price list, or the page reads as a bait and switch.
+      */}
+      <OwnerPlans />
 
       {/* FAQ */}
       <div className="py-20 bg-secondary/20">
