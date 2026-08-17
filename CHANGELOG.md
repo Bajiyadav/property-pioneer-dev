@@ -1,3 +1,8 @@
+## v0.9.0 — 2026-08-17
+
+### Features
+- feat(ui): update categories, add back buttons, and polish wizard (e269b61)
+
 ## v0.8.1 — 2026-08-16
 
 ### Fixes
