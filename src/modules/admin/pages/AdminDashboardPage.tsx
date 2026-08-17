@@ -57,9 +57,11 @@ import { getAdminProperties, updateAdminProperty } from "@/modules/admin/service
 import { displayName } from "@/modules/authentication/services/session";
 import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
 import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
+import { EmployeeActivityBoard } from "@/modules/admin/components/EmployeeActivityBoard";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "activity", label: "Employee Activity", icon: UsersRound },
   { id: "users", label: "Users", icon: Users },
   { id: "owners", label: "Owners", icon: UsersRound },
   { id: "agents", label: "Agents", icon: UserCheck },
@@ -226,6 +228,7 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const tabTitle: Record<string, string> = {
     overview: "Platform admin HQ",
+    activity: "Employee Activity",
     users: "User directory",
     owners: "Property owners",
     agents: "Partner agents",
@@ -879,6 +882,8 @@ function AdminDashboard({ user }: { user: User | null }) {
           </p>
         </div>
       )}
+
+      {activeTab === "activity" && <EmployeeActivityBoard />}
 
       {activeTab === "settings" && (
         <div className="space-y-5">
