@@ -1,3 +1,8 @@
+## v0.15.3 — 2026-08-17
+
+### Fixes
+- fix(security): set the response headers that were missing (ec613bb)
+
 ## v0.15.2 — 2026-08-17
 
 ### Fixes
