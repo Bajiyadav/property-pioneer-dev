@@ -173,14 +173,14 @@ jobs:
           retention-days: 7
 
   release-gate:
-    name: 8. Urban Properties Release Gate Summary
+    name: 8. Seedha Properties Release Gate Summary
     runs-on: ubuntu-latest
     needs: [security, quality, typecheck, unit-tests, migration-safety, build, e2e]
     steps:
       - name: Generate Release Gate Summary Report
         run: |
           echo "════════════════════════════════════" >> "$GITHUB_STEP_SUMMARY"
-          echo " URBAN PROPERTIES RELEASE GATE      " >> "$GITHUB_STEP_SUMMARY"
+          echo " SEEDHA PROPERTIES RELEASE GATE     " >> "$GITHUB_STEP_SUMMARY"
           echo "════════════════════════════════════" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Security Scan:          PASS" >> "$GITHUB_STEP_SUMMARY"

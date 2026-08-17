@@ -200,7 +200,7 @@ jobs:
       - name: Output Release Gate Score
         run: |
           echo "════════════════════════════════════" >> "$GITHUB_STEP_SUMMARY"
-          echo " URBAN PROPERTIES PRODUCTION GATE   " >> "$GITHUB_STEP_SUMMARY"
+          echo " SEEDHA PROPERTIES PRODUCTION GATE  " >> "$GITHUB_STEP_SUMMARY"
           echo "════════════════════════════════════" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Code Quality:          PASS" >> "$GITHUB_STEP_SUMMARY"
