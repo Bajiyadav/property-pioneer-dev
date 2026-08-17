@@ -145,7 +145,38 @@ export async function createOwnerProperty(ownerId: string, input: OwnerListingIn
     .select(ownerColumns(schema.shouldTry()))
     .single();
   if (error) throw new Error(error.message);
+
+  // Listing a property is what makes someone an owner, so record the role here.
+  //
+  // This is the only place the owner role is issued, and it is issued by the
+  // server on the strength of an action that actually happened — not chosen by
+  // the caller at sign-up, which was the escalation closed in migration
+  // 20260817000000. It matters because the owner dashboard is gated on the role:
+  // without this, anyone who listed through /list-property could create a
+  // property and then be locked out of managing it.
+  //
+  // Idempotent, and deliberately silent on failure: a bookkeeping error must not
+  // undo a listing the user just created successfully.
+  await grantOwnerRole(db, ownerId);
+
   return data;
+}
+
+/** Idempotently records the owner role for a user who has just listed. */
+async function grantOwnerRole(db: Awaited<ReturnType<typeof adminDb>>, ownerId: string) {
+  try {
+    const { data: existing } = await db
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", ownerId)
+      .eq("role", "owner")
+      .maybeSingle();
+    if (existing) return;
+
+    await db.from("user_roles").insert({ user_id: ownerId, role: "owner" });
+  } catch (err) {
+    console.error("[owner] could not record the owner role for", ownerId, err);
+  }
 }
 
 export async function updateOwnerProperty(

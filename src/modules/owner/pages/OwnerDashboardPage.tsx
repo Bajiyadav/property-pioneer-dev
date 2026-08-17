@@ -73,11 +73,18 @@ const NAV_ITEMS: NavItem[] = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
+/**
+ * Owner only.
+ *
+ * Admitting customers here showed a non-owner the full "Verified Owner Portal" —
+ * role surfaces without the grant, which contradicts owner access being granted
+ * rather than self-assigned. Nobody is stranded by it: creating a listing now
+ * records the owner role server-side, so anyone who lists through
+ * /list-property can manage what they listed.
+ */
 export function OwnerDashboardPage() {
   return (
-    <RequireRole role={["owner", "customer"]}>
-      {(session) => <OwnerDashboard user={session.user} />}
-    </RequireRole>
+    <RequireRole role="owner">{(session) => <OwnerDashboard user={session.user} />}</RequireRole>
   );
 }
 
