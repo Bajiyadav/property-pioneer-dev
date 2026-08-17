@@ -1,3 +1,8 @@
+## v0.15.0 — 2026-08-17
+
+### Features
+- feat(billing): owner assistance plans with Razorpay checkout (bc1ab40)
+
 ## v0.14.2 — 2026-08-17
 
 ### Fixes
