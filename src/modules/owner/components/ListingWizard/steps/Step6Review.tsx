@@ -154,20 +154,73 @@ export function Step6Review({ data }: { data: ListingFormData }) {
         </div>
       </div>
 
-      {/* Moderation Guarantee Notice */}
-      <div className="p-5 bg-gradient-to-r from-emerald-500/10 via-primary/5 to-transparent border border-emerald-500/20 rounded-2xl flex items-start gap-3.5">
-        <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
-          <ShieldCheck className="w-5 h-5" />
-        </div>
-        <div>
-          <h4 className="text-sm font-bold text-foreground">
-            Seedha Properties Moderation Guarantee
-          </h4>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            Your listing will be verified for genuine ownership and high quality imagery. Once
-            approved, you'll receive direct tenant inquiries without intermediary interference.
-          </p>
-        </div>
+      {/*
+        What happens after Submit.
+
+        Stated plainly and in order, because the step immediately before the one
+        irreversible action is where an owner most needs to know what they are
+        agreeing to. It also sets an honest expectation about the wait: the
+        previous copy promised a "Moderation Guarantee" and that listings "go
+        live in 2-4 hours" without qualifying that a moderator has to act first,
+        so a listing sitting in a queue overnight read as the platform failing.
+
+        Each stage below describes something the platform actually does. Nothing
+        here promises ownership verification, which is not performed.
+      */}
+      <div className="rounded-2xl border border-border/80 bg-secondary/20 p-5">
+        <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
+          <ShieldCheck className="h-4 w-4 text-primary" /> What happens after you submit
+        </h4>
+        <ol className="mt-4 space-y-4">
+          {[
+            {
+              title: "Submitted",
+              detail: "Your listing is saved to your account. You can edit or remove it any time.",
+              now: true,
+            },
+            {
+              title: "Moderator review",
+              detail:
+                "A person checks the details and photos for accuracy. Most listings are reviewed the same working day.",
+            },
+            {
+              title: "Live on the site",
+              detail:
+                "Once approved it appears in search for renters and buyers. Until then only you can see it.",
+            },
+            {
+              title: "Enquiries reach you directly",
+              detail:
+                "Interested tenants message you on WhatsApp at the number you gave in step 1. No agent sits in between, and we charge no commission.",
+            },
+          ].map((stage, i) => (
+            <li key={stage.title} className="flex gap-3.5">
+              <span
+                aria-hidden="true"
+                className={`mt-0.5 grid h-6 w-6 flex-none place-items-center rounded-full text-[11px] font-extrabold ${
+                  stage.now
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border bg-card text-muted-foreground"
+                }`}
+              >
+                {i + 1}
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-foreground">
+                  {stage.title}
+                  {stage.now ? (
+                    <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                      This step
+                    </span>
+                  ) : null}
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                  {stage.detail}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   );
