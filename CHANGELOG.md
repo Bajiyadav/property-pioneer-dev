@@ -1,3 +1,8 @@
+## v0.12.2 — 2026-08-17
+
+### Fixes
+- fix(owner): restore owner-only isolation, and grant the role on first listing (6bebbf0)
+
 ## v0.12.1 — 2026-08-17
 
 ### Fixes
