@@ -1,3 +1,8 @@
+## v0.12.1 — 2026-08-17
+
+### Fixes
+- fix: unbreak /admin, restore claim guards, align sitemap and stale tests (8b34145)
+
 ## v0.12.0 — 2026-08-17
 
 ### Features
