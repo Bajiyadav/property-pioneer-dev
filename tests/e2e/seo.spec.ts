@@ -56,6 +56,10 @@ test.describe("SEO — metadata", () => {
     const titles = new Map<string, string>();
     for (const [, path] of PUBLIC_PAGES) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
+      // Wait for the page's own H1 before reading the title: under parallel
+      // workers the document can still be hydrating, and the root's fallback
+      // title would be read instead of the route's.
+      await page.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
       titles.set(path, await page.title());
     }
     const seen = new Map<string, string>();
@@ -177,6 +181,7 @@ test.describe("SEO — structured data", () => {
   test("a single H1 per public page", async ({ page }) => {
     for (const [name, path] of PUBLIC_PAGES) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
+      await page.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
       const count = await page.locator("h1").count();
       expect(count, `${name} (${path}) should have exactly one H1, found ${count}`).toBe(1);
     }
