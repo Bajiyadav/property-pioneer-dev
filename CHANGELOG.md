@@ -1,3 +1,8 @@
+## v0.12.3 — 2026-08-17
+
+### Fixes
+- fix(brand): replace the Lovable favicon, serve the OG image, correct env guidance (6d8289d)
+
 ## v0.12.2 — 2026-08-17
 
 ### Fixes
