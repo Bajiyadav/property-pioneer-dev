@@ -1,3 +1,11 @@
+## v0.15.1 — 2026-08-17
+
+### Fixes
+- fix(hero): show the photo at its own brightness instead of a dark wash (d5af2ba)
+
+### Documentation
+- docs(readme): rewrite to describe the project as it actually is (024c522)
+
 ## v0.15.0 — 2026-08-17
 
 ### Features
