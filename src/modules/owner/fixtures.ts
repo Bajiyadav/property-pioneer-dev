@@ -2,35 +2,34 @@ import type { Property } from "@/modules/property/services/propertyQueries";
 
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 
-export const VISITS = [
-  { id: "v1", day: "Today", time: "04:00 PM", who: "Kavitha Reddy", what: "2BHK Gachibowli" },
-  { id: "v2", day: "Tomorrow", time: "11:00 AM", who: "Arjun Kapoor", what: "3BHK Kondapur" },
-  { id: "v3", day: "Saturday", time: "01:30 PM", who: "Neha Sharma", what: "Studio, Hitech City" },
-];
+/*
+ * DATA HONESTY — these arrays are intentionally empty.
+ *
+ * They previously held invented records that every dashboard rendered as if they
+ * were real: named people who are not users, enquiries nobody sent, visits nobody
+ * booked, a conversion funnel computed from nothing, and — worst — agent
+ * commission rows reading "Paid" against amounts that exist in no ledger. An agent
+ * opening the dashboard saw money they had not earned; an admin saw a user base
+ * that did not exist and searched it as though it did.
+ *
+ * Emptying them here rather than deleting the module is deliberate. The types and
+ * shapes stay valid, every dashboard keeps compiling, and each surface now renders
+ * its honest empty state ("no leads yet", "no enquiries yet") instead of fiction.
+ * That is a truthful screen today rather than a broken one.
+ *
+ * The replacement path is real queries, scoped server-side to the signed-in user.
+ * `src/modules/agent/services/agent.server.ts` is the worked example: it reads
+ * `agent_leads`, `property_visits` and `notifications`, and deliberately exposes
+ * NO commission data because the schema has no commission table — the honest
+ * answer to "what did I earn" is silence until something records it.
+ *
+ * Do not repopulate these with sample data. If a surface looks empty, that is the
+ * database being empty, which is information rather than a bug.
+ */
 
-export const ACTIVITY: TimelineItem[] = [
-  {
-    id: "a1",
-    title: "New enquiry received",
-    detail: "Kavitha Reddy asked about parking on 2BHK Gachibowli.",
-    time: "12 min ago",
-    tone: "info",
-  },
-  {
-    id: "a2",
-    title: "Listing approved",
-    detail: "Your 3BHK Kondapur listing passed verification.",
-    time: "2 hours ago",
-    tone: "success",
-  },
-  {
-    id: "a3",
-    title: "Visit scheduled",
-    detail: "Arjun Kapoor booked a walkthrough for tomorrow 11:00 AM.",
-    time: "Yesterday",
-    tone: "neutral",
-  },
-];
+export const VISITS: { id: string; day: string; time: string; who: string; what: string }[] = [];
+
+export const ACTIVITY: TimelineItem[] = [];
 
 export const SEARCH_PARAMS = {
   q: "",

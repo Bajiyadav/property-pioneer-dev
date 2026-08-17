@@ -52,7 +52,7 @@ import {
   DualLineChart,
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
-import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
+import { countBy, relativeTime } from "@/modules/dashboard/services/dashboardData";
 import { getAdminProperties, updateAdminProperty } from "@/modules/admin/services/adminFunctions";
 import { displayName } from "@/modules/authentication/services/session";
 import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
@@ -212,10 +212,16 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const cityMix = useMemo(() => countBy(properties, (p) => p.city), [properties]);
   const typeMix = useMemo(() => countBy(properties, (p) => p.property_type), [properties]);
-  const signupTrend = useMemo(
-    () => seededSeries(["Mar", "Apr", "May", "Jun", "Jul", "Aug"], 1337, 40, 260),
-    [],
-  );
+  /*
+   * Empty rather than generated.
+   *
+   * This was built by a seeded pseudo-random generator, producing a
+   * plausible curve from nothing. It was the most deceptive item on the page: it
+   * looked like a measurement, stayed identical across reloads so it read as
+   * stable data, and described no real activity whatsoever. The chart now renders
+   * its empty state until a real series is available.
+   */
+  const signupTrend = useMemo<{ label: string; value: number }[]>(() => [], []);
   const revenueSeries = useMemo(
     () =>
       ["Mar", "Apr", "May", "Jun", "Jul", "Aug"].map((label, i) => ({

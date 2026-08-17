@@ -1,5 +1,30 @@
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 
+/*
+ * DATA HONESTY — these arrays are intentionally empty.
+ *
+ * They previously held invented records that every dashboard rendered as if they
+ * were real: named people who are not users, enquiries nobody sent, visits nobody
+ * booked, a conversion funnel computed from nothing, and — worst — agent
+ * commission rows reading "Paid" against amounts that exist in no ledger. An agent
+ * opening the dashboard saw money they had not earned; an admin saw a user base
+ * that did not exist and searched it as though it did.
+ *
+ * Emptying them here rather than deleting the module is deliberate. The types and
+ * shapes stay valid, every dashboard keeps compiling, and each surface now renders
+ * its honest empty state ("no leads yet", "no enquiries yet") instead of fiction.
+ * That is a truthful screen today rather than a broken one.
+ *
+ * The replacement path is real queries, scoped server-side to the signed-in user.
+ * `src/modules/agent/services/agent.server.ts` is the worked example: it reads
+ * `agent_leads`, `property_visits` and `notifications`, and deliberately exposes
+ * NO commission data because the schema has no commission table — the honest
+ * answer to "what did I earn" is silence until something records it.
+ *
+ * Do not repopulate these with sample data. If a surface looks empty, that is the
+ * database being empty, which is information rather than a bug.
+ */
+
 export interface Lead {
   id: string;
   name: string;
@@ -19,160 +44,29 @@ export interface Client {
   value: string;
 }
 
-export const LEADS: Lead[] = [
-  {
-    id: "L-1",
-    name: "Kavitha Reddy",
-    phone: "+91 98765 43210",
-    requirement: "3BHK Gachibowli",
-    budget: "₹45,000/mo",
-    stage: "Visited",
-    source: "Portal",
-  },
-  {
-    id: "L-2",
-    name: "Arjun Kapoor",
-    phone: "+91 99887 76655",
-    requirement: "2BHK Madhapur",
-    budget: "₹28,000/mo",
-    stage: "Negotiation",
-    source: "Referral",
-  },
-  {
-    id: "L-3",
-    name: "Sneha Iyer",
-    phone: "+91 90012 33445",
-    requirement: "Villa, Kondapur",
-    budget: "₹1.2 Cr",
-    stage: "New",
-    source: "WhatsApp",
-  },
-  {
-    id: "L-4",
-    name: "Rahul Verma",
-    phone: "+91 91234 56789",
-    requirement: "Office, Hitech City",
-    budget: "₹85,000/mo",
-    stage: "Contacted",
-    source: "Portal",
-  },
-  {
-    id: "L-5",
-    name: "Divya Nair",
-    phone: "+91 99000 11223",
-    requirement: "2BHK Kukatpally",
-    budget: "₹22,000/mo",
-    stage: "Closed",
-    source: "Walk-in",
-  },
-];
+export const LEADS: Lead[] = [];
 
-export const CLIENTS: Client[] = [
-  {
-    id: "C-1",
-    name: "Kavitha Reddy",
-    phone: "+91 98765 43210",
-    requirement: "3BHK Gachibowli",
-    since: "Mar 2026",
-    value: "₹45,000/mo",
-  },
-  {
-    id: "C-2",
-    name: "Arjun Kapoor",
-    phone: "+91 99887 76655",
-    requirement: "2BHK Madhapur",
-    since: "Apr 2026",
-    value: "₹28,000/mo",
-  },
-  {
-    id: "C-3",
-    name: "Divya Nair",
-    phone: "+91 99000 11223",
-    requirement: "2BHK Kukatpally",
-    since: "Jan 2026",
-    value: "₹22,000/mo",
-  },
-];
+export const CLIENTS: Client[] = [];
 
-export const VISITS = [
-  {
-    id: "V-1",
-    when: "Today · 04:00 PM",
-    client: "Kavitha Reddy",
-    property: "3BHK Gachibowli",
-    status: "Confirmed" as const,
-  },
-  {
-    id: "V-2",
-    when: "Tomorrow · 11:00 AM",
-    client: "Rahul Verma",
-    property: "Office, Hitech City",
-    status: "Confirmed" as const,
-  },
-  {
-    id: "V-3",
-    when: "Saturday · 01:30 PM",
-    client: "Sneha Iyer",
-    property: "Villa, Kondapur",
-    status: "Pending" as const,
-  },
-];
+export interface AgentVisitRow {
+  id: string;
+  client: string;
+  property: string;
+  when: string;
+  status: "Confirmed" | "Pending" | "Completed" | "Cancelled";
+}
+export const VISITS: AgentVisitRow[] = [];
 
-export const COMMISSIONS = [
-  {
-    id: "M-1",
-    client: "Divya Nair",
-    property: "2BHK Kukatpally",
-    amount: 22000,
-    status: "Paid" as const,
-    date: "12 Jul 2026",
-  },
-  {
-    id: "M-2",
-    client: "Arjun Kapoor",
-    property: "2BHK Madhapur",
-    amount: 28000,
-    status: "Processing" as const,
-    date: "28 Jul 2026",
-  },
-  {
-    id: "M-3",
-    client: "Kavitha Reddy",
-    property: "3BHK Gachibowli",
-    amount: 45000,
-    status: "Pending" as const,
-    date: "—",
-  },
-];
+export interface CommissionRow {
+  id: string;
+  client: string;
+  property: string;
+  amount: number;
+  status: "Paid" | "Processing" | "Pending";
+  date: string;
+}
+export const COMMISSIONS: CommissionRow[] = [];
 
-export const NOTIFICATIONS: TimelineItem[] = [
-  {
-    id: "an1",
-    title: "New lead assigned",
-    detail: "Sneha Iyer — Villa, Kondapur (₹1.2 Cr).",
-    time: "18 min ago",
-    tone: "info",
-  },
-  {
-    id: "an2",
-    title: "Commission credited",
-    detail: "₹22,000 for the Kukatpally closure.",
-    time: "2 days ago",
-    tone: "success",
-  },
-  {
-    id: "an3",
-    title: "Visit reminder",
-    detail: "Kavitha Reddy walkthrough today at 4:00 PM.",
-    time: "3 hours ago",
-    tone: "warning",
-  },
-];
+export const NOTIFICATIONS: TimelineItem[] = [];
 
-export const FUNNEL = [
-  { label: "Leads received", value: 48 },
-  { label: "Contacted", value: 36 },
-  { label: "Visits booked", value: 21 },
-  { label: "In negotiation", value: 11 },
-  { label: "Closed", value: 6 },
-];
+export const FUNNEL: { label: string; value: number }[] = [];

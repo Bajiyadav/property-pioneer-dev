@@ -1,5 +1,30 @@
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 
+/*
+ * DATA HONESTY — these arrays are intentionally empty.
+ *
+ * They previously held invented records that every dashboard rendered as if they
+ * were real: named people who are not users, enquiries nobody sent, visits nobody
+ * booked, a conversion funnel computed from nothing, and — worst — agent
+ * commission rows reading "Paid" against amounts that exist in no ledger. An agent
+ * opening the dashboard saw money they had not earned; an admin saw a user base
+ * that did not exist and searched it as though it did.
+ *
+ * Emptying them here rather than deleting the module is deliberate. The types and
+ * shapes stay valid, every dashboard keeps compiling, and each surface now renders
+ * its honest empty state ("no leads yet", "no enquiries yet") instead of fiction.
+ * That is a truthful screen today rather than a broken one.
+ *
+ * The replacement path is real queries, scoped server-side to the signed-in user.
+ * `src/modules/agent/services/agent.server.ts` is the worked example: it reads
+ * `agent_leads`, `property_visits` and `notifications`, and deliberately exposes
+ * NO commission data because the schema has no commission table — the honest
+ * answer to "what did I earn" is silence until something records it.
+ *
+ * Do not repopulate these with sample data. If a surface looks empty, that is the
+ * database being empty, which is information rather than a bug.
+ */
+
 export interface PlatformUser {
   id: string;
   name: string;
@@ -9,87 +34,9 @@ export interface PlatformUser {
   joined: string;
 }
 
-export const USERS: PlatformUser[] = [
-  {
-    id: "U-1",
-    name: "Kavitha Reddy",
-    email: "kavitha@example.in",
-    role: "Customer",
-    status: "Active",
-    joined: "12 Mar 2026",
-  },
-  {
-    id: "U-2",
-    name: "Suresh Reddy",
-    email: "suresh@example.in",
-    role: "Owner",
-    status: "Active",
-    joined: "04 Feb 2026",
-  },
-  {
-    id: "U-3",
-    name: "Anitha Rao",
-    email: "anitha@example.in",
-    role: "Owner",
-    status: "Pending",
-    joined: "28 Jul 2026",
-  },
-  {
-    id: "U-4",
-    name: "Rahul Verma",
-    email: "rahul@example.in",
-    role: "Agent",
-    status: "Active",
-    joined: "19 Jan 2026",
-  },
-  {
-    id: "U-5",
-    name: "Divya Nair",
-    email: "divya@example.in",
-    role: "Customer",
-    status: "Active",
-    joined: "02 Jun 2026",
-  },
-  {
-    id: "U-6",
-    name: "Vikram Singh",
-    email: "vikram@example.in",
-    role: "Agent",
-    status: "Suspended",
-    joined: "15 Apr 2026",
-  },
-];
+export const USERS: PlatformUser[] = [];
 
-export const AUDIT: TimelineItem[] = [
-  {
-    id: "au1",
-    title: "property.approved",
-    detail: "3BHK Kondapur approved by admin@seedhaproperties.com",
-    time: "12 min ago",
-    tone: "success",
-  },
-  {
-    id: "au2",
-    title: "user.role_granted",
-    detail: "Agent role granted to rahul@example.in",
-    time: "1 hour ago",
-    tone: "info",
-  },
-  {
-    id: "au3",
-    title: "enquiry.rate_limited",
-    detail: "IP 49.37.x.x exceeded the hourly enquiry cap",
-    time: "3 hours ago",
-    tone: "warning",
-  },
-  {
-    id: "au4",
-    title: "auth.failed",
-    detail: "5 failed sign-ins for unknown@example.in",
-    time: "Yesterday",
-    tone: "danger",
-  },
-];
+export const AUDIT: TimelineItem[] = [];
 
 export const SEARCH_PARAMS = {
   q: "",

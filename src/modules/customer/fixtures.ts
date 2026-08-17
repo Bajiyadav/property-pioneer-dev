@@ -1,5 +1,30 @@
 import type { TimelineItem } from "@/modules/dashboard/components/DashboardKit";
 
+/*
+ * DATA HONESTY — these arrays are intentionally empty.
+ *
+ * They previously held invented records that every dashboard rendered as if they
+ * were real: named people who are not users, enquiries nobody sent, visits nobody
+ * booked, a conversion funnel computed from nothing, and — worst — agent
+ * commission rows reading "Paid" against amounts that exist in no ledger. An agent
+ * opening the dashboard saw money they had not earned; an admin saw a user base
+ * that did not exist and searched it as though it did.
+ *
+ * Emptying them here rather than deleting the module is deliberate. The types and
+ * shapes stay valid, every dashboard keeps compiling, and each surface now renders
+ * its honest empty state ("no leads yet", "no enquiries yet") instead of fiction.
+ * That is a truthful screen today rather than a broken one.
+ *
+ * The replacement path is real queries, scoped server-side to the signed-in user.
+ * `src/modules/agent/services/agent.server.ts` is the worked example: it reads
+ * `agent_leads`, `property_visits` and `notifications`, and deliberately exposes
+ * NO commission data because the schema has no commission table — the honest
+ * answer to "what did I earn" is silence until something records it.
+ *
+ * Do not repopulate these with sample data. If a surface looks empty, that is the
+ * database being empty, which is information rather than a bug.
+ */
+
 export interface Booking {
   id: string;
   title: string;
@@ -17,83 +42,13 @@ export interface Enquiry {
   status: "Owner responded" | "Awaiting reply";
 }
 
-export const BOOKINGS: Booking[] = [
-  {
-    id: "b1",
-    title: "Luxury 2BHK Apartment, Gachibowli",
-    when: "Tomorrow · 10:00 AM",
-    mode: "In-person walkthrough",
-    owner: "Suresh Reddy",
-    status: "Confirmed",
-  },
-  {
-    id: "b2",
-    title: "Modern Studio, Financial District",
-    when: "Friday · 02:00 PM",
-    mode: "Live video tour",
-    owner: "Anitha Rao",
-    status: "Scheduled",
-  },
-  {
-    id: "b3",
-    title: "3BHK Gated Villa, Kondapur",
-    when: "Last Monday · 05:30 PM",
-    mode: "In-person walkthrough",
-    owner: "Anil Varma",
-    status: "Completed",
-  },
-];
+export const BOOKINGS: Booking[] = [];
 
-export const ENQUIRIES: Enquiry[] = [
-  {
-    id: "e1",
-    title: "3BHK Gated Villa, Kondapur",
-    message: "Is this available for immediate move-in?",
-    sent: "2 hours ago",
-    status: "Owner responded",
-  },
-  {
-    id: "e2",
-    title: "Fully Furnished 2BHK, Madhapur",
-    message: "Interested in scheduling a weekend visit.",
-    sent: "Yesterday",
-    status: "Awaiting reply",
-  },
-];
+export const ENQUIRIES: Enquiry[] = [];
 
-export const NOTIFICATIONS: TimelineItem[] = [
-  {
-    id: "n1",
-    title: "Price drop on a saved home",
-    detail: "2BHK in Gachibowli reduced rent by ₹2,000/mo.",
-    time: "30 min ago",
-    tone: "success",
-  },
-  {
-    id: "n2",
-    title: "Visit confirmed",
-    detail: "Suresh Reddy confirmed tomorrow at 10:00 AM.",
-    time: "3 hours ago",
-    tone: "info",
-  },
-  {
-    id: "n3",
-    title: "New listings match your search",
-    detail: "4 new 2BHK homes in Madhapur under ₹35,000.",
-    time: "Yesterday",
-    tone: "neutral",
-  },
-];
+export const NOTIFICATIONS: TimelineItem[] = [];
 
-export const VIEW_TREND = [
-  { label: "Mon", value: 4 },
-  { label: "Tue", value: 7 },
-  { label: "Wed", value: 5 },
-  { label: "Thu", value: 11 },
-  { label: "Fri", value: 9 },
-  { label: "Sat", value: 15 },
-  { label: "Sun", value: 12 },
-];
+export const VIEW_TREND: { label: string; value: number }[] = [];
 
 export const SEARCH_PARAMS = {
   q: "",

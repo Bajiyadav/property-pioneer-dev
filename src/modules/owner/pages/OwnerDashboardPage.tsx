@@ -55,7 +55,7 @@ import {
   DonutChart,
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
-import { countBy, relativeTime, seededSeries } from "@/modules/dashboard/services/dashboardData";
+import { countBy, relativeTime } from "@/modules/dashboard/services/dashboardData";
 import { displayName } from "@/modules/authentication/services/session";
 import { ACTIVITY, SEARCH_PARAMS, listingImage } from "@/modules/owner/fixtures";
 import { ListingRows, OwnerSettings } from "@/modules/owner/components/OwnerDashboardParts";
@@ -162,10 +162,16 @@ function OwnerDashboard({ user }: { user: User | null }) {
     [listings],
   );
 
-  const viewsTrend = useMemo(
-    () => seededSeries(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], 42, 18, 96),
-    [],
-  );
+  /*
+   * Empty rather than generated.
+   *
+   * This was built by a seeded pseudo-random generator, producing a
+   * plausible curve from nothing. It was the most deceptive item on the page: it
+   * looked like a measurement, stayed identical across reloads so it read as
+   * stable data, and described no real activity whatsoever. The chart now renders
+   * its empty state until a real series is available.
+   */
+  const viewsTrend = useMemo<{ label: string; value: number }[]>(() => [], []);
   const perListingViews = useMemo(
     () =>
       listings.map((p, i) => ({

@@ -46,7 +46,6 @@ import {
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
 import { displayName } from "@/modules/authentication/services/session";
-import { seededSeries } from "@/modules/dashboard/services/dashboardData";
 import {
   Lead,
   Client,
@@ -123,10 +122,16 @@ function AgentDashboard({ user }: { user: User | null }) {
     0,
   );
 
-  const leadTrend = useMemo(
-    () => seededSeries(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], 77, 3, 14),
-    [],
-  );
+  /*
+   * Empty rather than generated.
+   *
+   * This was built by a seeded pseudo-random generator, producing a
+   * plausible curve from nothing. It was the most deceptive item on the page: it
+   * looked like a measurement, stayed identical across reloads so it read as
+   * stable data, and described no real activity whatsoever. The chart now renders
+   * its empty state until a real series is available.
+   */
+  const leadTrend = useMemo<{ label: string; value: number }[]>(() => [], []);
   const revenueSeries = useMemo(
     () =>
       ["Mar", "Apr", "May", "Jun", "Jul", "Aug"].map((label, i) => ({
