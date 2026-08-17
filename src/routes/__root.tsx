@@ -27,6 +27,9 @@ import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWai
 import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 
+/** Bump when the files in public/ that hold the brand icon change. */
+const ICON_VERSION = "2";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -85,10 +88,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         // Our own mark, generated from the BrandMark house glyph. The file that
         // shipped here was Lovable's heart logo — the icon visitors saw in the
         // browser tab. /favicon.ico stays because browsers probe it directly.
-        { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
-        { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-        { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
-        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+        //
+        // The ?v= is a cache buster, not decoration. Browsers cache favicons far
+        // more aggressively than pages and keep serving the old one long after
+        // the bytes change, so anyone who loaded the site before the icon was
+        // replaced keeps seeing the heart. Bump ICON_VERSION whenever the icon
+        // files change.
+        { rel: "icon", href: `/favicon.ico?v=${ICON_VERSION}`, sizes: "32x32" },
+        {
+          rel: "icon",
+          href: `/favicon-32.png?v=${ICON_VERSION}`,
+          type: "image/png",
+          sizes: "32x32",
+        },
+        {
+          rel: "icon",
+          href: `/favicon-16.png?v=${ICON_VERSION}`,
+          type: "image/png",
+          sizes: "16x16",
+        },
+        {
+          rel: "apple-touch-icon",
+          href: `/apple-touch-icon.png?v=${ICON_VERSION}`,
+          sizes: "180x180",
+        },
         { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
