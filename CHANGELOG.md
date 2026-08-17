@@ -1,3 +1,8 @@
+## v0.12.4 — 2026-08-17
+
+### Fixes
+- fix(ci): repair the lockfile and pin the npm major so `npm ci` stops drifting (edf1cdf)
+
 ## v0.12.3 — 2026-08-17
 
 ### Fixes
