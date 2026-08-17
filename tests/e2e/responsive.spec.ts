@@ -112,6 +112,50 @@ test.describe("responsive layout", () => {
     });
   }
 
+  /**
+   * Truncation, which BOTH assertions above are blind to.
+   *
+   * Three failure modes, three levels, and each level hides the other two:
+   *
+   *   - Track expansion. A value too wide with no `min-w-0` widens its grid track
+   *     and the ROW overflows. Only the row shows it.
+   *   - Clipped layout. A card wider than its grid column with `overflow-hidden`
+   *     loses content silently. Only the CARD shows it.
+   *   - Truncation. `truncate` sets overflow-hidden + nowrap + ellipsis on the
+   *     value itself, so the row and the card both measure a tidy 0px while the
+   *     price on screen reads "₹35,0...". Only the VALUE shows it.
+   *
+   * That last one shipped: the stat font was scaled up at `sm:` on the assumption
+   * that a wider viewport means a wider card, when a grid actually adds columns and
+   * leaves the card the same width. Both earlier assertions passed while the price
+   * was being cut off on the live site.
+   *
+   * An element with `truncate` is the one place `scrollWidth > clientWidth` on the
+   * element itself is exactly the right measure — which is also why the very first
+   * version of this suite, dismissed as insensitive, was measuring a real thing
+   * after all. It was just measuring the wrong failure mode for that bug.
+   */
+  for (const width of [375, 640, 768, 1024, 1280, 1440]) {
+    test(`property card stat values are not truncated @ ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/properties${SEARCH}`, { waitUntil: "domcontentloaded" });
+
+      const values = page.locator('[data-testid="stat-value"]');
+      await values.first().waitFor({ state: "visible", timeout: 15_000 });
+
+      const truncated = await values.evaluateAll((nodes) =>
+        nodes
+          .map((n) => ({
+            text: (n.textContent ?? "").trim(),
+            hiddenPx: n.scrollWidth - n.clientWidth,
+          }))
+          .filter((m) => m.hiddenPx > 1),
+      );
+
+      expect(truncated, `values cut off by truncate: ${JSON.stringify(truncated)}`).toEqual([]);
+    });
+  }
+
   for (const width of [320, 360, 375, 414]) {
     test(`property card stat row does not overflow @ ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
