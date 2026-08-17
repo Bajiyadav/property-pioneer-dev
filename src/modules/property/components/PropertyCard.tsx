@@ -233,12 +233,17 @@ export function PropertyCard({ property }: { property: Property }) {
           below `sm`, spacing tightens, and `tabular-nums` gives digits equal
           width so the three columns align instead of jittering per listing.
 
-          `data-testid="stat-value"` is what the element-level overflow test in
-          tests/e2e/responsive.spec.ts asserts against — the page-level check
-          there cannot see this class of bug, because a card overflowing its own
-          box does not make the document any wider.
+          `data-testid="stat-row"` is what the overflow test in
+          tests/e2e/responsive.spec.ts measures. It must be THIS element: when a
+          track expands, the cell and its text grow with it, so neither reports
+          any overflow of its own. Only the grid container sees the tracks sum
+          past its width. Measured on the real page, the pre-fix layout overflows
+          this row by 23px while the value spans and the document both report 0.
         */}
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4 rounded-md border border-border/50 bg-secondary/10 py-3 sm:py-4">
+        <div
+          data-testid="stat-row"
+          className="mt-4 grid grid-cols-3 gap-2 sm:gap-4 rounded-md border border-border/50 bg-secondary/10 py-3 sm:py-4"
+        >
           <div className="flex min-w-0 flex-col items-center justify-center border-r border-border/50 px-1 text-center sm:px-2">
             <span
               data-testid="stat-value"

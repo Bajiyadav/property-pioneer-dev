@@ -38,40 +38,51 @@ test.describe("responsive layout", () => {
   }
 
   /**
-   * Element-level overflow, which the document-level check above cannot see.
+   * Container-level overflow, which the document-level check above cannot see.
    *
    * This gap shipped a real bug: the rupee price in the property card's stat row
-   * escaped its column and spilled out of the card on phones, while every test
-   * here stayed green. The reason is that `documentElement.scrollWidth` only
-   * grows when overflow reaches the page. A child overflowing inside a container
-   * that clips, or that simply has room to absorb it, leaves the document width
-   * completely honest — so a page-level assertion reports a healthy layout for
-   * visibly broken UI.
+   * pushed its grid track wider than the third it was allotted, and the surplus
+   * spilled out of the card on phones — while every test here stayed green.
    *
-   * Comparing each value's own `scrollWidth` to its `clientWidth` is what
-   * actually catches it: they diverge the moment content is wider than the box
-   * that holds it, whether or not the page notices.
+   * `documentElement.scrollWidth` only grows when overflow reaches the page. A
+   * container absorbing or clipping its children's overflow leaves the document
+   * width completely honest, so a page-level assertion reports a healthy layout
+   * for visibly broken UI.
+   *
+   * WHICH ELEMENT IS MEASURED MATTERS, and the obvious choice is wrong. The first
+   * version of this test compared each value's own scrollWidth to its
+   * clientWidth. That cannot work: when a grid track expands to fit its content,
+   * the cell and the text inside it grow with the track, so neither overflows
+   * anything. Measured against the live page, the pre-fix layout at 360px gives:
+   *
+   *     value span scrollWidth - clientWidth ...  0   (insensitive)
+   *     stat row  scrollWidth - clientWidth ... 23px  (detects it)
+   *     document  scrollWidth - clientWidth ...  0   (the original blind spot)
+   *
+   * So the assertion belongs on the grid container: only it sees its tracks sum
+   * past its own width. Verified to fail on the pre-fix layout before being
+   * relied on here — an overflow test that cannot fail is worse than none, since
+   * it reads as coverage.
    */
   for (const width of [320, 360, 375, 414]) {
-    test(`property card stat values fit their columns @ ${width}px`, async ({ page }) => {
+    test(`property card stat row does not overflow @ ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`/properties${SEARCH}`, { waitUntil: "domcontentloaded" });
 
-      const values = page.locator('[data-testid="stat-value"]');
-      await values.first().waitFor({ state: "visible", timeout: 15_000 });
+      const rows = page.locator('[data-testid="stat-row"]');
+      await rows.first().waitFor({ state: "visible", timeout: 15_000 });
 
-      const overflowing = await values.evaluateAll((nodes) =>
+      const overflowing = await rows.evaluateAll((nodes) =>
         nodes
           .map((n) => ({
-            text: (n.textContent ?? "").trim(),
-            scroll: n.scrollWidth,
-            client: n.clientWidth,
+            overflowPx: n.scrollWidth - n.clientWidth,
+            text: (n.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 60),
           }))
           // 1px of slack for sub-pixel rounding; anything more is real overflow.
-          .filter((m) => m.scroll > m.client + 1),
+          .filter((m) => m.overflowPx > 1),
       );
 
-      expect(overflowing, `values wider than their column: ${JSON.stringify(overflowing)}`).toEqual(
+      expect(overflowing, `stat rows wider than their box: ${JSON.stringify(overflowing)}`).toEqual(
         [],
       );
     });
