@@ -195,19 +195,21 @@ export function PropertyDetailPage() {
       {/* 1. STICKY SUMMARY BAR */}
       <div className="sticky top-[60px] md:top-[72px] z-30 border-b border-border bg-card shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center justify-center rounded-lg border border-border p-2 bg-secondary/30 min-w-[60px]">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-rose-50 text-rose-500 mb-1">
-                <Heart className="h-4 w-4" fill="currentColor" />
-              </span>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">Rent</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/properties"
+              className="group flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary hover:text-primary transition-all shrink-0 shadow-xs"
+              title="Back to Listings"
+              aria-label="Back to Listings"
+            >
+              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            </Link>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-foreground line-clamp-1">
+              <h1 className="text-base sm:text-lg font-bold text-foreground line-clamp-1">
                 {property.title}
               </h1>
-              <p className="text-sm text-muted-foreground line-clamp-1">
-                {property.locality || property.city}
+              <p className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-primary" /> {property.locality || property.city}
               </p>
             </div>
           </div>

@@ -6,6 +6,7 @@ import {
   MapPin,
   Building2,
   ArrowRight,
+  ArrowLeft,
   HelpCircle,
   ChevronDown,
   ChevronUp,
@@ -114,9 +115,25 @@ export function CategoryLandingPage({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Top Back Navigation Bar */}
+      <div className="border-b border-border/40 bg-card/60 backdrop-blur-md px-4 py-3 sm:px-6 sticky top-16 z-30">
+        <div className="mx-auto max-w-6xl flex items-center justify-between">
+          <Link
+            to="/"
+            className="group inline-flex items-center gap-2 rounded-xl border border-border/70 bg-background/80 px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-xs hover:border-primary/50 hover:bg-secondary transition-all"
+          >
+            <ArrowLeft className="h-3.5 w-3.5 text-primary transition-transform group-hover:-translate-x-1" />
+            <span>Back to Home</span>
+          </Link>
+          <span className="text-xs font-medium text-muted-foreground hidden sm:inline-block">
+            Home / Categories / <strong className="text-foreground font-semibold">{badge}</strong>
+          </span>
+        </div>
+      </div>
+
       {/* 1. Hero Header Section */}
       <section
-        className={`relative overflow-hidden border-b border-border/60 ${heroGradient} px-4 py-16 sm:px-6 sm:py-24 text-center`}
+        className={`relative overflow-hidden border-b border-border/60 ${heroGradient} px-4 py-12 sm:px-6 sm:py-20 text-center`}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
 

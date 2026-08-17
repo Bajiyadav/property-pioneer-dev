@@ -2,90 +2,144 @@ import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
-import { MapPin, Search } from "lucide-react";
+import { MapPin, Search, Navigation, Building, Check } from "lucide-react";
+import type { StepProps } from "../types";
 
-export function Step1Location({
-  data,
-  updateData,
-}: {
-  data: any;
-  updateData: (data: any) => void;
-}) {
+export function Step1Location({ data, updateData }: StepProps) {
+  const cities = ["Hyderabad", "Bangalore", "Mumbai", "Pune", "Chennai", "Delhi"];
+  const popularLocalities = [
+    "Gachibowli",
+    "Madhapur",
+    "Kondapur",
+    "Hitech City",
+    "Financial District",
+    "Kokapet",
+    "Jubilee Hills",
+    "Banjara Hills",
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 mb-1">
-          Where is your property located?
+        <span className="text-xs font-bold uppercase tracking-wider text-primary">Step 1 of 6</span>
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1 flex items-center gap-2">
+          <MapPin className="h-6 w-6 text-primary" /> Where is your property located?
         </h2>
-        <p className="text-sm text-neutral-500">
-          Accurate location helps tenants find your property easily.
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          Accurate location details help genuine buyers and tenants discover your listing
+          immediately.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="city">City *</Label>
-          <select
-            id="city"
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={data.city}
-            onChange={(e) => updateData({ city: e.target.value })}
-          >
-            <option value="">Select City</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Bangalore">Bangalore</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Pune">Pune</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Chennai">Chennai</option>
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="locality">Locality / Area *</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-            <Input
-              id="locality"
-              placeholder="e.g. Madhapur, Hitech City"
-              className="pl-9"
-              value={data.locality}
-              onChange={(e) => updateData({ locality: e.target.value })}
-            />
+      <div className="space-y-6">
+        {/* City Selection Pills */}
+        <div className="space-y-2.5">
+          <Label className="text-sm font-semibold text-foreground">Select City *</Label>
+          <div className="flex flex-wrap gap-2">
+            {cities.map((city) => {
+              const isSelected = data.city === city;
+              return (
+                <button
+                  key={city}
+                  type="button"
+                  onClick={() => updateData({ city })}
+                  className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
+                      : "bg-secondary/40 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
+                  }`}
+                >
+                  {city}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="address">Full Address *</Label>
+        {/* Locality Input & Quick Chips */}
+        <div className="space-y-2.5">
+          <Label htmlFor="locality" className="text-sm font-semibold text-foreground">
+            Locality / Area Name *
+          </Label>
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="locality"
+              placeholder="e.g. Madhapur, Gachibowli, Financial District"
+              className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+              value={data.locality}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ locality: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Quick Locality Suggestions */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <span className="text-[11px] text-muted-foreground font-medium mr-1">Suggested:</span>
+            {popularLocalities.slice(0, 5).map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                onClick={() => updateData({ locality: loc })}
+                className="text-[11px] rounded-lg bg-secondary/50 px-2 py-1 text-muted-foreground hover:text-primary hover:bg-secondary transition border border-border/40 cursor-pointer"
+              >
+                {loc}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Full Address */}
+        <div className="space-y-2.5">
+          <Label htmlFor="address" className="text-sm font-semibold text-foreground">
+            Full Address / Building Name *
+          </Label>
           <Input
             id="address"
-            placeholder="House No, Building Name, Street"
+            placeholder="Flat No, Wing / Floor, Apartment or Building Name, Street / Road"
+            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
             value={data.address}
-            onChange={(e) => updateData({ address: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              updateData({ address: e.target.value })
+            }
           />
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="landmark">Landmark (Optional)</Label>
+        {/* Landmark */}
+        <div className="space-y-2.5">
+          <Label htmlFor="landmark" className="text-sm font-semibold text-foreground">
+            Prominent Landmark{" "}
+            <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+          </Label>
           <Input
             id="landmark"
-            placeholder="e.g. Near Apollo Hospital"
+            placeholder="e.g. Opposite Cyber Towers, Near Apollo Cradle Hospital"
+            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
             value={data.landmark}
-            onChange={(e) => updateData({ landmark: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              updateData({ landmark: e.target.value })
+            }
           />
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-3">
-        <MapPin className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-        <div>
-          <h4 className="text-sm font-medium text-blue-900">Pin on Map</h4>
-          <p className="text-sm text-blue-700 mt-1 mb-3">
-            Pinning your exact location on the map increases visibility by up to 40%.
-          </p>
-          <Button variant="outline" className="bg-white" size="sm">
-            Set Location on Map
-          </Button>
+      {/* Google Map Pin Confirmation Card */}
+      <div className="p-5 bg-gradient-to-br from-primary/5 via-secondary/20 to-transparent border border-border/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <MapPin className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-foreground">Google Map Geolocation Sync</h4>
+            <p className="text-xs text-muted-foreground mt-0.5 max-w-md">
+              Listing addresses in {data.city || "Hyderabad"} are automatically geocoded with
+              satellite coordinates and nearby metro & transit hubs.
+            </p>
+          </div>
+        </div>
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+          <Check className="h-3.5 w-3.5" /> Auto-Geocoded
         </div>
       </div>
     </div>
