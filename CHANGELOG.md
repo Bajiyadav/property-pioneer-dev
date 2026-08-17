@@ -1,3 +1,16 @@
+## v0.12.0 — 2026-08-17
+
+### Features
+- feat(admin): add region-based employee activity tracking (9fe8a84)
+
+### Migration notes
+- supabase/migrations/20260817130000_employee_access_and_scoping.sql
+- supabase/migrations/20260817140000_add_critical_property_specs.sql
+- supabase/migrations/20260817150000_employee_task_tracking.sql
+- supabase/migrations/properties/20260817140000_add_housing_fields.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.11.0 — 2026-08-17
 
 ### Features
