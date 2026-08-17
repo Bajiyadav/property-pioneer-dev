@@ -14,14 +14,29 @@ export function HeroSection({
 }) {
   return (
     <section className="relative isolate overflow-hidden">
-      {/* Background with Ambient Overlay & Gradient Depth */}
+      {/*
+        Background photo, shown close to its natural brightness.
+
+        This carried a near-black wash — `from-slate-950/80 via-slate-950/65
+        to-slate-950/90` — which dimmed the room to roughly a fifth of its
+        brightness and made the whole hero read as a dark-mode panel. The photo is
+        of a bright, sunlit living room; hiding that was the point of using it.
+
+        The wash cannot simply be deleted, because every piece of text on top is
+        white and would drop to unreadable over the bright window areas. So
+        legibility now comes from the text itself (a drop shadow, applied below)
+        plus a light scrim, rather than from flattening the image. The scrim is
+        strongest at top and bottom, where it meets the header and the section
+        beneath, and lightest through the middle where the photo is on show.
+      */}
       <div className="absolute inset-0 -z-10">
         <img
           src={heroImg}
-          alt="Luxury Real Estate"
+          alt=""
+          aria-hidden="true"
           className="h-full w-full object-cover object-center scale-105 transition-transform duration-1000"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/65 to-slate-950/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-950/20 to-slate-950/50" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
@@ -31,11 +46,11 @@ export function HeroSection({
           that is actually true — no commission from us, and you deal with the
           owner — is the stronger claim anyway.
         */}
-        <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl">
+        <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl [text-shadow:0_2px_12px_rgb(2_6_23_/_0.75)]">
           Rent and buy in Hyderabad, direct from owners
         </h1>
 
-        <p className="mt-4 text-base text-slate-200/90 sm:text-lg max-w-2xl">
+        <p className="mt-4 text-base text-white sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
           Direct owner contact, zero brokerage, and verified listings. Find your next home or
           commercial space without paying months of rent as commission.
         </p>
@@ -47,7 +62,9 @@ export function HeroSection({
 
         {/* Trending Searches Chips */}
         <div className="mt-6 flex flex-wrap justify-center items-center gap-2 text-xs">
-          <span className="font-semibold text-white/70">Popular Hubs:</span>
+          <span className="font-semibold text-white [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+            Popular Hubs:
+          </span>
           {["Gachibowli", "Madhapur", "Financial District", "Kondapur", "Hitech City"].map(
             (loc) => (
               <Link
@@ -82,8 +99,12 @@ export function HeroSection({
                 says so, so the badge contradicted our own answer. smoke.spec.ts
                 fails any page making a claim the platform cannot back.
               */}
-              <h3 className="font-bold text-white text-sm">Moderated Listings</h3>
-              <p className="text-xs text-white/70 mt-0.5">Reviewed before going live</p>
+              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                Moderated Listings
+              </h3>
+              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                Reviewed before going live
+              </p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2">
@@ -92,8 +113,12 @@ export function HeroSection({
             </div>
             <div>
               {/* We take no commission; we cannot promise what an owner charges. */}
-              <h3 className="font-bold text-white text-sm">No Platform Commission</h3>
-              <p className="text-xs text-white/70 mt-0.5">We charge you nothing</p>
+              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                No Platform Commission
+              </h3>
+              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                We charge you nothing
+              </p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2 col-span-2 sm:col-span-1">
@@ -101,8 +126,12 @@ export function HeroSection({
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">Direct Contact</h3>
-              <p className="text-xs text-white/70 mt-0.5">Chat with owners</p>
+              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                Direct Contact
+              </h3>
+              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
+                Chat with owners
+              </p>
             </div>
           </div>
         </div>
