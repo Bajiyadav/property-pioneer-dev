@@ -4,7 +4,7 @@ import {
   isPropertyVerified,
   type Property,
 } from "@/modules/property/services/propertyService";
-import { formatPrice } from "@/modules/property/services/propertyQueries";
+import { formatPrice, formatPriceCompact } from "@/modules/property/services/propertyQueries";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { APP_COPYRIGHT, getCanonicalUrl } from "@/config/app";
 
@@ -52,6 +52,50 @@ describe("price formatting", () => {
     expect(formatPrice(25000, "rent")).toMatch(/25,000/);
     expect(formatPrice(25000, "rent")).toMatch(/mo/i);
     expect(formatPrice(4500000, "sale")).not.toMatch(/mo/i);
+  });
+});
+
+describe("compact price formatting for narrow stat cells", () => {
+  // The card's stat columns are ~90px on a 360px phone, so the string length
+  // here is a layout constraint, not a style preference.
+  it("omits the /mo suffix that the cell's own label already states", () => {
+    expect(formatPriceCompact(48000, "rent")).toBe("₹48,000");
+    expect(formatPriceCompact(48000, "rent")).not.toMatch(/mo/i);
+  });
+
+  it("shortens large rents, which formatPrice leaves at full length", () => {
+    // formatPrice only shortens sale prices, so a rent of ₹1,50,000 produced a
+    // 12-character string that overflowed the column at any readable size.
+    expect(formatPrice(150000, "rent")).toBe("₹1,50,000/mo");
+    expect(formatPriceCompact(150000, "rent")).toBe("₹1.5L");
+  });
+
+  it("does not round a sub-lakh amount up to a lakh", () => {
+    // The card hard-coded (deposit / 100000).toFixed(1) + "L", which displayed a
+    // ₹96,000 deposit as "₹1.0L" — reading as a lakh when it is not one.
+    expect(formatPriceCompact(96000, "rent")).toBe("₹96,000");
+    expect(formatPriceCompact(100000, "rent")).toBe("₹1L");
+  });
+
+  it("drops a trailing .0 but keeps a meaningful decimal", () => {
+    expect(formatPriceCompact(200000, "sale")).toBe("₹2L");
+    expect(formatPriceCompact(250000, "sale")).toBe("₹2.5L");
+    expect(formatPriceCompact(12000000, "sale")).toBe("₹1.2Cr");
+    expect(formatPriceCompact(10000000, "sale")).toBe("₹1Cr");
+  });
+
+  it("returns N/A rather than a bogus amount for missing or invalid input", () => {
+    expect(formatPriceCompact(0, "rent")).toBe("N/A");
+    expect(formatPriceCompact(Number.NaN, "rent")).toBe("N/A");
+  });
+
+  it("never exceeds the width the stat column can hold", () => {
+    // A guard on the actual constraint: at text-base bold, ~9 characters is the
+    // most a ~90px column fits. Every realistic price must stay under it.
+    for (const amount of [1, 9500, 48000, 96000, 150000, 999999, 4500000, 12000000, 990000000]) {
+      const out = formatPriceCompact(amount, "rent");
+      expect(out.length, `"${out}" is too wide for the stat column`).toBeLessThanOrEqual(9);
+    }
   });
 });
 

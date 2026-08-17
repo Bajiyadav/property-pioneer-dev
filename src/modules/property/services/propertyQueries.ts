@@ -45,6 +45,40 @@ export function formatPrice(price: number, listingType: ListingType | string): s
   return `₹${inr.format(n)}`;
 }
 
+/** Drops a trailing ".0" so 1.5 stays "1.5" but 2.0 reads "2". */
+function trimTrailingZero(value: number): string {
+  return value.toFixed(1).replace(/\.0$/, "");
+}
+
+/**
+ * Price for a narrow, fixed-width stat cell — the three-column row on
+ * `PropertyCard`, where each column is roughly 90px on a 360px phone.
+ *
+ * Deliberately different from `formatPrice` in two ways, both forced by that
+ * width:
+ *
+ * 1. No "/mo" suffix. The cell's own label directly underneath already reads
+ *    "Rent/Month", so "₹48,000/mo" states the period twice while producing the
+ *    widest string in the row — the thing that was overflowing on mobile.
+ *
+ * 2. Lakh/crore shortening applies to rent as well as sale. `formatPrice` only
+ *    shortens sale prices, so a ₹1,50,000 rental produced a 12-character string
+ *    that no 90px column can hold at any readable font size.
+ *
+ * It also rounds honestly. The card used to hard-code
+ * `(deposit / 100000).toFixed(1) + "L"`, which rendered a ₹96,000 deposit as
+ * "₹1.0L" — reading as a lakh when it is not one. Values below a lakh now show
+ * in full.
+ */
+export function formatPriceCompact(price: number, listingType: ListingType | string): string {
+  void listingType; // Same shape for rent and sale; kept for call-site symmetry.
+  const n = Number(price);
+  if (!Number.isFinite(n) || n <= 0) return "N/A";
+  if (n >= 10000000) return `₹${trimTrailingZero(n / 10000000)}Cr`;
+  if (n >= 100000) return `₹${trimTrailingZero(n / 100000)}L`;
+  return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n)}`;
+}
+
 export async function fetchOwnerContact(
   propertyId: string,
   turnstileToken?: string,

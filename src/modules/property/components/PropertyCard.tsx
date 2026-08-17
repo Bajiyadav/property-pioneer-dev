@@ -16,7 +16,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { type Property, formatPrice } from "@/modules/property/services/propertyQueries";
+import { type Property, formatPriceCompact } from "@/modules/property/services/propertyQueries";
 import { useFavorites } from "@/modules/property/hooks/useFavorites";
 import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
@@ -211,27 +211,66 @@ export function PropertyCard({ property }: { property: Property }) {
           </div>
         </div>
 
-        {/* Financials & Specs Row (NoBroker Style Columns) */}
-        <div className="grid grid-cols-3 gap-4 py-4 bg-secondary/10 rounded-md mt-4 border border-border/50">
-          <div className="flex flex-col items-center justify-center border-r border-border/50 px-2 text-center">
-            <span className="text-xl font-bold text-foreground">
-              {formatPrice(property.price, property.listing_type)}
+        {/*
+          Financials & Specs Row — three equal columns.
+
+          The price used to overflow this row on a phone, escaping past the
+          divider and out of the card. The cause was NOT the font size; it was a
+          CSS Grid default that is easy to miss:
+
+            A grid item's `min-width` is `auto`, which means a `1fr` track will
+            NOT shrink below its content's min-content width. So a long value
+            like "₹1,50,000/mo" forced its track wider than the third it was
+            allotted, and the excess spilled out of the container.
+
+          `min-w-0` on each cell is the actual fix — it lets the track hold its
+          share. `truncate` is the belt-and-braces guarantee: if a value is ever
+          longer than expected, it is clipped with an ellipsis INSIDE the cell
+          instead of escaping it. Both are load-bearing; removing either brings
+          the overflow back.
+
+          The rest is legibility on a small screen: the value steps down a size
+          below `sm`, spacing tightens, and `tabular-nums` gives digits equal
+          width so the three columns align instead of jittering per listing.
+
+          `data-testid="stat-value"` is what the element-level overflow test in
+          tests/e2e/responsive.spec.ts asserts against — the page-level check
+          there cannot see this class of bug, because a card overflowing its own
+          box does not make the document any wider.
+        */}
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4 rounded-md border border-border/50 bg-secondary/10 py-3 sm:py-4">
+          <div className="flex min-w-0 flex-col items-center justify-center border-r border-border/50 px-1 text-center sm:px-2">
+            <span
+              data-testid="stat-value"
+              className="w-full truncate text-base font-bold tabular-nums text-foreground sm:text-xl"
+            >
+              {formatPriceCompact(property.price, property.listing_type)}
             </span>
-            <span className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">
+            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
               Rent/Month
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center border-r border-border/50 px-2 text-center">
-            <span className="text-xl font-bold text-foreground">
-              {estimatedDeposit ? `₹${(estimatedDeposit / 100000).toFixed(1)}L` : "N/A"}
+          <div className="flex min-w-0 flex-col items-center justify-center border-r border-border/50 px-1 text-center sm:px-2">
+            <span
+              data-testid="stat-value"
+              className="w-full truncate text-base font-bold tabular-nums text-foreground sm:text-xl"
+            >
+              {estimatedDeposit
+                ? formatPriceCompact(estimatedDeposit, property.listing_type)
+                : "N/A"}
             </span>
-            <span className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">
+            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
               Deposit
             </span>
           </div>
-          <div className="flex flex-col items-center justify-center px-2 text-center">
-            <span className="text-xl font-bold text-foreground">{property.area_sqft || "N/A"}</span>
-            <span className="text-xs text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">
+          <div className="flex min-w-0 flex-col items-center justify-center px-1 text-center sm:px-2">
+            <span
+              data-testid="stat-value"
+              className="w-full truncate text-base font-bold tabular-nums text-foreground sm:text-xl"
+            >
+              {property.area_sqft || "N/A"}
+            </span>
+            <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-xs">
               Builtup (Sq.ft)
             </span>
           </div>
