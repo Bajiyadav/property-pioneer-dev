@@ -54,7 +54,6 @@ function NotFoundComponent() {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => {
-    const canonicalUrl = getCanonicalUrl("/");
     const ogImage = getOgImageUrl();
     return {
       meta: [
@@ -65,7 +64,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { property: "og:title", content: `${APP_NAME} — India's Premier Real Estate Platform` },
         { property: "og:description", content: APP_DESCRIPTION },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: ogImage },
         { property: "og:site_name", content: APP_NAME },
         { name: "twitter:card", content: "summary_large_image" },
@@ -74,7 +72,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "twitter:image", content: ogImage },
       ],
       links: [
-        { rel: "canonical", href: canonicalUrl },
+        // No canonical or og:url here. Head tags from the root and the matched
+        // route are both emitted, so a hard-coded "/" here shipped a SECOND,
+        // conflicting canonical on every page that sets its own — and search
+        // engines discard both when they disagree. Each route owns its
+        // canonical via `getCanonicalUrl(path)`; the pages that set none are
+        // the authenticated ones we do not want indexed anyway.
         {
           rel: "stylesheet",
           href: appCss,

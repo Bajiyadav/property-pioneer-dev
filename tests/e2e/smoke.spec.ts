@@ -82,6 +82,22 @@ test.describe("SEO", () => {
     await expect(page.locator("h1")).toHaveCount(1);
   });
 
+  // The check above passes on "/" even when the tag is duplicated, because the
+  // root and the index route both resolved to the same origin URL. Every OTHER
+  // page shipped two conflicting canonicals — the root's origin plus its own
+  // path — and a search engine discards both when they disagree. So assert on
+  // pages whose canonical is NOT the origin, and assert the value too.
+  for (const path of ["/properties", "/buy", "/privacy-policy", "/help"]) {
+    test(`${path} declares exactly one canonical, pointing at itself`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+      const canonical = page.locator('link[rel="canonical"]');
+      await expect(canonical, `${path} should declare one canonical`).toHaveCount(1);
+      const href = await canonical.getAttribute("href");
+      expect(href, `${path} canonical should be absolute`).toMatch(/^https?:\/\//);
+      expect(new URL(href!).pathname, `${path} canonical should point at itself`).toBe(path);
+    });
+  }
+
   test("sitemap serves XML with entries", async ({ request }) => {
     const res = await request.get("/sitemap.xml");
     expect(res.status()).toBe(200);
