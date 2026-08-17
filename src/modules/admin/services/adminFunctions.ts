@@ -14,6 +14,25 @@ export type EmployeeAccess = {
 };
 
 // Check if the user has an employee_access row
+/** PostgreSQL `undefined_table` / PostgREST unknown relation. */
+function isMissingTable(error: { code?: string } | null): boolean {
+  return error?.code === "42P01" || error?.code === "PGRST205";
+}
+
+/**
+ * Resolves the caller's employee role and regional scope.
+ *
+ * `employee_access` arrives with its own migration. Until that is applied the
+ * table does not exist, and treating "table missing" the same as "not an
+ * employee" locked every real admin out of /admin — the route redirects on a
+ * null result, so the portal was unreachable for everyone.
+ *
+ * When the table is absent we fall back to the existing `user_roles` grant,
+ * which is the authority the rest of the app already trusts. This is a
+ * capability fallback, not a weakening: the caller still has to hold the admin
+ * role, read through their own RLS-scoped view. Once the table exists it takes
+ * precedence and regional scoping applies.
+ */
 async function getEmployeeAccess(context: AuthContext): Promise<EmployeeAccess | null> {
   const { data, error } = await context.supabase
     .from("employee_access")
@@ -21,11 +40,25 @@ async function getEmployeeAccess(context: AuthContext): Promise<EmployeeAccess |
     .eq("user_id", context.userId)
     .maybeSingle();
 
-  if (error || !data) return null;
-  return {
-    role: data.role as EmployeeRole,
-    regions: data.regions || [],
-  };
+  if (!error && data) {
+    return {
+      role: data.role as EmployeeRole,
+      regions: data.regions || [],
+    };
+  }
+
+  if (error && !isMissingTable(error)) return null;
+  if (!error) return null; // table exists, caller simply has no row
+
+  const { data: roleRow } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  // Global scope: without the table there is no regional data to narrow to.
+  return roleRow ? { role: "admin" as EmployeeRole, regions: [] } : null;
 }
 
 async function assertEmployee(context: AuthContext): Promise<EmployeeAccess> {

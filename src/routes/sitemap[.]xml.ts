@@ -15,17 +15,22 @@ export const Route = createFileRoute("/sitemap.xml")({
       GET: async ({ request }) => {
         const origin = APP_URL || new URL(request.url).origin;
 
+        // Only paths that actually resolve. /villas, /plots and /farm-lands
+        // were removed as routes but left here, so the sitemap was handing
+        // search engines three URLs that return 404 — worse than not listing
+        // them, because it invites crawling and then fails.
         const staticPaths = [
           "/",
           "/buy",
           "/commercial",
-          "/villas",
-          "/plots",
-          "/farm-lands",
           "/properties",
           "/favorites",
           "/help",
           "/blog",
+          "/privacy-policy",
+          "/terms-of-service",
+          "/cookie-policy",
+          "/refund-policy",
         ];
         const entries: Array<{ loc: string; lastmod?: string; priority: string }> = staticPaths.map(
           (p) => ({

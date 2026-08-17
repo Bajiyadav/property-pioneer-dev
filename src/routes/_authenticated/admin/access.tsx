@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { upsertEmployeeAccess } from "@/modules/admin/services/adminFunctions";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { useEmployeeAccess } from "@/modules/admin/hooks/useEmployeeAccess";
 
 export const Route = createFileRoute("/_authenticated/admin/access")({
   component: AccessManagement,
@@ -20,7 +21,7 @@ const HYDERABAD_LOCALITIES = [
 ];
 
 function AccessManagement() {
-  const { access } = Route.useRouteContext();
+  const access = useEmployeeAccess();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"support" | "moderator" | "analyst" | "ops" | "admin">(
     "moderator",
@@ -43,7 +44,7 @@ function AccessManagement() {
     },
   });
 
-  if (access.role !== "admin") {
+  if (access?.role !== "admin") {
     return (
       <div className="p-8 text-center text-neutral-400">
         Only admins can manage employee access.

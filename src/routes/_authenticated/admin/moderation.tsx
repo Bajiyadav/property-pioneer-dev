@@ -1,14 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { getAdminProperties, updateAdminProperty } from "@/modules/admin/services/adminFunctions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/admin/moderation")({
-  loader: () => getAdminProperties(),
   component: ModerationQueue,
 });
 
 function ModerationQueue() {
-  const properties = Route.useLoaderData();
+  // Fetched in the component, not in `loader`. A route loader runs during SSR,
+  // where the Supabase bearer token is attached by a *client* middleware and is
+  // therefore absent — every one of these server functions threw "no
+  // authorization header" and 500'd the whole /admin document, for signed-in
+  // admins and anonymous visitors alike.
+  const fetchgetAdminProperties = useServerFn(getAdminProperties);
+  const { data: properties = [] } = useQuery({
+    queryKey: ["admin", "properties"],
+    queryFn: () => fetchgetAdminProperties({}),
+  });
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

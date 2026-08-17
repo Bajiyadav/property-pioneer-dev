@@ -1,13 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { getAdminOverview } from "@/modules/admin/services/adminFunctions";
 
 export const Route = createFileRoute("/_authenticated/admin/analytics")({
-  loader: () => getAdminOverview(),
   component: AnalyticsPanel,
 });
 
 function AnalyticsPanel() {
-  const data = Route.useLoaderData();
+  // Fetched in the component, not in `loader`. A route loader runs during SSR,
+  // where the Supabase bearer token is attached by a *client* middleware and is
+  // therefore absent — every one of these server functions threw "no
+  // authorization header" and 500'd the whole /admin document, for signed-in
+  // admins and anonymous visitors alike.
+  const fetchgetAdminOverview = useServerFn(getAdminOverview);
+  const { data: data } = useQuery({
+    queryKey: ["admin", "overview"],
+    queryFn: () => fetchgetAdminOverview({}),
+  });
+
+  // Overview is an object; render a loading state rather than dereferencing it.
+  if (!data) {
+    return <p className="text-sm text-neutral-400">Loading…</p>;
+  }
 
   return (
     <div className="space-y-6">

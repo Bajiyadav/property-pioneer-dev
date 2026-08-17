@@ -15,6 +15,7 @@ export type Property = {
   description: string;
   price: number;
   city: string;
+  pincode?: string | null;
   address: string;
   bedrooms: number;
   bathrooms: number;
@@ -91,7 +92,11 @@ const BASE_PROPERTY_COLUMNS =
  * (video tours and location context).
  */
 const EXTENDED_PROPERTY_COLUMNS =
-  "video_url,video_status,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable";
+  // `pincode` belongs here, not in the base set: it arrives with migration
+  // 20260817160000, and putting an un-applied column in the "always present"
+  // list left the fallback query with nothing to fall back to — every listing
+  // query failed and collapsed onto seed data.
+  "pincode,video_url,video_status,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable";
 
 export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
 

@@ -26,8 +26,13 @@ export function HeroSection({
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
         {/* Main Heading */}
+        {/*
+          Was a global superlative we cannot substantiate. The differentiator
+          that is actually true — no commission from us, and you deal with the
+          owner — is the stronger claim anyway.
+        */}
         <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl">
-          World's Largest NoBrokerage Property Site
+          Rent and buy in Hyderabad, direct from owners
         </h1>
 
         <p className="mt-4 text-base text-slate-200/90 sm:text-lg max-w-2xl">
@@ -71,8 +76,14 @@ export function HeroSection({
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">100% Verified</h3>
-              <p className="text-xs text-white/70 mt-0.5">Owners & Tenants</p>
+              {/*
+                Not "100% Verified": the review is moderation, not verification.
+                We do not check title, Aadhaar or government records — the FAQ
+                says so, so the badge contradicted our own answer. smoke.spec.ts
+                fails any page making a claim the platform cannot back.
+              */}
+              <h3 className="font-bold text-white text-sm">Moderated Listings</h3>
+              <p className="text-xs text-white/70 mt-0.5">Reviewed before going live</p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2">
@@ -80,8 +91,9 @@ export function HeroSection({
               <Zap className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">Zero Brokerage</h3>
-              <p className="text-xs text-white/70 mt-0.5">Save thousands</p>
+              {/* We take no commission; we cannot promise what an owner charges. */}
+              <h3 className="font-bold text-white text-sm">No Platform Commission</h3>
+              <p className="text-xs text-white/70 mt-0.5">We charge you nothing</p>
             </div>
           </div>
           <div className="flex flex-col items-center text-center gap-2 col-span-2 sm:col-span-1">

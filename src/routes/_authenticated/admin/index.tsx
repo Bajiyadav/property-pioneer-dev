@@ -1,22 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { getAdminOverview } from "@/modules/admin/services/adminFunctions";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useEmployeeAccess } from "@/modules/admin/hooks/useEmployeeAccess";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
-  loader: () => getAdminOverview(),
   component: AdminDashboard,
 });
 
 function AdminDashboard() {
-  const data = Route.useLoaderData();
-  const { access } = Route.useRouteContext();
+  // Fetched in the component, not in `loader`. A route loader runs during SSR,
+  // where the Supabase bearer token is attached by a *client* middleware and is
+  // therefore absent — every one of these server functions threw "no
+  // authorization header" and 500'd the whole /admin document, for signed-in
+  // admins and anonymous visitors alike.
+  const fetchgetAdminOverview = useServerFn(getAdminOverview);
+  const { data: data } = useQuery({
+    queryKey: ["admin", "overview"],
+    queryFn: () => fetchgetAdminOverview({}),
+  });
+
+  const access = useEmployeeAccess();
+
+  // After every hook: an early return above `useEmployeeAccess` changed the
+  // hook order between renders, which React rejects.
+  if (!data) {
+    return <p className="text-sm text-neutral-400">Loading…</p>;
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight">Overview</h1>
         <p className="text-neutral-400 text-sm mt-1">
-          {access.role === "admin"
+          {access?.role === "admin"
             ? "Global statistics across all regions."
             : `Statistics restricted to your assigned regions.`}
         </p>

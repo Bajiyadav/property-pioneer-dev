@@ -14,28 +14,37 @@ test.describe("Premium Rental Journey", () => {
     });
 
     // 2. Open first property card
-    const viewDetailsLink = page.getByRole("link", { name: /View Details/i }).first();
+    // The card CTA was renamed "View Details" -> "Get Owner Details". Matching
+    // either keeps this asserting the journey rather than one wording.
+    const viewDetailsLink = page
+      .getByRole("link", { name: /View Details|Get Owner Details/i })
+      .first();
     await expect(viewDetailsLink).toBeVisible({ timeout: 10000 });
     await viewDetailsLink.click();
 
     // 3. Verify on Property Detail Page
     await page.waitForURL(/\/properties\//, { timeout: 15000 });
 
-    // Verify Transparent Rental Terms section exists
-    await expect(page.getByRole("heading", { name: /Transparent Rental Terms/i })).toBeVisible({
+    // The detail page now leads with an Overview section; the old "Transparent
+    // Rental Terms" block was removed in the redesign. Asserting a section the
+    // page still has keeps this checking that the detail page actually
+    // rendered, rather than pinning one layout.
+    await expect(page.getByRole("heading", { name: /Overview/i }).first()).toBeVisible({
       timeout: 15000,
     });
 
-    // Verify Brokerage 0% Zero Fee badge is displayed
-    await expect(page.getByText(/0% Zero Fee/i).first()).toBeVisible({ timeout: 10000 });
+    // The "0% Zero Fee" badge is deliberately gone: it was a brokerage claim of
+    // the same kind smoke.spec.ts bans, so it is not re-asserted here.
 
     // 4. Verify Schedule Visit Modal can be opened
     const scheduleBtn = page.getByRole("button", { name: /Schedule Visit/i }).first();
     await expect(scheduleBtn).toBeVisible({ timeout: 10000 });
     await scheduleBtn.click();
 
-    // Verify Schedule Visit dialog appears
-    await expect(page.getByRole("heading", { name: /Request a Property Visit/i })).toBeVisible({
+    // The scheduling step is headed "Schedule a Visit" since the redesign; it
+    // was "Request a Property Visit". Still asserting that clicking the button
+    // actually opens the scheduling UI.
+    await expect(page.getByRole("heading", { name: /Schedule a Visit/i }).first()).toBeVisible({
       timeout: 10000,
     });
   });

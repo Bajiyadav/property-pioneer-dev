@@ -29,7 +29,11 @@ export function ConsentBanner() {
 
   return (
     <div
-      role="dialog"
+      // A landmark region, not role="dialog": this notice does not trap focus
+      // or block the page, so calling it a dialog misdescribes it to assistive
+      // tech — and made it collide with real modals in `[role="dialog"]`
+      // queries, where it shadowed the expansion modal.
+      role="region"
       aria-label="Cookie choices"
       aria-live="polite"
       data-testid="consent-banner"

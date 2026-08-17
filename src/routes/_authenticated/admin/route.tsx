@@ -1,4 +1,7 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate as useNav } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
 import { checkEmployeeAccess } from "@/modules/admin/services/adminFunctions";
 import {
   LayoutDashboard,
@@ -16,19 +19,53 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
+/**
+ * Access is checked in the component, not in `beforeLoad`.
+ *
+ * `beforeLoad` runs during SSR, where the Supabase bearer token is attached by
+ * a *client* middleware and so is absent — `checkEmployeeAccess()` threw
+ * "no authorization header" and the whole document 500'd for every admin.
+ * Skipping it on the server does not help either, because `beforeLoad` does not
+ * re-run on hydration, which would leave the portal ungated.
+ *
+ * Checking on the client keeps the gate real: nothing but a loading state
+ * renders until the answer arrives, and every server function behind these
+ * pages runs its own `assertEmployee`, so the data is guarded independently of
+ * this component.
+ */
 export const Route = createFileRoute("/_authenticated/admin")({
-  beforeLoad: async () => {
-    const { access } = await checkEmployeeAccess();
-    if (!access) {
-      throw redirect({ to: "/" });
-    }
-    return { access };
-  },
-  component: AdminLayout,
+  component: AdminGate,
 });
 
-function AdminLayout() {
-  const { access } = Route.useRouteContext();
+function AdminGate() {
+  const check = useServerFn(checkEmployeeAccess);
+  const navigate = useNav();
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["admin", "employee-access"],
+    queryFn: () => check({}),
+    retry: false,
+  });
+
+  const denied = !isPending && (isError || !data?.access);
+
+  useEffect(() => {
+    if (denied) navigate({ to: "/", replace: true });
+  }, [denied, navigate]);
+
+  if (isPending) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-neutral-950 text-neutral-400">
+        <p className="text-xs font-semibold">Checking your access…</p>
+      </div>
+    );
+  }
+
+  if (denied || !data?.access) return null;
+
+  return <AdminLayout access={data.access} />;
+}
+
+function AdminLayout({ access }: { access: { role: string; regions: string[] } }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { signOut } = useAuthSession();

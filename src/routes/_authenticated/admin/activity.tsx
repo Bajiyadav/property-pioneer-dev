@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { getEmployeeActivity } from "@/modules/admin/services/adminFunctions";
 import {
   Table,
@@ -16,11 +18,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/_authenticated/admin/activity")({
   component: EmployeeActivityPage,
-  loader: () => getEmployeeActivity(),
 });
 
 function EmployeeActivityPage() {
-  const activities = Route.useLoaderData();
+  // Fetched in the component, not in `loader`. A route loader runs during SSR,
+  // where the Supabase bearer token is attached by a *client* middleware and is
+  // therefore absent — every one of these server functions threw "no
+  // authorization header" and 500'd the whole /admin document, for signed-in
+  // admins and anonymous visitors alike.
+  const fetchgetEmployeeActivity = useServerFn(getEmployeeActivity);
+  const { data: activities = [] } = useQuery({
+    queryKey: ["admin", "activity"],
+    queryFn: () => fetchgetEmployeeActivity({}),
+  });
 
   if (!activities || activities.length === 0) {
     return (

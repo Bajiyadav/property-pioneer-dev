@@ -24,9 +24,9 @@ test.describe("public routes", () => {
     [`/properties${SEARCH}`, /Properties|Browse|Homes/i],
     ["/buy", /Buy/i],
     ["/commercial", /Commercial/i],
-    ["/villas", /Villa/i],
-    ["/plots", /Plot/i],
-    ["/farm-lands", /Farm/i],
+    // /villas, /plots and /farm-lands were removed as routes in dfd7b38. They
+    // are intentionally absent here rather than asserted-and-failing; restore
+    // both the routes and these entries together if the pages come back.
     ["/favorites", /Saved/i],
     ["/blog", /Blog|Insight/i],
     ["/help", /help/i],
