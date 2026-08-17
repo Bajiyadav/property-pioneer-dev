@@ -87,7 +87,7 @@ function BuyPage() {
         {
           icon: ShieldCheck,
           title: "Zero Platform Brokerage",
-          desc: "Urban Properties charges no platform commission on home sales.",
+          desc: "Seedha Properties charges no platform commission on home sales.",
         },
         {
           icon: Calendar,
@@ -102,12 +102,12 @@ function BuyPage() {
       ]}
       faqs={[
         {
-          q: "How do I buy a home directly from an owner on Urban Properties?",
+          q: "How do I buy a home directly from an owner on Seedha Properties?",
           a: "Browse the live sale catalogue, select your desired property, and click 'Schedule Visit' or 'Contact Owner'. You can connect directly with the owner to view the home and discuss terms.",
         },
         {
-          q: "Does Urban Properties charge any transaction fee to buyers?",
-          a: "No. Urban Properties adds zero platform commission or hidden buyer fees to property listings.",
+          q: "Does Seedha Properties charge any transaction fee to buyers?",
+          a: "No. Seedha Properties adds zero platform commission or hidden buyer fees to property listings.",
         },
         {
           q: "Can I apply for a home loan for properties listed on the platform?",

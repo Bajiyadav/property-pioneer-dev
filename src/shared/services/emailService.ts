@@ -1,5 +1,5 @@
 /**
- * Urban Properties — Transactional Email & Communication Service
+ * Seedha Properties — Transactional Email & Communication Service
  *
  * Provides a unified abstraction for transactional platform notifications.
  * Respects strict enterprise honesty: if an email provider (Resend, SendGrid,
@@ -84,7 +84,7 @@ export async function sendTransactionalEmail(payload: EmailPayload): Promise<Ema
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Urban Properties <notifications@urbanproperties.in>",
+        from: "Seedha Properties <notifications@seedhaproperties.com>",
         to: [payload.to],
         subject: payload.subject,
         html: payload.htmlBody || `<p>${payload.textBody}</p>`,

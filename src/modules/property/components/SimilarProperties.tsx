@@ -10,7 +10,7 @@ interface SimilarPropertiesProps {
 }
 
 /**
- * Algorithmic Real Recommendations for Urban Properties.
+ * Algorithmic Real Recommendations for Seedha Properties.
  * Matches listings based on locality, property type, bedroom count, and rent budget,
  * strictly excluding the current property and never fabricating listings.
  */

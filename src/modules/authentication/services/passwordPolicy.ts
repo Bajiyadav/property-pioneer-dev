@@ -1,5 +1,5 @@
 /**
- * Enterprise Password & Identity Validation Engine for Urban Properties.
+ * Enterprise Password & Identity Validation Engine for Seedha Properties.
  * Complies with OWASP & ISO/IEC 27001 Security Guidelines.
  */
 
@@ -28,7 +28,11 @@ const COMMON_DISALLOWED_PASSWORDS = new Set([
   "admin",
   "welcome123",
   "123456789",
+  // Both brand spellings stay on the list: the platform was renamed, and a
+  // password built from the previous name is no less guessable for it.
   "urbanproperties",
+  "seedhaproperties",
+  "seedha123",
   "hyderabad123",
   "pass123456",
 ]);

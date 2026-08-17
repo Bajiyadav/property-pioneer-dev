@@ -9,7 +9,7 @@ import {
 import { MapPin, Sparkles, CheckCircle2, Bell, Building2, Rocket, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-const SUPPORT_EMAIL = "support@urbanproperties.in";
+const SUPPORT_EMAIL = "support@seedhaproperties.com";
 
 export function ExpansionWaitlistModal({
   isOpen,
@@ -42,7 +42,7 @@ export function ExpansionWaitlistModal({
     // interest is emailed to the published support address instead, and the
     // copy no longer invents a queue position or promises an SMS.
     const subject = `Launch interest: ${cityName || categoryName}`;
-    const body = `Please notify me when Urban Properties launches in ${cityName || categoryName}.\nMobile: ${phone}`;
+    const body = `Please notify me when Seedha Properties launches in ${cityName || categoryName}.\nMobile: ${phone}`;
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`;
@@ -106,7 +106,7 @@ export function ExpansionWaitlistModal({
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />
-                  <span>Direct owner contact — no brokerage charged by Urban Properties</span>
+                  <span>Direct owner contact — no brokerage charged by Seedha Properties</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />

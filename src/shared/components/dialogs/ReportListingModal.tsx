@@ -9,7 +9,7 @@ import {
 import { AlertTriangle, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
-const SUPPORT_EMAIL = "support@urbanproperties.in";
+const SUPPORT_EMAIL = "support@seedhaproperties.com";
 
 export function ReportListingModal({
   isOpen,

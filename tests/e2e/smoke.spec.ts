@@ -20,7 +20,7 @@ function collectConsoleErrors(page: Page): string[] {
 
 test.describe("public routes", () => {
   const routes = [
-    ["/", /Urban Properties/i],
+    ["/", /Seedha Properties/i],
     [`/properties${SEARCH}`, /Properties|Browse|Homes/i],
     ["/buy", /Buy/i],
     ["/commercial", /Commercial/i],
@@ -54,7 +54,7 @@ test.describe("public routes", () => {
     // Not a pinned year: the notice is derived from the current date, so
     // hard-coding one here would re-introduce the staleness this checks for.
     await expect(page.locator("footer").last()).toContainText(
-      `© ${new Date().getFullYear()} Urban Properties. All Rights Reserved.`,
+      `© ${new Date().getFullYear()} Seedha Properties. All Rights Reserved.`,
     );
   });
 
@@ -65,7 +65,7 @@ test.describe("public routes", () => {
       await page.goto(path, { waitUntil: "domcontentloaded" });
       await expect(page.locator("footer"), `${path} should have one footer`).toHaveCount(1);
       const copies = await page
-        .getByText(`© ${new Date().getFullYear()} Urban Properties. All Rights Reserved.`)
+        .getByText(`© ${new Date().getFullYear()} Seedha Properties. All Rights Reserved.`)
         .count();
       expect(copies, `${path} should show the copyright once`).toBe(1);
     }
@@ -167,7 +167,7 @@ test.describe("product focus", () => {
     "0% Brokerage",
     "Aadhaar",
     "Launching Soon",
-    "Download the Urban Properties mobile app",
+    "Download the Seedha Properties mobile app",
     "Pan-India",
     "Expanding Across India",
   ];

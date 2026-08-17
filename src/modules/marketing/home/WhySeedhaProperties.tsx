@@ -44,7 +44,7 @@ const VALUE_CARDS: ValueCard[] = [
   },
   {
     title: "No Platform Commission",
-    desc: "Connect directly with property owners and landlords. Urban Properties does not charge tenant fees or commission on deals.",
+    desc: "Connect directly with property owners and landlords. Seedha Properties does not charge tenant fees or commission on deals.",
     badge: "0% Platform Fee",
     icon: Lock,
     cta: "Browse Direct Homes",
@@ -70,7 +70,7 @@ const VALUE_CARDS: ValueCard[] = [
   },
 ];
 
-export function WhyUrbanProperties() {
+export function WhySeedhaProperties() {
   return (
     <section className="bg-gradient-to-b from-secondary/40 via-background to-secondary/30 py-16 sm:py-24 border-y border-border/60">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">

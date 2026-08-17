@@ -62,7 +62,7 @@ export function PropertyBadges({
       {isZeroBrokerage && (
         <span
           className={`inline-flex items-center gap-1 rounded-full bg-teal-700/90 font-semibold uppercase tracking-wide text-white backdrop-blur ${textSize}`}
-          title="Listed directly by the owner — Urban Properties adds no commission"
+          title="Listed directly by the owner — Seedha Properties adds no commission"
         >
           <Tag className={iconSize} /> No commission
         </span>

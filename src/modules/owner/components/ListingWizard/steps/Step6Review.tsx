@@ -161,7 +161,7 @@ export function Step6Review({ data }: { data: ListingFormData }) {
         </div>
         <div>
           <h4 className="text-sm font-bold text-foreground">
-            Urban Properties Moderation Guarantee
+            Seedha Properties Moderation Guarantee
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
             Your listing will be verified for genuine ownership and high quality imagery. Once

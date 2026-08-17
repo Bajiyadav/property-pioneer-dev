@@ -201,7 +201,7 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
 
         <div className="mt-6 border-t border-border/40 pt-4">
           <p className="text-[11px] text-muted-foreground">
-            Urban Properties ensures direct contact with verified owners across Hyderabad.
+            Seedha Properties ensures direct contact with verified owners across Hyderabad.
           </p>
         </div>
       </div>

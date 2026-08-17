@@ -18,9 +18,9 @@ export interface PropertyImageProps extends Omit<React.ImgHTMLAttributes<HTMLIma
 }
 
 /**
- * Universal Property Image Component for Urban Properties.
+ * Universal Property Image Component for Seedha Properties.
  * Renders property photographs with automatic fallback handling,
- * responsive aspect ratio containers, and the official Urban Properties branding watermark.
+ * responsive aspect ratio containers, and the official Seedha Properties branding watermark.
  */
 export function PropertyImage({
   src,
@@ -46,7 +46,7 @@ export function PropertyImage({
     >
       <img
         src={displaySrc}
-        alt={alt || "Urban Properties Listing"}
+        alt={alt || "Seedha Properties Listing"}
         loading={loading}
         decoding="async"
         onError={() => setImgError(true)}

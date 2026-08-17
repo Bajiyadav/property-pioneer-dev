@@ -9,7 +9,7 @@ import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
 import { PropertyCategories } from "@/modules/marketing/home/PropertyCategories";
 import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
 import { PopularCities } from "@/modules/marketing/home/PopularCities";
-import { WhyUrbanProperties } from "@/modules/marketing/home/WhyUrbanProperties";
+import { WhySeedhaProperties } from "@/modules/marketing/home/WhySeedhaProperties";
 import { HowItWorks } from "@/modules/marketing/home/HowItWorks";
 import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
@@ -87,9 +87,9 @@ function Index() {
         isLoading={isLoading}
       />
 
-      {/* 5. What Urban Properties actually does today */}
+      {/* 5. What Seedha Properties actually does today */}
       <div id="why-us">
-        <WhyUrbanProperties />
+        <WhySeedhaProperties />
       </div>
 
       {/* 6. Live market + expansion roadmap (Interactive City Modal) */}

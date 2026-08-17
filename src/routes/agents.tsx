@@ -27,7 +27,7 @@ export const Route = createFileRoute("/agents")({
     const ogImage = getOgImageUrl();
     const title = `Partner Agent Careers — ${APP_NAME}`;
     const description =
-      "Join Urban Properties as a verified Partner Agent. Connect with high-intent rental leads, coordinate scheduled visits, and grow your real estate business with zero cold calls.";
+      "Join Seedha Properties as a verified Partner Agent. Connect with high-intent rental leads, coordinate scheduled visits, and grow your real estate business with zero cold calls.";
 
     return {
       meta: [
@@ -71,7 +71,7 @@ const LANGUAGES = ["Telugu", "English", "Hindi", "Tamil", "Kannada", "Urdu"];
 
 const FAQS = [
   {
-    q: "What does an Urban Properties Partner Agent do?",
+    q: "What does an Seedha Properties Partner Agent do?",
     a: "Partner Agents coordinate property visits, guide tenants through verified rental homes, answer neighborhood questions, and assist owners with closing verified rental agreements.",
   },
   {
@@ -164,11 +164,11 @@ function AgentsCareerPage() {
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary">
-                <Sparkles className="h-3.5 w-3.5" /> Urban Properties Partner Network
+                <Sparkles className="h-3.5 w-3.5" /> Seedha Properties Partner Network
               </span>
               <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl sm:leading-tight">
                 Grow Your Real Estate Career as an{" "}
-                <span className="text-primary">Urban Partner Agent</span>
+                <span className="text-primary">Seedha Partner Agent</span>
               </h1>
               <p className="mt-4 text-base text-muted-foreground sm:text-lg">
                 Join India's verified rental platform. Gain access to authenticated customer visit
@@ -268,7 +268,7 @@ function AgentsCareerPage() {
               Workflow
             </span>
             <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold text-foreground sm:text-3xl">
-              How Urban Properties Empowers Agents
+              How Seedha Properties Empowers Agents
             </h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
               A streamlined system designed to maximize your time in the field closing deals rather

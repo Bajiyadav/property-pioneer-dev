@@ -196,7 +196,7 @@ export function EmiCalculatorModal({ isOpen, onClose, initialPrice = 5000000 }: 
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            An indicative estimate only. Urban Properties is not a lender and does not arrange
+            An indicative estimate only. Seedha Properties is not a lender and does not arrange
             finance — confirm actual rates and eligibility with your bank.
           </p>
         </div>

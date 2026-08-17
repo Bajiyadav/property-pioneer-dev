@@ -16,4 +16,4 @@ Disallow: /api/
 Disallow: /dashboard/
 Disallow: /admin
 
-Sitemap: https://urbanproperties.in/sitemap.xml
+Sitemap: https://seedhaproperties.com/sitemap.xml

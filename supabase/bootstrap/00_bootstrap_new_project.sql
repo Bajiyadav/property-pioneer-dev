@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Urban Properties — single-file bootstrap for a BLANK Supabase project
+-- Seedha Properties — single-file bootstrap for a BLANK Supabase project
 --
 -- Target project: iyttetfaavokzyexvqam
 -- Paste this whole file into Supabase → SQL Editor → Run. It is idempotent:

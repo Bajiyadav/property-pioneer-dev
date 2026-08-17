@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-const SUPPORT_EMAIL = "support@urbanproperties.in";
+const SUPPORT_EMAIL = "support@seedhaproperties.com";
 import { MapPin, Bell, CheckCircle2, Rocket, Building, Compass } from "lucide-react";
 
 export interface CityModalData {
@@ -45,7 +45,7 @@ export function CityExpansionModal({
     // Nothing stores launch interest yet, so this hands off to support rather
     // than claiming a registration that does not exist.
     const subject = `Launch interest: ${data.name}`;
-    const body = `Please notify me when Urban Properties launches in ${data.name}.\nEmail: ${email}`;
+    const body = `Please notify me when Seedha Properties launches in ${data.name}.\nEmail: ${email}`;
     window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`;
@@ -162,7 +162,7 @@ export function CityExpansionModal({
             ) : (
               <form onSubmit={handleWaitlist} className="space-y-3">
                 <p className="text-xs font-semibold text-foreground">
-                  Get Notified When Urban Properties Launches in {data.name}
+                  Get Notified When Seedha Properties Launches in {data.name}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input

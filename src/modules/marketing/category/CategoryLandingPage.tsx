@@ -324,7 +324,7 @@ export function CategoryLandingPage({
         <section>
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              The Urban Properties Commitment
+              The Seedha Properties Commitment
             </p>
             <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-bold text-foreground sm:text-3xl">
               Transparent, Direct & Zero Commission

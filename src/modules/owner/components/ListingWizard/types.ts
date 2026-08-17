@@ -2,6 +2,7 @@ export interface ListingFormData {
   owner_name?: string;
   project_name?: string;
   city: string;
+  pincode?: string;
   locality: string;
   address: string;
   landmark?: string;

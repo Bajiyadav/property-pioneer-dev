@@ -15,7 +15,7 @@ import {
 /**
  * Content for the expandable feature cards.
  *
- * Wording rule that governs this whole file: a card may describe what Urban
+ * Wording rule that governs this whole file: a card may describe what Seedha
  * Properties *does*, never a guarantee it cannot honour. Nothing here claims a
  * document, title, or identity has been government-verified, and nothing
  * promises a loan, a rate, or an absolute zero-brokerage outcome — those
@@ -83,7 +83,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "High-Demand Residential",
     summary: "Residential opportunities in Bangalore's sought-after neighbourhoods.",
     intro:
-      "Discover residential opportunities in Bangalore's high-demand neighbourhoods as Urban Properties expands its marketplace.",
+      "Discover residential opportunities in Bangalore's high-demand neighbourhoods as Seedha Properties expands its marketplace.",
     availability: "in-progress",
     provides: [
       "Apartments and independent homes",
@@ -107,7 +107,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "Direct Owner Verification",
     summary: "A verification-first marketplace, reviewed before anything is published.",
     intro:
-      "Urban Properties is building a verification-first property marketplace designed to help customers identify legitimate property listings and owners.",
+      "Seedha Properties is building a verification-first property marketplace designed to help customers identify legitimate property listings and owners.",
     availability: "in-progress",
     provides: [
       "Owner identity information captured at signup",
@@ -129,7 +129,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
       "Approved listings become publicly visible",
     ],
     disclaimer:
-      "Document verification is being rolled out as part of the Urban Properties verification programme. We do not currently verify Aadhaar, PAN, title deeds or government records, and no listing should be read as carrying that assurance.",
+      "Document verification is being rolled out as part of the Seedha Properties verification programme. We do not currently verify Aadhaar, PAN, title deeds or government records, and no listing should be read as carrying that assurance.",
     cta: { label: "See verification process", to: "/help" },
   },
 
@@ -139,7 +139,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "Direct-Owner Listings",
     summary: "Enquire with the owner directly, without a broker in the middle.",
     intro:
-      "Urban Properties connects you directly with the person listing the property. Direct-owner listings may help customers avoid traditional brokerage costs.",
+      "Seedha Properties connects you directly with the person listing the property. Direct-owner listings may help customers avoid traditional brokerage costs.",
     availability: "live",
     provides: [
       "Listings published by the property owner",
@@ -150,10 +150,10 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     youGet: [
       "A direct line to the owner rather than an agent chain",
       "Pricing you can compare without hidden additions",
-      "No charge from Urban Properties to enquire about a listing",
+      "No charge from Seedha Properties to enquire about a listing",
     ],
     disclaimer:
-      "Urban Properties does not add brokerage to a listing. We cannot guarantee that an individual owner or third party will not levy their own charges — always confirm costs directly before committing.",
+      "Seedha Properties does not add brokerage to a listing. We cannot guarantee that an individual owner or third party will not levy their own charges — always confirm costs directly before committing.",
     cta: { label: "Browse direct-owner listings", to: "/properties" },
   },
 
@@ -163,7 +163,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "Verified Documents",
     summary: "A private, access-controlled document review workflow.",
     intro:
-      "Urban Properties is building a document-verification workflow so owners can evidence a listing and customers can see that a review took place.",
+      "Seedha Properties is building a document-verification workflow so owners can evidence a listing and customers can see that a review took place.",
     availability: "planned",
     provides: [
       "Identity documents, submitted privately",
@@ -195,7 +195,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "Home Loan Assistance",
     summary: "Understand the home-loan journey before you commit.",
     intro:
-      "Planning to buy a property? Urban Properties can help customers understand the home-loan journey and connect with relevant financing options as the service becomes available.",
+      "Planning to buy a property? Seedha Properties can help customers understand the home-loan journey and connect with relevant financing options as the service becomes available.",
     availability: "planned",
     provides: [
       "An explanation of the steps involved",
@@ -218,7 +218,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
       "Application followed up",
     ],
     disclaimer:
-      "Urban Properties is not a lender and does not approve loans. Nothing here is an offer of finance, an interest rate, or a statement of eligibility — any loan is subject to lender eligibility and approval.",
+      "Seedha Properties is not a lender and does not approve loans. Nothing here is an offer of finance, an interest rate, or a statement of eligibility — any loan is subject to lender eligibility and approval.",
     cta: { label: "Register interest", action: "launch-list" },
   },
 
@@ -238,7 +238,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     ],
     youGet: ["A clearer picture of what to ask for", "Fewer unknowns before you commit"],
     disclaimer:
-      "Urban Properties does not replace independent legal advice unless a qualified legal professional is explicitly providing the service. We do not certify title or provide legal clearance.",
+      "Seedha Properties does not replace independent legal advice unless a qualified legal professional is explicitly providing the service. We do not certify title or provide legal clearance.",
     cta: { label: "Learn more", to: "/help" },
   },
 
@@ -282,7 +282,7 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
     title: "Customer Protection",
     summary: "Moderation, reporting and secure accounts.",
     intro:
-      "Protection on Urban Properties comes from a small number of things that genuinely work, rather than a badge.",
+      "Protection on Seedha Properties comes from a small number of things that genuinely work, rather than a badge.",
     availability: "live",
     provides: [
       "Clear listing information on every property",
@@ -298,14 +298,14 @@ export const FEATURE_DETAILS: Record<string, FeatureDetail> = {
       "An account only you can access",
     ],
     disclaimer:
-      "Always view a property in person and confirm details directly with the owner before making any payment. Urban Properties does not hold funds or act as an escrow.",
+      "Always view a property in person and confirm details directly with the owner before making any payment. Seedha Properties does not hold funds or act as an escrow.",
     cta: { label: "Report a problem", to: "/help" },
   },
 
   "owner-benefits": {
     id: "owner-benefits",
     icon: Home,
-    title: "Why List With Urban Properties?",
+    title: "Why List With Seedha Properties?",
     summary: "Free listing, direct enquiries, and a dashboard to manage them.",
     intro:
       "List a property, reach people actually searching for it, and manage the responses from one place.",

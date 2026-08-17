@@ -111,7 +111,7 @@ export function EnterprisePasswordForm({
 
       if (data.session) {
         // Project has email confirmation disabled — the account is live now.
-        toast.success(`Account created! Welcome to Urban Properties.`);
+        toast.success(`Account created! Welcome to Seedha Properties.`);
         onSuccess({ name, email, phone: `+91${phone}`, role: SELF_REGISTRATION_ROLE });
       } else {
         // Confirmation required. Supabase sends a LINK by default, so we must not
@@ -440,7 +440,7 @@ export function EnterprisePasswordForm({
             ) : mode === "signup" ? (
               "Create Secure Account"
             ) : (
-              "Sign In to Urban Properties"
+              "Sign In to Seedha Properties"
             )}
           </button>
 

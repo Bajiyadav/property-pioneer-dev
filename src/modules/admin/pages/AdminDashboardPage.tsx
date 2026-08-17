@@ -58,6 +58,7 @@ import { displayName } from "@/modules/authentication/services/session";
 import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
 import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
 import { EmployeeActivityBoard } from "@/modules/admin/components/EmployeeActivityBoard";
+import { EmployeeAccessForm } from "@/modules/admin/components/EmployeeAccessForm";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -883,7 +884,12 @@ function AdminDashboard({ user }: { user: User | null }) {
         </div>
       )}
 
-      {activeTab === "activity" && <EmployeeActivityBoard />}
+      {activeTab === "activity" && (
+        <div className="space-y-8">
+          <EmployeeAccessForm />
+          <EmployeeActivityBoard />
+        </div>
+      )}
 
       {activeTab === "settings" && (
         <div className="space-y-5">

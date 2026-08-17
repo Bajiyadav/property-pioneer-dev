@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, Bell, Rss, TrendingUp, Users, MapPin, ArrowRight, Clock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-const SUPPORT_EMAIL = "support@urbanproperties.in";
+const SUPPORT_EMAIL = "support@seedhaproperties.com";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 export const Route = createFileRoute("/blog")({
@@ -67,7 +67,7 @@ function BlogPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-800/10 to-transparent" />
         <div className="relative mx-auto max-w-3xl">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-blue-400">
-            <BookOpen className="h-3 w-3" /> Urban Properties Blog
+            <BookOpen className="h-3 w-3" /> Seedha Properties Blog
           </span>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-foreground sm:text-6xl">
             Real Estate <span className="text-blue-400">Intelligence</span>
@@ -83,7 +83,7 @@ function BlogPage() {
               e.preventDefault();
               window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
                 "Blog launch notification",
-              )}&body=${encodeURIComponent("Please notify me when the Urban Properties blog launches.")}`;
+              )}&body=${encodeURIComponent("Please notify me when the Seedha Properties blog launches.")}`;
             }}
             className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 mx-auto max-w-md"
           >

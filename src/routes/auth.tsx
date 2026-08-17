@@ -69,7 +69,7 @@ function AuthPage() {
           <ShieldCheck className="h-3.5 w-3.5" /> Encrypted & Secure Authentication
         </span>
         <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl">
-          {mode === "signin" ? "Sign In to Urban Properties" : "Create Account"}
+          {mode === "signin" ? "Sign In to Seedha Properties" : "Create Account"}
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
           {mode === "signin"

@@ -7,12 +7,12 @@ function getAppUrl(): string {
   if (envUrl && typeof envUrl === "string" && envUrl.trim() !== "") {
     return envUrl.trim().replace(/\/+$/, "");
   }
-  return "https://urbanproperties.in";
+  return "https://seedhaproperties.com";
 }
 
 export const APP_URL = getAppUrl();
-export const APP_NAME = "Urban Properties";
-export const APP_SHORT_NAME = "UP";
+export const APP_NAME = "Seedha Properties";
+export const APP_SHORT_NAME = "Seedha";
 export const APP_DESCRIPTION =
   "Rent, buy and commercial property in Hyderabad, listed directly by owners and reviewed before publication. No platform commission.";
 export const APP_LOGO = `${APP_URL}/favicon.ico`;

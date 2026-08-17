@@ -120,7 +120,7 @@ export function PropertyDetailPage() {
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
-    const shareTitle = property?.title || "Rental Property on Urban Properties";
+    const shareTitle = property?.title || "Rental Property on Seedha Properties";
     if (navigator.share) {
       try {
         await navigator.share({
@@ -181,7 +181,7 @@ export function PropertyDetailPage() {
   const faqs = [
     {
       q: "Is there any brokerage or platform commission on this property?",
-      a: "No. Urban Properties charges no platform commission for browsing or contacting listing owners.",
+      a: "No. Seedha Properties charges no platform commission for browsing or contacting listing owners.",
     },
     {
       q: "How do I schedule an in-person or video visit?",
@@ -193,7 +193,7 @@ export function PropertyDetailPage() {
     },
     {
       q: "Are the property video tours authentic?",
-      a: "Yes, every uploaded video tour is moderated and verified before appearing publicly on Urban Properties.",
+      a: "Yes, every uploaded video tour is moderated and verified before appearing publicly on Seedha Properties.",
     },
   ];
   return (

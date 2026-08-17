@@ -41,7 +41,7 @@ export function Step3Pricing({ data, updateData }: StepProps) {
           <IndianRupee className="h-6 w-6 text-primary" /> Pricing & Preferences
         </h2>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-          Set transparent pricing with no hidden charges. Urban Properties charges zero platform
+          Set transparent pricing with no hidden charges. Seedha Properties charges zero platform
           fee.
         </p>
       </div>

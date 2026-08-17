@@ -43,12 +43,12 @@ const FAQS = [
     category: "Getting Started",
     items: [
       {
-        q: "How do I list my property on Urban Properties?",
+        q: "How do I list my property on Seedha Properties?",
         a: "Click 'List Property FREE' in the navigation bar, complete a quick registration, and follow the onboarding wizard to add your property details, photos, and pricing. Your listing is then submitted for moderation and becomes publicly visible once an admin approves it.",
       },
       {
-        q: "Does Urban Properties charge brokerage?",
-        a: "Urban Properties adds no commission to a listing, and listing a property is free. We cannot control charges levied by an individual owner or third party, so confirm all costs directly before committing.",
+        q: "Does Seedha Properties charge brokerage?",
+        a: "Seedha Properties adds no commission to a listing, and listing a property is free. We cannot control charges levied by an individual owner or third party, so confirm all costs directly before committing.",
       },
     ],
   },
@@ -60,8 +60,8 @@ const FAQS = [
         a: "On any property listing page, click 'Schedule Visit'. Choose a date and time, and the property owner will confirm within 2 hours. You'll receive a WhatsApp and email confirmation.",
       },
       {
-        q: "Does Urban Properties provide the rental agreement?",
-        a: "No. Urban Properties connects you with the owner and does not draft, sign, stamp or store rental agreements. Arrange the agreement directly with the owner and seek independent legal advice if you need it.",
+        q: "Does Seedha Properties provide the rental agreement?",
+        a: "No. Seedha Properties connects you with the owner and does not draft, sign, stamp or store rental agreements. Arrange the agreement directly with the owner and seek independent legal advice if you need it.",
       },
     ],
   },
@@ -70,11 +70,11 @@ const FAQS = [
     items: [
       {
         q: "Do you verify RERA registration or title deeds?",
-        a: "No. Urban Properties reviews the listing information an owner submits before publishing it, but we do not verify RERA registration, title deeds, or HMDA/GHMC approvals. Please carry out your own due diligence and seek independent legal advice before any transaction.",
+        a: "No. Seedha Properties reviews the listing information an owner submits before publishing it, but we do not verify RERA registration, title deeds, or HMDA/GHMC approvals. Please carry out your own due diligence and seek independent legal advice before any transaction.",
       },
       {
-        q: "Can I apply for a home loan through Urban Properties?",
-        a: "No. The EMI calculator on a property page is an indicative estimate only. Urban Properties is not a lender, has no lending partners, and cannot arrange or approve finance — speak to your bank directly.",
+        q: "Can I apply for a home loan through Seedha Properties?",
+        a: "No. The EMI calculator on a property page is an indicative estimate only. Seedha Properties is not a lender, has no lending partners, and cannot arrange or approve finance — speak to your bank directly.",
       },
     ],
   },
@@ -176,8 +176,8 @@ function HelpPage() {
             {
               icon: Mail,
               label: "Email Support",
-              desc: "support@urbanproperties.in",
-              href: "mailto:support@urbanproperties.in",
+              desc: "support@seedhaproperties.com",
+              href: "mailto:support@seedhaproperties.com",
               color: "text-purple-500 bg-purple-500/10",
             },
           ].map((item) => (
@@ -239,7 +239,7 @@ function HelpPage() {
             Still can't find what you're looking for?
           </p>
           <a
-            href="mailto:support@urbanproperties.in"
+            href="mailto:support@seedhaproperties.com"
             className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-xs font-bold text-primary-foreground shadow hover:brightness-110 transition"
           >
             Contact Support <ArrowRight className="h-3.5 w-3.5" />

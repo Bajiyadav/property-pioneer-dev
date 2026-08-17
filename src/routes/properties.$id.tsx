@@ -110,7 +110,7 @@ export const Route = createFileRoute("/properties/$id")({
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
       <p className="mt-2 text-muted-foreground">
-        We couldn't load this listing on Urban Properties.
+        We couldn't load this listing on Seedha Properties.
       </p>
       <Link
         to="/properties"
@@ -125,7 +125,7 @@ export const Route = createFileRoute("/properties/$id")({
     <div className="mx-auto max-w-2xl px-6 py-20 text-center">
       <h1 className="text-2xl font-semibold text-foreground">Listing not found</h1>
       <p className="mt-2 text-muted-foreground">
-        This home is no longer listed on Urban Properties.
+        This home is no longer listed on Seedha Properties.
       </p>
       <Link
         to="/properties"

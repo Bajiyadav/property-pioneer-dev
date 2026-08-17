@@ -106,7 +106,11 @@ export function PropertyTable({
         {
           key: "city",
           header: "City",
-          render: (p: Property) => <span className="text-muted-foreground">{p.city}</span>,
+          render: (p: Property) => (
+            <span className="text-muted-foreground">
+              {p.city} {p.pincode && ` - ${p.pincode}`}
+            </span>
+          ),
         },
         {
           key: "type",

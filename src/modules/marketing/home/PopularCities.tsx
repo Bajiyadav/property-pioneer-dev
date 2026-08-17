@@ -30,7 +30,7 @@ export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoad
       onSelectCity(city);
     } else if (city.status === "upcoming") {
       toast.info(
-        `Urban Properties is launching soon in ${city.name}! Currently live in Hyderabad.`,
+        `Seedha Properties is launching soon in ${city.name}! Currently live in Hyderabad.`,
         {
           description:
             "We are expanding city by city. Register to get notified when we launch in " +

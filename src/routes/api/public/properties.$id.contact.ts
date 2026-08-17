@@ -94,7 +94,7 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
 
         const template = `Hello,
 
-I found your property on Urban Properties.
+I found your property on Seedha Properties.
 
 Property:
 ${property.title}

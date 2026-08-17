@@ -3,8 +3,8 @@ import { BRAND } from "@/config/platform";
 import { DEFAULT_PROPERTY_COVER } from "@/shared/components/PropertyImage";
 
 describe("Property Watermark Branding", () => {
-  it("uses the official Urban Properties brand name", () => {
-    expect(BRAND.name).toBe("Urban Properties");
+  it("uses the official Seedha Properties brand name", () => {
+    expect(BRAND.name).toBe("Seedha Properties");
   });
 
   it("provides a resilient default cover for property photography", () => {

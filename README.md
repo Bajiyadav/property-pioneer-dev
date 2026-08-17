@@ -1,11 +1,11 @@
-# Urban Rental Flats (URF) — Property Connect Hub
+# Seedha Properties — Property Connect Hub
 
 [![Framework](https://img.shields.io/badge/Framework-TanStack_Start-FF4154?style=flat-square&logo=react)](https://tanstack.com/start)
 [![React](https://img.shields.io/badge/React-19.2.0-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![Database](https://img.shields.io/badge/Database-Supabase_Postgres-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS_v4-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Urban Rental Flats (URF)** is a full-stack, modular, API-first real-estate platform designed to connect home seekers across India with curated rental and sale properties.
+**Seedha Properties** is a full-stack, modular, API-first real-estate platform designed to connect home seekers across India with curated rental and sale properties.
 
 Built with **TanStack Start**, **React 19**, **Vite 8**, and **Supabase**, the platform combines Server-Side Rendering (SSR) for speed and SEO with robust database-level security (Row & Column Level Security), anti-abuse protections, and an authenticated administrative control panel.
 

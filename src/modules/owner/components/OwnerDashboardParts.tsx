@@ -180,7 +180,7 @@ export function OwnerSettings({ user }: { user: User | null }) {
           <div>
             <p className="text-xs font-bold text-foreground">Rent collection</p>
             <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
-              Connect a bank account to collect rent directly through Urban Properties with
+              Connect a bank account to collect rent directly through Seedha Properties with
               automated receipts and reminders.
             </p>
             <button

@@ -6,7 +6,6 @@ import { MapPin, Search, Navigation, Building, Check } from "lucide-react";
 import type { StepProps } from "../types";
 
 export function Step1Location({ data, updateData }: StepProps) {
-  const cities = ["Hyderabad", "Bangalore", "Mumbai", "Pune", "Chennai", "Delhi"];
   const popularLocalities = [
     "Gachibowli",
     "Madhapur",
@@ -48,27 +47,35 @@ export function Step1Location({ data, updateData }: StepProps) {
           />
         </div>
 
-        {/* City Selection Pills */}
-        <div className="space-y-2.5">
-          <Label className="text-sm font-semibold text-foreground">Select City *</Label>
-          <div className="flex flex-wrap gap-2">
-            {cities.map((city) => {
-              const isSelected = data.city === city;
-              return (
-                <button
-                  key={city}
-                  type="button"
-                  onClick={() => updateData({ city })}
-                  className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                    isSelected
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
-                      : "bg-secondary/40 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
-                  }`}
-                >
-                  {city}
-                </button>
-              );
-            })}
+        {/* City & Pincode Input */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2.5">
+            <Label htmlFor="city" className="text-sm font-semibold text-foreground">
+              City *
+            </Label>
+            <Input
+              id="city"
+              placeholder="e.g. Hyderabad"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+              value={data.city || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ city: e.target.value })
+              }
+            />
+          </div>
+          <div className="space-y-2.5">
+            <Label htmlFor="pincode" className="text-sm font-semibold text-foreground">
+              Pin / Postal Code *
+            </Label>
+            <Input
+              id="pincode"
+              placeholder="e.g. 500081"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
+              value={data.pincode || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ pincode: e.target.value })
+              }
+            />
           </div>
         </div>
 

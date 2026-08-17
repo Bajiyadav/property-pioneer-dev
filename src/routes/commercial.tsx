@@ -103,7 +103,7 @@ function CommercialPage() {
       ]}
       faqs={[
         {
-          q: "What types of commercial spaces are available on Urban Properties?",
+          q: "What types of commercial spaces are available on Seedha Properties?",
           a: "Our catalogue supports Grade-A office floors, plug-and-play IT office spaces, retail storefronts, bare-shell commercial units, and independent commercial buildings.",
         },
         {

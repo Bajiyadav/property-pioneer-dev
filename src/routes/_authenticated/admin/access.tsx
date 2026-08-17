@@ -100,7 +100,7 @@ function AccessManagement() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none focus:border-neutral-600"
-              placeholder="employee@urbanproperties.com"
+              placeholder="employee@seedhaproperties.com"
             />
             <p className="text-xs text-neutral-500 mt-1">
               User must have an existing registered account.

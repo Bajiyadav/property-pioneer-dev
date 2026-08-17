@@ -3,8 +3,8 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const FAQS = [
   {
-    q: "Does Urban Properties charge brokerage?",
-    a: "Urban Properties adds no commission to a listing and never charges you to enquire — you contact the owner directly. We cannot control what an individual owner or third party may charge, so always confirm costs before you commit.",
+    q: "Does Seedha Properties charge brokerage?",
+    a: "Seedha Properties adds no commission to a listing and never charges you to enquire — you contact the owner directly. We cannot control what an individual owner or third party may charge, so always confirm costs before you commit.",
   },
   {
     q: "How are listings reviewed?",
@@ -37,7 +37,7 @@ export function FAQSection() {
           Frequently Asked Questions
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Everything you need to know about renting & listing on Urban Properties.
+          Everything you need to know about renting & listing on Seedha Properties.
         </p>
       </div>
 

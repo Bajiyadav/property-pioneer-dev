@@ -89,7 +89,7 @@ export function HowItWorks() {
           <Sparkles className="h-3.5 w-3.5" /> Simple 5-Step Process
         </div>
         <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-          How Urban Properties Works
+          How Seedha Properties Works
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Transparent, streamlined, and 100% free of agent commissions.

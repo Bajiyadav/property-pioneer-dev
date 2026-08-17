@@ -144,7 +144,7 @@ export function ProfilePanel({ user }: { user: User | null }) {
 
   return (
     <div className="space-y-5">
-      <SectionHeader title="Profile" subtitle="Your account details on Urban Properties" />
+      <SectionHeader title="Profile" subtitle="Your account details on Seedha Properties" />
       <div className="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
         {rows.map((r) => (
           <div key={r.label} className="rounded-2xl border border-border/60 bg-card p-4">

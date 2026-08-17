@@ -24,9 +24,9 @@ export interface PropertyImageBrandingProps extends Omit<
 }
 
 /**
- * Universal Property Image Branding Component for Urban Properties.
+ * Universal Property Image Branding Component for Seedha Properties.
  * Renders property photography with automatic error fallbacks, responsive containers,
- * and the official Urban Properties branding watermark overlay.
+ * and the official Seedha Properties branding watermark overlay.
  *
  * Designed to be non-intrusive, responsive, and pointer-events safe so it never interferes
  * with clicks or touch gestures.
@@ -55,7 +55,7 @@ export function PropertyImageBranding({
     >
       <img
         src={displaySrc}
-        alt={alt || "Urban Properties Listing"}
+        alt={alt || "Seedha Properties Listing"}
         loading={loading}
         decoding="async"
         onError={() => setImgError(true)}

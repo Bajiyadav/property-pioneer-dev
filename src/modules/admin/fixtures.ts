@@ -64,7 +64,7 @@ export const AUDIT: TimelineItem[] = [
   {
     id: "au1",
     title: "property.approved",
-    detail: "3BHK Kondapur approved by admin@urbanproperties.in",
+    detail: "3BHK Kondapur approved by admin@seedhaproperties.com",
     time: "12 min ago",
     tone: "success",
   },

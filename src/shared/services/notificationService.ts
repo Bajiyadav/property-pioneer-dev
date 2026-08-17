@@ -1,5 +1,5 @@
 /**
- * Urban Properties — login security notification dispatcher.
+ * Seedha Properties — login security notification dispatcher.
  *
  * Guarantees:
  * 1. Honest provider reporting — an unconfigured provider is never reported as
@@ -32,7 +32,7 @@ export interface NotificationDispatchResult {
   details?: string;
 }
 
-const SUPPORT_EMAIL = "support@urbanproperties.in";
+const SUPPORT_EMAIL = "support@seedhaproperties.com";
 
 /** Endpoint that performs the actual send. Server-only credentials live there. */
 export const LOGIN_NOTIFICATION_ENDPOINT = "/api/auth/login-notification";

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * The core Urban Properties business flow, end to end against the real database:
+ * The core Seedha Properties business flow, end to end against the real database:
  *
  *   owner listing created (unapproved)
  *     -> NOT publicly visible

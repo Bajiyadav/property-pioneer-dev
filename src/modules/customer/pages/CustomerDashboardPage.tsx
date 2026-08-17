@@ -222,7 +222,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
               tips={[
                 "Tap the heart on any listing to save it — saved homes appear here instantly.",
                 "Schedule a walkthrough directly from a property page; owners reply in under 15 minutes.",
-                "Urban Properties adds no commission, so the price you see is the owner's asking price.",
+                "Seedha Properties adds no commission, so the price you see is the owner's asking price.",
               ]}
             />
           )}
@@ -328,7 +328,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
                     : [
                         {
                           id: "placeholder",
-                          title: "Welcome to Urban Properties",
+                          title: "Welcome to Seedha Properties",
                           detail: "Start exploring and favoriting properties to see activity here.",
                           time: "Just now",
                           tone: "info" as const,

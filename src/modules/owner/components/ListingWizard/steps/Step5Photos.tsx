@@ -6,26 +6,54 @@ import { ImagePlus, X, Sparkles, Video, Plus, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import type { StepProps } from "../types";
 
+import { supabase } from "@/integrations/supabase/client";
+
 export function Step5Photos({ data, updateData }: StepProps) {
-  const [imageUrl, setImageUrl] = React.useState("");
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const samplePhotos = [
-    "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-  ];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-  const addImage = () => {
-    if (imageUrl.trim()) {
-      updateData({ images: [...(data.images || []), imageUrl.trim()] });
-      setImageUrl("");
-      toast.success("Image added to gallery");
+    setIsUploading(true);
+    const files = Array.from(e.target.files);
+    const newImages = [...(data.images || [])];
+
+    try {
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is larger than 5MB`);
+          continue;
+        }
+
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("property-images")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("property-images").getPublicUrl(filePath);
+
+        newImages.push(publicUrl);
+      }
+
+      updateData({ images: newImages });
+      toast.success("Images uploaded successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error uploading images.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  };
-
-  const addSamplePhotos = () => {
-    updateData({ images: [...(data.images || []), ...samplePhotos] });
-    toast.success("Sample showcase photos added!");
   };
 
   const removeImage = (index: number) => {
@@ -57,48 +85,34 @@ export function Step5Photos({ data, updateData }: StepProps) {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-semibold text-foreground">Property Gallery</Label>
-            {(!data.images || data.images.length === 0) && (
-              <button
-                type="button"
-                onClick={addSamplePhotos}
-                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Sparkles className="h-3 w-3" /> Add Sample Photos
-              </button>
-            )}
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              placeholder="Paste photo image URL (e.g. https://...)..."
-              value={imageUrl}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setImageUrl(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                e.key === "Enter" && (e.preventDefault(), addImage())
-              }
-              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-            />
-            <button
-              type="button"
-              onClick={addImage}
-              className="px-5 h-11 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 text-sm shrink-0 flex items-center gap-1.5 transition cursor-pointer"
-            >
-              <Plus className="h-4 w-4" /> Add
-            </button>
-          </div>
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            multiple
+            accept="image/*"
+            onChange={handleFileChange}
+          />
 
           {/* Grid of Images */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 mt-4">
             {/* Upload Box helper */}
             <div
-              onClick={addSamplePhotos}
-              className="aspect-video sm:aspect-square border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-muted-foreground bg-secondary/30 hover:bg-secondary/60 hover:border-primary/50 cursor-pointer transition-all p-4 text-center group"
+              onClick={() => !isUploading && fileInputRef.current?.click()}
+              className={`aspect-video sm:aspect-square border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center text-muted-foreground bg-secondary/30 hover:bg-secondary/60 hover:border-primary/50 cursor-pointer transition-all p-4 text-center group ${isUploading ? "opacity-50 pointer-events-none" : ""}`}
             >
               <div className="p-3 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform mb-2">
                 <ImagePlus className="w-5 h-5" />
               </div>
-              <span className="text-xs font-bold text-foreground">Upload Images</span>
-              <span className="text-[10px] text-muted-foreground mt-0.5">JPG, PNG or WebP</span>
+              <span className="text-xs font-bold text-foreground">
+                {isUploading ? "Uploading..." : "Upload Images"}
+              </span>
+              <span className="text-[10px] text-muted-foreground mt-0.5">
+                JPG, PNG or WebP (Max 5MB)
+              </span>
             </div>
 
             {/* Added Images */}
