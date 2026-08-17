@@ -1,3 +1,8 @@
+## v0.15.2 — 2026-08-17
+
+### Fixes
+- fix(dashboards): stop presenting invented records as real data (0a93017)
+
 ## v0.15.1 — 2026-08-17
 
 ### Fixes
