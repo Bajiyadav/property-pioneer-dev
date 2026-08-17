@@ -223,7 +223,7 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
       subject_type: "properties",
       subject_id: id,
       outcome: "success",
-      details: patch as Record<string, unknown>,
+      details: patch as unknown as import("@/integrations/supabase/types").Json,
     });
 
     return { ok: true };
