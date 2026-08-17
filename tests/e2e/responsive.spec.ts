@@ -64,6 +64,54 @@ test.describe("responsive layout", () => {
    * relied on here — an overflow test that cannot fail is worse than none, since
    * it reads as coverage.
    */
+  /**
+   * The CARD, not just the stat row inside it.
+   *
+   * The stat-row assertion below shipped a second overflow bug straight past it.
+   * The card root was `flex-col sm:flex-row` with a fixed 280px image while every
+   * consumer renders it in a multi-column grid, so from 640px up the card needed
+   * 515px and had 350px. Because the root sets `overflow-hidden`, the excess was
+   * clipped rather than spilled: titles, prices and buttons were cut mid-word on
+   * the live desktop site. Measured at 1440px at the time:
+   *
+   *     stat row scrollWidth - clientWidth ...   0px  (the existing assertion)
+   *     CARD     scrollWidth - clientWidth ... 165px  (the actual break)
+   *     document scrollWidth - clientWidth ...   0px
+   *
+   * Two lessons, both encoded here. Overflow has to be asserted at the level that
+   * owns the constraint, and `overflow-hidden` makes a broken layout LOOK
+   * contained — it silences the page-level and parent-level signals while the
+   * content is destroyed. And desktop widths need this as much as phones: this one
+   * only appeared at and above 640px, which is why the mobile-only widths on the
+   * stat-row test could never have found it.
+   */
+  for (const width of [375, 640, 768, 1024, 1280, 1440]) {
+    test(`property card does not clip its own content @ ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/properties${SEARCH}`, { waitUntil: "domcontentloaded" });
+
+      const rows = page.locator('[data-testid="stat-row"]');
+      await rows.first().waitFor({ state: "visible", timeout: 15_000 });
+
+      const clipped = await rows.evaluateAll((nodes) =>
+        nodes
+          .map((n) => {
+            // Walk out to the card root: the nearest ancestor that hides overflow.
+            let el = n.parentElement;
+            while (el && getComputedStyle(el).overflowX !== "hidden") el = el.parentElement;
+            if (!el) return null;
+            return {
+              overflowPx: el.scrollWidth - el.clientWidth,
+              text: (n.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 40),
+            };
+          })
+          .filter((m): m is { overflowPx: number; text: string } => !!m && m.overflowPx > 1),
+      );
+
+      expect(clipped, `cards clipping their content: ${JSON.stringify(clipped)}`).toEqual([]);
+    });
+  }
+
   for (const width of [320, 360, 375, 414]) {
     test(`property card stat row does not overflow @ ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });

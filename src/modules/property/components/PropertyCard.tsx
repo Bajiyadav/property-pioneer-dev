@@ -90,10 +90,26 @@ export function PropertyCard({ property }: { property: Property }) {
         ? "Semi Furnished"
         : "Unfurnished";
 
+  /*
+   * Card layout is VERTICAL at every width, deliberately.
+   *
+   * The root was `flex-col sm:flex-row`, putting the image beside the details from
+   * 640px up. All six places that render this card put it in a multi-column grid
+   * (`sm:grid-cols-2`, `lg:grid-cols-3`), so above 640px the card is only about
+   * 300-350px wide. The image is a fixed `w-[280px] shrink-0`, which left roughly
+   * 70px for the title, price and button — and because the root also sets
+   * `overflow-hidden`, the result was not a visible break but a silent clip:
+   * "Sunlit 2BHK" rendered as "Sunli...", the price as "₹...", the button as
+   * "Get Deta...".
+   *
+   * A side-by-side card needs a full-width row to live in, and nothing here
+   * provides one. `overflow-hidden` stays, because it is what rounds the image
+   * corners — so the clip has to be prevented by the layout rather than absorbed.
+   */
   return (
-    <div className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40">
+    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40">
       {/* 1. IMAGE CONTAINER */}
-      <div className="relative w-full sm:w-[280px] shrink-0 aspect-[4/3] sm:aspect-auto overflow-hidden bg-muted group/carousel">
+      <div className="relative w-full shrink-0 aspect-[4/3] overflow-hidden bg-muted group/carousel">
         <Link
           to="/properties/$id"
           params={{ id: property.id }}
@@ -103,7 +119,7 @@ export function PropertyCard({ property }: { property: Property }) {
         >
           {images[0] === DEFAULT_PROPERTY_COVER &&
           (!property.images || property.images.length === 0) ? (
-            <div className="h-full w-full flex flex-col items-center justify-center bg-secondary text-muted-foreground border-b sm:border-b-0 sm:border-r border-border/50">
+            <div className="h-full w-full flex flex-col items-center justify-center bg-secondary text-muted-foreground border-b border-border/50">
               <ImageIcon className="h-12 w-12 opacity-50 mb-2" />
               <span className="text-xs font-semibold uppercase tracking-widest bg-background/80 px-3 py-1 rounded-full shadow-sm">
                 Request Photos
@@ -163,7 +179,7 @@ export function PropertyCard({ property }: { property: Property }) {
       </div>
 
       {/* 2. CARD CONTENT (Right Side) */}
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
         {/* Header Row */}
         <div className="flex items-start justify-between gap-4 border-b border-border/50 pb-3">
           <div>
