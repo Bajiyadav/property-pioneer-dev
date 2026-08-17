@@ -1,3 +1,8 @@
+## v0.14.2 — 2026-08-17
+
+### Fixes
+- fix(property-card): stop truncate cutting the price off on desktop (41aecd7)
+
 ## v0.14.1 — 2026-08-17
 
 ### Fixes
