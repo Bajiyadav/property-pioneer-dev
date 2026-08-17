@@ -1,3 +1,8 @@
+## v0.13.4 — 2026-08-17
+
+### Fixes
+- fix(brand): version the icon URLs so cached copies of the old logo refresh (c3fe820)
+
 ## v0.13.3 — 2026-08-17
 
 ### Fixes
