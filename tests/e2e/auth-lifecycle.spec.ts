@@ -21,7 +21,11 @@ import {
 } from "../fixtures/qaAccounts";
 
 /** Text that only the admin portal at /admin renders. */
-const ADMIN_PORTAL_MARKER = "Dashboard Overview";
+// Text that only the /admin portal shell renders. Deliberately not a heading:
+// the portal has been restructured twice and its h1 went "Admin dashboard" ->
+// "Dashboard Overview" -> "Overview", the last of which also appears on the
+// property detail page. This nav label exists nowhere else in the app.
+const ADMIN_PORTAL_MARKER = "Moderation Queue";
 
 /** Sidebar label rendered only inside that role's own dashboard. */
 const PORTAL_LABEL: Record<QaRole, string> = {
@@ -358,9 +362,13 @@ test.describe("Authentication lifecycle", () => {
       await expect(page.getByText(PORTAL_LABEL[other.role], { exact: false })).toHaveCount(0);
     }
 
-    // The dedicated admin portal is gated separately, at the route level.
+    // The dedicated admin portal is gated separately, by its own component
+    // guard, which sends a non-employee to the public homepage rather than to
+    // their dashboard. What matters is that they leave /admin and see none of
+    // it — the destination itself is a product choice, so all three landing
+    // spots are accepted.
     await page.goto("/admin");
-    await page.waitForURL(/\/dashboard\/customer|\/auth/, { timeout: 30000 });
+    await page.waitForURL((url) => !url.pathname.startsWith("/admin"), { timeout: 30000 });
     // Marker for "admin-only content rendered". The portal used to be headed
     // "Admin dashboard"; it is now a sidebar + analytics shell. Asserting the
     // old heading here would pass vacuously against the new UI, so this checks
