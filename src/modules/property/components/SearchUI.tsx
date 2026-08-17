@@ -6,6 +6,7 @@ import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { PropertyMapView } from "@/modules/property/components/PropertyMapView";
 import { LocationPicker } from "@/modules/property/components/LocationPicker";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
+import { trackSearch } from "@/modules/analytics/services/tracking";
 
 interface SearchUIProps {
   properties: Property[];
@@ -38,6 +39,30 @@ export function SearchUI({
   subtitle,
   baseUrl,
 }: SearchUIProps) {
+  // Record the search once results have settled, not on every keystroke:
+  // `isLoading` gating plus the serialised search key means one row per distinct
+  // query. No-ops entirely without analytics consent.
+  const searchKey = JSON.stringify(search);
+  useEffect(() => {
+    if (isLoading) return;
+    void trackSearch({
+      query: search.q,
+      city: search.city,
+      locality: search.locality,
+      listing: search.listing === "rent" || search.listing === "sale" ? search.listing : undefined,
+      filters: {
+        minPrice: search.minPrice,
+        maxPrice: search.maxPrice,
+        beds: search.beds,
+        baths: search.baths,
+        type: search.type,
+        sort: search.sort,
+      },
+      resultCount: properties.length,
+    });
+    // `searchKey` collapses the params object to a stable dependency.
+  }, [searchKey, isLoading, properties.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [keyword, setKeyword] = useState(search.q || "");

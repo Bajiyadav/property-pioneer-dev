@@ -72,8 +72,14 @@ describe("role routing", () => {
 });
 
 describe("app config", () => {
-  it("pins the footer copyright", () => {
-    expect(APP_COPYRIGHT).toBe("© 2022 Urban Properties. All Rights Reserved.");
+  it("keeps the footer copyright current", () => {
+    // This used to pin the literal "© 2022", which meant the test enforced a
+    // stale year rather than catching it. The property that matters is that the
+    // notice tracks the present year and names the platform.
+    expect(APP_COPYRIGHT).toBe(
+      `© ${new Date().getFullYear()} Urban Properties. All Rights Reserved.`,
+    );
+    expect(APP_COPYRIGHT).not.toContain("2022");
   });
 
   it("builds canonical URLs without a trailing slash for root", () => {

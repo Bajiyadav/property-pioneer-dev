@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { PrivacyControls } from "@/modules/legal/components/PrivacyControls";
 import {
   User,
   Mail,
@@ -246,6 +247,11 @@ function ProfilePage() {
             desc="Visit alerts & updates"
             color="text-emerald-500 bg-emerald-500/10"
           />
+        </div>
+
+        {/* Data-subject rights the Privacy Policy links here for. */}
+        <div className="mt-6">
+          <PrivacyControls />
         </div>
       </div>
     </div>

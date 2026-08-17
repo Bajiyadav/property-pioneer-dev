@@ -17,7 +17,11 @@ export const APP_DESCRIPTION =
   "Rent, buy and commercial property in Hyderabad, listed directly by owners and reviewed before publication. No platform commission.";
 export const APP_LOGO = `${APP_URL}/favicon.ico`;
 /** Single source of truth for the footer copyright line shown on every page. */
-export const APP_COPYRIGHT = `© 2022 ${APP_NAME}. All Rights Reserved.`;
+/**
+ * Derived from the current year rather than hard-coded. It read "© 2022",
+ * which is both wrong and a staleness signal to anyone reading the footer.
+ */
+export const APP_COPYRIGHT = `© ${new Date().getFullYear()} ${APP_NAME}. All Rights Reserved.`;
 export const APP_OG_IMAGE = `${APP_URL}/hero.jpg`;
 
 export function getCanonicalUrl(path: string = ""): string {

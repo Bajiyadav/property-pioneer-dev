@@ -1,6 +1,7 @@
 import { Link, notFound, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { beginPropertyViewTimer } from "@/modules/analytics/services/tracking";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { toast } from "sonner";
 import {
@@ -71,6 +72,13 @@ export function PropertyDetailPage() {
   const { has, toggle } = useFavorites();
   const { user } = useAuthSession();
   const tenantId = user?.id || "anonymous-tenant";
+
+  // One view row per visit, filed on the way out so `time_spent` is measured
+  // rather than guessed. No-ops entirely without analytics consent.
+  useEffect(() => {
+    if (!id) return;
+    return beginPropertyViewTimer(id);
+  }, [id]);
 
   const [activeImg, setActiveImg] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);

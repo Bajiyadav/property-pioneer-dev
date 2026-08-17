@@ -16,22 +16,32 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BuyRouteImport } from './routes/buy'
 import { Route as CommercialRouteImport } from './routes/commercial'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FarmLandsRouteImport } from './routes/farm-lands'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlotsRouteImport } from './routes/plots'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as VillasRouteImport } from './routes/villas'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as RentIndexRouteImport } from './routes/rent.index'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated/admin/access'
+import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin/activity'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
+import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin/moderation'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
@@ -81,6 +91,11 @@ const CommercialRoute = CommercialRouteImport.update({
   path: '/commercial',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FarmLandsRoute = FarmLandsRouteImport.update({
   id: '/farm-lands',
   path: '/farm-lands',
@@ -111,6 +126,11 @@ const PlotsRoute = PlotsRouteImport.update({
   path: '/plots',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -121,9 +141,19 @@ const PropertiesRoute = PropertiesRouteImport.update({
   path: '/properties',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
+  id: '/terms-of-service',
+  path: '/terms-of-service',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VillasRoute = VillasRouteImport.update({
@@ -131,7 +161,7 @@ const VillasRoute = VillasRouteImport.update({
   path: '/villas',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
@@ -160,6 +190,40 @@ const RentIndexRoute = RentIndexRouteImport.update({
   id: '/rent/',
   path: '/rent/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
+const AuthenticatedAdminAccessRoute =
+  AuthenticatedAdminAccessRouteImport.update({
+    id: '/access',
+    path: '/access',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminActivityRoute =
+  AuthenticatedAdminActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminModerationRoute =
+  AuthenticatedAdminModerationRouteImport.update({
+    id: '/moderation',
+    path: '/moderation',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
@@ -250,22 +314,31 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/villas': typeof VillasRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
+  '/admin/access': typeof AuthenticatedAdminAccessRoute
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -273,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -288,20 +362,28 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/villas': typeof VillasRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties': typeof PropertiesIndexRoute
   '/rent': typeof RentIndexRoute
+  '/admin/access': typeof AuthenticatedAdminAccessRoute
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -309,6 +391,7 @@ export interface FileRoutesByTo {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/rent/$city': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -326,22 +409,31 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/buy': typeof BuyRoute
   '/commercial': typeof CommercialRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/farm-lands': typeof FarmLandsRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRoute
   '/notifications': typeof NotificationsRoute
   '/plots': typeof PlotsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
+  '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms-of-service': typeof TermsOfServiceRoute
   '/villas': typeof VillasRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth_/callback': typeof AuthCallbackRoute
   '/properties/$id': typeof PropertiesIdRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
+  '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
+  '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -349,6 +441,7 @@ export interface FileRoutesById {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -366,15 +459,19 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/cookie-policy'
     | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
     | '/plots'
+    | '/privacy-policy'
     | '/profile'
     | '/properties'
+    | '/refund-policy'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/villas'
     | '/admin'
     | '/dashboard'
@@ -382,6 +479,11 @@ export interface FileRouteTypes {
     | '/properties/$id'
     | '/properties/'
     | '/rent/'
+    | '/admin/access'
+    | '/admin/activity'
+    | '/admin/analytics'
+    | '/admin/moderation'
+    | '/admin/users'
     | '/dashboard/admin'
     | '/dashboard/agent'
     | '/dashboard/customer'
@@ -389,6 +491,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
+    | '/admin/'
     | '/dashboard/'
     | '/rent/$city/'
     | '/api/public/properties/$id/contact'
@@ -404,20 +507,28 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/cookie-policy'
     | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
     | '/plots'
+    | '/privacy-policy'
     | '/profile'
+    | '/refund-policy'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/villas'
-    | '/admin'
     | '/auth/callback'
     | '/properties/$id'
     | '/properties'
     | '/rent'
+    | '/admin/access'
+    | '/admin/activity'
+    | '/admin/analytics'
+    | '/admin/moderation'
+    | '/admin/users'
     | '/dashboard/admin'
     | '/dashboard/agent'
     | '/dashboard/customer'
@@ -425,6 +536,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
+    | '/admin'
     | '/dashboard'
     | '/rent/$city'
     | '/api/public/properties/$id/contact'
@@ -441,15 +553,19 @@ export interface FileRouteTypes {
     | '/blog'
     | '/buy'
     | '/commercial'
+    | '/cookie-policy'
     | '/farm-lands'
     | '/favorites'
     | '/help'
     | '/list-property'
     | '/notifications'
     | '/plots'
+    | '/privacy-policy'
     | '/profile'
     | '/properties'
+    | '/refund-policy'
     | '/sitemap.xml'
+    | '/terms-of-service'
     | '/villas'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
@@ -457,6 +573,11 @@ export interface FileRouteTypes {
     | '/properties/$id'
     | '/properties/'
     | '/rent/'
+    | '/_authenticated/admin/access'
+    | '/_authenticated/admin/activity'
+    | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/moderation'
+    | '/_authenticated/admin/users'
     | '/_authenticated/dashboard/admin'
     | '/_authenticated/dashboard/agent'
     | '/_authenticated/dashboard/customer'
@@ -464,6 +585,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/rent/$city/$locality'
+    | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
     | '/rent/$city/'
     | '/api/public/properties/$id/contact'
@@ -481,15 +603,19 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   BuyRoute: typeof BuyRoute
   CommercialRoute: typeof CommercialRoute
+  CookiePolicyRoute: typeof CookiePolicyRoute
   FarmLandsRoute: typeof FarmLandsRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
   ListPropertyRoute: typeof ListPropertyRoute
   NotificationsRoute: typeof NotificationsRoute
   PlotsRoute: typeof PlotsRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
+  RefundPolicyRoute: typeof RefundPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsOfServiceRoute: typeof TermsOfServiceRoute
   VillasRoute: typeof VillasRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   RentIndexRoute: typeof RentIndexRoute
@@ -555,6 +681,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommercialRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/farm-lands': {
       id: '/farm-lands'
       path: '/farm-lands'
@@ -597,6 +730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlotsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -611,11 +751,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms-of-service': {
+      id: '/terms-of-service'
+      path: '/terms-of-service'
+      fullPath: '/terms-of-service'
+      preLoaderRoute: typeof TermsOfServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/villas': {
@@ -629,7 +783,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/admin'
       path: '/admin'
       fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -666,6 +820,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/rent/'
       preLoaderRoute: typeof RentIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/access': {
+      id: '/_authenticated/admin/access'
+      path: '/access'
+      fullPath: '/admin/access'
+      preLoaderRoute: typeof AuthenticatedAdminAccessRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/activity': {
+      id: '/_authenticated/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/moderation': {
+      id: '/_authenticated/admin/moderation'
+      path: '/moderation'
+      fullPath: '/admin/moderation'
+      preLoaderRoute: typeof AuthenticatedAdminModerationRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
@@ -768,6 +964,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminAccessRoute: typeof AuthenticatedAdminAccessRoute
+  AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminAccessRoute: AuthenticatedAdminAccessRoute,
+    AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
+    AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+    AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
+    AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
+
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardAdminRoute: typeof AuthenticatedDashboardAdminRoute
   AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRoute
@@ -791,12 +1011,12 @@ const AuthenticatedDashboardRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
 }
 
@@ -825,15 +1045,19 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   BuyRoute: BuyRoute,
   CommercialRoute: CommercialRoute,
+  CookiePolicyRoute: CookiePolicyRoute,
   FarmLandsRoute: FarmLandsRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
   ListPropertyRoute: ListPropertyRoute,
   NotificationsRoute: NotificationsRoute,
   PlotsRoute: PlotsRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
+  RefundPolicyRoute: RefundPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsOfServiceRoute: TermsOfServiceRoute,
   VillasRoute: VillasRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   RentIndexRoute: RentIndexRoute,

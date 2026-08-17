@@ -26,6 +26,7 @@ import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
 import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
 import { AuthProvider } from "@/modules/authentication/context/AuthContext";
+import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,7 @@ function RootComponent() {
           <SiteFooter />
         </div>
         <Toaster position="top-center" richColors />
+        <ConsentBanner />
       </AuthProvider>
     </QueryClientProvider>
   );
@@ -497,25 +499,36 @@ function SiteFooter() {
             <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
               Trust &amp; Legal
             </h3>
+            {/*
+              These point at the real policy pages. They previously all resolved
+              to /help — a "Privacy Policy" link that opens a help article is not
+              a privacy policy, and the four policy URLs themselves returned 404
+              in production, which is a compliance gap as well as a broken link.
+            */}
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
-                <Link to="/help" className="hover:text-foreground transition">
-                  Moderation Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/help" className="hover:text-foreground transition">
-                  Direct Owner Terms
-                </Link>
-              </li>
-              <li>
-                <Link to="/help" className="hover:text-foreground transition">
+                <Link to="/privacy-policy" className="hover:text-foreground transition">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/help" className="hover:text-foreground transition">
+                <Link to="/terms-of-service" className="hover:text-foreground transition">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookie-policy" className="hover:text-foreground transition">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/refund-policy" className="hover:text-foreground transition">
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/help" className="hover:text-foreground transition">
+                  Moderation Policy
                 </Link>
               </li>
             </ul>
