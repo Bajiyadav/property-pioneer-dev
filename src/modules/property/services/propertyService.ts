@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { createSchemaCapability, isUndefinedColumn } from "./propertySchema";
+import { createSchemaCapability, isExtendedColumnUnavailable } from "./propertySchema";
 
 /** Typed client — `Database` is generated from the live schema. */
 const db = supabase;
@@ -726,7 +726,7 @@ export async function fetchPublicPropertyFeed(
     const tryExtended = shouldTryExtended();
     let { data, error } = await buildFeedQuery(params, tryExtended);
 
-    if (error && tryExtended && isUndefinedColumn(error)) {
+    if (error && tryExtended && isExtendedColumnUnavailable(error)) {
       // The video/location migration has not been applied to this database.
       // Latch the capability off and serve the query the schema can answer.
       schema.record(false);
@@ -841,7 +841,7 @@ export async function fetchPublicPropertyById(id: string): Promise<Property | nu
     const tryExtended = shouldTryExtended();
     let { data, error } = await detailQuery(tryExtended);
 
-    if (error && tryExtended && isUndefinedColumn(error)) {
+    if (error && tryExtended && isExtendedColumnUnavailable(error)) {
       schema.record(false);
       ({ data, error } = await detailQuery(false));
     } else if (!error && tryExtended) {

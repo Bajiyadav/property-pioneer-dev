@@ -140,17 +140,27 @@ function AgentsCareerPage() {
         status: "pending",
       });
 
-      if (error) {
-        // Fallback gracefully if table is not yet migrated in Supabase remote
-        console.warn("[agent_applications] Write warning:", error.message);
-      }
+      // A failed insert must never be reported as a success.
+      //
+      // This used to swallow the error into a console.warn and show
+      // "Application submitted successfully!" regardless. Because the
+      // agent_applications table was missing from production altogether, that
+      // was not a rare edge case — it was EVERY applicant. Each one was told
+      // their application had been received while nothing was written, and the
+      // admin review queue reading the same table stayed permanently empty.
+      //
+      // Surfacing the failure is the only honest option: the applicant can retry
+      // or reach us another way, rather than waiting on a submission that does
+      // not exist.
+      if (error) throw error;
 
       setSubmitted(true);
       toast.success("Application submitted successfully!");
     } catch (err) {
       console.error("[agent_applications] Submission error:", err);
-      setSubmitted(true);
-      toast.success("Application submitted successfully!");
+      toast.error(
+        "We could not submit your application just now. Please try again, or email us if the problem continues.",
+      );
     } finally {
       setSubmitting(false);
     }

@@ -1,6 +1,6 @@
 import {
   createSchemaCapability,
-  isUndefinedColumn,
+  isExtendedColumnUnavailable,
   stripExtendedColumns,
 } from "@/modules/property/services/propertySchema";
 import { toListingType } from "@/modules/property/services/propertyQueries";
@@ -78,7 +78,7 @@ async function withSchemaFallback<T>(
   const tryExtended = schema.shouldTry();
   const first = await run(ownerColumns(tryExtended));
 
-  if (first.error && tryExtended && isUndefinedColumn(first.error)) {
+  if (first.error && tryExtended && isExtendedColumnUnavailable(first.error)) {
     schema.record(false);
     return run(ownerColumns(false));
   }
