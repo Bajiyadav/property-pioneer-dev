@@ -1,3 +1,8 @@
+## v0.17.4 — 2026-08-18
+
+### Fixes
+- fix(property-card): remove the layout variant whose default broke every card (465941b)
+
 ## v0.17.3 — 2026-08-18
 
 ### Fixes
