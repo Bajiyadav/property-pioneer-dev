@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
@@ -194,6 +195,32 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     );
   }
 
+  Future<void> _openWhatsApp(BuildContext context, Property property) async {
+    final title = property.title;
+    final priceStr = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(property.price);
+    final message = "Hello! I am interested in '$title' ($priceStr/month) listed on SEEDHA Properties. Is it available for a visit?";
+    final rawPhone = property.ownerPhone ?? "9876543210";
+    final cleanDigits = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final fullPhone = cleanDigits.startsWith('91') && cleanDigits.length > 10
+        ? cleanDigits
+        : '91$cleanDigits';
+
+    final uri = Uri.parse("https://wa.me/$fullPhone?text=${Uri.encodeComponent(message)}");
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open WhatsApp. Please ensure WhatsApp is installed.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -309,6 +336,57 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                     style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                   ),
                   const SizedBox(height: 16),
+
+                  // WhatsApp Direct Quick Action Card
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFBBF7D0)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF25D366),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Direct Owner Connect",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF14532D)),
+                              ),
+                              Text(
+                                "Chat with verified owner on WhatsApp with 0% brokerage.",
+                                style: TextStyle(fontSize: 11, color: Color(0xFF15803D)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () => _openWhatsApp(context, property),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF25D366),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Chat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 12),
 
@@ -402,7 +480,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
 
       // Mobile Sticky Bottom Bar
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -415,6 +493,18 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
         ),
         child: Row(
           children: [
+            // WhatsApp Direct Action Button
+            IconButton.filled(
+              onPressed: () => _openWhatsApp(context, property),
+              style: IconButton.styleFrom(
+                backgroundColor: const Color(0xFF25D366),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(12),
+              ),
+              icon: const Icon(Icons.chat_bubble, size: 20),
+              tooltip: 'Chat on WhatsApp',
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _showEnquiryDialog(context, isScheduleVisit: true),
@@ -423,10 +513,10 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                   side: const BorderSide(color: AppTheme.primaryColor),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Schedule Visit', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                child: const Text('Schedule Visit', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton(
                 onPressed: () => _showEnquiryDialog(context, isScheduleVisit: false),
@@ -434,7 +524,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Contact Owner', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('Contact Owner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),
           ],
