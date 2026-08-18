@@ -39,15 +39,34 @@ export const Route = createFileRoute("/sitemap.xml")({
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-          // Single query for all approved properties
-          const { data } = await supabaseAdmin
+          /*
+           * Base columns only in this query, and `locality` fetched separately
+           * below.
+           *
+           * `locality` arrives in a migration that is not yet applied to the live
+           * database. PostgREST rejects an ENTIRE select when one column is
+           * missing, so naming it here did not merely omit locality pages — it
+           * failed the whole query, the catch swallowed the error, and the live
+           * sitemap silently collapsed from 47 URLs to the 12 static paths. Every
+           * property page and every city page disappeared from search engines
+           * while the endpoint still returned a valid 200 XML document.
+           *
+           * That is the worst shape of failure available here: no error surface,
+           * no alert, and a sitemap that looks healthy. Keeping the required
+           * columns in one query and the optional one in another means a missing
+           * migration costs a section rather than everything.
+           */
+          const { data, error: baseError } = await supabaseAdmin
             .from("properties")
-            .select(
-              "id, updated_at, city, listing_type, bedrooms, property_type, locality, title, description",
-            )
+            .select("id, updated_at, city, listing_type, bedrooms, property_type, title")
             .eq("is_approved", true)
             .order("updated_at", { ascending: false })
             .limit(5000);
+
+          if (baseError) {
+            // Logged loudly: an empty sitemap is a silent SEO outage.
+            console.error("[sitemap] base property query failed", baseError);
+          }
 
           const rows = (data ?? []) as Array<{
             id: string;
@@ -56,9 +75,8 @@ export const Route = createFileRoute("/sitemap.xml")({
             listing_type: string | null;
             bedrooms: number | null;
             property_type: string | null;
-            locality: string | null;
             title: string | null;
-            description: string | null;
+            locality?: string | null;
           }>;
 
           // Add individual property pages with friendly slugs
@@ -77,6 +95,22 @@ export const Route = createFileRoute("/sitemap.xml")({
               lastmod: new Date(row.updated_at).toISOString(),
               priority: "0.7",
             });
+          }
+
+          /*
+           * Optional enrichment. If the column is absent this fails alone, the
+           * rows keep their base data, and only locality pages are skipped.
+           */
+          try {
+            const { data: locRows } = await supabaseAdmin
+              .from("properties")
+              .select("id, locality")
+              .eq("is_approved", true)
+              .limit(5000);
+            const byId = new Map((locRows ?? []).map((r) => [r.id, r.locality]));
+            for (const row of rows) row.locality = byId.get(row.id) ?? null;
+          } catch (localityError) {
+            console.error("[sitemap] locality enrichment skipped", localityError);
           }
 
           const slugify = (v: string) =>
