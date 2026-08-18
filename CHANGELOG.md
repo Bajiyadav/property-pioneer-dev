@@ -1,3 +1,13 @@
+## v0.17.6 — 2026-08-18
+
+### Fixes
+- fix(db): correct the admin check in the employee task policies (de4cea2)
+
+### Migration notes
+- supabase/migrations/20260817150000_employee_task_tracking.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.17.5 — 2026-08-18
 
 ### Fixes
