@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryColor = Color(0xFF0F766E); // Teal / Emerald
+  static const Color primaryColor = Color(0xFF0F766E); // Deep Emerald / Forest Teal
   static const Color primaryDark = Color(0xFF115E59);
   static const Color primaryLight = Color(0xFF14B8A6);
-  static const Color accentColor = Color(0xFFF59E0B); // Amber badge
-  static const Color backgroundColor = Color(0xFFF8FAFC);
+  static const Color accentColor = Color(0xFFF59E0B); // Amber / warm gold badge
+  static const Color backgroundColor = Color(0xFFFAF8F5); // Warm architectural linen / ivory
   static const Color cardColor = Colors.white;
-  static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color borderSubtle = Color(0xFFE2E8F0);
+  static const Color textPrimary = Color(0xFF2C241E); // Rich espresso charcoal
+  static const Color textSecondary = Color(0xFF786F66); // Warm architectural taupe
+  static const Color borderSubtle = Color(0xFFEBE6DF); // Warm linen stone border
   static const Color errorColor = Color(0xFFEF4444);
   static const Color successColor = Color(0xFF10B981);
 

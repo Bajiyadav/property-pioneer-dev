@@ -58,47 +58,48 @@
 
 :root {
   --radius: 0.875rem;
-  /* Ultra-refined modern architectural palette */
-  --background: oklch(0.988 0.005 85); /* pristine warm linen */
-  --foreground: oklch(0.18 0.025 240); /* deep navy charcoal */
+  /* Ultra-refined architectural palette (warm linen, espresso, and editorial ivory) */
+  --background: oklch(0.988 0.008 80); /* warm architectural linen / ivory #FAF8F5 */
+  --foreground: oklch(0.24 0.025 50); /* rich espresso charcoal #332B25 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.025 240);
+  --card-foreground: oklch(0.24 0.025 50);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.025 240);
+  --popover-foreground: oklch(0.24 0.025 50);
 
-  /* Primary: Emerald Teal with luxury tone */
-  --primary: oklch(0.52 0.16 160);
+  /* Primary: Deep Forest Emerald & Architectural Olive */
+  --primary: oklch(0.48 0.14 165);
   --primary-foreground: oklch(0.99 0.005 85);
-  --primary-glow: oklch(0.68 0.18 150);
+  --primary-glow: oklch(0.65 0.16 155);
 
-  --secondary: oklch(0.96 0.01 90);
-  --secondary-foreground: oklch(0.22 0.025 240);
-  --muted: oklch(0.945 0.01 90);
-  --muted-foreground: oklch(0.46 0.02 240);
-  --accent: oklch(0.55 0.16 45); /* warm copper / gold for luxury badges */
+  --secondary: oklch(0.955 0.012 85); /* warm stone oat #F3EFEA */
+  --secondary-foreground: oklch(0.25 0.025 50);
+  --muted: oklch(0.94 0.012 85);
+  --muted-foreground: oklch(0.48 0.02 50);
+  --accent: oklch(0.65 0.18 45); /* warm sunset coral & terracotta */
   --accent-foreground: oklch(0.99 0.005 85);
   --destructive: oklch(0.55 0.22 27);
   --destructive-foreground: oklch(0.985 0.008 85);
-  --border: oklch(0.89 0.01 90);
-  --input: oklch(0.91 0.01 90);
-  --ring: oklch(0.52 0.16 160);
+  --border: oklch(0.9 0.012 85);
+  --input: oklch(0.91 0.012 85);
+  --ring: oklch(0.48 0.14 165);
 
   --gradient-hero: linear-gradient(
     180deg,
-    oklch(0.12 0.04 240 / 0.82) 0%,
-    oklch(0.16 0.03 240 / 0.72) 50%,
-    oklch(0.12 0.04 240 / 0.94) 100%
+    oklch(0.18 0.03 50 / 0.88) 0%,
+    oklch(0.22 0.03 50 / 0.75) 50%,
+    oklch(0.18 0.03 50 / 0.94) 100%
   );
-  --gradient-primary: linear-gradient(135deg, oklch(0.52 0.16 160), oklch(0.42 0.15 170));
+  --gradient-sunset: linear-gradient(135deg, #ff6b4a 0%, #ffa033 50%, #ff5252 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.48 0.14 165), oklch(0.38 0.13 175));
   --gradient-gold: linear-gradient(135deg, oklch(0.78 0.16 75), oklch(0.62 0.18 55));
-  --gradient-card-glass: linear-gradient(135deg, oklch(1 0 0 / 0.85), oklch(1 0 0 / 0.55));
+  --gradient-card-glass: linear-gradient(135deg, oklch(1 0 0 / 0.9), oklch(1 0 0 / 0.65));
 
-  --shadow-subtle: 0 2px 4px oklch(0.18 0.02 240 / 0.03), 0 1px 2px oklch(0.18 0.02 240 / 0.02);
+  --shadow-subtle: 0 2px 6px oklch(0.24 0.02 50 / 0.04), 0 1px 2px oklch(0.24 0.02 50 / 0.02);
   --shadow-card:
-    0 4px 20px -2px oklch(0.18 0.02 240 / 0.06), 0 2px 6px -1px oklch(0.18 0.02 240 / 0.04);
+    0 4px 20px -2px oklch(0.24 0.02 50 / 0.06), 0 2px 6px -1px oklch(0.24 0.02 50 / 0.04);
   --shadow-lift:
-    0 20px 35px -10px oklch(0.18 0.02 240 / 0.12), 0 8px 16px -4px oklch(0.18 0.02 240 / 0.06);
-  --shadow-glow: 0 0 25px oklch(0.52 0.16 160 / 0.25);
+    0 20px 35px -10px oklch(0.24 0.02 50 / 0.12), 0 8px 16px -4px oklch(0.24 0.02 50 / 0.06);
+  --shadow-glow: 0 0 25px oklch(0.48 0.14 165 / 0.25);
 
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
