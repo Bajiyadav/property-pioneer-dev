@@ -1,3 +1,13 @@
+## v0.17.7 — 2026-08-18
+
+### Fixes
+- fix(db): remove the duplicate entitlements table and define the missing trigger fn (59b0670)
+
+### Migration notes
+- supabase/migrations/20260818120000_customer_payments.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.17.6 — 2026-08-18
 
 ### Fixes
