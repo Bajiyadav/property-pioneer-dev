@@ -1,5 +1,5 @@
 import { PropertyImage } from "@/shared/components/PropertyImage";
-import { listingImage } from "@/modules/owner/fixtures";
+
 import { CreditCard, Star } from "lucide-react";
 import { SectionHeader } from "@/modules/dashboard/components/DashboardKit";
 import { useState } from "react";
@@ -15,7 +15,19 @@ import {
   LoadingSkeleton,
   StatusPill,
 } from "@/modules/dashboard/components/DashboardKit";
-import { SEARCH_PARAMS } from "@/modules/owner/fixtures";
+const DEFAULT_SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
+
+// Narrow structural type rather than `any`: this only ever needs the images
+// array, and typing it that way keeps the call sites checked.
+const getListingImage = (p: { images?: string[] | null }) =>
+  p.images && p.images.length > 0 ? p.images[0] : "";
 
 export function ListingRows({
   listings,
@@ -63,7 +75,7 @@ export function ListingRows({
         >
           <div className="flex min-w-0 items-center gap-4">
             <PropertyImage
-              src={listingImage(p)}
+              src={getListingImage(p)}
               alt={p.title}
               watermarkSize="xs"
               watermarkPosition="bottom-right"
@@ -86,7 +98,7 @@ export function ListingRows({
               <Link
                 to="/properties/$id"
                 params={{ id: p.id }}
-                search={SEARCH_PARAMS}
+                search={DEFAULT_SEARCH_PARAMS}
                 aria-label={`View ${p.title}`}
                 className="rounded-xl border border-border bg-secondary/50 p-2 text-foreground transition hover:bg-secondary"
               >

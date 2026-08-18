@@ -46,16 +46,60 @@ import {
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
 import { displayName } from "@/modules/authentication/services/session";
-import {
-  Lead,
-  Client,
-  LEADS,
-  CLIENTS,
-  VISITS,
-  COMMISSIONS,
-  NOTIFICATIONS,
-  FUNNEL,
-} from "@/modules/agent/fixtures";
+import { useServerFn } from "@tanstack/react-start";
+import { getAgentDashboard } from "@/modules/agent/services/agentFunctions";
+import { relativeTime } from "@/modules/dashboard/services/dashboardData";
+
+/*
+ * Row shapes for the sections the schema cannot yet answer.
+ *
+ * These arrays are empty because the data genuinely does not exist:
+ * `agent_leads` has no status column, so a pipeline funnel cannot be computed,
+ * and there is no commission table at all. They are typed rather than `any[]`
+ * so the columns that render them stay checked — when a real source arrives the
+ * compiler points at every place that needs updating instead of silently
+ * accepting whatever shape turns up.
+ */
+interface CommissionRow {
+  id: string;
+  client: string;
+  property: string;
+  amount: number;
+  status: string;
+  date: string;
+}
+
+interface ClientRow {
+  id: string;
+  name: string;
+  phone: string;
+  requirement: string;
+  since: string;
+  value: string;
+}
+
+interface FunnelStage {
+  label: string;
+  value: number;
+}
+
+interface LeadRow {
+  id: string;
+  name: string;
+  phone?: string | null;
+  stage?: string;
+  requirement?: string | null;
+  budget?: string | null;
+  source?: string | null;
+}
+
+interface NotificationRow {
+  id: string;
+  title: string;
+  body?: string | null;
+  kind?: string | null;
+  createdAt: string;
+}
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -86,6 +130,9 @@ export function AgentDashboardPage() {
 function AgentDashboard({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useDashboardTab("/dashboard/agent");
 
+  const [selectedClient, setSelectedClient] = useState<ClientRow | null>(null);
+  const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
+
   const [leadQuery, setLeadQuery] = useState("");
   const [stageFilter, setStageFilter] = useState("all");
 
@@ -100,6 +147,27 @@ function AgentDashboard({ user }: { user: User | null }) {
     staleTime: 5 * 60 * 1000,
   });
 
+  const fetchDashboard = useServerFn(getAgentDashboard);
+  const { data: dashboard } = useQuery({
+    queryKey: ["agent", "dashboard"],
+    queryFn: () => fetchDashboard({}),
+  });
+
+  const LEADS = dashboard?.leads || [];
+  const VISITS = (dashboard?.visits || []).map((v) => ({
+    id: v.id,
+    client: v.visitorName,
+    property: v.propertyTitle,
+    when: v.preferredDate
+      ? `${v.preferredDate} ${v.preferredTimeSlot || ""}`
+      : "Pending scheduling",
+    status: v.status,
+  }));
+  const NOTIFICATIONS = dashboard?.notifications || [];
+  const COMMISSIONS: CommissionRow[] = [];
+  const CLIENTS: ClientRow[] = [];
+  const FUNNEL: FunnelStage[] = [];
+
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
   const assigned = useMemo(() => properties.slice(0, 6), [properties]);
@@ -107,11 +175,10 @@ function AgentDashboard({ user }: { user: User | null }) {
   const filteredLeads = useMemo(() => {
     const q = leadQuery.trim().toLowerCase();
     return LEADS.filter((l) => {
-      if (stageFilter !== "all" && l.stage.toLowerCase() !== stageFilter) return false;
       if (!q) return true;
-      return `${l.name} ${l.requirement} ${l.phone}`.toLowerCase().includes(q);
+      return `${l.name} ${l.locality || ""} ${l.phone || ""}`.toLowerCase().includes(q);
     });
-  }, [leadQuery, stageFilter]);
+  }, [leadQuery, stageFilter, LEADS]);
 
   const paidCommission = COMMISSIONS.filter((c) => c.status === "Paid").reduce(
     (s, c) => s + c.amount,
@@ -185,7 +252,7 @@ function AgentDashboard({ user }: { user: User | null }) {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <KpiCard
                 label="Open leads"
-                numericValue={LEADS.filter((l) => l.stage !== "Closed").length}
+                numericValue={LEADS.length}
                 icon={<Target className="h-4 w-4" />}
                 accent="blue"
                 trend={{ direction: "up", label: "+2 today" }}
@@ -279,7 +346,15 @@ function AgentDashboard({ user }: { user: User | null }) {
             </div>
             <div className="rounded-3xl border border-border/60 bg-card p-5">
               <SectionHeader title="Recent activity" />
-              <ActivityTimeline items={NOTIFICATIONS} />
+              <ActivityTimeline
+                items={NOTIFICATIONS.map((n: NotificationRow) => ({
+                  id: n.id,
+                  title: n.title,
+                  detail: n.body ?? "",
+                  time: relativeTime(n.createdAt),
+                  tone: (n.kind === "error" ? "warning" : "success") as "success" | "warning",
+                })).slice(0, 3)}
+              />
             </div>
           </div>
         </div>
@@ -398,7 +473,7 @@ function AgentDashboard({ user }: { user: User | null }) {
               {
                 key: "name",
                 header: "Client",
-                render: (c: Client) => (
+                render: (c: ClientRow) => (
                   <div>
                     <p className="font-bold text-foreground">{c.name}</p>
                     <p className="text-[11px] text-muted-foreground">{c.phone}</p>
@@ -408,25 +483,27 @@ function AgentDashboard({ user }: { user: User | null }) {
               {
                 key: "req",
                 header: "Requirement",
-                render: (c: Client) => (
+                render: (c: ClientRow) => (
                   <span className="text-muted-foreground">{c.requirement}</span>
                 ),
               },
               {
                 key: "since",
                 header: "Client since",
-                render: (c: Client) => <span className="text-muted-foreground">{c.since}</span>,
+                render: (c: ClientRow) => <span className="text-muted-foreground">{c.since}</span>,
               },
               {
                 key: "value",
                 header: "Deal value",
-                render: (c: Client) => <span className="font-bold text-foreground">{c.value}</span>,
+                render: (c: ClientRow) => (
+                  <span className="font-bold text-foreground">{c.value}</span>
+                ),
               },
               {
                 key: "call",
                 header: "",
                 className: "text-right",
-                render: (c: Client) => (
+                render: (c: ClientRow) => (
                   <a
                     href={`tel:${c.phone.replace(/\s/g, "")}`}
                     aria-label={`Call ${c.name}`}
@@ -598,7 +675,15 @@ function AgentDashboard({ user }: { user: User | null }) {
             subtitle="Lead assignments, payouts, and visit reminders"
           />
           <div className="rounded-3xl border border-border/60 bg-card p-6">
-            <ActivityTimeline items={NOTIFICATIONS} />
+            <ActivityTimeline
+              items={NOTIFICATIONS.map((n: NotificationRow) => ({
+                id: n.id,
+                title: n.title,
+                detail: n.body ?? "",
+                time: relativeTime(n.createdAt),
+                tone: n.kind === "error" ? "warning" : "success",
+              }))}
+            />
           </div>
         </div>
       )}
@@ -606,8 +691,8 @@ function AgentDashboard({ user }: { user: User | null }) {
   );
 }
 
-function LeadTable({ leads }: { leads: Lead[] }) {
-  const tone = (stage: Lead["stage"]) =>
+function LeadTable({ leads }: { leads: LeadRow[] }) {
+  const tone = (stage: string) =>
     stage === "Closed"
       ? "success"
       : stage === "New"
@@ -631,7 +716,7 @@ function LeadTable({ leads }: { leads: Lead[] }) {
         {
           key: "name",
           header: "Lead",
-          render: (l: Lead) => (
+          render: (l: LeadRow) => (
             <div>
               <p className="font-bold text-foreground">{l.name}</p>
               <p className="text-[11px] text-muted-foreground">{l.phone}</p>
@@ -641,23 +726,28 @@ function LeadTable({ leads }: { leads: Lead[] }) {
         {
           key: "req",
           header: "Requirement",
-          render: (l: Lead) => <span className="text-muted-foreground">{l.requirement}</span>,
+          render: (l: LeadRow) => <span className="text-muted-foreground">{l.requirement}</span>,
         },
         {
           key: "budget",
           header: "Budget",
-          render: (l: Lead) => <span className="font-semibold text-foreground">{l.budget}</span>,
+          render: (l: LeadRow) => <span className="font-semibold text-foreground">{l.budget}</span>,
         },
         {
           key: "source",
           header: "Source",
-          render: (l: Lead) => <span className="text-muted-foreground">{l.source}</span>,
+          render: (l: LeadRow) => <span className="text-muted-foreground">{l.source}</span>,
         },
         {
           key: "stage",
           header: "Stage",
           className: "text-right",
-          render: (l: Lead) => <StatusPill label={l.stage} tone={tone(l.stage)} />,
+          render: (l: LeadRow) => (
+            // `agent_leads` stores no status, so there is no stage to show
+            // until that column exists. An em dash is honest; inventing "New"
+            // for every lead would not be.
+            <StatusPill label={l.stage ?? "—"} tone={tone(l.stage ?? "")} />
+          ),
         },
       ]}
     />

@@ -8,7 +8,15 @@ import {
   LoadingSkeleton,
   StatusPill,
 } from "@/modules/dashboard/components/DashboardKit";
-import { SEARCH_PARAMS, type PlatformUser } from "@/modules/admin/fixtures";
+import type { PlatformUser } from "@/modules/admin/services/adminFunctions";
+const DEFAULT_SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
 
 export function UserTable({ users }: { users: PlatformUser[] }) {
   return (
@@ -96,7 +104,7 @@ export function PropertyTable({
             <Link
               to="/properties/$id"
               params={{ id: p.id }}
-              search={SEARCH_PARAMS}
+              search={DEFAULT_SEARCH_PARAMS}
               className="font-bold text-foreground hover:text-primary"
             >
               {p.title}

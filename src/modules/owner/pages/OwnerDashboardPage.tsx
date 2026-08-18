@@ -57,7 +57,6 @@ import {
 } from "@/modules/dashboard/components/DashboardCharts";
 import { countBy, relativeTime } from "@/modules/dashboard/services/dashboardData";
 import { displayName } from "@/modules/authentication/services/session";
-import { ACTIVITY, SEARCH_PARAMS, listingImage } from "@/modules/owner/fixtures";
 import { ListingRows, OwnerSettings } from "@/modules/owner/components/OwnerDashboardParts";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
 import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
@@ -156,6 +155,12 @@ function OwnerDashboard({ user }: { user: User | null }) {
     [allBookings, uid],
   );
   const myChats = useMemo(() => allChats.filter((c) => c.ownerId === uid), [allChats, uid]);
+
+  const allNotifications = useInteractionStore((s) => s.notifications);
+  const myNotifications = useMemo(
+    () => allNotifications.filter((n) => n.userId === uid),
+    [allNotifications, uid],
+  );
 
   const monthlyRent = useMemo(
     () => listings.reduce((sum, p) => sum + Number(p.price || 0), 0),
@@ -310,7 +315,16 @@ function OwnerDashboard({ user }: { user: User | null }) {
             </div>
             <div className="rounded-3xl border border-border/60 bg-card p-5">
               <SectionHeader title="Recent activity" />
-              <ActivityTimeline items={ACTIVITY} />
+              <ActivityTimeline
+                items={myNotifications.map((n) => ({
+                  id: n.id,
+                  title: n.title,
+                  detail: n.detail,
+                  time: relativeTime(n.createdAt),
+                  tone: (n.tone === "rose" ? "danger" : n.tone) as
+                    "success" | "warning" | "danger" | "info" | "neutral",
+                }))}
+              />
             </div>
           </div>
 

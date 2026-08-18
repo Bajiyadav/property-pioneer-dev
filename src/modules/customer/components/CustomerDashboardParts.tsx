@@ -15,7 +15,14 @@ import {
   LoadingSkeleton,
   SectionHeader,
 } from "@/modules/dashboard/components/DashboardKit";
-import { SEARCH_PARAMS } from "@/modules/customer/fixtures";
+const DEFAULT_SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
 
 export function ListingGrid({
   items,
@@ -81,7 +88,7 @@ export function RecentSearchesPanel({ searches }: { searches: RecentSearch[] }) 
           action={
             <Link
               to="/properties"
-              search={SEARCH_PARAMS}
+              search={DEFAULT_SEARCH_PARAMS}
               className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
             >
               <Search className="h-3.5 w-3.5" /> Start a search

@@ -51,7 +51,14 @@ import {
 import { TrendAreaChart, DonutChart } from "@/modules/dashboard/components/DashboardCharts";
 import { displayName } from "@/modules/authentication/services/session";
 import { readRecentSearches, type RecentSearch } from "@/modules/dashboard/services/dashboardData";
-import { VIEW_TREND, SEARCH_PARAMS } from "@/modules/customer/fixtures";
+const DEFAULT_SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
 import {
   ListingGrid,
   RecentSearchesPanel,
@@ -171,7 +178,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
       headerAction={
         <Link
           to="/properties"
-          search={SEARCH_PARAMS}
+          search={DEFAULT_SEARCH_PARAMS}
           className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
         >
           <Search className="h-3.5 w-3.5" /> Browse homes
@@ -236,7 +243,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
                   label: "Find a home",
                   hint: "Search verified listings",
                   icon: <Search className="h-4 w-4" />,
-                  onClick: () => navigate({ to: "/properties", search: SEARCH_PARAMS }),
+                  onClick: () => navigate({ to: "/properties", search: DEFAULT_SEARCH_PARAMS }),
                 },
                 {
                   id: "saved",
@@ -274,7 +281,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
             <TrendAreaChart
               title="Your search activity"
               subtitle="Listings viewed over the last 7 days"
-              data={VIEW_TREND}
+              data={[]}
               valueName="Views"
             />
             {cityMix.length > 0 ? (
@@ -370,7 +377,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
             action={
               <Link
                 to="/properties"
-                search={SEARCH_PARAMS}
+                search={DEFAULT_SEARCH_PARAMS}
                 className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
               >
                 <Search className="h-3.5 w-3.5" /> Browse listings
@@ -398,7 +405,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
               action={
                 <Link
                   to="/properties"
-                  search={SEARCH_PARAMS}
+                  search={DEFAULT_SEARCH_PARAMS}
                   className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
                 >
                   Start browsing
@@ -417,7 +424,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
                     <Link
                       to="/properties/$id"
                       params={{ id: p.id }}
-                      search={SEARCH_PARAMS}
+                      search={DEFAULT_SEARCH_PARAMS}
                       className="font-bold text-foreground hover:text-primary"
                     >
                       {p.title}

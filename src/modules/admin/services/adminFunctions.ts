@@ -309,3 +309,49 @@ export const upsertEmployeeAccess = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export interface PlatformUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "Customer" | "Owner" | "Agent" | "Admin";
+  status: "Active" | "Suspended" | "Pending";
+  joined: string;
+}
+
+export const getAdminUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const authCtx = context as AuthContext;
+    await assertEmployee(authCtx);
+
+    // In a real app we'd paginate this and fetch email from auth schema.
+    // For now we get what's in public schema.
+    const { data: profiles } = await authCtx.supabase
+      .from("profiles")
+      .select("id, full_name, created_at");
+
+    const { data: roles } = await authCtx.supabase.from("user_roles").select("user_id, role");
+
+    if (!profiles) return [];
+
+    return profiles.map((p) => {
+      const userRoles = roles?.filter((r) => r.user_id === p.id) || [];
+      const primaryRole =
+        userRoles.find((r) => r.role === "admin")?.role ||
+        userRoles.find((r) => r.role === "agent")?.role ||
+        userRoles.find((r) => r.role === "owner")?.role ||
+        "customer";
+
+      const roleStr = primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1);
+
+      return {
+        id: p.id,
+        name: p.full_name || "Unknown",
+        email: "hidden@example.com", // Email not available in public profile
+        role: roleStr as PlatformUser["role"],
+        status: "Active" as PlatformUser["status"],
+        joined: p.created_at,
+      };
+    });
+  });

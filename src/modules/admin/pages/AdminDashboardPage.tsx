@@ -53,9 +53,22 @@ import {
   TrendAreaChart,
 } from "@/modules/dashboard/components/DashboardCharts";
 import { countBy, relativeTime } from "@/modules/dashboard/services/dashboardData";
-import { getAdminProperties, updateAdminProperty } from "@/modules/admin/services/adminFunctions";
+import {
+  getAdminProperties,
+  updateAdminProperty,
+  getAdminUsers,
+  getAdminAuditLogs,
+  type PlatformUser,
+} from "@/modules/admin/services/adminFunctions";
 import { displayName } from "@/modules/authentication/services/session";
-import { PlatformUser, USERS, AUDIT, SEARCH_PARAMS } from "@/modules/admin/fixtures";
+const DEFAULT_SEARCH_PARAMS = {
+  q: "",
+  city: "Hyderabad",
+  listing: "rent",
+  minPrice: 0,
+  maxPrice: 0,
+  beds: 0,
+} as const;
 import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
 import { EmployeeActivityBoard } from "@/modules/admin/components/EmployeeActivityBoard";
 import { EmployeeAccessForm } from "@/modules/admin/components/EmployeeAccessForm";
@@ -110,6 +123,18 @@ function AdminDashboard({ user }: { user: User | null }) {
     retry: false,
   });
 
+  const fetchAdminUsers = useServerFn(getAdminUsers);
+  const { data: adminUsers } = useQuery({
+    queryKey: ["admin", "users"],
+    queryFn: () => fetchAdminUsers({}),
+  });
+
+  const fetchAdminAuditLogs = useServerFn(getAdminAuditLogs);
+  const { data: adminAuditLogs } = useQuery({
+    queryKey: ["admin", "audit"],
+    queryFn: () => fetchAdminAuditLogs({}),
+  });
+
   // Moderation writes through the same RLS-bypassing server function the secure
   // portal uses. It requires SUPABASE_SERVICE_ROLE_KEY on the server — when that
   // is absent the mutation fails loudly rather than showing a false success.
@@ -147,6 +172,7 @@ function AdminDashboard({ user }: { user: User | null }) {
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
 
+  const USERS = adminUsers || [];
   const owners = USERS.filter((u) => u.role === "Owner");
   const agents = USERS.filter((u) => u.role === "Agent");
   /** Genuinely unapproved listings, straight from the service-role view. */
@@ -383,7 +409,18 @@ function AdminDashboard({ user }: { user: User | null }) {
             </div>
             <div className="rounded-3xl border border-border/60 bg-card p-5">
               <SectionHeader title="Security activity" />
-              <ActivityTimeline items={AUDIT.slice(0, 4)} />
+              <ActivityTimeline
+                items={(adminAuditLogs || [])
+                  .map((log) => ({
+                    id: log.id,
+                    title: log.event.replace(/_/g, " "),
+                    detail: `Actor: ${log.actor_id || "system"}`,
+                    time: relativeTime(log.created_at),
+                    tone: (log.outcome === "success" ? "success" : "warning") as
+                      "success" | "warning",
+                  }))
+                  .slice(0, 4)}
+              />
             </div>
           </div>
         </div>
@@ -878,7 +915,15 @@ function AdminDashboard({ user }: { user: User | null }) {
         <div className="space-y-5">
           <SectionHeader title="Audit logs" subtitle="Security and moderation events" />
           <div className="rounded-3xl border border-border/60 bg-card p-6">
-            <ActivityTimeline items={AUDIT} />
+            <ActivityTimeline
+              items={(adminAuditLogs || []).map((log) => ({
+                id: log.id,
+                title: log.event.replace(/_/g, " "),
+                detail: `Actor: ${log.actor_id || "system"} | Outcome: ${log.outcome}`,
+                time: relativeTime(log.created_at),
+                tone: (log.outcome === "success" ? "success" : "warning") as "success" | "warning",
+              }))}
+            />
           </div>
           <p className="text-[11px] text-muted-foreground">
             Full immutable logs are served by the secure admin portal, which reads through the
