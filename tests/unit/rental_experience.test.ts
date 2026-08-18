@@ -23,7 +23,15 @@ describe("Rental Experience & Price Formatting", () => {
   it("verifies seed properties have real rental parameters without fabricated data", () => {
     HYDERABAD_FALLBACK_PROPERTIES.forEach((prop) => {
       expect(prop.price).toBeGreaterThan(0);
-      expect(prop.bedrooms).toBeGreaterThanOrEqual(1);
+      if (
+        prop.property_type?.toLowerCase() === "commercial" ||
+        prop.property_type?.toLowerCase() === "plots" ||
+        prop.property_type?.toLowerCase() === "farm-lands"
+      ) {
+        expect(prop.bedrooms).toBeGreaterThanOrEqual(0);
+      } else {
+        expect(prop.bedrooms).toBeGreaterThanOrEqual(1);
+      }
       expect(prop.area_sqft).toBeGreaterThan(0);
       expect(prop.city).toBe("Hyderabad");
       expect(prop.images.length).toBeGreaterThan(0);

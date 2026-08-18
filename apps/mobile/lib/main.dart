@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'config/theme.dart';
-import 'features/home/presentation/home_screen.dart';
+import 'config/app_routes.dart';
 import 'services/supabase_service.dart';
 
 void main() async {
@@ -10,7 +11,7 @@ void main() async {
   } catch (e) {
     // Offline resilience
   }
-  runApp(const UrbanPropertiesMobileApp());
+  runApp(const ProviderScope(child: UrbanPropertiesMobileApp()));
 }
 
 class UrbanPropertiesMobileApp extends StatelessWidget {
@@ -18,11 +19,11 @@ class UrbanPropertiesMobileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Urban Properties',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      routerConfig: appRouter,
     );
   }
 }

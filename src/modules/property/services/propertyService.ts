@@ -349,6 +349,230 @@ export const HYDERABAD_FALLBACK_PROPERTIES: Property[] = [
     is_premium: false,
     created_at: SEED_CREATED_AT[5],
   },
+  {
+    id: "hyd-sale-001",
+    title: "Premium 3 BHK Apartment in Gachibowli",
+    description:
+      "Stunning 3 BHK flat for sale in a premier high-rise society in Gachibowli, close to Outer Ring Road (ORR). Premium modular kitchen, spacious balconies with skyline views, 24/7 security, and world-class amenities.",
+    price: 12500000,
+    city: "Hyderabad",
+    locality: "Gachibowli",
+    address: "Vasavi GP Trends, Gachibowli",
+    bedrooms: 3,
+    bathrooms: 3,
+    area_sqft: 1850,
+    property_type: "Apartment",
+    listing_type: "sale",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[0],
+  },
+  {
+    id: "hyd-sale-002",
+    title: "Luxury 4 BHK Villa in Kokapet",
+    description:
+      "Exquisite 4 BHK ultra-luxury independent villa for sale in Kokapet's most exclusive gated community. Italian marble, private garden, home automation, double-height ceiling, and 3 covered car parking spaces.",
+    price: 38000000,
+    city: "Hyderabad",
+    locality: "Kokapet",
+    address: "Neopolis Corridor, Kokapet",
+    bedrooms: 4,
+    bathrooms: 4,
+    area_sqft: 4200,
+    property_type: "Villa",
+    listing_type: "sale",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[1],
+  },
+  {
+    id: "hyd-sale-003",
+    title: "Modern 2 BHK Flat in Kondapur",
+    description:
+      "Well-designed 2 BHK apartment for sale in Kondapur, close to Botanical Gardens. Features excellent cross-ventilation, lift, security, modular wardrobes, and close proximity to major IT parks.",
+    price: 8500000,
+    city: "Hyderabad",
+    locality: "Kondapur",
+    address: "Silpa Layout, Kondapur",
+    bedrooms: 2,
+    bathrooms: 2,
+    area_sqft: 1200,
+    property_type: "Apartment",
+    listing_type: "sale",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80",
+    ],
+    is_featured: false,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: false,
+    created_at: SEED_CREATED_AT[2],
+  },
+  {
+    id: "hyd-sale-004",
+    title: "Spacious 3 BHK Apartment in Madhapur",
+    description:
+      "Semi-furnished 3 BHK flat for sale in Madhapur. Located walking distance to Cyber Towers and Durgam Cheruvu metro station. Unmatched location convenience, lift, and power backup.",
+    price: 14500000,
+    city: "Hyderabad",
+    locality: "Madhapur",
+    address: "Kavuri Hills, Madhapur",
+    bedrooms: 3,
+    bathrooms: 3,
+    area_sqft: 1950,
+    property_type: "Apartment",
+    listing_type: "sale",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80",
+    ],
+    is_featured: false,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: false,
+    created_at: SEED_CREATED_AT[3],
+  },
+  {
+    id: "hyd-comm-001",
+    title: "Grade-A Commercial Office Space in Hitech City",
+    description:
+      "Fully fitted Grade-A commercial office space for rent in Hitech City's prime tech park corridor. 100 workstations, 4 manager cabins, conference room, double power backup, central AC, and 10 parking slots.",
+    price: 180000,
+    city: "Hyderabad",
+    locality: "Hitech City",
+    address: "Mindspace Tech Park, Hitech City",
+    bedrooms: 0,
+    bathrooms: 2,
+    area_sqft: 3500,
+    property_type: "Commercial",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[0],
+  },
+  {
+    id: "hyd-comm-002",
+    title: "Prime Corner Retail Shop in Madhapur",
+    description:
+      "High-visibility corner retail storefront for rent on main Madhapur 100 Feet Road. Premium glass frontage, high footfall zone, suitable for premium brands, cafes, or boutiques.",
+    price: 95000,
+    city: "Hyderabad",
+    locality: "Madhapur",
+    address: "100 Feet Road, Madhapur",
+    bedrooms: 0,
+    bathrooms: 1,
+    area_sqft: 850,
+    property_type: "Commercial",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1555529669-e69e7aa0db9a?w=1200&auto=format&fit=crop&q=80",
+    ],
+    is_featured: true,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: true,
+    created_at: SEED_CREATED_AT[1],
+  },
+  {
+    id: "hyd-comm-003",
+    title: "Premium Commercial Building in Gachibowli",
+    description:
+      "Fully independent commercial building for sale in Gachibowli. Ideal for corporate offices, banks, clinics, or upscale showrooms. Features high floor height, lift, and front road access.",
+    price: 150000000,
+    city: "Hyderabad",
+    locality: "Gachibowli",
+    address: "ORR Junction, Gachibowli",
+    bedrooms: 0,
+    bathrooms: 6,
+    area_sqft: 12000,
+    property_type: "Commercial",
+    listing_type: "sale",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80",
+    ],
+    is_featured: false,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: false,
+    created_at: SEED_CREATED_AT[2],
+  },
+  {
+    id: "hyd-comm-004",
+    title: "Boutique Office Suite in Financial District",
+    description:
+      "Modern boutique office suite for rent in the Financial District. Fully air-conditioned, 25 workstations, pantry, conference room, and high-speed elevator access.",
+    price: 250000,
+    city: "Hyderabad",
+    locality: "Financial District",
+    address: "ISB Road, Financial District",
+    bedrooms: 0,
+    bathrooms: 2,
+    area_sqft: 5000,
+    property_type: "Commercial",
+    listing_type: "rent",
+    status: "available",
+    images: [
+      "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200&auto=format&fit=crop&q=80",
+    ],
+    is_featured: false,
+    owner_verification_status: "verified",
+    property_verification_status: "verified",
+    phone_verified: true,
+    email_verified: true,
+    id_verified: true,
+    is_zero_brokerage: true,
+    is_premium: false,
+    created_at: SEED_CREATED_AT[3],
+  },
 ];
 
 export const BANGALORE_FALLBACK_PROPERTIES: Property[] = [
@@ -519,6 +743,19 @@ export async function fetchPublicPropertyFeed(
       const filtered = ALL_FALLBACK_PROPERTIES.filter((p) => {
         if (city && p.city.toLowerCase() !== city) return false;
         if (loc && !(p.locality?.toLowerCase().includes(loc) ?? false)) return false;
+        if (params?.listing && p.listing_type !== params.listing) return false;
+        if (params?.type) {
+          const typeLower = params.type.toLowerCase();
+          if (typeLower === "commercial") {
+            const isCommercial =
+              p.property_type?.toLowerCase() === "commercial" ||
+              p.title?.toLowerCase().includes("commercial") ||
+              p.description?.toLowerCase().includes("office");
+            if (!isCommercial) return false;
+          } else {
+            if (!p.property_type?.toLowerCase().includes(typeLower)) return false;
+          }
+        }
         if (
           q &&
           !p.title.toLowerCase().includes(q) &&
@@ -543,6 +780,19 @@ export async function fetchPublicPropertyFeed(
       const filtered = ALL_FALLBACK_PROPERTIES.filter((p) => {
         if (city && p.city.toLowerCase() !== city) return false;
         if (loc && !(p.locality?.toLowerCase().includes(loc) ?? false)) return false;
+        if (params?.listing && p.listing_type !== params.listing) return false;
+        if (params?.type) {
+          const typeLower = params.type.toLowerCase();
+          if (typeLower === "commercial") {
+            const isCommercial =
+              p.property_type?.toLowerCase() === "commercial" ||
+              p.title?.toLowerCase().includes("commercial") ||
+              p.description?.toLowerCase().includes("office");
+            if (!isCommercial) return false;
+          } else {
+            if (!p.property_type?.toLowerCase().includes(typeLower)) return false;
+          }
+        }
         if (
           q &&
           !p.title.toLowerCase().includes(q) &&

@@ -17,7 +17,11 @@ const PUBLIC_PAGES = [
   ["rent city", "/rent/hyderabad"],
   ["rent locality", "/rent/hyderabad/gachibowli"],
   ["buy", "/buy"],
+  ["buy city", "/buy/hyderabad"],
+  ["buy locality", "/buy/hyderabad/gachibowli"],
   ["commercial", "/commercial"],
+  ["commercial city", "/commercial/hyderabad"],
+  ["commercial locality", "/commercial/hyderabad/gachibowli"],
   ["listings", "/properties"],
   ["list property", "/list-property"],
 ] as const;
@@ -151,10 +155,25 @@ test.describe("SEO — indexing rules", () => {
         `sitemap must not list ${path}`,
       ).toBe(false);
     }
-    // The rental tree is the commercial priority; it was missing entirely.
+    // The rental, buy and commercial trees must be present in the sitemap.
     expect(
       locs.some((l) => new URL(l).pathname.startsWith("/rent")),
       "sitemap should include rental pages",
+    ).toBe(true);
+    expect(
+      locs.some((l) => new URL(l).pathname.startsWith("/buy")),
+      "sitemap should include buy pages",
+    ).toBe(true);
+    expect(
+      locs.some((l) => new URL(l).pathname.startsWith("/commercial")),
+      "sitemap should include commercial pages",
+    ).toBe(true);
+    expect(
+      locs.some((l) => {
+        const path = new URL(l).pathname;
+        return path.startsWith("/properties/") && path.length > 25;
+      }),
+      "sitemap should include friendly property slug URLs",
     ).toBe(true);
   });
 

@@ -65,10 +65,11 @@ import { ScheduleVisitModal } from "@/modules/interactions/components/ScheduleVi
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { SimilarProperties } from "@/modules/property/components/SimilarProperties";
-import { APP_NAME } from "@/config/app";
+import { APP_NAME, extractIdFromSlug } from "@/config/app";
 
 export function PropertyDetailPage() {
-  const { id } = useParams({ strict: false }) as { id: string };
+  const { id: slugOrId } = useParams({ strict: false }) as { id: string };
+  const id = extractIdFromSlug(slugOrId);
   const { has, toggle } = useFavorites();
   const { user } = useAuthSession();
   const tenantId = user?.id || "anonymous-tenant";
@@ -263,26 +264,80 @@ export function PropertyDetailPage() {
             Home
           </Link>
           <span>/</span>
-          <Link
-            to="/rent/$city"
-            params={{ city: property.city.toLowerCase() }}
-            className="capitalize hover:text-foreground transition"
-          >
-            Rent in {property.city}
-          </Link>
-          {property.locality && (
+          {property.property_type?.toLowerCase() === "commercial" ? (
             <>
-              <span>/</span>
               <Link
-                to="/rent/$city/$locality"
-                params={{
-                  city: property.city.toLowerCase(),
-                  locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
-                }}
-                className="hover:text-foreground transition"
+                to="/commercial/$city"
+                params={{ city: property.city.toLowerCase().replace(/\s+/g, "-") }}
+                className="capitalize hover:text-foreground transition"
               >
-                {property.locality}
+                Commercial in {property.city}
               </Link>
+              {property.locality && (
+                <>
+                  <span>/</span>
+                  <Link
+                    to="/commercial/$city/$locality"
+                    params={{
+                      city: property.city.toLowerCase().replace(/\s+/g, "-"),
+                      locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
+                    }}
+                    className="hover:text-foreground transition"
+                  >
+                    {property.locality}
+                  </Link>
+                </>
+              )}
+            </>
+          ) : property.listing_type === "sale" ? (
+            <>
+              <Link
+                to="/buy/$city"
+                params={{ city: property.city.toLowerCase().replace(/\s+/g, "-") }}
+                className="capitalize hover:text-foreground transition"
+              >
+                Buy in {property.city}
+              </Link>
+              {property.locality && (
+                <>
+                  <span>/</span>
+                  <Link
+                    to="/buy/$city/$locality"
+                    params={{
+                      city: property.city.toLowerCase().replace(/\s+/g, "-"),
+                      locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
+                    }}
+                    className="hover:text-foreground transition"
+                  >
+                    {property.locality}
+                  </Link>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Link
+                to="/rent/$city"
+                params={{ city: property.city.toLowerCase().replace(/\s+/g, "-") }}
+                className="capitalize hover:text-foreground transition"
+              >
+                Rent in {property.city}
+              </Link>
+              {property.locality && (
+                <>
+                  <span>/</span>
+                  <Link
+                    to="/rent/$city/$locality"
+                    params={{
+                      city: property.city.toLowerCase().replace(/\s+/g, "-"),
+                      locality: property.locality.toLowerCase().replace(/\s+/g, "-"),
+                    }}
+                    className="hover:text-foreground transition"
+                  >
+                    {property.locality}
+                  </Link>
+                </>
+              )}
             </>
           )}
           <span>/</span>
@@ -305,16 +360,39 @@ export function PropertyDetailPage() {
               >
                 <img
                   src={property.images[0]}
-                  alt="Property"
+                  alt={(() => {
+                    const furnishing = property.furnishing_status
+                      ? `${property.furnishing_status} `
+                      : "";
+                    const type = property.property_type || "property";
+                    const beds = property.bedrooms ? `${property.bedrooms} BHK ` : "";
+                    const action = property.listing_type === "sale" ? "for sale" : "for rent";
+                    const loc = property.locality ? `in ${property.locality}` : "";
+                    const city = property.city
+                      ? `${property.locality ? ", " : "in "}${property.city}`
+                      : "";
+                    return `${beds}${furnishing}${type} ${action} ${loc}${city} - exterior view`;
+                  })()}
                   className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
                 />
-                <div className="absolute top-4 left-4 flex gap-2 z-10">
+                <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
                   <span className="bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 backdrop-blur-sm">
                     <Maximize2 className="w-3.5 h-3.5" /> Photos
                   </span>
                   <span className="bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 backdrop-blur-sm">
                     <MapPin className="w-3.5 h-3.5" /> Location
                   </span>
+                  {property.video_url && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToVideo();
+                      }}
+                      className="bg-black/70 hover:bg-black/80 text-white text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1.5 backdrop-blur-sm transition cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" /> Video Tour
+                    </button>
+                  )}
                 </div>
               </div>
               {/* Right Images */}
@@ -325,7 +403,19 @@ export function PropertyDetailPage() {
                 >
                   <img
                     src={property.images[1] || property.images[0]}
-                    alt="Property"
+                    alt={(() => {
+                      const furnishing = property.furnishing_status
+                        ? `${property.furnishing_status} `
+                        : "";
+                      const type = property.property_type || "property";
+                      const beds = property.bedrooms ? `${property.bedrooms} BHK ` : "";
+                      const action = property.listing_type === "sale" ? "for sale" : "for rent";
+                      const loc = property.locality ? `in ${property.locality}` : "";
+                      const city = property.city
+                        ? `${property.locality ? ", " : "in "}${property.city}`
+                        : "";
+                      return `${beds}${furnishing}${type} ${action} ${loc}${city} - interior view`;
+                    })()}
                     className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
                   />
                   <div className="absolute top-4 right-4 z-10">
@@ -347,7 +437,19 @@ export function PropertyDetailPage() {
                 >
                   <img
                     src={property.images[2] || property.images[0]}
-                    alt="Property"
+                    alt={(() => {
+                      const furnishing = property.furnishing_status
+                        ? `${property.furnishing_status} `
+                        : "";
+                      const type = property.property_type || "property";
+                      const beds = property.bedrooms ? `${property.bedrooms} BHK ` : "";
+                      const action = property.listing_type === "sale" ? "for sale" : "for rent";
+                      const loc = property.locality ? `in ${property.locality}` : "";
+                      const city = property.city
+                        ? `${property.locality ? ", " : "in "}${property.city}`
+                        : "";
+                      return `${beds}${furnishing}${type} ${action} ${loc}${city} - alternative view`;
+                    })()}
                     className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition duration-300 group-hover:bg-black/60">
@@ -388,6 +490,21 @@ export function PropertyDetailPage() {
                 {property.description}
               </p>
             </div>
+
+            {/* Video Tour Section */}
+            {property.video_url && (
+              <div
+                ref={videoSectionRef}
+                className="border border-border/60 rounded-sm bg-card p-6 shadow-sm scroll-mt-24"
+              >
+                <h2 className="text-lg font-bold border-b-2 border-rose-500 pb-2 inline-block mb-4">
+                  Video Tour
+                </h2>
+                <div className="relative overflow-hidden rounded-xl bg-black/5 shadow-md border border-border/40">
+                  <VideoPlayer src={property.video_url} poster={property.images[0]} />
+                </div>
+              </div>
+            )}
 
             {/* Activity */}
             <div className="border border-border/60 rounded-sm bg-card p-6 shadow-sm">

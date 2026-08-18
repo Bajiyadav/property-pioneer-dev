@@ -22,6 +22,10 @@ class Property {
   final String? videoStatus;
   final bool isFeatured;
   final bool isZeroBrokerage;
+  final String? ownerId;
+  final String? ownerName;
+  final String? ownerPhone;
+  final String? ownerEmail;
   final DateTime createdAt;
 
   Property({
@@ -48,6 +52,10 @@ class Property {
     this.videoStatus,
     this.isFeatured = false,
     this.isZeroBrokerage = true,
+    this.ownerId,
+    this.ownerName,
+    this.ownerPhone,
+    this.ownerEmail,
     required this.createdAt,
   });
 
@@ -79,6 +87,10 @@ class Property {
       videoStatus: json['video_status'] as String?,
       isFeatured: json['is_featured'] as bool? ?? false,
       isZeroBrokerage: json['is_zero_brokerage'] as bool? ?? true,
+      ownerId: json['owner_id'] as String?,
+      ownerName: json['owner_name'] as String?,
+      ownerPhone: json['owner_phone'] as String?,
+      ownerEmail: json['owner_email'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -110,6 +122,10 @@ class Property {
       'video_status': videoStatus,
       'is_featured': isFeatured,
       'is_zero_brokerage': isZeroBrokerage,
+      'owner_id': ownerId,
+      'owner_name': ownerName,
+      'owner_phone': ownerPhone,
+      'owner_email': ownerEmail,
       'created_at': createdAt.toIso8601String(),
     };
   }

@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { type Property, formatPrice } from "@/modules/property/services/propertyQueries";
+import { generatePropertySlug } from "@/config/app";
 
 /**
  * Clean, production-safe Map View & Locality Cluster component.
@@ -183,7 +184,7 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
                   </span>
                   <Link
                     to="/properties/$id"
-                    params={{ id: selectedCluster.sampleProperty.id }}
+                    params={{ id: generatePropertySlug(selectedCluster.sampleProperty) }}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                   >
                     <span>View</span>

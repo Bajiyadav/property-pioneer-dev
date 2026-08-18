@@ -39,6 +39,7 @@ export function SearchUI({
   subtitle,
   baseUrl,
 }: SearchUIProps) {
+  const navigate = useNavigate();
   // Record the search once results have settled, not on every keystroke:
   // `isLoading` gating plus the serialised search key means one row per distinct
   // query. No-ops entirely without analytics consent.
@@ -326,7 +327,43 @@ export function SearchUI({
         </div>
 
         <div className="flex flex-col sm:items-end gap-3 shrink-0">
-          <LocationPicker currentCity={search.city} currentLocality={search.locality} />
+          <LocationPicker
+            currentCity={search.city}
+            currentLocality={search.locality}
+            onLocationSelect={(city, locality) => {
+              const citySlug = city.toLowerCase().replace(/\s+/g, "-");
+              const localitySlug = locality
+                ? locality.toLowerCase().replace(/\s+/g, "-")
+                : undefined;
+              let prefix = "/rent";
+              if (baseUrl.startsWith("/buy") || search.listing === "sale") {
+                prefix = "/buy";
+              } else if (baseUrl.startsWith("/commercial") || search.type === "commercial") {
+                prefix = "/commercial";
+              }
+              if (localitySlug) {
+                navigate({
+                  to: `${prefix}/$city/$locality`,
+                  params: { city: citySlug, locality: localitySlug },
+                  search: (prev: PropertySearchParams) => {
+                    const next = { ...prev };
+                    delete next.locality;
+                    return next;
+                  },
+                });
+              } else {
+                navigate({
+                  to: `${prefix}/$city`,
+                  params: { city: citySlug },
+                  search: (prev: PropertySearchParams) => {
+                    const next = { ...prev };
+                    delete next.locality;
+                    return next;
+                  },
+                });
+              }
+            }}
+          />
 
           <div className="flex items-center gap-2">
             <button

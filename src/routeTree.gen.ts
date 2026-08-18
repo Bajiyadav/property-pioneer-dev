@@ -14,8 +14,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
-import { Route as BuyRouteImport } from './routes/buy'
-import { Route as CommercialRouteImport } from './routes/commercial'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
@@ -30,6 +28,8 @@ import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
+import { Route as BuyIndexRouteImport } from './routes/buy.index'
+import { Route as CommercialIndexRouteImport } from './routes/commercial.index'
 import { Route as ListPropertyWizardRouteImport } from './routes/list-property.wizard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
@@ -47,6 +47,10 @@ import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
+import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
+import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
+import { Route as CommercialCityIndexRouteImport } from './routes/commercial.$city.index'
+import { Route as CommercialCityLocalityRouteImport } from './routes/commercial.$city.$locality'
 import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
@@ -77,16 +81,6 @@ const AuthRoute = AuthRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuyRoute = BuyRouteImport.update({
-  id: '/buy',
-  path: '/buy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommercialRoute = CommercialRouteImport.update({
-  id: '/commercial',
-  path: '/commercial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiePolicyRoute = CookiePolicyRouteImport.update({
@@ -157,6 +151,16 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth_/callback',
   path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyIndexRoute = BuyIndexRouteImport.update({
+  id: '/buy/',
+  path: '/buy/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommercialIndexRoute = CommercialIndexRouteImport.update({
+  id: '/commercial/',
+  path: '/commercial/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListPropertyWizardRoute = ListPropertyWizardRouteImport.update({
@@ -254,6 +258,26 @@ const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   path: '/api/public/enquiries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BuyCityIndexRoute = BuyCityIndexRouteImport.update({
+  id: '/buy/$city/',
+  path: '/buy/$city/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuyCityLocalityRoute = BuyCityLocalityRouteImport.update({
+  id: '/buy/$city/$locality',
+  path: '/buy/$city/$locality',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommercialCityIndexRoute = CommercialCityIndexRouteImport.update({
+  id: '/commercial/$city/',
+  path: '/commercial/$city/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommercialCityLocalityRoute = CommercialCityLocalityRouteImport.update({
+  id: '/commercial/$city/$locality',
+  path: '/commercial/$city/$locality',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RentCityIndexRoute = RentCityIndexRouteImport.update({
   id: '/rent/$city/',
   path: '/rent/$city/',
@@ -300,8 +324,6 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
-  '/buy': typeof BuyRoute
-  '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -318,6 +340,8 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/buy/': typeof BuyIndexRoute
+  '/commercial/': typeof CommercialIndexRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -331,9 +355,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/buy/$city/$locality': typeof BuyCityLocalityRoute
+  '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/buy/$city/': typeof BuyCityIndexRoute
+  '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -346,8 +374,6 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
-  '/buy': typeof BuyRoute
-  '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -361,6 +387,8 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/buy': typeof BuyIndexRoute
+  '/commercial': typeof CommercialIndexRoute
   '/properties': typeof PropertiesIndexRoute
   '/rent': typeof RentIndexRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -374,9 +402,13 @@ export interface FileRoutesByTo {
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/buy/$city/$locality': typeof BuyCityLocalityRoute
+  '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/buy/$city': typeof BuyCityIndexRoute
+  '/commercial/$city': typeof CommercialCityIndexRoute
   '/rent/$city': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -391,8 +423,6 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
-  '/buy': typeof BuyRoute
-  '/commercial': typeof CommercialRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -409,6 +439,8 @@ export interface FileRoutesById {
   '/auth_/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/buy/': typeof BuyIndexRoute
+  '/commercial/': typeof CommercialIndexRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -422,9 +454,13 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/buy/$city/$locality': typeof BuyCityLocalityRoute
+  '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/buy/$city/': typeof BuyCityIndexRoute
+  '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -439,8 +475,6 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
-    | '/buy'
-    | '/commercial'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -457,6 +491,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/buy/'
+    | '/commercial/'
     | '/properties/'
     | '/rent/'
     | '/admin/access'
@@ -470,9 +506,13 @@ export interface FileRouteTypes {
     | '/dashboard/owner'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
+    | '/buy/$city/$locality'
+    | '/commercial/$city/$locality'
     | '/rent/$city/$locality'
     | '/admin/'
     | '/dashboard/'
+    | '/buy/$city/'
+    | '/commercial/$city/'
     | '/rent/$city/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -485,8 +525,6 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
-    | '/buy'
-    | '/commercial'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -500,6 +538,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/buy'
+    | '/commercial'
     | '/properties'
     | '/rent'
     | '/admin/access'
@@ -513,9 +553,13 @@ export interface FileRouteTypes {
     | '/dashboard/owner'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
+    | '/buy/$city/$locality'
+    | '/commercial/$city/$locality'
     | '/rent/$city/$locality'
     | '/admin'
     | '/dashboard'
+    | '/buy/$city'
+    | '/commercial/$city'
     | '/rent/$city'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -529,8 +573,6 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
-    | '/buy'
-    | '/commercial'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -547,6 +589,8 @@ export interface FileRouteTypes {
     | '/auth_/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/buy/'
+    | '/commercial/'
     | '/properties/'
     | '/rent/'
     | '/_authenticated/admin/access'
@@ -560,9 +604,13 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/owner'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
+    | '/buy/$city/$locality'
+    | '/commercial/$city/$locality'
     | '/rent/$city/$locality'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
+    | '/buy/$city/'
+    | '/commercial/$city/'
     | '/rent/$city/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -577,8 +625,6 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRoute
-  BuyRoute: typeof BuyRoute
-  CommercialRoute: typeof CommercialRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
@@ -591,10 +637,16 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  BuyIndexRoute: typeof BuyIndexRoute
+  CommercialIndexRoute: typeof CommercialIndexRoute
   RentIndexRoute: typeof RentIndexRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
+  BuyCityLocalityRoute: typeof BuyCityLocalityRoute
+  CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
   RentCityLocalityRoute: typeof RentCityLocalityRoute
+  BuyCityIndexRoute: typeof BuyCityIndexRoute
+  CommercialCityIndexRoute: typeof CommercialCityIndexRoute
   RentCityIndexRoute: typeof RentCityIndexRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
@@ -638,20 +690,6 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/buy': {
-      id: '/buy'
-      path: '/buy'
-      fullPath: '/buy'
-      preLoaderRoute: typeof BuyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/commercial': {
-      id: '/commercial'
-      path: '/commercial'
-      fullPath: '/commercial'
-      preLoaderRoute: typeof CommercialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookie-policy': {
@@ -750,6 +788,20 @@ declare module '@tanstack/react-router' {
       path: '/auth/callback'
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy/': {
+      id: '/buy/'
+      path: '/buy'
+      fullPath: '/buy/'
+      preLoaderRoute: typeof BuyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commercial/': {
+      id: '/commercial/'
+      path: '/commercial'
+      fullPath: '/commercial/'
+      preLoaderRoute: typeof CommercialIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list-property/wizard': {
@@ -869,6 +921,34 @@ declare module '@tanstack/react-router' {
       path: '/api/public/enquiries'
       fullPath: '/api/public/enquiries'
       preLoaderRoute: typeof ApiPublicEnquiriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy/$city/': {
+      id: '/buy/$city/'
+      path: '/buy/$city'
+      fullPath: '/buy/$city/'
+      preLoaderRoute: typeof BuyCityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/buy/$city/$locality': {
+      id: '/buy/$city/$locality'
+      path: '/buy/$city/$locality'
+      fullPath: '/buy/$city/$locality'
+      preLoaderRoute: typeof BuyCityLocalityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commercial/$city/': {
+      id: '/commercial/$city/'
+      path: '/commercial/$city'
+      fullPath: '/commercial/$city/'
+      preLoaderRoute: typeof CommercialCityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commercial/$city/$locality': {
+      id: '/commercial/$city/$locality'
+      path: '/commercial/$city/$locality'
+      fullPath: '/commercial/$city/$locality'
+      preLoaderRoute: typeof CommercialCityLocalityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rent/$city/': {
@@ -1014,8 +1094,6 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
   BlogRoute: BlogRoute,
-  BuyRoute: BuyRoute,
-  CommercialRoute: CommercialRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
@@ -1028,10 +1106,16 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  BuyIndexRoute: BuyIndexRoute,
+  CommercialIndexRoute: CommercialIndexRoute,
   RentIndexRoute: RentIndexRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
+  BuyCityLocalityRoute: BuyCityLocalityRoute,
+  CommercialCityLocalityRoute: CommercialCityLocalityRoute,
   RentCityLocalityRoute: RentCityLocalityRoute,
+  BuyCityIndexRoute: BuyCityIndexRoute,
+  CommercialCityIndexRoute: CommercialCityIndexRoute,
   RentCityIndexRoute: RentCityIndexRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,

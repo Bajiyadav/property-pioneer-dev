@@ -55,16 +55,26 @@ import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
 import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
-import { APP_NAME, APP_URL, APP_LOGO, getCanonicalUrl } from "@/config/app";
+import {
+  APP_NAME,
+  APP_URL,
+  APP_LOGO,
+  getCanonicalUrl,
+  extractIdFromSlug,
+  generatePropertySlug,
+} from "@/config/app";
 
-const propertyQueryOptions = (id: string) =>
-  queryOptions({ queryKey: ["property", id], queryFn: () => fetchProperty(id) });
+const propertyQueryOptions = (slugOrId: string) => {
+  const id = extractIdFromSlug(slugOrId);
+  return queryOptions({ queryKey: ["property", id], queryFn: () => fetchProperty(id) });
+};
 
 export const Route = createFileRoute("/properties/$id")({
-  loader: ({ params, context }) =>
-    context.queryClient.ensureQueryData(propertyQueryOptions(params.id)).catch(() => null),
+  loader: ({ params, context }) => {
+    const id = extractIdFromSlug(params.id);
+    return context.queryClient.ensureQueryData(propertyQueryOptions(id)).catch(() => null);
+  },
   head: ({ params, loaderData }) => {
-    const url = getCanonicalUrl(`/properties/${params.id}`);
     if (!loaderData) {
       return {
         meta: [
@@ -80,9 +90,13 @@ export const Route = createFileRoute("/properties/$id")({
         ],
       };
     }
+    const canonicalSlug = generatePropertySlug(loaderData);
+    const url = getCanonicalUrl(`/properties/${canonicalSlug}`);
     const title = `${loaderData.title} — ${APP_NAME}`;
-    const description = `${loaderData.bedrooms} BHK in ${loaderData.city} on ${APP_NAME}. View photos, details, and enquire.`;
+    const description = `${loaderData.bedrooms || 0} BHK in ${loaderData.city} on ${APP_NAME}. View photos, details, and enquire.`;
     const image = loaderData.images?.[0];
+    const isPublic = loaderData.is_approved === true || loaderData.status === "available";
+    const robots = isPublic ? "index, follow" : "noindex, nofollow";
     return {
       meta: [
         { title },
@@ -95,6 +109,7 @@ export const Route = createFileRoute("/properties/$id")({
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "robots", content: robots },
         ...(image && image.startsWith("https://")
           ? [
               { property: "og:image", content: image },

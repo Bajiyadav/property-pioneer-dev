@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { type Property, formatPriceCompact } from "@/modules/property/services/propertyQueries";
+import { generatePropertySlug } from "@/config/app";
 import { useFavorites } from "@/modules/property/hooks/useFavorites";
 import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
@@ -130,7 +131,7 @@ export function PropertyCard({
       <div className={imageClasses}>
         <Link
           to="/properties/$id"
-          params={{ id: property.id }}
+          params={{ id: generatePropertySlug(property) }}
           className="block h-full w-full"
           tabIndex={-1}
           aria-hidden="true"
@@ -203,7 +204,7 @@ export function PropertyCard({
           <div className="min-w-0 flex-1">
             <Link
               to="/properties/$id"
-              params={{ id: property.id }}
+              params={{ id: generatePropertySlug(property) }}
               className="group-hover:text-primary transition-colors block"
             >
               <h3 className="line-clamp-1 text-base sm:text-lg font-extrabold text-foreground tracking-tight hover:text-primary transition-colors">
@@ -312,7 +313,7 @@ export function PropertyCard({
           </span>
           <Link
             to="/properties/$id"
-            params={{ id: property.id }}
+            params={{ id: generatePropertySlug(property) }}
             className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary hover:bg-primary/95 px-4.5 py-2 text-xs font-bold text-primary-foreground transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
           >
             <span>Get Owner Details</span>

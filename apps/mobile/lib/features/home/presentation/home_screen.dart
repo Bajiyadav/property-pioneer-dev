@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../models/property.dart';
+import '../../../models/user_profile.dart';
 import '../../../services/property_service.dart';
 import '../../../services/favorites_service.dart';
 import '../properties/presentation/property_card_widget.dart';
 import '../properties/presentation/property_detail_screen.dart';
+import '../../../providers/app_providers.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _propertyService = PropertyService();
   final _favoritesService = FavoritesService();
 
@@ -62,6 +66,39 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              ref.watch(authStateChangesProvider);
+              final user = ref.read(authServiceProvider).currentUser;
+
+              if (user != null) {
+                return IconButton(
+                  icon: const Icon(Icons.dashboard_outlined, color: AppTheme.primaryColor),
+                  tooltip: 'Go to Dashboard',
+                  onPressed: () async {
+                    final profile = await ref.read(userProfileProvider.future);
+                    if (context.mounted) {
+                      if (profile?.role == UserRole.admin) {
+                        context.go('/admin-dashboard');
+                      } else if (profile?.role == UserRole.owner) {
+                        context.go('/owner-dashboard');
+                      } else {
+                        context.go('/customer-dashboard');
+                      }
+                    }
+                  },
+                );
+              } else {
+                return TextButton(
+                  onPressed: () => context.go('/login'),
+                  child: const Text(
+                    'Sign In',
+                    style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  ),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {},
@@ -159,27 +196,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final prop = _properties[index];
-                    final isFav = _favoriteIds.contains(prop.id);
+                    final isFav = ref.watch(favoritesProvider).contains(prop.id);
                     return PropertyCardWidget(
                       property: prop,
                       isFavorite: isFav,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PropertyDetailScreen(propertyId: prop.id),
-                          ),
-                        );
+                        context.go('/properties/${prop.id}');
                       },
-                      onToggleFavorite: () async {
-                        final nowFav = await _favoritesService.toggleFavorite(prop.id);
-                        setState(() {
-                          if (nowFav) {
-                            _favoriteIds.add(prop.id);
-                          } else {
-                            _favoriteIds.remove(prop.id);
-                          }
-                        });
+                      onToggleFavorite: () {
+                        ref.read(favoritesProvider.notifier).toggleFavorite(prop.id);
                       },
                     );
                   },

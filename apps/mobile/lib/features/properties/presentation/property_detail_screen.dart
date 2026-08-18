@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:video_player/video_player.dart';
 import '../../../config/theme.dart';
 import '../../../models/property.dart';
 import '../../../services/property_service.dart';
 import '../../../services/enquiry_service.dart';
 import '../../../shared/widgets/property_watermark_widget.dart';
+import '../../../providers/app_providers.dart';
 
-class PropertyDetailScreen extends StatefulWidget {
+class PropertyDetailScreen extends ConsumerStatefulWidget {
   final String propertyId;
 
   const PropertyDetailScreen({Key? key, required this.propertyId})
       : super(key: key);
 
   @override
-  State<PropertyDetailScreen> createState() => _PropertyDetailScreenState();
+  ConsumerState<PropertyDetailScreen> createState() => _PropertyDetailScreenState();
 }
 
-class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
+class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   final _propertyService = PropertyService();
   final _enquiryService = EnquiryService();
 
@@ -24,11 +27,18 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   List<Property> _similarProperties = [];
   bool _isLoading = true;
   int _currentImageIndex = 0;
+  VideoPlayerController? _videoController;
 
   @override
   void initState() {
     super.initState();
     _loadProperty();
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProperty() async {
@@ -41,6 +51,13 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
         _similarProperties = similar;
         _isLoading = false;
       });
+
+      if (prop.hasVideoTour) {
+        _videoController = VideoPlayerController.networkUrl(Uri.parse(prop.videoUrl!))
+          ..initialize().then((_) {
+            setState(() {});
+          });
+      }
     } else {
       setState(() => _isLoading = false);
     }
@@ -202,6 +219,22 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  ref.watch(favoritesProvider).contains(property.id)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: ref.watch(favoritesProvider).contains(property.id)
+                      ? Colors.red
+                      : Colors.white,
+                ),
+                onPressed: () {
+                  ref.read(favoritesProvider.notifier).toggleFavorite(property.id);
+                },
+              ),
+            ],
+            backgroundColor: AppTheme.primaryDark,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -308,6 +341,46 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       _nearbyItem('IT & Tech Hub', property.itPark!, Icons.business),
                     if (property.hospital != null)
                       _nearbyItem('Healthcare', property.hospital!, Icons.local_hospital),
+                  ],
+
+                  // Video Tour Section
+                  if (property.hasVideoTour && _videoController != null && _videoController!.value.isInitialized) ...[
+                    const SizedBox(height: 20),
+                    const Text('Video Tour', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.black,
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AspectRatio(
+                            aspectRatio: _videoController!.value.aspectRatio,
+                            child: VideoPlayer(_videoController!),
+                          ),
+                          IconButton(
+                            iconSize: 48,
+                            icon: Icon(
+                              _videoController!.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (_videoController!.value.isPlaying) {
+                                  _videoController!.pause();
+                                } else {
+                                  _videoController!.play();
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
 
                   // Description

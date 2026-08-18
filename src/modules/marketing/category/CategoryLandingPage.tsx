@@ -73,6 +73,7 @@ function CategoryFaqItem({ q, a }: CategoryFaq) {
 }
 
 export function CategoryLandingPage({
+  slug,
   badge,
   title,
   titleHighlight,
@@ -80,6 +81,7 @@ export function CategoryLandingPage({
   heroGradient,
   badgeColor,
   searchListingType,
+  searchPropertyType,
   filterPredicate,
   hotspots,
   features,
@@ -188,17 +190,26 @@ export function CategoryLandingPage({
                 key={spot.name}
                 onClick={() => {
                   setSelectedLocality(spot.name);
-                  navigate({
-                    to: "/properties",
-                    search: {
-                      q: spot.name,
-                      city: "Hyderabad",
-                      listing: searchListingType === "all" ? "" : searchListingType,
-                      minPrice: 0,
-                      maxPrice: 0,
-                      beds: 0,
-                    },
-                  });
+                  const citySlug = "hyderabad";
+                  const localitySlug = spot.name.toLowerCase().replace(/\s+/g, "-");
+                  if (slug === "buy" || slug === "commercial") {
+                    navigate({
+                      to: `/${slug}/$city/$locality`,
+                      params: { city: citySlug, locality: localitySlug },
+                    });
+                  } else {
+                    navigate({
+                      to: "/properties",
+                      search: {
+                        q: spot.name,
+                        city: "Hyderabad",
+                        listing: searchListingType === "all" ? "" : searchListingType,
+                        minPrice: 0,
+                        maxPrice: 0,
+                        beds: 0,
+                      },
+                    });
+                  }
                 }}
                 className="rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition cursor-pointer"
               >
