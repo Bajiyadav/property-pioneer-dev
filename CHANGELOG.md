@@ -1,3 +1,8 @@
+## v0.23.0 — 2026-08-18
+
+### Features
+- feat(notifications): add Meta WhatsApp Cloud API and Seedha brand templates (428b847)
+
 ## v0.22.0 — 2026-08-18
 
 ### Features
