@@ -1,3 +1,8 @@
+## v0.17.3 — 2026-08-18
+
+### Fixes
+- fix(billing): stop an unpayable paywall blocking contact and visits (182fd5d)
+
 ## v0.17.2 — 2026-08-18
 
 ### Fixes
