@@ -54,7 +54,7 @@ test.describe("public routes", () => {
     // Not a pinned year: the notice is derived from the current date, so
     // hard-coding one here would re-introduce the staleness this checks for.
     await expect(page.locator("footer").last()).toContainText(
-      `© ${new Date().getFullYear()} Seedha Properties. All Rights Reserved.`,
+      `© ${new Date().getFullYear()} SEEDHA Properties. All Rights Reserved.`,
     );
   });
 
@@ -65,7 +65,7 @@ test.describe("public routes", () => {
       await page.goto(path, { waitUntil: "domcontentloaded" });
       await expect(page.locator("footer"), `${path} should have one footer`).toHaveCount(1);
       const copies = await page
-        .getByText(`© ${new Date().getFullYear()} Seedha Properties. All Rights Reserved.`)
+        .getByText(`© ${new Date().getFullYear()} SEEDHA Properties. All Rights Reserved.`)
         .count();
       expect(copies, `${path} should show the copyright once`).toBe(1);
     }

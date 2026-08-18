@@ -37,6 +37,8 @@ dist-ssr
 .env.local
 .env.*.local
 !.env.example
+.agents/mcp_config.json
+
 
 # Test + coverage output
 coverage/

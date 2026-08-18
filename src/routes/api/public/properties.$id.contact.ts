@@ -77,7 +77,7 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         }
 
         if (body.turnstileToken) {
-          const captcha = await verifyTurnstile(body.turnstileToken, ip);
+          const captcha = await verifyTurnstile(body.turnstileToken, ip, "contact");
           if (!captcha.ok) {
             await recordAudit({
               event: "contact.rejected",

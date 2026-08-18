@@ -11,10 +11,12 @@ import {
   Building2,
   CalendarDays,
   CreditCard,
+  ExternalLink,
   Eye,
   FileEdit,
   LayoutDashboard,
   MessageSquare,
+  Phone,
   PlusCircle,
   Settings,
   Star,
@@ -111,12 +113,20 @@ function OwnerDashboard({ user }: { user: User | null }) {
   // Real per-owner portfolio, scoped server-side to the signed-in owner_id.
   const fetchMine = useServerFn(getMyListings);
   const deleteMine = useServerFn(removeListing);
+  const fetchLeads = useServerFn(getMyLeads);
+
   const {
     data: mine,
     isLoading: mineLoading,
     isError: mineError,
     refetch: refetchMine,
   } = useQuery({ queryKey: ["owner", "listings"], queryFn: () => fetchMine({}), retry: false });
+
+  const { data: myLeads, isLoading: leadsLoading } = useQuery({
+    queryKey: ["owner", "leads"],
+    queryFn: () => fetchLeads({}),
+    retry: false,
+  });
 
   const queryClient = useQueryClient();
   const removal = useMutation({
@@ -501,12 +511,81 @@ function OwnerDashboard({ user }: { user: User | null }) {
       )}
 
       {activeTab === "enquiries" && (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <SectionHeader
-            title="Tenant Messages"
-            subtitle="Direct conversations with interested tenants"
+            title="Tenant Enquiries & Leads"
+            subtitle="Verified leads from prospective tenants with direct WhatsApp response"
           />
-          <ChatInterface currentUserId={user?.id || ""} role="owner" chats={myChats} />
+
+          {/* Real Leads from Database */}
+          {leadsLoading ? (
+            <LoadingSkeleton rows={2} />
+          ) : myLeads && myLeads.length > 0 ? (
+            <div className="grid gap-3">
+              {myLeads.map((lead) => {
+                const cleanPhone = lead.phone.replace(/\D/g, "");
+                const waUrl = `https://wa.me/91${cleanPhone.replace(/^91/, "")}?text=${encodeURIComponent(
+                  `Hi ${lead.name}, thank you for your enquiry on "${lead.propertyTitle}". When would you like to schedule a walkthrough?`,
+                )}`;
+
+                return (
+                  <div
+                    key={lead.id}
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-border/70 bg-card p-4.5 shadow-sm transition hover:border-border sm:flex-row sm:items-center"
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-bold text-foreground">{lead.name}</h4>
+                        <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          {lead.propertyTitle}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {relativeTime(lead.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">"{lead.message}"</p>
+                      <p className="text-[11px] font-medium text-foreground/80">📞 {lead.phone}</p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#20bd5a] hover:shadow"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        Reply on WhatsApp
+                      </a>
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/60 px-3.5 py-2 text-xs font-bold text-foreground transition hover:bg-secondary"
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                        Call
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border/70 bg-card/50 p-6 text-center">
+              <MessageSquare className="mx-auto h-7 w-7 text-muted-foreground/60" />
+              <p className="mt-2 text-xs font-semibold text-foreground">No tenant enquiries yet</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                When tenants submit enquiries on your live listings, they will appear here with
+                instant WhatsApp reply buttons.
+              </p>
+            </div>
+          )}
+
+          <div className="pt-2">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              In-App Chat Threads
+            </h3>
+            <ChatInterface currentUserId={user?.id || ""} role="owner" chats={myChats} />
+          </div>
         </div>
       )}
 

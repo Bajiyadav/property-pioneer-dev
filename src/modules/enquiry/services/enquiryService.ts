@@ -32,7 +32,8 @@ export const enquiryInputSchema = z.object({
 
 export type EnquiryInput = z.infer<typeof enquiryInputSchema>;
 
-export type EnquiryResult = { ok: true } | { ok: false; error: string; retryAfterSeconds?: number };
+export type EnquiryResult =
+  { ok: true; whatsappUrl?: string } | { ok: false; error: string; retryAfterSeconds?: number };
 
 export async function submitEnquiry(input: EnquiryInput): Promise<EnquiryResult> {
   const res = await fetch("/api/public/enquiries", {
@@ -41,7 +42,7 @@ export async function submitEnquiry(input: EnquiryInput): Promise<EnquiryResult>
     body: JSON.stringify(input),
   });
 
-  let payload: { error?: string; retryAfterSeconds?: number } = {};
+  let payload: { error?: string; retryAfterSeconds?: number; whatsappUrl?: string } = {};
   try {
     payload = (await res.json()) as typeof payload;
   } catch {
@@ -55,7 +56,7 @@ export async function submitEnquiry(input: EnquiryInput): Promise<EnquiryResult>
       retryAfterSeconds: payload.retryAfterSeconds,
     };
   }
-  return { ok: true };
+  return { ok: true, whatsappUrl: payload.whatsappUrl };
 }
 
 export const TURNSTILE_SITE_KEY: string | undefined =

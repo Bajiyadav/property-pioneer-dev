@@ -94,8 +94,8 @@ export const Route = createFileRoute("/api/public/enquiries")({
           return jsonResponse({ error: "That was a little too quick — please try again." }, 400);
         }
 
-        // ── 4. CAPTCHA (no-op until Turnstile is configured) ────────────
-        const captcha = await verifyTurnstile(input.turnstileToken, ip);
+        // ── 4. CAPTCHA (verified via Cloudflare Turnstile siteverify) ────
+        const captcha = await verifyTurnstile(input.turnstileToken, ip, "enquiry");
         if (!captcha.ok) {
           await recordAudit({
             event: "enquiry.rejected",
@@ -188,7 +188,7 @@ export const Route = createFileRoute("/api/public/enquiries")({
         // ── 6. Property must exist and be publicly listed ───────────────
         const { data: property, error: propertyError } = await db
           .from("properties")
-          .select("id")
+          .select("id, title, address, owner_id, owner_name, owner_phone")
           .eq("id", input.propertyId)
           .eq("is_approved", true)
           .maybeSingle();
@@ -224,16 +224,42 @@ export const Route = createFileRoute("/api/public/enquiries")({
           return jsonResponse({ error: "Could not send your enquiry." }, 500);
         }
 
+        // ── 8. Dispatch Automated WhatsApp / SMS / In-App Notification ─
+        const { dispatchLeadNotification } =
+          await import("@/modules/notifications/services/leadNotificationService.server");
+        const notifyResult = await dispatchLeadNotification(db, {
+          propertyId: property.id,
+          propertyTitle: property.title,
+          propertyAddress: property.address,
+          ownerId: property.owner_id,
+          ownerName: property.owner_name,
+          ownerPhone: property.owner_phone,
+          customerName: input.name,
+          customerPhone: input.phone,
+          customerMessage: input.message,
+        });
+
         await recordAudit({
           event: "enquiry.created",
           ip,
           userAgent,
           subjectType: "property",
           subjectId: input.propertyId,
-          details: { captchaConfigured: captcha.configured },
+          details: {
+            captchaConfigured: captcha.configured,
+            inAppNotified: notifyResult.inAppNotificationCreated,
+            whatsappSent: notifyResult.whatsappMessageSent,
+            smsSent: notifyResult.smsMessageSent,
+          },
         });
 
-        return jsonResponse({ ok: true }, 201);
+        return jsonResponse(
+          {
+            ok: true,
+            whatsappUrl: notifyResult.whatsappDirectUrl || undefined,
+          },
+          201,
+        );
       },
     },
   },

@@ -92,30 +92,76 @@ export async function recordAudit(entry: AuditEvent): Promise<void> {
 
 /**
  * Cloudflare Turnstile verification.
- * Returns `true` when the CAPTCHA is not configured, so the platform runs
- * unchanged until the secret is provisioned.
+ * Follows Cloudflare's canonical server-side siteverify specification.
+ * Returns `true` when the CAPTCHA is not configured in local development,
+ * so the platform runs smoothly until the secret is provisioned.
  */
 export async function verifyTurnstile(
   token: string | undefined,
   ip: string,
+  expectedAction?: string,
 ): Promise<{ ok: boolean; configured: boolean; reason?: string }> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
+  const secret = process.env.TURNSTILE_SECRET || process.env.TURNSTILE_SECRET_KEY;
   if (!secret) return { ok: true, configured: false };
-  if (!token) return { ok: false, configured: true, reason: "missing-token" };
+  if (!token || typeof token !== "string" || token.length === 0 || token.length > 4096) {
+    return { ok: false, configured: true, reason: "missing-token" };
+  }
+
+  const expectedHostnames = new Set(
+    (process.env.TURNSTILE_HOSTNAMES ?? "")
+      .split(",")
+      .map((h) => h.trim())
+      .filter(Boolean),
+  );
 
   try {
-    const body = new URLSearchParams({ secret, response: token });
-    if (ip && ip !== "unknown") body.set("remoteip", ip);
+    const body = new URLSearchParams({
+      secret,
+      response: token,
+    });
+    if (ip && ip !== "unknown") {
+      body.set("remoteip", ip);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10_000);
 
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body,
+      signal: controller.signal,
     });
-    const data = (await res.json()) as { success?: boolean; "error-codes"?: string[] };
-    return data.success
-      ? { ok: true, configured: true }
-      : { ok: false, configured: true, reason: (data["error-codes"] ?? []).join(",") || "failed" };
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      return { ok: false, configured: true, reason: `http-${res.status}` };
+    }
+
+    const data = (await res.json()) as {
+      success?: boolean;
+      action?: string;
+      hostname?: string;
+      "error-codes"?: string[];
+    };
+
+    if (!data.success) {
+      return {
+        ok: false,
+        configured: true,
+        reason: (data["error-codes"] ?? []).join(",") || "failed",
+      };
+    }
+
+    if (expectedAction && data.action && data.action !== expectedAction) {
+      return { ok: false, configured: true, reason: "action-mismatch" };
+    }
+
+    if (expectedHostnames.size > 0 && data.hostname && !expectedHostnames.has(data.hostname)) {
+      return { ok: false, configured: true, reason: "hostname-mismatch" };
+    }
+
+    return { ok: true, configured: true };
   } catch (error) {
     console.error("[turnstile] verification error", error);
     return { ok: false, configured: true, reason: "verify-error" };

@@ -42,9 +42,11 @@ function loadTurnstile(): Promise<void> {
  */
 export function TurnstileWidget({
   onToken,
+  action = "contact",
   className,
 }: {
   onToken: (token: string | undefined) => void;
+  action?: string;
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -61,9 +63,15 @@ export function TurnstileWidget({
         if (cancelled || !containerRef.current || !window.turnstile) return;
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: TURNSTILE_SITE_KEY,
+          action,
           theme: "auto",
           callback: (token: string) => onTokenRef.current(token),
-          "expired-callback": () => onTokenRef.current(undefined),
+          "expired-callback": () => {
+            onTokenRef.current(undefined);
+            if (widgetIdRef.current && window.turnstile) {
+              window.turnstile.reset(widgetIdRef.current);
+            }
+          },
           "error-callback": () => onTokenRef.current(undefined),
         });
       })
@@ -79,7 +87,7 @@ export function TurnstileWidget({
         }
       }
     };
-  }, []);
+  }, [action]);
 
   if (!TURNSTILE_SITE_KEY) return null;
   return <div ref={containerRef} className={className} />;

@@ -125,7 +125,7 @@ export const LISTING_BOOSTS = [
 ] as const;
 
 export const BRAND = {
-  name: "Seedha Properties",
-  shortName: "Seedha",
+  name: "SEEDHA Properties",
+  shortName: "SEEDHA",
   tagline: "India's next-generation real estate ecosystem.",
 } as const;

@@ -1,12 +1,12 @@
 class AppEnv {
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://demo.supabase.co',
+    defaultValue: 'https://iyttetfaavokzyexvqam.supabase.co',
   );
 
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key_for_mobile_client',
+    defaultValue: 'sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x',
   );
 
   static const String apiBaseUrl = String.fromEnvironment(

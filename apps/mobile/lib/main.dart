@@ -11,16 +11,16 @@ void main() async {
   } catch (e) {
     // Offline resilience
   }
-  runApp(const ProviderScope(child: UrbanPropertiesMobileApp()));
+  runApp(const ProviderScope(child: SeedhaPropertiesMobileApp()));
 }
 
-class UrbanPropertiesMobileApp extends StatelessWidget {
-  const UrbanPropertiesMobileApp({Key? key}) : super(key: key);
+class SeedhaPropertiesMobileApp extends StatelessWidget {
+  const SeedhaPropertiesMobileApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Urban Properties',
+      title: 'SEEDHA Properties',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: appRouter,

@@ -124,3 +124,33 @@ describe("identity validation", () => {
     expect(validateFullName("12345")).toBe(false);
   });
 });
+
+describe("Cloudflare Turnstile verification", () => {
+  it("returns unconfigured when secret is absent", async () => {
+    const { verifyTurnstile } = await import("@/lib/security.server");
+    const origSecret = process.env.TURNSTILE_SECRET_KEY;
+    const origSecret2 = process.env.TURNSTILE_SECRET;
+    delete process.env.TURNSTILE_SECRET_KEY;
+    delete process.env.TURNSTILE_SECRET;
+
+    const res = await verifyTurnstile("some-token", "127.0.0.1");
+    expect(res.ok).toBe(true);
+    expect(res.configured).toBe(false);
+
+    process.env.TURNSTILE_SECRET_KEY = origSecret;
+    if (origSecret2) process.env.TURNSTILE_SECRET = origSecret2;
+  });
+
+  it("fails verification when token is missing and secret is configured", async () => {
+    const { verifyTurnstile } = await import("@/lib/security.server");
+    const origSecret = process.env.TURNSTILE_SECRET_KEY;
+    process.env.TURNSTILE_SECRET_KEY = "0x4AAAAAAET7XZDDUOoNOG1HBXor8Tn6JQo";
+
+    const res = await verifyTurnstile(undefined, "127.0.0.1");
+    expect(res.ok).toBe(false);
+    expect(res.configured).toBe(true);
+    expect(res.reason).toBe("missing-token");
+
+    process.env.TURNSTILE_SECRET_KEY = origSecret;
+  });
+});

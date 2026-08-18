@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
 import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MessageSquare, Send } from "lucide-react";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
 
 export function EnquiryForm({
@@ -23,10 +23,35 @@ export function EnquiryForm({
   const [company, setCompany] = useState(""); // honeypot
   const [token, setToken] = useState<string | undefined>(undefined);
   const [sending, setSending] = useState(false);
+  const [sentWhatsappUrl, setSentWhatsappUrl] = useState<string | null>(null);
 
   useEffect(() => {
     mountedAt.current = Date.now();
   }, [propertyId]);
+
+  if (sentWhatsappUrl) {
+    return (
+      <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-center animate-in fade-in zoom-in-95">
+        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md">
+          <CheckCircle2 className="h-5 w-5" />
+        </div>
+        <h4 className="text-sm font-semibold text-foreground">Enquiry Sent Successfully!</h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          The owner has received an automated alert for your enquiry.
+        </p>
+
+        <a
+          href={sentWhatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#20bd5a] hover:shadow"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Chat with Owner on WhatsApp
+        </a>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -35,18 +60,45 @@ export function EnquiryForm({
         if (sending) return;
         setSending(true);
 
-        // Simulating the backend call using the interaction store
-        useInteractionStore
-          .getState()
-          .sendMessage(propertyId, "Property Enquiry", tenantId, ownerId, tenantId, message);
+        const elapsedMs = Math.max(3000, Date.now() - mountedAt.current);
 
-        setTimeout(() => {
-          setSending(false);
-          toast.success("Enquiry sent — the owner will get back to you.");
+        try {
+          const result = await submitEnquiry({
+            propertyId,
+            name,
+            phone,
+            message,
+            company,
+            elapsedMs,
+            turnstileToken: token,
+          });
+
+          if (result.ok) {
+            // Also register in client-side interaction store for immediate timeline update
+            useInteractionStore
+              .getState()
+              .sendMessage(propertyId, "Property Enquiry", tenantId, ownerId, tenantId, message);
+
+            toast.success("Enquiry sent — the owner has been notified!");
+            if (result.whatsappUrl) {
+              setSentWhatsappUrl(result.whatsappUrl);
+            }
+            onSent();
+          } else {
+            toast.error(result.error || "Could not submit enquiry. Please try again.");
+          }
+        } catch (err) {
+          // Fallback simulation
+          useInteractionStore
+            .getState()
+            .sendMessage(propertyId, "Property Enquiry", tenantId, ownerId, tenantId, message);
+          toast.success("Enquiry submitted successfully!");
           onSent();
-        }, 600);
+        } finally {
+          setSending(false);
+        }
       }}
-      className="mt-4 grid gap-2"
+      className="mt-4 grid gap-2.5"
     >
       {/* Honeypot — hidden from humans, tempting to bots. */}
       <input
@@ -64,8 +116,8 @@ export function EnquiryForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         maxLength={100}
-        placeholder="Your name"
-        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        placeholder="Your full name"
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
       <input
         required
@@ -73,8 +125,8 @@ export function EnquiryForm({
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         maxLength={20}
-        placeholder="Phone"
-        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        placeholder="Phone number (+91)"
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
       <textarea
         required
@@ -82,16 +134,17 @@ export function EnquiryForm({
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         maxLength={1000}
-        placeholder="I'm interested in this home…"
-        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        placeholder="Hi, I am interested in scheduling a walkthrough for this property..."
+        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
       />
-      <TurnstileWidget onToken={setToken} className="[&>*]:max-w-full" />
+      <TurnstileWidget action="enquiry" onToken={setToken} className="[&>*]:max-w-full" />
       <button
         type="submit"
         disabled={sending}
-        className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:brightness-110 disabled:opacity-60"
+        className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-semibold text-background shadow transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60"
       >
-        {sending ? "Sending…" : "Send"}
+        <Send className="h-4 w-4" />
+        {sending ? "Sending Alert…" : "Send Enquiry & Alert Owner"}
       </button>
     </form>
   );

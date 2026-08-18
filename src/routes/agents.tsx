@@ -504,7 +504,10 @@ function AgentsCareerPage() {
                   on experience and corridor focus. We operate with zero hidden platform deductions.
                 </div>
 
-                <TurnstileWidget onToken={(t) => setTurnstileToken(t ?? null)} />
+                <TurnstileWidget
+                  action="agent_signup"
+                  onToken={(t) => setTurnstileToken(t ?? null)}
+                />
 
                 <button
                   type="submit"

@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-https://iyttetfaavokzyexvqam.supabase.co}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x}
+        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-iyttetfaavokzyexvqam}
+        VITE_APP_URL: ${VITE_APP_URL:-http://localhost:3000}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-AIzaSyDhiRcWpvLzyRVmA8rNdj1s5r9oAp_7xfg}
+        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-0x4AAAAAAET7XQlvwk5N-Om6}
+    image: property-pioneer:latest
+    container_name: property_pioneer_app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+    restart: unless-stopped

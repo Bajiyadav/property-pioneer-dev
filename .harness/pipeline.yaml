@@ -1,0 +1,67 @@
+pipeline:
+  name: property-pioneer-ci-cd
+  identifier: propertypioneer_pipeline
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Build and Test
+        identifier: build_and_test
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: Kubernetes
+            spec:
+              namespace: harness-ci
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install Dependencies
+                  identifier: npm_ci
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:22-alpine
+                    shell: Sh
+                    command: |-
+                      npm ci
+              - step:
+                  type: Run
+                  name: Typecheck & Lint
+                  identifier: typecheck_and_lint
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:22-alpine
+                    shell: Sh
+                    command: |-
+                      npm run typecheck
+                      npm run lint
+              - step:
+                  type: Run
+                  name: Run Unit Tests
+                  identifier: run_unit_tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: node:22-alpine
+                    shell: Sh
+                    command: |-
+                      npm run test
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: Build Docker Image
+                  identifier: build_docker_image
+                  spec:
+                    connectorRef: <+input>
+                    repo: property-pioneer
+                    tags:
+                      - <+pipeline.sequenceId>
+                      - latest
+                    dockerfile: Dockerfile
+                    buildArgs:
+                      VITE_SUPABASE_URL: <+secrets.getValue("VITE_SUPABASE_URL")>
+                      VITE_SUPABASE_PUBLISHABLE_KEY: <+secrets.getValue("VITE_SUPABASE_PUBLISHABLE_KEY")>
+                      VITE_SUPABASE_PROJECT_ID: <+secrets.getValue("VITE_SUPABASE_PROJECT_ID")>
+                      VITE_APP_URL: <+secrets.getValue("VITE_APP_URL")>
+                      VITE_GOOGLE_MAPS_API_KEY: <+secrets.getValue("VITE_GOOGLE_MAPS_API_KEY")>

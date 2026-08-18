@@ -121,7 +121,7 @@ describe("app config", () => {
     // stale year rather than catching it. The property that matters is that the
     // notice tracks the present year and names the platform.
     expect(APP_COPYRIGHT).toBe(
-      `© ${new Date().getFullYear()} Seedha Properties. All Rights Reserved.`,
+      `© ${new Date().getFullYear()} SEEDHA Properties. All Rights Reserved.`,
     );
     expect(APP_COPYRIGHT).not.toContain("2022");
   });

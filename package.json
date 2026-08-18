@@ -24,7 +24,11 @@
     "prepare": "husky",
     "test:e2e:smoke": "playwright test smoke",
     "test:e2e:journey": "playwright test journey",
-    "test:e2e:responsive": "playwright test responsive"
+    "test:e2e:responsive": "playwright test responsive",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
