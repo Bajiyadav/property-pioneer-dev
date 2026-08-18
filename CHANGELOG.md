@@ -1,3 +1,8 @@
+## v0.28.1 — 2026-08-18
+
+### Fixes
+- fix(mobile): configure Android manifest permissions, OAuth deep links, and track native structure (11a3aa1)
+
 ## v0.28.0 — 2026-08-18
 
 ### Features
