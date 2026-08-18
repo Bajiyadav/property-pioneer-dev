@@ -10,23 +10,27 @@ export function FeaturedProperties({
   isLoading: boolean;
 }) {
   return (
-    <section className="bg-secondary/40 py-12 sm:py-16">
+    <section className="bg-gradient-to-b from-secondary/50 via-background to-secondary/30 py-16 sm:py-20 border-b border-border/60">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Handpicked Listings
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold text-foreground sm:text-3xl">
-              Featured Properties
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-bold text-primary mb-2.5">
+              <span>★ Handpicked Direct Listings</span>
+            </div>
+            <h2 className="font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-4xl tracking-tight">
+              Find Your Dream Home
             </h2>
+            <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground">
+              Direct connection with verified property owners · 0% brokerage commission
+            </p>
           </div>
           <Link
             to="/properties"
             search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="text-xs font-semibold text-foreground underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-full bg-card border border-border/80 px-4 py-2 text-xs font-bold text-foreground shadow-sm hover:border-primary hover:text-primary hover:shadow-md transition-all"
           >
-            View all ({properties.length}) →
+            <span>Explore All Homes ({properties.length})</span>
+            <span>→</span>
           </Link>
         </div>
 

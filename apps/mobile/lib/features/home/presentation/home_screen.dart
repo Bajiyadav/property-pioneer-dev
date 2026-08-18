@@ -155,13 +155,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Direct From Owners',
-                              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                              'Find Your Dream Home',
+                              style: TextStyle(color: Colors.white, fontSize: 23, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                             ),
-                            SizedBox(height: 2),
+                            SizedBox(height: 3),
                             Text(
-                              '0% Brokerage • 100% Direct Contact',
-                              style: TextStyle(color: Color(0xFF99F6E4), fontSize: 13, fontWeight: FontWeight.w500),
+                              'Direct from Owners • 0% Brokerage',
+                              style: TextStyle(color: Color(0xFF99F6E4), fontSize: 13, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
