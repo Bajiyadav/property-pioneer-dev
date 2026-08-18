@@ -19,6 +19,7 @@ import { WhySeedhaProperties } from "@/modules/marketing/home/WhySeedhaPropertie
 import { HowItWorks } from "@/modules/marketing/home/HowItWorks";
 import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
+import { FeedbackSection } from "@/modules/feedback/components/FeedbackSection";
 
 import {
   CityExpansionModal,
@@ -107,7 +108,10 @@ function Index() {
       {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
       <OwnerCTA onOpenWizard={() => setShowOwnerWizard(true)} />
 
-      {/* 9. Support FAQ Accordion */}
+      {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
+      <FeedbackSection />
+
+      {/* 10. Support FAQ Accordion */}
       <div id="contact">
         <FAQSection />
       </div>
