@@ -1,3 +1,8 @@
+## v0.22.0 — 2026-08-18
+
+### Features
+- feat(mobile): add SecurityUtils, createAccount auth helper, and scale config (b716022)
+
 ## v0.21.0 — 2026-08-18
 
 ### Features
