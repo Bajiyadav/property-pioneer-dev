@@ -23,6 +23,22 @@ class AuthService {
     );
   }
 
+  Future<AuthResponse> createAccount({
+    required String email,
+    required String password,
+    String? fullName,
+    String? phone,
+    String role = 'customer',
+  }) async {
+    return await signUpWithEmail(
+      email: email,
+      password: password,
+      fullName: fullName,
+      phone: phone,
+      role: role,
+    );
+  }
+
   Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,
