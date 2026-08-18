@@ -1,3 +1,8 @@
+## v0.20.0 — 2026-08-18
+
+### Features
+- feat(mobile): align Flutter app brand to SEEDHA Properties and sync API configuration (d049945)
+
 ## v0.19.0 — 2026-08-18
 
 ### Features
