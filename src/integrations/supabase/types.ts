@@ -14,6 +14,36 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" };
   public: {
     Tables: {
+      messages: {
+        Row: {
+          id: string;
+          inquiry_id: string | null;
+          sender_id: string;
+          receiver_id: string;
+          content: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          inquiry_id?: string | null;
+          sender_id: string;
+          receiver_id: string;
+          content: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          inquiry_id?: string | null;
+          sender_id?: string;
+          receiver_id?: string;
+          content?: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           id: string;

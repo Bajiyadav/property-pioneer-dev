@@ -13,6 +13,7 @@ import '../features/customer/presentation/customer_dashboard_screen.dart';
 import '../features/owner/presentation/owner_dashboard_screen.dart';
 import '../features/owner/presentation/list_property_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
+import '../features/chat/presentation/chat_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -44,12 +45,23 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // Standalone Detail and Auth Routes
+    // Standalone Detail, Chat, and Auth Routes
     GoRoute(
       path: '/properties/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return PropertyDetailScreen(propertyId: id);
+      },
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        return ChatScreen(
+          recipientId: extra['recipientId'] as String? ?? '',
+          recipientName: extra['recipientName'] as String? ?? 'Property Owner',
+          propertyTitle: extra['propertyTitle'] as String?,
+        );
       },
     ),
     GoRoute(
