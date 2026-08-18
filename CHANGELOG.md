@@ -1,3 +1,8 @@
+## v0.27.0 — 2026-08-18
+
+### Features
+- feat(ai): enhance Gemini assistant with dynamic RAG context retrieval (13a3144)
+
 ## v0.26.0 — 2026-08-18
 
 ### Features
