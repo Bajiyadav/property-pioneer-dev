@@ -229,14 +229,14 @@ export function CategoryLandingPage({
                 Live Inventory
               </p>
               <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-bold text-foreground sm:text-3xl">
-                Available Listings in Hyderabad
+                Available Listings Across India
               </h2>
             </div>
             <Link
               to="/properties"
               search={{
                 q: "",
-                city: "Hyderabad",
+                city: "",
                 listing: searchListingType === "all" ? "" : searchListingType,
                 minPrice: 0,
                 maxPrice: 0,

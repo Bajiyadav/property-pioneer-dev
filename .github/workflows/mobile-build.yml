@@ -54,6 +54,10 @@ jobs:
         working-directory: apps/mobile
         run: flutter pub get
 
+      - name: Generate Official App Launcher Icons
+        working-directory: apps/mobile
+        run: dart run flutter_launcher_icons
+
       - name: Run Mobile Unit & Widget Tests
         working-directory: apps/mobile
         run: flutter test

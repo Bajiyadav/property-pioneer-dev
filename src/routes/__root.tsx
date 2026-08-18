@@ -418,15 +418,15 @@ function SiteFooter() {
           {/* Popular Hubs */}
           <div>
             <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-foreground mb-3">
-              Popular Hubs
+              Major Cities
             </h3>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li>
                 <Link
                   to="/properties"
                   search={{
-                    q: "Gachibowli",
-                    city: "Hyderabad",
+                    q: "",
+                    city: "Bengaluru",
                     listing: "rent",
                     minPrice: 0,
                     maxPrice: 0,
@@ -434,15 +434,15 @@ function SiteFooter() {
                   }}
                   className="hover:text-foreground transition"
                 >
-                  Gachibowli
+                  Bengaluru
                 </Link>
               </li>
               <li>
                 <Link
                   to="/properties"
                   search={{
-                    q: "Madhapur",
-                    city: "Hyderabad",
+                    q: "",
+                    city: "Mumbai",
                     listing: "rent",
                     minPrice: 0,
                     maxPrice: 0,
@@ -450,15 +450,15 @@ function SiteFooter() {
                   }}
                   className="hover:text-foreground transition"
                 >
-                  Madhapur
+                  Mumbai
                 </Link>
               </li>
               <li>
                 <Link
                   to="/properties"
                   search={{
-                    q: "Kondapur",
-                    city: "Hyderabad",
+                    q: "",
+                    city: "Delhi NCR",
                     listing: "rent",
                     minPrice: 0,
                     maxPrice: 0,
@@ -466,14 +466,14 @@ function SiteFooter() {
                   }}
                   className="hover:text-foreground transition"
                 >
-                  Kondapur
+                  Delhi NCR
                 </Link>
               </li>
               <li>
                 <Link
                   to="/properties"
                   search={{
-                    q: "Financial District",
+                    q: "",
                     city: "Hyderabad",
                     listing: "rent",
                     minPrice: 0,
@@ -482,7 +482,39 @@ function SiteFooter() {
                   }}
                   className="hover:text-foreground transition"
                 >
-                  Financial District
+                  Hyderabad
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Pune",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Pune
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/properties"
+                  search={{
+                    q: "",
+                    city: "Chennai",
+                    listing: "rent",
+                    minPrice: 0,
+                    maxPrice: 0,
+                    beds: 0,
+                  }}
+                  className="hover:text-foreground transition"
+                >
+                  Chennai
                 </Link>
               </li>
             </ul>
