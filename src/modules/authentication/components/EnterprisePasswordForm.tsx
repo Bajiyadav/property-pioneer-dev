@@ -13,6 +13,8 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  MIN_PASSWORD_LENGTH,
+  MAX_PASSWORD_LENGTH,
   evaluatePasswordRules,
   validateFullName,
   validateIndianPhone,
@@ -375,53 +377,92 @@ export function EnterprisePasswordForm({
             </div>
           )}
 
-          {/* REAL-TIME ENTERPRISE PASSWORD SECURITY CHECKLIST */}
-          {mode === "signup" && (
-            <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
-              <div className="flex items-center justify-between">
+          {/*
+            Password guidance, not a compliance checklist.
+
+            This was ten tick-boxes: length, uppercase, lowercase, digit, symbol,
+            three "must not contain" rules, common-password and match.
+            Composition rules of that kind are what NIST SP 800-63B advises
+            against — they push people towards `Seedha@123` rather than towards a
+            passphrase. The policy now measures length and blocks guessable
+            values, so the UI shows strength and surfaces a rule only when it is
+            actually failing.
+          */}
+          {mode === "signup" && password.length > 0 && (
+            <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <Lock className="h-3.5 w-3.5 text-primary" /> Create a Strong Password
+                  <Lock className="h-3.5 w-3.5 text-primary" /> Password strength
                 </span>
                 <span
-                  className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${rules.strengthColor}`}
+                  className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full text-white ${rules.strengthColor.split(" ")[0]}`}
                 >
                   {rules.strengthLabel}
                 </span>
               </div>
 
-              {/* Password Strength Progress Bar */}
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-300 ${
-                    rules.strengthScore === 1
-                      ? "w-1/4 bg-rose-500"
-                      : rules.strengthScore === 2
-                        ? "w-2/4 bg-amber-500"
-                        : rules.strengthScore === 3
-                          ? "w-3/4 bg-emerald-500"
-                          : rules.strengthScore >= 4
-                            ? "w-full bg-blue-500"
-                            : "w-0"
-                  }`}
-                />
+              {/* Four segments rather than one growing bar: discrete progress
+                  reads faster, and maps exactly onto the 0-3 score. */}
+              <div
+                className="flex gap-1"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={3}
+                aria-valuenow={rules.strengthScore}
+                aria-label={`Password strength: ${rules.strengthLabel}`}
+              >
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                      i < rules.strengthScore ? rules.strengthColor.split(" ")[0] : "bg-muted"
+                    }`}
+                  />
+                ))}
               </div>
 
-              {/* Rules Checklist */}
-              <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                <RuleItem
-                  pass={rules.hasMinLength && rules.hasMaxLength}
-                  label="12–64 characters"
-                />
-                <RuleItem pass={rules.hasUppercase} label="Uppercase letter (A–Z)" />
-                <RuleItem pass={rules.hasLowercase} label="Lowercase letter (a–z)" />
-                <RuleItem pass={rules.hasNumber} label="Number (0–9)" />
-                <RuleItem pass={rules.hasSpecialChar} label="Special char (!@#$%^&*)" />
-                <RuleItem pass={rules.noNameMatch} label="Must not contain name" />
-                <RuleItem pass={rules.noEmailMatch} label="Must not contain email" />
-                <RuleItem pass={rules.noPhoneMatch} label="Must not contain phone" />
-                <RuleItem pass={rules.noCommonPassword} label="Not common password" />
-                <RuleItem pass={rules.passwordsMatch} label="Passwords match" />
-              </div>
+              {/*
+                Only failures are listed. A wall of green ticks is noise; the one
+                thing standing between the user and an account is the signal.
+              */}
+              <ul className="space-y-1 text-[11px] text-muted-foreground">
+                {!rules.hasMinLength && (
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true">•</span> At least {MIN_PASSWORD_LENGTH} characters
+                  </li>
+                )}
+                {!rules.hasMaxLength && (
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true">•</span> No more than {MAX_PASSWORD_LENGTH} characters
+                  </li>
+                )}
+                {!rules.noPersonalInfo && (
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true">•</span> Cannot contain your name, email or phone
+                  </li>
+                )}
+                {!rules.noCommonPassword && (
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true">•</span> This password is too common to be safe
+                  </li>
+                )}
+                {confirmPassword.length > 0 && !rules.passwordsMatch && (
+                  <li className="flex items-center gap-1.5">
+                    <span aria-hidden="true">•</span> Both passwords must match
+                  </li>
+                )}
+                {rules.isCompliant && (
+                  <li className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span aria-hidden="true">✓</span> Looks good
+                  </li>
+                )}
+              </ul>
+
+              {rules.hasMinLength && rules.strengthScore < 3 && (
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  A few unrelated words beat symbols — length is what resists guessing.
+                </p>
+              )}
             </div>
           )}
 
