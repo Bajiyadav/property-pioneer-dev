@@ -47,7 +47,7 @@ jobs:
         run: |
           if [ ! -d "android" ]; then
             echo "Generating native Android wrapper..."
-            flutter create . --org in.seedhaproperties --project-name seedha_properties_mobile --platforms=android
+            flutter create . --org com.seedhaproperties --project-name seedha_properties_mobile --platforms=android
           fi
 
       - name: Install Dependencies
