@@ -17,6 +17,11 @@ final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
+// Real-time live synchronization provider for properties
+final livePropertiesStreamProvider = StreamProvider.autoDispose.family<List<Property>, String>((ref, locality) {
+  return ref.watch(propertyServiceProvider).streamRentalProperties(locality: locality);
+});
+
 // Current User Profile & Role
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
   // Triggers re-fetch when user auth state changes

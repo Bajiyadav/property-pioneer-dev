@@ -8,6 +8,34 @@ class PropertyService {
   PropertyService([SupabaseClient? client])
       : _client = client ?? SupabaseService.client;
 
+  /// Realtime WebSocket Stream that automatically updates the mobile app
+  /// whenever an owner or admin adds/edits a property on the website.
+  Stream<List<Property>> streamRentalProperties({String? city = 'Hyderabad', String? locality}) {
+    try {
+      return _client
+          .from('properties')
+          .stream(primaryKey: ['id'])
+          .map((data) {
+            final available = data
+                .where((item) =>
+                    (item['status'] == null || item['status'] == 'available') &&
+                    (locality == null || locality == 'All' || item['locality'] == locality))
+                .map((item) => Property.fromJson(item))
+                .toList();
+
+            if (available.isNotEmpty) {
+              return available;
+            }
+            return _getCuratedFallbackProperties(city: city, locality: locality);
+          })
+          .handleError((error) {
+            return _getCuratedFallbackProperties(city: city, locality: locality);
+          });
+    } catch (_) {
+      return Stream.value(_getCuratedFallbackProperties(city: city, locality: locality));
+    }
+  }
+
   Future<List<Property>> getRentalProperties({
     String? city = 'Hyderabad',
     String? locality,

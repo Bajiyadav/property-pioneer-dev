@@ -49,6 +49,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Real-time live synchronization: instantly update mobile screen when properties change on website
+    ref.listen<AsyncValue<List<Property>>>(
+      livePropertiesStreamProvider(_selectedLocality),
+      (prev, next) {
+        next.whenData((liveProps) {
+          if (liveProps.isNotEmpty && mounted) {
+            setState(() {
+              _properties = liveProps;
+              _isLoading = false;
+            });
+          }
+        });
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
