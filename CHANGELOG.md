@@ -1,3 +1,8 @@
+## v0.29.3 — 2026-08-18
+
+### Fixes
+- fix(form): add name, autocomplete, prefill, and pointer cues to START NOW form (c1a4a29)
+
 ## v0.29.2 — 2026-08-18
 
 ### Fixes
