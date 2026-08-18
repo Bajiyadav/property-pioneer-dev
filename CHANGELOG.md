@@ -1,3 +1,8 @@
+## v0.29.2 — 2026-08-18
+
+### Fixes
+- fix(router): configure safe parseSearch and stringifySearch to prevent JSON parser syntax error (6dd9e01)
+
 ## v0.29.1 — 2026-08-18
 
 ### Fixes
