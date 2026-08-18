@@ -1,6 +1,6 @@
 class AppConstants {
-  static const String appName = 'Urban Properties';
-  static const String appTagline = 'Verified Rental Homes in Hyderabad & Across India';
+  static const String appName = 'SEEDHA Properties';
+  static const String appTagline = 'Verified Direct-Owner Marketplace in Hyderabad & Across India';
   
   static const String defaultCity = 'Hyderabad';
   static const List<String> supportedCities = [

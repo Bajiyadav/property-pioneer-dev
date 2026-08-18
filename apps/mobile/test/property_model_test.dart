@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:urban_properties_mobile/models/property.dart';
+import 'package:seedha_properties_mobile/models/property.dart';
 
 void main() {
   group('Property Model Tests', () {

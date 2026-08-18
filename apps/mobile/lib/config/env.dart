@@ -11,6 +11,6 @@ class AppEnv {
 
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://urbanproperties.in/api',
+    defaultValue: 'https://seedhaproperties.com/api',
   );
 }

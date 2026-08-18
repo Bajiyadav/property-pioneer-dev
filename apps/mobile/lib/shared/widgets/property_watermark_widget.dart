@@ -35,7 +35,7 @@ class PropertyWatermarkWidget extends StatelessWidget {
               ),
               child: const Center(
                 child: Text(
-                  'UP',
+                  'SP',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 7,
@@ -46,7 +46,7 @@ class PropertyWatermarkWidget extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             const Text(
-              'URBAN PROPERTIES',
+              'SEEDHA PROPERTIES',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 9,
