@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -43,9 +44,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Wait for profile to load and fetch the role
       final profile = await ref.refresh(userProfileProvider.future);
       if (mounted) {
-        if (profile?.role == 'admin') {
+        if (profile?.role == UserRole.admin) {
           context.go('/admin-dashboard');
-        } else if (profile?.role == 'owner') {
+        } else if (profile?.role == UserRole.owner) {
           context.go('/owner-dashboard');
         } else {
           context.go('/customer-dashboard');
@@ -91,7 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

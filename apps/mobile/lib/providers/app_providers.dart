@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/constants.dart';
 import '../services/auth_service.dart';
 import '../services/property_service.dart';
 import '../services/enquiry_service.dart';
@@ -17,14 +19,34 @@ final authStateChangesProvider = StreamProvider<AuthState>((ref) {
   return ref.watch(authServiceProvider).authStateChanges;
 });
 
+// Category State (Rent, Buy, Commercial)
+final activeCategoryProvider = StateProvider<PropertyCategory>((ref) => PropertyCategory.rent);
+
+// Active City & Locality State
+final selectedCityProvider = StateProvider<String>((ref) => 'All India');
+final selectedLocalityProvider = StateProvider<String?>((ref) => null);
+
+// Search & Filter State
+final searchKeywordProvider = StateProvider<String>((ref) => '');
+final selectedBedroomsFilterProvider = StateProvider<int?>((ref) => null);
+final selectedPropertyTypeFilterProvider = StateProvider<String?>((ref) => null);
+final selectedFurnishingFilterProvider = StateProvider<String?>((ref) => null);
+final budgetRangeFilterProvider = StateProvider<RangeValues>((ref) => const RangeValues(0, 50000000));
+
 // Real-time live synchronization provider for properties
-final livePropertiesStreamProvider = StreamProvider.autoDispose.family<List<Property>, String>((ref, locality) {
-  return ref.watch(propertyServiceProvider).streamRentalProperties(locality: locality);
+final livePropertiesStreamProvider = StreamProvider.autoDispose((ref) {
+  final category = ref.watch(activeCategoryProvider);
+  final city = ref.watch(selectedCityProvider);
+  final locality = ref.watch(selectedLocalityProvider);
+  return ref.watch(propertyServiceProvider).streamProperties(
+    category: category,
+    city: (city == 'All India' || city == 'All') ? null : city,
+    locality: locality,
+  );
 });
 
 // Current User Profile & Role
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
-  // Triggers re-fetch when user auth state changes
   ref.watch(authStateChangesProvider);
   return ref.watch(authServiceProvider).getProfile();
 });
@@ -60,7 +82,7 @@ final favoritesProvider = StateNotifierProvider<FavoritesNotifier, Set<String>>(
 });
 
 // Future of user's actual favorite properties
-final favoritePropertiesProvider = FutureProvider<List<Property>>((ref) async {
+final favoritePropertiesProvider = FutureProvider.autoDispose<List<Property>>((ref) async {
   final favIds = ref.watch(favoritesProvider);
   if (favIds.isEmpty) return [];
 

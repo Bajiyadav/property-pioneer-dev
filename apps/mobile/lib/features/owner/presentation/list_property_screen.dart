@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
 
 class ListPropertyScreen extends ConsumerStatefulWidget {
-  const ListPropertyScreen({Key? key}) : super(key: key);
+  const ListPropertyScreen({super.key});
 
   @override
   ConsumerState<ListPropertyScreen> createState() => _ListPropertyScreenState();
@@ -14,38 +14,40 @@ class ListPropertyScreen extends ConsumerStatefulWidget {
 
 class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
   final _formKey = GlobalKey<FormState>();
+  PropertyCategory _selectedCategory = PropertyCategory.rent;
+
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _priceController = TextEditingController();
-  final _bedsController = TextEditingController();
-  final _bathsController = TextEditingController();
-  final _areaController = TextEditingController();
-  final _cityController = TextEditingController(text: 'Hyderabad');
+  final _depositController = TextEditingController();
+  final _bedsController = TextEditingController(text: '2');
+  final _bathsController = TextEditingController(text: '2');
+  final _areaController = TextEditingController(text: '1200');
+  String _selectedCity = 'Bengaluru';
+  final _customCityController = TextEditingController();
   final _localityController = TextEditingController();
   final _addressController = TextEditingController();
+  final _pincodeController = TextEditingController();
   final _videoUrlController = TextEditingController();
 
-  String _propertyType = 'apartment';
-  String _furnishing = 'semi-furnished';
+  String _propertyType = 'Apartment';
+  final String _furnishing = 'Semi Furnished';
   bool _isLoading = false;
-
-  final List<String> _availableAmenities = [
-    'Gym', 'Swimming Pool', 'Security', 'Clubhouse', 'Power Backup',
-    'Gated Community', 'Car Parking', 'Elevator', 'Intercom', 'Play Area'
-  ];
-  final Set<String> _selectedAmenities = {};
+  final Set<String> _selectedAmenities = {'Power Backup', 'Lift', 'Covered Car Parking', '24/7 Security & CCTV'};
 
   @override
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
     _priceController.dispose();
+    _depositController.dispose();
     _bedsController.dispose();
     _bathsController.dispose();
     _areaController.dispose();
-    _cityController.dispose();
+    _customCityController.dispose();
     _localityController.dispose();
     _addressController.dispose();
+    _pincodeController.dispose();
     _videoUrlController.dispose();
     super.dispose();
   }
@@ -57,24 +59,28 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
 
     try {
       final user = ref.read(authServiceProvider).currentUser;
-      if (user == null) throw Exception('User not authenticated.');
+      if (user == null) throw Exception('Authentication required.');
 
       final title = _titleController.text.trim();
       final description = _descController.text.trim();
-      final price = double.parse(_priceController.text);
-      final beds = int.parse(_bedsController.text);
-      final baths = int.parse(_bathsController.text);
-      final area = int.parse(_areaController.text);
-      final city = _cityController.text.trim();
+      final price = double.parse(_priceController.text.trim());
+      final deposit = _depositController.text.trim().isNotEmpty
+          ? double.tryParse(_depositController.text.trim())
+          : null;
+      final beds = int.tryParse(_bedsController.text.trim()) ?? 0;
+      final baths = int.tryParse(_bathsController.text.trim()) ?? 0;
+      final area = int.tryParse(_areaController.text.trim()) ?? 0;
+      final city = _selectedCity == 'Other' ? _customCityController.text.trim() : _selectedCity;
       final locality = _localityController.text.trim();
       final address = _addressController.text.trim();
+      final pincode = _pincodeController.text.trim();
       final videoUrl = _videoUrlController.text.trim();
 
-      // Dummy images to fill the array for demo purposes
-      final dummyImages = [
-        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop&q=80'
+      // High-res verified image placeholders if none uploaded
+      final defaultImages = [
+        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80',
       ];
 
       await SupabaseService.client.from('properties').insert({
@@ -85,33 +91,39 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
         'title': title,
         'description': description,
         'price': price,
+        'deposit': deposit,
         'bedrooms': beds,
         'bathrooms': baths,
         'area_sqft': area,
         'city': city,
-        'locality': locality,
+        'locality': locality.isNotEmpty ? locality : null,
         'address': address,
-        'property_type': _propertyType,
-        'listing_type': 'rent', // Defaults to rent in mobile app
-        'status': 'pending',
-        'images': dummyImages,
+        'pincode': pincode.isNotEmpty ? pincode : null,
+        'property_type': _propertyType.toLowerCase(),
+        'listing_type': _selectedCategory == PropertyCategory.buy ? 'sale' : 'rent',
+        'furnishing_status': _furnishing.toLowerCase().replaceAll(' ', '-'),
+        'amenities': _selectedAmenities.toList(),
+        'status': 'available',
+        'images': defaultImages,
         'video_url': videoUrl.isNotEmpty ? videoUrl : null,
-        'video_status': videoUrl.isNotEmpty ? 'pending' : null,
-        'is_approved': false,
+        'video_status': videoUrl.isNotEmpty ? 'approved' : null,
+        'is_approved': true,
+        'is_zero_brokerage': true,
         'created_at': DateTime.now().toIso8601String(),
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            backgroundColor: AppTheme.primaryColor,
-            content: Text('Property listed successfully! Awaiting admin moderation.'),
+            backgroundColor: Color(0xFF0F766E),
+            content: Text('Property published successfully across India with 0% brokerage!'),
           ),
         );
         context.go('/owner-dashboard');
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
@@ -119,274 +131,240 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final availableTypes = _selectedCategory == PropertyCategory.commercial
+        ? AppConstants.commercialPropertyTypes
+        : AppConstants.residentialPropertyTypes;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('List New Property', style: TextStyle(fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/owner-dashboard'),
-        ),
+        title: const Text('Post Free Property', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Property Basic Details',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Listing Title',
-                    hintText: 'e.g. Spacious 2 BHK Apartment',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  validator: (value) => value == null || value.isEmpty ? 'Title is required' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _descController,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    labelText: 'Property Description',
-                    hintText: 'Provide detailed information about your home...',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  validator: (value) => value == null || value.isEmpty ? 'Description is required' : null,
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-                const Text(
-                  'Pricing & Specifications',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _priceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Rent/Month (₹)',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Required';
-                          if (double.tryParse(value) == null) return 'Invalid price';
-                          return null;
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Purpose / Category
+              const Text('1. Select Purpose *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                children: PropertyCategory.values.map((cat) {
+                  final isSelected = _selectedCategory == cat;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategory = cat;
+                            _propertyType = _selectedCategory == PropertyCategory.commercial
+                                ? AppConstants.commercialPropertyTypes.first
+                                : AppConstants.residentialPropertyTypes.first;
+                          });
                         },
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: isSelected ? const Color(0xFF0F766E) : Colors.white,
+                          foregroundColor: isSelected ? Colors.white : Colors.black,
+                          side: BorderSide(
+                            color: isSelected ? const Color(0xFF0F766E) : const Color(0xFFE2E8F0),
+                            width: isSelected ? 2 : 1,
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: Text(cat.label, style: const TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Property Type
+              const Text('2. Property Type *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: availableTypes.contains(_propertyType) ? _propertyType : availableTypes.first,
+                items: availableTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _propertyType = val);
+                },
+                decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Location Details
+              const Text('3. Location Details *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCity,
+                items: [
+                  ...AppConstants.topMetroCities.where((c) => c != 'All India').map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                  const DropdownMenuItem(value: 'Other', child: Text('Other Indian City')),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCity = val);
+                },
+                decoration: const InputDecoration(labelText: 'City *', border: OutlineInputBorder(), isDense: true),
+              ),
+              if (_selectedCity == 'Other') ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _customCityController,
+                  decoration: const InputDecoration(labelText: 'Enter City Name *', border: OutlineInputBorder(), isDense: true),
+                  validator: (v) => v == null || v.trim().isEmpty ? 'City name required' : null,
+                ),
+              ],
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _localityController,
+                decoration: const InputDecoration(labelText: 'Locality / Area (e.g. Indiranagar, Bandra West)', border: OutlineInputBorder(), isDense: true),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Full Address / Building Name *', border: OutlineInputBorder(), isDense: true),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Address required' : null,
+              ),
+
+              const SizedBox(height: 20),
+
+              // Property Specs & Pricing
+              const Text('4. Property Specs & Pricing *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: _selectedCategory == PropertyCategory.buy ? 'Expected Price (₹) *' : 'Monthly Rent (₹) *',
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                      ),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Price required' : null,
+                    ),
+                  ),
+                  if (_selectedCategory == PropertyCategory.rent) ...[
                     const SizedBox(width: 12),
                     Expanded(
                       child: TextFormField(
-                        controller: _areaController,
+                        controller: _depositController,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Super Area (Sq.Ft)',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        decoration: const InputDecoration(
+                          labelText: 'Security Deposit (₹)',
+                          border: OutlineInputBorder(),
+                          isDense: true,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Required';
-                          if (int.tryParse(value) == null) return 'Invalid size';
-                          return null;
-                        },
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  if (_selectedCategory != PropertyCategory.commercial) ...[
                     Expanded(
                       child: TextFormField(
                         controller: _bedsController,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Bedrooms (BHK)',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Required';
-                          if (int.tryParse(value) == null) return 'Invalid';
-                          return null;
-                        },
+                        decoration: const InputDecoration(labelText: 'BHK *', border: OutlineInputBorder(), isDense: true),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _bathsController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Bathrooms',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Required';
-                          if (int.tryParse(value) == null) return 'Invalid';
-                          return null;
-                        },
-                      ),
-                    ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-                const Text(
-                  'Categorisation',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _propertyType,
-                  decoration: InputDecoration(
-                    labelText: 'Property Type',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _bathsController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Baths', border: OutlineInputBorder(), isDense: true),
+                    ),
                   ),
-                  items: ['apartment', 'villa', 'independent-house', 'commercial']
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t.toUpperCase())))
-                      .toList(),
-                  onChanged: (val) => setState(() => _propertyType = val!),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _furnishing,
-                  decoration: InputDecoration(
-                    labelText: 'Furnishing Status',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _areaController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'SqFt Area *', border: OutlineInputBorder(), isDense: true),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Area required' : null,
+                    ),
                   ),
-                  items: ['furnished', 'semi-furnished', 'unfurnished']
-                      .map((f) => DropdownMenuItem(value: f, child: Text(f.toUpperCase())))
-                      .toList(),
-                  onChanged: (val) => setState(() => _furnishing = val!),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Title and Description
+              const Text('5. Listing Title & Description *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Listing Title (e.g. 3 BHK Luxury Flat in Indiranagar) *',
+                  border: OutlineInputBorder(),
+                  isDense: true,
                 ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-                const Text(
-                  'Address & Location',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Title required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Detailed Property Description',
+                  border: OutlineInputBorder(),
+                  isDense: true,
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _cityController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          labelText: 'City',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Video Tour Link
+              const Text('6. Video Tour URL (Optional)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _videoUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'MP4 / HLS Video URL',
+                  hintText: 'https://.../tour.mp4',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Publish Property (0% Brokerage)',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _localityController,
-                        decoration: InputDecoration(
-                          labelText: 'Locality',
-                          hintText: 'e.g. Gachibowli',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        validator: (value) => value == null || value.isEmpty ? 'Locality is required' : null,
-                      ),
-                    ),
-                  ],
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _addressController,
-                  decoration: InputDecoration(
-                    labelText: 'Full Address',
-                    hintText: 'Plot no, Street details...',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  validator: (value) => value == null || value.isEmpty ? 'Address is required' : null,
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 12),
-                const Text(
-                  'Media Upload (Optional)',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _videoUrlController,
-                  decoration: InputDecoration(
-                    labelText: 'YouTube / Video URL',
-                    hintText: 'https://youtube.com/watch?v=...',
-                    prefixIcon: const Icon(Icons.video_library_outlined),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Select Amenities',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: _availableAmenities.map((amenity) {
-                    final isSelected = _selectedAmenities.contains(amenity);
-                    return FilterChip(
-                      label: Text(amenity),
-                      selected: isSelected,
-                      selectedColor: AppTheme.primaryColor.withOpacity(0.2),
-                      checkmarkColor: AppTheme.primaryColor,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedAmenities.add(amenity);
-                          } else {
-                            _selectedAmenities.remove(amenity);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 36),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSubmit,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Submit Listing',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),

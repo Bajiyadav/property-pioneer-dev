@@ -4,9 +4,9 @@ class PropertyWatermarkWidget extends StatelessWidget {
   final double size;
 
   const PropertyWatermarkWidget({
-    Key? key,
+    super.key,
     this.size = 28.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +16,10 @@ class PropertyWatermarkWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.65),
+          color: Colors.black.withValues(alpha: 0.65),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),

@@ -15,7 +15,7 @@ void main() async {
 }
 
 class SeedhaPropertiesMobileApp extends StatelessWidget {
-  const SeedhaPropertiesMobileApp({Key? key}) : super(key: key);
+  const SeedhaPropertiesMobileApp({super.key});
 
   @override
   Widget build(BuildContext context) {

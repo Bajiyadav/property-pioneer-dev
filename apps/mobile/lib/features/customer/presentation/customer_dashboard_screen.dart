@@ -9,7 +9,7 @@ import 'package:seedha_properties_mobile/services/supabase_service.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 
 class CustomerDashboardScreen extends ConsumerStatefulWidget {
-  const CustomerDashboardScreen({Key? key}) : super(key: key);
+  const CustomerDashboardScreen({super.key});
 
   @override
   ConsumerState<CustomerDashboardScreen> createState() => _CustomerDashboardScreenState();
@@ -207,7 +207,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(enquiry.status).withOpacity(0.1),
+                            color: _getStatusColor(enquiry.status).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -257,7 +257,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+            backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
             child: const Icon(Icons.person, size: 50, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 16),

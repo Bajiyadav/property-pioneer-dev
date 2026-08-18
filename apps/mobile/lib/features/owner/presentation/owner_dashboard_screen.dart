@@ -9,7 +9,7 @@ import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
 
 class OwnerDashboardScreen extends ConsumerStatefulWidget {
-  const OwnerDashboardScreen({Key? key}) : super(key: key);
+  const OwnerDashboardScreen({super.key});
 
   @override
   ConsumerState<OwnerDashboardScreen> createState() => _OwnerDashboardScreenState();
@@ -132,7 +132,6 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
             itemCount: properties.length,
             itemBuilder: (context, index) {
               final prop = properties[index];
-              final priceFormatter = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -164,7 +163,7 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(prop.status).withOpacity(0.1),
+                                color: _getStatusColor(prop.status).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -188,7 +187,7 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "${priceFormatter.format(prop.price)}/mo",
+                              prop.formattedPrice,
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryDark),
                             ),
                             Text(
@@ -352,7 +351,7 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+            backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
             child: const Icon(Icons.person, size: 50, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 16),

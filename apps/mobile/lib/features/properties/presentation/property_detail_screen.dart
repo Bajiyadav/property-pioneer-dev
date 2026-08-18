@@ -13,8 +13,7 @@ import 'package:seedha_properties_mobile/providers/app_providers.dart';
 class PropertyDetailScreen extends ConsumerStatefulWidget {
   final String propertyId;
 
-  const PropertyDetailScreen({Key? key, required this.propertyId})
-      : super(key: key);
+  const PropertyDetailScreen({super.key, required this.propertyId});
 
   @override
   ConsumerState<PropertyDetailScreen> createState() => _PropertyDetailScreenState();
@@ -46,21 +45,27 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     setState(() => _isLoading = true);
     final prop = await _propertyService.getPropertyById(widget.propertyId);
     if (prop != null) {
-      final similar = await _propertyService.getSimilarRentals(prop);
-      setState(() {
-        _property = prop;
-        _similarProperties = similar;
-        _isLoading = false;
-      });
+      final similar = await _propertyService.getSimilarProperties(prop);
+      if (mounted) {
+        setState(() {
+          _property = prop;
+          _similarProperties = similar;
+          _isLoading = false;
+        });
+      }
 
       if (prop.hasVideoTour) {
-        _videoController = VideoPlayerController.networkUrl(Uri.parse(prop.videoUrl!))
-          ..initialize().then((_) {
-            setState(() {});
-          });
+        try {
+          _videoController = VideoPlayerController.networkUrl(Uri.parse(prop.videoUrl!))
+            ..initialize().then((_) {
+              if (mounted) setState(() {});
+            });
+        } catch (_) {}
       }
     } else {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -68,7 +73,8 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
     final messageCtrl = TextEditingController();
-    String visitType = 'in_person';
+    DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
+    String selectedTimeSlot = '10:00 AM - 12:00 PM';
     bool submitting = false;
 
     showModalBottomSheet(
@@ -76,7 +82,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) => Padding(
@@ -84,7 +90,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
             top: 20,
             left: 20,
             right: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -95,45 +101,64 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isScheduleVisit ? 'Schedule a Property Visit' : 'Contact Property Owner',
+                      isScheduleVisit ? 'Schedule Property Visit' : 'Direct Owner Enquiry',
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: nameCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Full Name',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person_outline),
+                    isDense: true,
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number (WhatsApp) *',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone_outlined),
+                    isDense: true,
                   ),
                 ),
-                if (!isScheduleVisit) ...[
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: messageCtrl,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: 'Your Message',
-                      hintText: 'I am interested in renting this property. Please let me know when we can connect.',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
+                if (isScheduleVisit) ...[
+                  const SizedBox(height: 14),
+                  const Text('Preferred Visit Slot:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedTimeSlot,
+                    items: const [
+                      DropdownMenuItem(value: '10:00 AM - 12:00 PM', child: Text('10:00 AM - 12:00 PM (Morning)')),
+                      DropdownMenuItem(value: '02:00 PM - 04:00 PM', child: Text('02:00 PM - 04:00 PM (Afternoon)')),
+                      DropdownMenuItem(value: '05:00 PM - 07:00 PM', child: Text('05:00 PM - 07:00 PM (Evening)')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setModalState(() => selectedTimeSlot = val);
+                    },
+                    decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
                   ),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: messageCtrl,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    labelText: isScheduleVisit ? 'Special Requirements / Notes' : 'Message to Owner',
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -141,50 +166,64 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                     onPressed: submitting
                         ? null
                         : () async {
-                            if (nameCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
+                            if (nameCtrl.text.trim().isEmpty || phoneCtrl.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Please enter your name and phone number')),
                               );
                               return;
                             }
+
                             setModalState(() => submitting = true);
+                            try {
+                              if (isScheduleVisit) {
+                                await _enquiryService.scheduleVisit(
+                                  propertyId: widget.propertyId,
+                                  date: selectedDate,
+                                  timeSlot: selectedTimeSlot,
+                                  notes: messageCtrl.text.trim(),
+                                );
+                              } else {
+                                await _enquiryService.createEnquiry(
+                                  propertyId: widget.propertyId,
+                                  customerName: nameCtrl.text.trim(),
+                                  customerPhone: phoneCtrl.text.trim(),
+                                  message: messageCtrl.text.trim(),
+                                );
+                              }
 
-                            bool success;
-                            if (isScheduleVisit) {
-                              success = await _enquiryService.scheduleVisit(
-                                propertyId: widget.propertyId,
-                                name: nameCtrl.text,
-                                phone: phoneCtrl.text,
-                                visitType: visitType,
-                                date: DateTime.now().add(const Duration(days: 1)),
-                                time: '10:00 AM',
-                              );
-                            } else {
-                              success = await _enquiryService.submitEnquiry(
-                                propertyId: widget.propertyId,
-                                name: nameCtrl.text,
-                                phone: phoneCtrl.text,
-                                message: messageCtrl.text.isNotEmpty
-                                    ? messageCtrl.text
-                                    : 'Enquiry for ${_property?.title}',
-                              );
+                              if (ctx.mounted) {
+                                Navigator.pop(ctx);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      isScheduleVisit
+                                          ? 'Visit request confirmed! Owner notified directly.'
+                                          : 'Enquiry sent successfully to owner!',
+                                    ),
+                                    backgroundColor: const Color(0xFF0F766E),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setModalState(() => submitting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: ${e.toString()}')),
+                                );
+                              }
                             }
-
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(this.context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: success ? AppTheme.primaryColor : Colors.red,
-                                content: Text(
-                                  success
-                                      ? 'Request submitted successfully! The owner will contact you.'
-                                      : 'Could not submit request. Please try again.',
-                                ),
-                              ),
-                            );
                           },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F766E),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: submitting
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(isScheduleVisit ? 'Confirm Visit Request' : 'Send Enquiry'),
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : Text(
+                            isScheduleVisit ? 'Confirm Visit Request' : 'Send Enquiry (0% Brokerage)',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
                   ),
                 ),
               ],
@@ -196,26 +235,27 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   }
 
   Future<void> _openWhatsApp(BuildContext context, Property property) async {
-    final title = property.title;
-    final priceStr = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(property.price);
-    final message = "Hello! I am interested in '$title' ($priceStr/month) listed on SEEDHA Properties. Is it available for a visit?";
-    final rawPhone = property.ownerPhone ?? "9876543210";
-    final cleanDigits = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
-    final fullPhone = cleanDigits.startsWith('91') && cleanDigits.length > 10
-        ? cleanDigits
-        : '91$cleanDigits';
+    final phone = property.ownerPhone ?? '+919876543210';
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    final msg = Uri.encodeComponent(
+      "Hi! I am interested in your property listed on Seedha Properties: '${property.title}' (${property.formattedPrice}) in ${property.locationLabel}. Is it still available for direct booking?",
+    );
+    final url = Uri.parse("https://wa.me/$cleanPhone?text=$msg");
 
-    final uri = Uri.parse("https://wa.me/$fullPhone?text=${Uri.encodeComponent(message)}");
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        await launchUrl(uri, mode: LaunchMode.platformDefault);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open WhatsApp. Connecting owner directly...')),
+          );
+        }
       }
-    } catch (e) {
-      if (mounted) {
+    } catch (_) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open WhatsApp. Please ensure WhatsApp is installed.')),
+          const SnackBar(content: Text('WhatsApp launched.')),
         );
       }
     }
@@ -229,39 +269,67 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
       );
     }
 
-    final property = _property;
-    if (property == null) {
+    if (_property == null) {
       return Scaffold(
-        appBar: AppBar(),
-        body: const Center(child: Text('Property not found.')),
+        appBar: AppBar(title: const Text('Property Details')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.home_work_outlined, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('Property not found or no longer available', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
-    final formatter = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
+    final property = _property!;
+    final isFav = ref.watch(favoritesProvider).contains(property.id);
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // Image Gallery Sliver App Bar
+          // Collapsible Image Header with Watermark
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 280,
             pinned: true,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
             actions: [
               IconButton(
-                icon: Icon(
-                  ref.watch(favoritesProvider).contains(property.id)
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: ref.watch(favoritesProvider).contains(property.id)
-                      ? Colors.red
-                      : Colors.white,
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isFav ? Icons.favorite : Icons.favorite_border,
+                    color: isFav ? Colors.red : Colors.white,
+                    size: 20,
+                  ),
                 ),
                 onPressed: () {
                   ref.read(favoritesProvider.notifier).toggleFavorite(property.id);
                 },
               ),
             ],
-            backgroundColor: AppTheme.primaryDark,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -273,7 +341,16 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       final url = property.images.isNotEmpty
                           ? property.images[idx]
                           : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
-                      return Image.network(url, fit: BoxFit.cover);
+                      return Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: Icon(Icons.home, size: 64, color: Colors.grey),
+                          ),
+                        ),
+                      );
                     },
                   ),
                   const PropertyWatermarkWidget(),
@@ -282,9 +359,9 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       bottom: 12,
                       left: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -298,29 +375,40 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
             ),
           ),
 
-          // Details Body
+          // Property Body
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Price and Badge Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "${formatter.format(property.price)}/month",
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.primaryDark),
+                        property.formattedPrice,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryLight.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
+                          color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF0F766E).withValues(alpha: 0.3)),
                         ),
                         child: const Text(
                           '0% Brokerage',
-                          style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: TextStyle(
+                            color: Color(0xFF0F766E),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -328,21 +416,37 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     property.title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    "${property.address}, ${property.locality ?? ''}, ${property.city}",
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 16, color: Color(0xFF0F766E)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          "${property.address}, ${property.locationLabel}",
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
-                  // WhatsApp Direct Quick Action Card
+                  // Direct WhatsApp Connect Card
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0FDF4),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFBBF7D0)),
                     ),
                     child: Row(
@@ -377,154 +481,174 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF25D366),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: const Text('Chat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          child: const Text('Chat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   const Divider(),
                   const SizedBox(height: 12),
 
-                  // Transparent Rental Terms
-                  const Text('Transparent Rental Terms', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  // Specs Grid
+                  Text(
+                    property.isSale ? 'Property Details' : 'Key Information',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 12),
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     childAspectRatio: 2.8,
-                    crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
                     children: [
-                      _termItem('Bedrooms', '${property.bedrooms} BHK', Icons.bed_outlined),
-                      _termItem('Bathrooms', '${property.bathrooms} Bath', Icons.bathtub_outlined),
-                      _termItem('Super Area', '${property.areaSqft} sq.ft', Icons.square_foot_outlined),
-                      _termItem('Security Deposit', formatter.format(property.price * 2), Icons.security_outlined),
+                      if (property.bedrooms > 0)
+                        _specCard(Icons.bed_outlined, 'Bedrooms', "${property.bedrooms} BHK"),
+                      if (property.bathrooms > 0)
+                        _specCard(Icons.bathtub_outlined, 'Bathrooms', "${property.bathrooms} Bath"),
+                      if (property.areaSqft > 0)
+                        _specCard(Icons.square_foot_outlined, 'Super Area', "${property.areaSqft} sqft"),
+                      _specCard(Icons.category_outlined, 'Property Type', property.propertyType.toUpperCase()),
+                      if (property.deposit != null && property.deposit! > 0)
+                        _specCard(Icons.account_balance_wallet_outlined, 'Security Deposit', "₹${NumberFormat('#,##,###', 'en_IN').format(property.deposit!.toInt())}"),
+                      if (property.furnishingStatus != null)
+                        _specCard(Icons.chair_outlined, 'Furnishing', property.furnishingStatus!.replaceAll('-', ' ').toUpperCase()),
                     ],
                   ),
 
-                  // Nearby Transit & Hubs
-                  if (property.metroStation != null || property.itPark != null || property.hospital != null) ...[
-                    const SizedBox(height: 20),
-                    const Text('Nearby Hubs & Transit', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    if (property.metroStation != null)
-                      _nearbyItem('Metro Transit', property.metroStation!, Icons.train),
-                    if (property.itPark != null)
-                      _nearbyItem('IT & Tech Hub', property.itPark!, Icons.business),
-                    if (property.hospital != null)
-                      _nearbyItem('Healthcare', property.hospital!, Icons.local_hospital),
-                  ],
-
-                  // Video Tour Section
+                  // Video Tour Section (if available)
                   if (property.hasVideoTour && _videoController != null && _videoController!.value.isInitialized) ...[
-                    const SizedBox(height: 20),
-                    const Text('Video Tour', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 24),
+                    const Text('Official Video Tour', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
-                    Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.black,
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          AspectRatio(
-                            aspectRatio: _videoController!.value.aspectRatio,
-                            child: VideoPlayer(_videoController!),
-                          ),
-                          IconButton(
-                            iconSize: 48,
-                            icon: Icon(
-                              _videoController!.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                              color: Colors.white.withOpacity(0.8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            VideoPlayer(_videoController!),
+                            VideoProgressIndicator(_videoController!, allowScrubbing: true),
+                            Center(
+                              child: IconButton(
+                                iconSize: 48,
+                                icon: Icon(
+                                  _videoController!.value.isPlaying ? Icons.pause_circle : Icons.play_circle,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _videoController!.value.isPlaying
+                                        ? _videoController!.pause()
+                                        : _videoController!.play();
+                                  });
+                                },
+                              ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                if (_videoController!.value.isPlaying) {
-                                  _videoController!.pause();
-                                } else {
-                                  _videoController!.play();
-                                }
-                              });
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
 
                   // Description
-                  const SizedBox(height: 20),
-                  const Text('About This Home', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 24),
+                  const Text('About this Property', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Text(
-                    property.description,
-                    style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary, height: 1.5),
+                    property.description.isNotEmpty
+                        ? property.description
+                        : 'Well-maintained direct owner property located in a prime neighborhood with 0% brokerage.',
+                    style: const TextStyle(fontSize: 14, height: 1.5, color: Color(0xFF334155)),
                   ),
 
-                  const SizedBox(height: 80), // Padding for sticky bottom bar
+                  // Similar Properties
+                  if (_similarProperties.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Text('Similar Properties Nearby', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    ..._similarProperties.map((simProp) => Card(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          child: ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                simProp.images.isNotEmpty
+                                    ? simProp.images.first
+                                    : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200&auto=format&fit=crop&q=80',
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.home, size: 32),
+                              ),
+                            ),
+                            title: Text(simProp.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            subtitle: Text("${simProp.formattedPrice} • ${simProp.locationLabel}", style: const TextStyle(fontSize: 11)),
+                            trailing: const Icon(Icons.arrow_forward_ios, size: 12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => PropertyDetailScreen(propertyId: simProp.id)),
+                              );
+                            },
+                          ),
+                        )),
+                  ],
+
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
         ],
       ),
-
-      // Mobile Sticky Bottom Bar
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 10,
-              offset: const Offset(0, -2),
+              offset: const Offset(0, -4),
             ),
           ],
         ),
         child: Row(
           children: [
-            // WhatsApp Direct Action Button
-            IconButton.filled(
-              onPressed: () => _openWhatsApp(context, property),
-              style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFF25D366),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.all(12),
-              ),
-              icon: const Icon(Icons.chat_bubble, size: 20),
-              tooltip: 'Chat on WhatsApp',
-            ),
-            const SizedBox(width: 8),
             Expanded(
-              child: OutlinedButton(
+              child: OutlinedButton.icon(
                 onPressed: () => _showEnquiryDialog(context, isScheduleVisit: true),
+                icon: const Icon(Icons.calendar_month_outlined, size: 18),
+                label: const Text('Schedule Visit', style: TextStyle(fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF0F766E),
+                  side: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: AppTheme.primaryColor),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Schedule Visit', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () => _showEnquiryDialog(context, isScheduleVisit: false),
+                icon: const Icon(Icons.send, size: 18),
+                label: const Text('Send Enquiry', style: TextStyle(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F766E),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Contact Owner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ),
           ],
@@ -533,41 +657,27 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     );
   }
 
-  Widget _termItem(String label, String value, IconData icon) {
+  Widget _specCard(IconData icon, String label, String val) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.borderSubtle),
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppTheme.primaryColor),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(label, style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
-              Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _nearbyItem(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: AppTheme.primaryColor),
-          const SizedBox(width: 8),
-          Text("$label: ", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textSecondary)),
+          Icon(icon, size: 20, color: const Color(0xFF0F766E)),
+          const SizedBox(width: 10),
           Expanded(
-            child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(label, style: const TextStyle(fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.w600)),
+                Text(val, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
           ),
         ],
       ),

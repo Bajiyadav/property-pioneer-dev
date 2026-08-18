@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../shared/widgets/main_scaffold_shell.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/search/presentation/search_screen.dart';
+import '../features/favorites/presentation/favorites_screen.dart';
+import '../features/visits/presentation/visits_screen.dart';
+import '../features/profile/presentation/profile_screen.dart';
 import '../features/properties/presentation/property_detail_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/signup_screen.dart';
@@ -13,9 +17,40 @@ import '../features/admin/presentation/admin_dashboard_screen.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
+    // Bottom Navigation Shell with 5 Tabs
+    ShellRoute(
+      builder: (context, state, child) => MainScaffoldShell(child: child),
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const HomeScreen(),
+        ),
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => const SearchScreen(),
+        ),
+        GoRoute(
+          path: '/saved',
+          builder: (context, state) => const FavoritesScreen(),
+        ),
+        GoRoute(
+          path: '/visits',
+          builder: (context, state) => const VisitsScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
+        ),
+      ],
+    ),
+
+    // Standalone Detail and Auth Routes
     GoRoute(
-      path: '/',
-      builder: (context, state) => const HomeScreen(),
+      path: '/properties/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return PropertyDetailScreen(propertyId: id);
+      },
     ),
     GoRoute(
       path: '/login',
@@ -28,13 +63,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/verify-email',
       builder: (context, state) => const VerifyEmailScreen(),
-    ),
-    GoRoute(
-      path: '/properties/:id',
-      builder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return PropertyDetailScreen(propertyId: id);
-      },
     ),
     GoRoute(
       path: '/customer-dashboard',

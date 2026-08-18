@@ -5,7 +5,7 @@ import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
@@ -89,7 +89,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -226,7 +226,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         onSelected: (selected) {
                           if (selected) setState(() => _selectedRole = 'customer');
                         },
-                        selectedColor: AppTheme.primaryColor.withOpacity(0.2),
+                        selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppTheme.primaryColor,
                         labelStyle: TextStyle(
                           color: _selectedRole == 'customer' ? AppTheme.primaryDark : AppTheme.textSecondary,
@@ -242,7 +242,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         onSelected: (selected) {
                           if (selected) setState(() => _selectedRole = 'owner');
                         },
-                        selectedColor: AppTheme.primaryColor.withOpacity(0.2),
+                        selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppTheme.primaryColor,
                         labelStyle: TextStyle(
                           color: _selectedRole == 'owner' ? AppTheme.primaryDark : AppTheme.textSecondary,
