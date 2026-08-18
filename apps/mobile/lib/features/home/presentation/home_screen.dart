@@ -25,7 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   List<Property> _properties = [];
   Set<String> _favoriteIds = {};
   bool _isLoading = true;
-  String _selectedLocality = 'All';
+  String _selectedLocality = 'All India';
 
   @override
   void initState() {
@@ -37,8 +37,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() => _isLoading = true);
     final favs = await _favoritesService.getFavoriteIds();
     final props = await _propertyService.getRentalProperties(
-      city: AppConstants.defaultCity,
-      locality: _selectedLocality == 'All' ? null : _selectedLocality,
+      city: (_selectedLocality == 'All' || _selectedLocality == 'All India') ? null : _selectedLocality,
+      locality: null,
     );
     setState(() {
       _favoriteIds = favs;
@@ -172,7 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             SizedBox(height: 3),
                             Text(
-                              'Direct from Owners • 0% Brokerage',
+                              'Direct from Owners • Pan-India 0% Brokerage',
                               style: TextStyle(color: Color(0xFF99F6E4), fontSize: 13, fontWeight: FontWeight.w600),
                             ),
                           ],
@@ -201,7 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Expanded(
                             child: TextField(
                               decoration: const InputDecoration(
-                                hintText: 'Search locality, BHK, or landmark...',
+                                hintText: 'Search city, locality, BHK, or landmark...',
                                 hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
                                 border: InputBorder.none,
                                 isDense: true,
@@ -216,6 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     _properties = _properties.where((p) =>
                                       p.title.toLowerCase().contains(q) ||
                                       p.address.toLowerCase().contains(q) ||
+                                      p.city.toLowerCase().contains(q) ||
                                       (p.locality?.toLowerCase().contains(q) ?? false) ||
                                       "${p.bedrooms} bhk".contains(q)
                                     ).toList();
@@ -228,13 +229,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    // Locality Chips
+                    // Pan-India City Chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          _localityChip('All'),
-                          ...AppConstants.hyderabadLocalities.take(6).map((l) => _localityChip(l)),
+                          _localityChip('All India'),
+                          ...['Bengaluru', 'Mumbai', 'Delhi NCR', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata'].map((l) => _localityChip(l)),
                         ],
                       ),
                     ),
@@ -251,8 +252,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _selectedLocality == 'All'
-                          ? 'Available Rentals in Hyderabad'
+                      (_selectedLocality == 'All' || _selectedLocality == 'All India')
+                          ? 'Available Rentals Across India'
                           : 'Rentals in $_selectedLocality',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                     ),

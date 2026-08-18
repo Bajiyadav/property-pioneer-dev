@@ -63,27 +63,32 @@ export function HeroSection({
         {/* Trending Searches Chips */}
         <div className="mt-6 flex flex-wrap justify-center items-center gap-2 text-xs">
           <span className="font-semibold text-white [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-            Popular Hubs:
+            Explore Cities:
           </span>
-          {["Gachibowli", "Madhapur", "Financial District", "Kondapur", "Hitech City"].map(
-            (loc) => (
-              <Link
-                key={loc}
-                to="/properties"
-                search={{
-                  q: loc,
-                  city: "Hyderabad",
-                  listing: "rent",
-                  minPrice: 0,
-                  maxPrice: 0,
-                  beds: 0,
-                }}
-                className="rounded-full bg-white/10 border border-white/15 px-3 py-1.5 text-xs font-medium text-white transition-all hover:border-white/30 hover:bg-white/20 shadow-sm"
-              >
-                {loc}
-              </Link>
-            ),
-          )}
+          {[
+            { name: "Bengaluru", query: "Bengaluru" },
+            { name: "Mumbai", query: "Mumbai" },
+            { name: "Delhi NCR", query: "Delhi NCR" },
+            { name: "Hyderabad", query: "Hyderabad" },
+            { name: "Pune", query: "Pune" },
+            { name: "Chennai", query: "Chennai" },
+          ].map((item) => (
+            <Link
+              key={item.name}
+              to="/properties"
+              search={{
+                q: "",
+                city: item.query,
+                listing: "rent",
+                minPrice: 0,
+                maxPrice: 0,
+                beds: 0,
+              }}
+              className="rounded-full bg-white/15 border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:border-white/40 hover:bg-white/30 shadow-sm backdrop-blur-xs"
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
 
         {/* Trust Assurances Row */}

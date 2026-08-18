@@ -14,7 +14,7 @@ export function TabbedSearchBox({
 }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<SearchMode>("rent");
-  const [city, setCity] = useState("Hyderabad");
+  const [city, setCity] = useState("All Cities");
 
   const [propertyType, setPropertyType] = useState("Full House");
 
@@ -24,7 +24,7 @@ export function TabbedSearchBox({
       to: "/properties",
       search: {
         q: query,
-        city: city,
+        city: city === "All Cities" ? "" : city,
         listing: activeTab === "buy" ? "sale" : "rent",
         minPrice: 0,
         maxPrice: 0,
@@ -68,58 +68,43 @@ export function TabbedSearchBox({
             onClick={() => setActiveTab(tab.id as SearchMode)}
             className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition-all relative ${
               activeTab === tab.id
-                ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                ? "text-primary bg-white dark:bg-slate-900 shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <tab.icon
-              className={`h-4 w-4 ${activeTab === tab.id ? "text-emerald-600 dark:text-emerald-400" : ""}`}
-            />
-            {tab.label}
+            <tab.icon className="h-4 w-4" />
+            <span>{tab.label}</span>
             {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-primary" />
             )}
           </button>
         ))}
       </div>
 
-      {/* Search Form */}
-      <div className="p-4 sm:p-6">
-        {/* Quick Radios (specific to NoBroker style Rent tab) */}
-        {activeTab === "rent" && (
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-5">
-            {["Full House", "PG/Hostel", "Flatmates"].map((type) => (
-              <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                <div
-                  className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                    propertyType === type
-                      ? "border-primary"
-                      : "border-input group-hover:border-primary/50"
-                  }`}
-                >
-                  {propertyType === type && <div className="h-2 w-2 rounded-full bg-primary" />}
-                </div>
-                <span
-                  className={`text-sm ${propertyType === type ? "text-foreground font-medium" : "text-muted-foreground group-hover:text-foreground"}`}
-                >
-                  {type}
-                </span>
-                <input
-                  type="radio"
-                  name="propertyType"
-                  value={type}
-                  checked={propertyType === type}
-                  onChange={(e) => setPropertyType(e.target.value)}
-                  // The visible text is a sibling span, not a <label for>, so
-                  // the control needs its own name for assistive tech.
-                  aria-label={`Property type: ${type}`}
-                  className="sr-only"
-                />
-              </label>
-            ))}
-          </div>
-        )}
+      {/* Property Type Radio Filter (For Rent Mode) */}
+      {activeTab === "rent" && (
+        <div className="flex items-center gap-6 px-6 py-3 border-b border-border/40 text-xs font-semibold text-muted-foreground bg-secondary/20">
+          {["Full House", "PG / Co-Living", "Flatmates"].map((type) => (
+            <label
+              key={type}
+              className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
+            >
+              <input
+                type="radio"
+                name="propType"
+                value={type}
+                checked={propertyType === type}
+                onChange={(e) => setPropertyType(e.target.value)}
+                className="text-primary focus:ring-primary h-3.5 w-3.5 accent-primary cursor-pointer"
+              />
+              <span>{type}</span>
+            </label>
+          ))}
+        </div>
+      )}
 
+      {/* Search Input Bar */}
+      <div className="p-4 sm:p-5">
         <form
           onSubmit={handleSearch}
           className="flex flex-col sm:flex-row items-stretch gap-0 rounded-md ring-1 ring-border bg-background focus-within:ring-2 focus-within:ring-primary/50 transition-all shadow-sm"
@@ -133,12 +118,15 @@ export function TabbedSearchBox({
               aria-label="City"
               className="bg-transparent text-sm font-medium text-foreground outline-none w-full py-2 cursor-pointer appearance-none"
             >
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Bangalore">Bangalore</option>
+              <option value="All Cities">All India</option>
+              <option value="Bengaluru">Bengaluru</option>
               <option value="Mumbai">Mumbai</option>
+              <option value="Delhi NCR">Delhi NCR</option>
+              <option value="Hyderabad">Hyderabad</option>
               <option value="Pune">Pune</option>
               <option value="Chennai">Chennai</option>
-              <option value="Delhi">Delhi</option>
+              <option value="Kolkata">Kolkata</option>
+              <option value="Ahmedabad">Ahmedabad</option>
             </select>
           </div>
 

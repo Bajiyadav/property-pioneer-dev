@@ -264,16 +264,107 @@ class PropertyService {
         ownerEmail: 'pooja.h@example.com',
         createdAt: now.subtract(const Duration(days: 6)),
       ),
+      Property(
+        id: 'prop-curated-7',
+        title: '3 BHK High-End Apartment in Indiranagar',
+        description: 'Serene tree-lined penthouse in Indiranagar 100ft Road with private terrace garden, Italian modular kitchen, and smart home automation.',
+        price: 72000.0,
+        city: 'Bengaluru',
+        locality: 'Indiranagar',
+        address: '100 Feet Road, Indiranagar',
+        landmark: 'Near CMH Road Metro Station',
+        metroStation: 'Indiranagar Metro (0.4 km)',
+        itPark: 'Bagmane Tech Park (2.5 km)',
+        bedrooms: 3,
+        bathrooms: 3,
+        areaSqft: 2100,
+        propertyType: 'apartment',
+        listingType: 'rent',
+        status: 'available',
+        isFeatured: true,
+        isZeroBrokerage: true,
+        images: [
+          'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?auto=format&fit=crop&w=1200&q=80',
+        ],
+        ownerId: 'owner-blr-7',
+        ownerName: 'Rohan Nambiar',
+        ownerPhone: '+919876543216',
+        ownerEmail: 'rohan.n@example.com',
+        createdAt: now.subtract(const Duration(days: 1)),
+      ),
+      Property(
+        id: 'prop-curated-8',
+        title: '2.5 BHK Sea-View Residence in Bandra West',
+        description: 'Sun-drenched sea breeze apartment along Bandra Carter Road with dedicated valet parking and art-deco interiors.',
+        price: 95000.0,
+        city: 'Mumbai',
+        locality: 'Bandra West',
+        address: 'Carter Road, Bandra West',
+        landmark: 'Near Bandstand Promenade',
+        metroStation: 'Bandra Station (1.8 km)',
+        itPark: 'BKC Business Hub (5.0 km)',
+        bedrooms: 3,
+        bathrooms: 3,
+        areaSqft: 1450,
+        propertyType: 'apartment',
+        listingType: 'rent',
+        status: 'available',
+        isFeatured: true,
+        isZeroBrokerage: true,
+        images: [
+          'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80',
+        ],
+        ownerId: 'owner-mum-8',
+        ownerName: 'Zahir Merchant',
+        ownerPhone: '+919876543217',
+        ownerEmail: 'zahir.m@example.com',
+        createdAt: now.subtract(const Duration(days: 2)),
+      ),
+      Property(
+        id: 'prop-curated-9',
+        title: '4 BHK Luxury Golf Course Villa in Gurgaon',
+        description: 'Stunning golf-facing villa with double-height living room, private infinity plunge pool, and servant quarters.',
+        price: 135000.0,
+        city: 'Delhi NCR',
+        locality: 'Golf Course Road',
+        address: 'Sector 54, Golf Course Road, Gurgaon',
+        landmark: 'Near DLF Golf Club',
+        metroStation: 'Sector 54 Rapid Metro (0.3 km)',
+        itPark: 'Cyber City Gurgaon (4.5 km)',
+        bedrooms: 4,
+        bathrooms: 5,
+        areaSqft: 4200,
+        propertyType: 'villa',
+        listingType: 'rent',
+        status: 'available',
+        isFeatured: true,
+        isZeroBrokerage: true,
+        images: [
+          'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+          'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
+        ],
+        ownerId: 'owner-del-9',
+        ownerName: 'Aditya Oberoi',
+        ownerPhone: '+919876543218',
+        ownerEmail: 'aditya.o@example.com',
+        createdAt: now.subtract(const Duration(days: 3)),
+      ),
     ];
 
     return allFallback.where((p) {
-      if (locality != null && locality.isNotEmpty && locality != 'All') {
+      if (city != null && city.isNotEmpty && city != 'All' && city != 'All India') {
+        if (p.city.toLowerCase() != city.toLowerCase()) return false;
+      }
+      if (locality != null && locality.isNotEmpty && locality != 'All' && locality != 'All India') {
         if (p.locality?.toLowerCase() != locality.toLowerCase()) return false;
       }
       if (bedrooms != null && bedrooms > 0 && p.bedrooms < bedrooms) return false;
       if (maxPrice != null && maxPrice > 0 && p.price > maxPrice) return false;
       return true;
     }).toList();
+  }
 
   Future<Property?> getPropertyById(String id) async {
     try {

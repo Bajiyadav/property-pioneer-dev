@@ -22,7 +22,6 @@ export function SeedhaLogoIcon({ className = "h-8 w-8" }: { className?: string }
 export function BrandMark({
   size = "md",
   showName = true,
-  responsiveName = false,
   className = "",
 }: {
   size?: "sm" | "md" | "lg";
@@ -30,39 +29,27 @@ export function BrandMark({
   responsiveName?: boolean;
   className?: string;
 }) {
-  const logoSizeClass = size === "sm" ? "h-7 w-7" : size === "lg" ? "h-11 w-11" : "h-9 w-9";
-  const textClass =
-    size === "sm"
-      ? "text-base font-semibold"
-      : size === "lg"
-        ? "text-2xl font-bold"
-        : "text-xl font-bold";
+  const logoSizeClass = size === "sm" ? "h-8 w-8" : size === "lg" ? "h-12 w-12" : "h-10 w-10";
 
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <SeedhaLogoIcon className={logoSizeClass} />
 
-      {showName &&
-        (responsiveName ? (
-          <>
-            <span
-              className={`hidden font-[family-name:var(--font-display)] tracking-tight text-foreground sm:inline ${textClass}`}
-            >
-              {BRAND.name}
+      {showName && (
+        <div className="flex flex-col leading-none">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-foreground text-lg sm:text-xl">
+              SEEDHA
             </span>
-            <span
-              className={`font-[family-name:var(--font-display)] tracking-tight text-foreground sm:hidden ${textClass}`}
-            >
-              {BRAND.shortName}
+            <span className="font-[family-name:var(--font-display)] font-bold tracking-widest text-[#B8860B] dark:text-[#D4AF37] text-xs sm:text-sm uppercase">
+              PROPERTIES
             </span>
-          </>
-        ) : (
-          <span
-            className={`font-[family-name:var(--font-display)] tracking-tight text-foreground ${textClass}`}
-          >
-            {BRAND.name}
+          </div>
+          <span className="text-[8px] sm:text-[9px] font-bold tracking-wider text-muted-foreground uppercase mt-0.5">
+            GA SEEDHA • PROPERTIES AAP KI
           </span>
-        ))}
+        </div>
+      )}
     </span>
   );
 }

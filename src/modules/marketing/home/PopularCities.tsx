@@ -11,16 +11,52 @@ interface CityRoadmap {
 
 const CITY_ROADMAP: CityRoadmap[] = [
   {
-    name: "Hyderabad",
-    tag: "Hitech City, Gachibowli & Kondapur",
+    name: "Bengaluru",
+    tag: "Koramangala, Indiranagar & Whitefield",
     status: "live",
     badge: "● Live Market",
   },
   {
-    name: "Bangalore",
-    tag: "Koramangala & Indiranagar",
-    status: "upcoming",
-    badge: "Upcoming Market",
+    name: "Mumbai",
+    tag: "Bandra, Andheri & Powai",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Delhi NCR",
+    tag: "Gurgaon, Noida & South Delhi",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Hyderabad",
+    tag: "Hitech City, Gachibowli & Jubilee Hills",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Pune",
+    tag: "Hinjewadi, Baner & Koregaon Park",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Chennai",
+    tag: "OMR, Anna Nagar & Velachery",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Kolkata",
+    tag: "Salt Lake & New Town",
+    status: "live",
+    badge: "● Live Market",
+  },
+  {
+    name: "Ahmedabad",
+    tag: "SG Highway & Prahlad Nagar",
+    status: "live",
+    badge: "● Live Market",
   },
 ];
 
@@ -28,16 +64,6 @@ export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoad
   const handleCityClick = (city: CityRoadmap) => {
     if (onSelectCity) {
       onSelectCity(city);
-    } else if (city.status === "upcoming") {
-      toast.info(
-        `Seedha Properties is launching soon in ${city.name}! Currently live in Hyderabad.`,
-        {
-          description:
-            "We are expanding city by city. Register to get notified when we launch in " +
-            city.name +
-            ".",
-        },
-      );
     }
   };
 
@@ -45,14 +71,14 @@ export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoad
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="mb-8">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-          <Rocket className="h-3.5 w-3.5" /> Where We Operate
+          <Rocket className="h-3.5 w-3.5" /> India-Wide Coverage
         </span>
         <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
-          Live in Hyderabad
+          Major Indian Cities
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Hyderabad is our live market. Bangalore is an early expansion and does not yet have full
-          coverage.
+          Discover verified direct-owner homes with 0% brokerage across premier metropolitan hubs
+          across India.
         </p>
       </div>
 

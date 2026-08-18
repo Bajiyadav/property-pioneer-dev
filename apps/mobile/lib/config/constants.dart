@@ -1,17 +1,17 @@
 class AppConstants {
   static const String appName = 'SEEDHA Properties';
-  static const String appTagline = 'Verified Direct-Owner Marketplace in Hyderabad & Across India';
+  static const String appTagline = 'Verified Direct-Owner Marketplace Across India';
   
-  static const String defaultCity = 'Hyderabad';
+  static const String defaultCity = 'All India';
   static const List<String> supportedCities = [
-    'Hyderabad',
-    'Bangalore',
-    'Chennai',
-    'Pune',
+    'All India',
+    'Bengaluru',
     'Mumbai',
     'Delhi NCR',
-    'Visakhapatnam',
-    'Vijayawada',
+    'Hyderabad',
+    'Pune',
+    'Chennai',
+    'Kolkata',
   ];
 
   static const List<String> hyderabadLocalities = [
