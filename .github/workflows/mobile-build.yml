@@ -31,6 +31,9 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
@@ -61,7 +64,7 @@ jobs:
       - name: Build Android Release APK
         working-directory: apps/mobile
         run: |
-          flutter build apk --release --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x --dart-define=API_BASE_URL=https://seedhaproperties.com/api
+          flutter build apk --release --no-tree-shake-icons --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x --dart-define=API_BASE_URL=https://seedhaproperties.com/api
 
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
