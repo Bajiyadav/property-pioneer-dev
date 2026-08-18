@@ -3,16 +3,24 @@ import { ListingWizard } from "@/modules/owner/components/ListingWizard/ListingW
 import { z } from "zod";
 
 const wizardSearchSchema = z.object({
-  propertyType: z.enum(["Residential", "Commercial"]).optional().catch("Residential"),
-  intent: z.enum(["Rent", "Sell", "PG/Co-living"]).optional().catch("Rent"),
-  // No `phone` here on purpose. It used to be a search param, which put the
-  // owner's mobile number in the URL, in browser history and in request logs,
-  // and it arrived JSON-quoted. It now travels in sessionStorage — see
-  // LISTING_PHONE_KEY in routes/list-property.tsx.
+  propertyType: z.enum(["Residential", "Commercial"]).catch("Residential"),
+  intent: z.enum(["Rent", "Sell", "PG/Co-living"]).catch("Rent"),
 });
 
 export const Route = createFileRoute("/list-property/wizard")({
-  validateSearch: wizardSearchSchema,
+  validateSearch: (search: Record<string, unknown>) => {
+    const rawType = typeof search.propertyType === "string" ? search.propertyType : "";
+    const rawIntent = typeof search.intent === "string" ? search.intent : "";
+    return {
+      propertyType: (rawType === "Commercial" ? "Commercial" : "Residential") as
+        "Residential" | "Commercial",
+      intent: (rawIntent === "Sell"
+        ? "Sell"
+        : rawIntent === "PG/Co-living"
+          ? "PG/Co-living"
+          : "Rent") as "Rent" | "Sell" | "PG/Co-living",
+    };
+  },
   component: ListPropertyWizardPage,
 });
 
