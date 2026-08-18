@@ -288,23 +288,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isSelected = _selectedLocality == locality;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(locality),
-        selected: isSelected,
-        onSelected: (selected) {
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
           setState(() => _selectedLocality = locality);
           _loadData();
         },
-        selectedColor: Colors.white,
-        backgroundColor: Colors.white.withOpacity(0.15),
-        labelStyle: TextStyle(
-          color: isSelected ? AppTheme.primaryDark : Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: isSelected ? Colors.white : Colors.transparent),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.black.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.4),
+              width: 1.2,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isSelected) ...[
+                const Icon(Icons.check, size: 14, color: Color(0xFF0F766E)),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                locality,
+                style: TextStyle(
+                  color: isSelected ? const Color(0xFF0F766E) : Colors.white,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
