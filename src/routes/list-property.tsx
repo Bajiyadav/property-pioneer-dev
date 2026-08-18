@@ -12,11 +12,12 @@ import {
   MessageSquare,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-
 import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+import { useAuth } from "@/modules/authentication/context/AuthContext";
+import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
+import { UserCheck, LogIn } from "lucide-react";
 
 export const Route = createFileRoute("/list-property")({
   /*
@@ -59,37 +60,13 @@ export const LISTING_PHONE_KEY = "sp_listing_phone";
 
 function ListPropertyLandingPage() {
   const navigate = useNavigate();
+  const { status, user } = useAuth();
   const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
   const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  /**
-   * Starts the listing flow.
-   *
-   * Two things here were wrong before and are worth stating, because both were
-   * invisible from the outside:
-   *
-   * 1. The number was passed as a search param, so it appeared in the URL. A
-   *    mobile number is personal data, and a URL is the leakiest place to put
-   *    it — it persists in browser history, in server and CDN logs, and is sent
-   *    to third parties in the `Referer` header. It also arrived JSON-quoted
-   *    (`phone=%229876543210%22`), so the value carried literal quote
-   *    characters. It now travels in sessionStorage: same tab only, gone when
-   *    the tab closes, never in a URL.
-   *
-   * 2. The wizard declared `phone` in its props and never read it, so whatever
-   *    the owner typed here was discarded. Combined with the wizard never
-   *    collecting a number of its own, no listing ever stored `owner_phone` —
-   *    which is why every "Get Owner Details" enquiry fell back to a hard-coded
-   *    number belonging to nobody. Prefilling the wizard from here is what
-   *    closes that chain.
-   *
-   * Validation is explicit rather than left to the input's `required`
-   * attribute. Native validation only checks non-empty, so "1" or "abc" used to
-   * pass straight through, and its bubble is easy to miss on a phone.
-   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -108,8 +85,7 @@ function ListPropertyLandingPage() {
     try {
       sessionStorage.setItem(LISTING_PHONE_KEY, digits);
     } catch {
-      // Private browsing can refuse storage. The wizard asks for the number
-      // again in that case, which is better than blocking the flow here.
+      // Private browsing fallback
     }
     navigate({ to: "/list-property/wizard", search: { propertyType, intent } });
   };
@@ -184,6 +160,34 @@ function ListPropertyLandingPage() {
               </div>
 
               <CardContent className="p-5 sm:p-7">
+                {/* Account Status Notification */}
+                {status === "authenticated" ? (
+                  <div className="mb-4 flex items-center gap-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    <UserCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <div className="truncate">
+                      Signed in as <span className="font-bold">{user?.email}</span> (Listing will be
+                      saved directly to your owner account).
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 rounded-xl bg-secondary/50 border border-border/70 p-3 text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-foreground">Have an account?</span>
+                      <span className="text-[10px] uppercase font-bold text-primary">
+                        Fast Track
+                      </span>
+                    </div>
+                    <GoogleSignInButton
+                      redirect="/list-property/wizard"
+                      label="Continue with Google (1-Click)"
+                      className="h-10 text-xs shadow-xs"
+                    />
+                    <p className="text-[10px] text-muted-foreground text-center">
+                      Or fill your number below to continue directly as guest.
+                    </p>
+                  </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
