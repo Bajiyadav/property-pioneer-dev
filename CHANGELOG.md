@@ -1,3 +1,13 @@
+## v0.25.0 — 2026-08-18
+
+### Features
+- feat(phase2): implement Owner KYC Verification and Free Commute Distance Service (dcd914e)
+
+### Migration notes
+- supabase/migrations/20260819010000_create_kyc_system.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.24.0 — 2026-08-18
 
 ### Features
