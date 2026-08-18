@@ -1,3 +1,8 @@
+## v0.20.1 — 2026-08-18
+
+### Fixes
+- fix(mobile): fix textAlign syntax and add widget test for SEEDHA Properties watermark (257c274)
+
 ## v0.20.0 — 2026-08-18
 
 ### Features
