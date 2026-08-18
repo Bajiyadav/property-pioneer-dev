@@ -1,0 +1,72 @@
+name: Mobile APK Cloud Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/mobile-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build Android Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Verify Flutter & Dart
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Prepare Native Android Structure
+        working-directory: apps/mobile
+        run: |
+          if [ ! -d "android" ]; then
+            echo "Generating native Android wrapper..."
+            flutter create . --org in.seedhaproperties --project-name seedha_properties_mobile --platforms=android
+          fi
+
+      - name: Install Dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Run Mobile Unit & Widget Tests
+        working-directory: apps/mobile
+        run: flutter test
+
+      - name: Build Android Release APK
+        working-directory: apps/mobile
+        run: |
+          flutter build apk --release --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x --dart-define=API_BASE_URL=https://seedhaproperties.com/api
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: seedha-properties-release-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
