@@ -37,7 +37,7 @@ class VerifyEmailScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
                 ),
-                textAlign: Center,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               const Text(
