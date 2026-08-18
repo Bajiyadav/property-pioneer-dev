@@ -14,6 +14,39 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" };
   public: {
     Tables: {
+      kyc_documents: {
+        Row: {
+          id: string;
+          owner_id: string;
+          document_type: string;
+          file_path: string;
+          status: string;
+          rejection_reason: string | null;
+          uploaded_at: string;
+          verified_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          document_type: string;
+          file_path: string;
+          status?: string;
+          rejection_reason?: string | null;
+          uploaded_at?: string;
+          verified_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          document_type?: string;
+          file_path?: string;
+          status?: string;
+          rejection_reason?: string | null;
+          uploaded_at?: string;
+          verified_at?: string | null;
+        };
+        Relationships: [];
+      };
       messages: {
         Row: {
           id: string;

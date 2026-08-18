@@ -12,6 +12,7 @@ import '../features/auth/presentation/verify_email_screen.dart';
 import '../features/customer/presentation/customer_dashboard_screen.dart';
 import '../features/owner/presentation/owner_dashboard_screen.dart';
 import '../features/owner/presentation/list_property_screen.dart';
+import '../features/owner/presentation/kyc_upload_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 
@@ -87,6 +88,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/owner-dashboard/list-property',
       builder: (context, state) => const ListPropertyScreen(),
+    ),
+    GoRoute(
+      path: '/owner-dashboard/kyc',
+      builder: (context, state) => const KYCUploadScreen(),
     ),
     GoRoute(
       path: '/admin-dashboard',
