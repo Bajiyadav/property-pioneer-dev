@@ -1,3 +1,8 @@
+## v0.16.0 — 2026-08-18
+
+### Features
+- feat(listing): make the wizard actually save the listing (b147fe6)
+
 ## v0.15.5 — 2026-08-17
 
 ### Fixes
