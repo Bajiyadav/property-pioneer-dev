@@ -1,3 +1,8 @@
+## v0.18.0 — 2026-08-18
+
+### Features
+- feat(auth): replace the password checklist with length-based strength (2d96ce7)
+
 ## v0.17.7 — 2026-08-18
 
 ### Fixes
