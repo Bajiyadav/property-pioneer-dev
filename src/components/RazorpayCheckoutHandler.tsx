@@ -36,6 +36,29 @@ interface RazorpayOptions {
   handler: (response: RazorpaySuccessResponse) => void | Promise<void>;
   prefill?: { name?: string; email?: string; contact?: string };
   theme?: { color?: string };
+  config?: {
+    display?: {
+      // Razorpay's custom payment-method blocks. Typed to the fields the docs
+      // define rather than `Record<string, any>`: this object decides which
+      // payment methods a customer is shown, so a typo silently offering the
+      // wrong set is a real failure mode, not a style question.
+      blocks?: Record<
+        string,
+        {
+          name: string;
+          instruments?: Array<{
+            method: string;
+            issuers?: string[];
+            banks?: string[];
+            wallets?: string[];
+            flows?: string[];
+          }>;
+        }
+      >;
+      sequence?: string[];
+      preferences?: { show_default_blocks?: boolean };
+    };
+  };
 }
 
 declare global {
@@ -79,6 +102,28 @@ export function RazorpayCheckoutHandler() {
         prefill: {
           email: order.userEmail || undefined,
           contact: order.userPhone || undefined,
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI",
+                instruments: [{ method: "upi" }],
+              },
+              cards: {
+                name: "Pay via Cards",
+                instruments: [{ method: "card" }],
+              },
+              other: {
+                name: "Other Payment Modes",
+                instruments: [{ method: "netbanking" }, { method: "wallet" }],
+              },
+            },
+            sequence: ["block.upi", "block.cards", "block.other"],
+            preferences: {
+              show_default_blocks: false,
+            },
+          },
         },
         handler: async function (response: RazorpaySuccessResponse) {
           toast.loading("Verifying payment...", { id: "payment-verify" });

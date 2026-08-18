@@ -149,19 +149,11 @@ function RootComponent() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "RealEstateAgent",
+    "@type": "Organization",
     name: APP_NAME,
     url: APP_URL,
     logo: `${APP_URL}/og-image.png`,
     description: APP_DESCRIPTION,
-    priceRange: "₹₹",
-    areaServed: "India",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Hyderabad",
-      addressRegion: "Telangana",
-      addressCountry: "IN",
-    },
   };
 
   return (

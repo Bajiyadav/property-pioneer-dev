@@ -47,7 +47,7 @@ export function HeroSection({
           owner — is the stronger claim anyway.
         */}
         <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl [text-shadow:0_2px_12px_rgb(2_6_23_/_0.75)]">
-          Rent and buy in Hyderabad, direct from owners
+          Rent and buy properties direct from owners
         </h1>
 
         <p className="mt-4 text-base text-white sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">

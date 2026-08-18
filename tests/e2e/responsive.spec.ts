@@ -180,6 +180,60 @@ test.describe("responsive layout", () => {
     });
   }
 
+  /**
+   * Cards on the PROPERTY DETAIL page, and a fourth failure mode: spill.
+   *
+   * Everything above visits /properties. The "Similar Rentals" grid on a detail
+   * page sits in a narrower container, and a card that fits at 590px does not fit
+   * at 73px — so a layout regression reached production while all 53 checks here
+   * passed. Measured on the live page at 1440px when it broke:
+   *
+   *     /properties      stat row 590px wide, cells 193px, spill 0
+   *     detail page      stat row  73px wide, cells  21px, spill 3
+   *
+   * SPILL is the signal, and it is distinct from everything already covered. The
+   * row does not overflow, no ancestor clips, and `truncate` is not reached —
+   * the text simply renders wider than the cell that owns it and lands on top of
+   * its neighbour. That is how "RENT/MONTH" and "DEPOSIT" printed as
+   * "RENT/MDEPOSIT". `scrollWidth` cannot see it; comparing each child's box
+   * against its parent's can.
+   */
+  for (const width of [375, 768, 1024, 1440]) {
+    test(`similar-property cards do not spill their stat cells @ ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/properties${SEARCH}`, { waitUntil: "domcontentloaded" });
+      await page.locator('[data-testid="stat-row"]').first().waitFor({ timeout: 20_000 });
+
+      // Enter a real detail page rather than hardcoding an id, so this keeps
+      // working as inventory changes.
+      await page.locator("a[href*='/properties/']").first().click();
+      await page.waitForTimeout(2_500);
+
+      const rows = page.locator('[data-testid="stat-row"]');
+      await rows.first().waitFor({ state: "visible", timeout: 20_000 });
+
+      const broken = await rows.evaluateAll((nodes) =>
+        nodes
+          .map((row) => {
+            const cells = Array.from(row.children) as HTMLElement[];
+            let spill = 0;
+            for (const cell of cells) {
+              const cb = cell.getBoundingClientRect();
+              for (const child of Array.from(cell.children) as HTMLElement[]) {
+                const tb = child.getBoundingClientRect();
+                // 1px of slack for sub-pixel rounding.
+                if (tb.right > cb.right + 1 || tb.left < cb.left - 1) spill++;
+              }
+            }
+            return { rowWidth: Math.round(row.getBoundingClientRect().width), spill };
+          })
+          .filter((m) => m.spill > 0),
+      );
+
+      expect(broken, `stat text rendering outside its cell: ${JSON.stringify(broken)}`).toEqual([]);
+    });
+  }
+
   test("primary navigation stays reachable on the narrowest phone", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto("/", { waitUntil: "domcontentloaded" });

@@ -26,13 +26,7 @@ import {
   DEFAULT_PROPERTY_COVER,
 } from "@/shared/components/PropertyImageBranding";
 
-export function PropertyCard({
-  property,
-  layout = "responsive",
-}: {
-  property: Property;
-  layout?: "vertical" | "horizontal" | "responsive";
-}) {
+export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
   const saved = has(property.id);
   const [copied, setCopied] = useState(false);
@@ -113,17 +107,25 @@ export function PropertyCard({
    * provides one. `overflow-hidden` stays, because it is what rounds the image
    * corners — so the clip has to be prevented by the layout rather than absorbed.
    */
-  // Root card container layout classes
+  /*
+   * There is no layout variant, deliberately.
+   *
+   * A `layout` prop was added with a "responsive" default that resolved to the
+   * horizontal branch. No call site passed it, so every card on the site went
+   * back to image-left/details-right inside a multi-column grid — the exact
+   * failure described above, and this time the columns were narrow enough that
+   * the three stat labels printed on top of each other ("RENT/MDEPOSIT") and the
+   * button read "Get Ow… Det…".
+   *
+   * A variant whose default breaks every consumer is worse than no variant. If a
+   * horizontal card is ever genuinely needed, it needs a full-width row to live
+   * in, and that container should be built and tested at the same time.
+   */
   const rootClasses =
-    layout === "vertical"
-      ? "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
-      : "group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40";
+    "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40";
 
-  // Image container layout classes
   const imageClasses =
-    layout === "vertical"
-      ? "relative w-full shrink-0 aspect-[4/3] overflow-hidden bg-muted group/carousel"
-      : "relative w-full sm:w-[280px] shrink-0 aspect-[4/3] sm:aspect-square overflow-hidden bg-muted group/carousel";
+    "relative w-full shrink-0 aspect-[4/3] overflow-hidden bg-muted group/carousel";
 
   return (
     <div className={rootClasses}>
