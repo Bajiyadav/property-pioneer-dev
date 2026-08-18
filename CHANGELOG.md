@@ -1,3 +1,9 @@
+## v0.17.1 — 2026-08-18
+
+### Fixes
+- fix(seo,dashboards): repair the empty sitemap and restore a green build (958ed8b)
+- fix(seo): stop one missing column emptying the entire sitemap (57420ff)
+
 ## v0.17.0 — 2026-08-18
 
 ### Features
