@@ -88,12 +88,21 @@ export function EnquiryForm({
             toast.error(result.error || "Could not submit enquiry. Please try again.");
           }
         } catch (err) {
-          // Fallback simulation
-          useInteractionStore
-            .getState()
-            .sendMessage(propertyId, "Property Enquiry", tenantId, ownerId, tenantId, message);
-          toast.success("Enquiry submitted successfully!");
-          onSent();
+          // A failed enquiry must not be simulated as a successful one.
+          //
+          // This block used to write the enquiry into the client-side
+          // interaction store and report "Enquiry submitted successfully!" — its
+          // own comment called it a "fallback simulation". The effect was that
+          // any network or server error produced a buyer who believed the owner
+          // had been contacted AND a fabricated entry in their own timeline
+          // confirming it. The owner received nothing. This is the primary
+          // conversion action on the platform, so the failure mode was a silent
+          // dead end on the one thing the marketplace exists to do.
+          //
+          // The store write stays on the success path above, where it is a
+          // legitimate optimistic update of a result the server confirmed.
+          console.error("[enquiry] submission failed:", err);
+          toast.error("Could not send your enquiry. Please check your connection and try again.");
         } finally {
           setSending(false);
         }

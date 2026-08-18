@@ -773,38 +773,25 @@ export async function fetchPublicPropertyFeed(
         error: error.message,
       };
     }
+    // An empty result is a truthful answer, not a failure to paper over.
+    //
+    // This branch used to substitute ALL_FALLBACK_PROPERTIES whenever the query
+    // returned no rows — filtered by the same city/locality/type the visitor
+    // searched, and returned with `error: null` so it looked like a clean
+    // database read. A search for a locality with no inventory therefore
+    // produced invented listings that were indistinguishable from real ones.
+    //
+    // That was masked until now. `pincode` did not exist, so the extended query
+    // always failed, the capability latched off, and buildFeedQuery dropped the
+    // locality filter entirely — every locality search quietly returned the full
+    // city list and was never empty. Applying the pincode column switches real
+    // locality filtering on, which makes empty results common and would have
+    // turned this branch into the normal path.
+    //
+    // `source: "fallback"` is now reserved for a genuine failure, which is what
+    // lets callers distinguish "nothing matched" from "we could not look".
     if (!data || data.length === 0) {
-      const q = params?.q?.toLowerCase();
-      const loc = params?.locality?.toLowerCase();
-      const city = params?.city?.toLowerCase();
-      const filtered = ALL_FALLBACK_PROPERTIES.filter((p) => {
-        if (city && p.city.toLowerCase() !== city) return false;
-        if (loc && !(p.locality?.toLowerCase().includes(loc) ?? false)) return false;
-        if (params?.listing && p.listing_type !== params.listing) return false;
-        if (params?.type) {
-          const typeLower = params.type.toLowerCase();
-          if (typeLower === "commercial") {
-            const isCommercial =
-              p.property_type?.toLowerCase() === "commercial" ||
-              p.title?.toLowerCase().includes("commercial") ||
-              p.description?.toLowerCase().includes("office");
-            if (!isCommercial) return false;
-          } else {
-            if (!p.property_type?.toLowerCase().includes(typeLower)) return false;
-          }
-        }
-        if (
-          q &&
-          !p.title.toLowerCase().includes(q) &&
-          !p.description.toLowerCase().includes(q) &&
-          !(p.locality?.toLowerCase().includes(q) ?? false) &&
-          !p.address.toLowerCase().includes(q)
-        ) {
-          return false;
-        }
-        return true;
-      });
-      return { properties: filtered, source: "fallback", error: null };
+      return { properties: [], source: "database", error: null };
     }
     return {
       // The column list is chosen at runtime, so PostgREST's generic row type is
@@ -825,7 +812,33 @@ export async function fetchPublicPropertyFeed(
 }
 
 export async function fetchPublicProperties(params?: PropertySearchParams): Promise<Property[]> {
-  return (await fetchPublicPropertyFeed(params)).properties;
+  const feed = await fetchPublicPropertyFeed(params);
+
+  // The public site never shows seed listings as if they were real inventory.
+  //
+  // fetchPublicPropertyFeed falls back to ALL_FALLBACK_PROPERTIES when the query
+  // fails, and marks the result `source: "fallback"` so the caller can say so.
+  // The three dashboards honour that and render a "Showing sample data" banner.
+  // This function dropped the marker on the floor, and it is what every public
+  // surface uses — /properties, the home page, and all the rent/buy/commercial
+  // city and locality pages. So a failed query showed visitors fourteen invented
+  // Hyderabad listings, indistinguishable from real ones.
+  //
+  // A mislabelled metrics panel is a cosmetic problem; a fabricated listing is
+  // not. It is clickable, it has a detail page, and a visitor can try to enquire
+  // about a home that does not exist. An empty result is the honest answer, and
+  // the search UI already has a good empty state for it.
+  //
+  // The feed itself is unchanged, so the dashboards keep their labelled data.
+  if (feed.source === "fallback") {
+    console.error(
+      "[properties] public query failed; serving an empty result rather than seed listings",
+      feed.error,
+    );
+    return [];
+  }
+
+  return feed.properties;
 }
 
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {

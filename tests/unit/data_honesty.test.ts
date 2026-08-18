@@ -103,3 +103,39 @@ describe("dashboards contain no fabricated records", () => {
     expect(offenders, `hardcoded earnings found in: ${offenders.join(", ")}`).toEqual([]);
   });
 });
+
+describe("the public site never presents seed listings as real inventory", () => {
+  const service = readFileSync(
+    join(process.cwd(), "src/modules/property/services/propertyService.ts"),
+    "utf-8",
+  );
+
+  /**
+   * fetchPublicPropertyFeed serves ALL_FALLBACK_PROPERTIES when the query fails,
+   * and marks the result `source: "fallback"`. The dashboards honour that marker
+   * and render a "Showing sample data" banner. fetchPublicProperties — which is
+   * what /properties, the home page and every rent/buy/commercial page use —
+   * discarded it, so a failed query put fourteen invented Hyderabad listings in
+   * front of visitors with nothing to distinguish them from real ones.
+   *
+   * A fabricated listing is not a cosmetic defect: it is clickable, it has a
+   * detail page, and a visitor can try to enquire about a home that does not
+   * exist.
+   */
+  it("drops fallback listings instead of returning them to public callers", () => {
+    const body = service.slice(
+      service.indexOf("export async function fetchPublicProperties"),
+      service.indexOf("export async function fetchPublicPropertyById"),
+    );
+    expect(body, "fetchPublicProperties must inspect the feed's provenance").toContain(
+      'feed.source === "fallback"',
+    );
+    expect(body, "a fallback feed must yield an empty result").toMatch(/return \[\];/);
+  });
+
+  it("keeps the provenance marker the dashboards depend on", () => {
+    // The fix must not be implemented by deleting the marker — the dashboards
+    // still need it to label their illustrative figures.
+    expect(service).toContain('export type PropertySource = "database" | "fallback";');
+  });
+});
