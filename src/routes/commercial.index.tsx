@@ -3,7 +3,7 @@ import { Building2, ShieldCheck, Zap, Compass } from "lucide-react";
 import { CategoryLandingPage } from "@/modules/marketing/category/CategoryLandingPage";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
-export const Route = createFileRoute("/commercial")({
+export const Route = createFileRoute("/commercial/")({
   head: () => {
     const canonicalUrl = getCanonicalUrl("/commercial");
     const ogImage = getOgImageUrl();

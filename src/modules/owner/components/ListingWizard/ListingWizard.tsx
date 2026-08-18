@@ -11,6 +11,10 @@ import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
 import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
 import type { ListingFormData } from "./types";
+import { buildListingPayload } from "./buildListingPayload";
+import { useServerFn } from "@tanstack/react-start";
+import { createListing } from "@/modules/owner/services/ownerFunctions";
+import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
 
 interface ListingWizardProps {
@@ -40,6 +44,47 @@ function readStashedPhone(): string {
   }
 }
 
+/** Key holding an in-progress listing while the owner signs in. */
+const LISTING_DRAFT_KEY = "sp_listing_draft";
+
+/**
+ * Persists wizard state so signing in does not discard six steps of work.
+ *
+ * localStorage rather than sessionStorage: the sign-in round trip can involve a
+ * fresh tab (an email link, a provider redirect), which a session-scoped store
+ * would not survive. Cleared the moment the server confirms the listing.
+ */
+function saveDraft(data: ListingFormData): void {
+  try {
+    window.localStorage.setItem(LISTING_DRAFT_KEY, JSON.stringify(data));
+  } catch {
+    // Storage blocked or full. Losing the draft is bad; blocking the sign-in
+    // they need in order to save at all is worse.
+  }
+}
+
+function clearDraft(): void {
+  try {
+    window.localStorage.removeItem(LISTING_DRAFT_KEY);
+  } catch {
+    /* nothing to recover */
+  }
+}
+
+/** Reads a saved draft. Shape is re-checked because storage is untrusted input. */
+function readStashedDraft(): Partial<ListingFormData> | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(LISTING_DRAFT_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    return parsed as Partial<ListingFormData>;
+  } catch {
+    return null;
+  }
+}
+
 const steps = [
   { id: 1, name: "Location", desc: "City & Address" },
   { id: 2, name: "Details", desc: "Type & Rooms" },
@@ -52,6 +97,9 @@ const steps = [
 export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
+  const { status, refreshSession } = useAuth();
+  const create = useServerFn(createListing);
   const addProperty = useAdminPropertyStore((state) => state.addProperty);
 
   const [formData, setFormData] = useState<ListingFormData>({
@@ -94,6 +142,9 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     facing: "East",
     available_from: "",
     rent_negotiable: false,
+    // Last, so a restored draft wins over the defaults above. Returning from
+    // sign-in lands back on the same details rather than an empty form.
+    ...(readStashedDraft() ?? {}),
   });
 
   const updateFormData = (data: Partial<ListingFormData>) => {
@@ -130,24 +181,80 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     }
   };
 
-  const handleSubmit = () => {
-    const title =
-      formData.title ||
-      `${formData.bhk_type || `${formData.bedrooms} BHK`} ${formData.property_type} in ${formData.locality || formData.city}`;
+  /**
+   * Saves the listing.
+   *
+   * This used to call `addProperty`, which writes to a Zustand store in
+   * localStorage, and then told the owner "Property listing submitted
+   * successfully! Our moderation team will review and approve within 2-4 hours."
+   * No row was created. No moderator could see it. The listing never appeared,
+   * and the owner waited for enquiries that could not arrive. Six steps of work
+   * went into one browser's local storage.
+   *
+   * It now calls the same auth-gated server function the onboarding modal uses,
+   * and — the part that matters — success is only reported after the server has
+   * confirmed the row exists.
+   */
+  const handleSave = async (mode: "draft" | "submit") => {
+    if (isSaving) return;
 
-    addProperty({
-      ...formData,
-      title,
-      listing_type: formData.listing_type || "rent",
-      is_featured: false,
-      is_approved: false,
-    });
+    const built = buildListingPayload(formData, mode);
+    if (!built.ok) {
+      // Named field, not a generic failure: the owner is six steps deep and
+      // needs to know which one to go back to.
+      toast.error(built.problems[0].message);
+      return;
+    }
 
-    toast.success("Property listing submitted successfully!", {
-      description: "Our moderation team will review and approve within 2-4 hours.",
-    });
-    navigate({ to: "/" });
+    // Not signed in: a listing needs an owner id, and the server function is
+    // auth-gated. Keep the draft, send them to sign in, bring them back.
+    if (status !== "authenticated") {
+      saveDraft(formData);
+      toast.info("Sign in to save your listing", {
+        description: "Your details are kept and restored when you return.",
+      });
+      navigate({ to: "/auth", search: { redirect: "/list-property/wizard" } });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await create({ data: built.payload });
+
+      // Only now does anything exist on the server.
+      clearDraft();
+      try {
+        sessionStorage.removeItem(LISTING_PHONE_KEY);
+      } catch {
+        /* best effort */
+      }
+
+      // The owner may have just become an owner; refresh so the role and the
+      // dashboard route resolve.
+      await refreshSession();
+
+      if (mode === "draft") {
+        toast.success("Draft saved", {
+          description: "It stays private until you submit it for review.",
+        });
+      } else {
+        toast.success("Submitted for review", {
+          description: "A moderator checks it before it goes live. Track it in your dashboard.",
+        });
+      }
+      navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
+    } catch (err) {
+      // Reported, never swallowed. A failed save that looks like a success is
+      // the exact defect this function replaced.
+      toast.error(err instanceof Error ? err.message : "Could not save the listing.", {
+        description: "Your details are still on this page — nothing was lost.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleSubmit = () => void handleSave("submit");
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
@@ -252,6 +359,21 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
           >
             <ArrowLeft className="w-4 h-4" />
             Previous Step
+          </Button>
+
+          {/*
+            Save draft, offered at every step rather than only at the end.
+            Someone halfway through a six-step form is precisely who needs it,
+            and `buildListingPayload` holds drafts to a lower bar than
+            submissions, so a price they have not decided yet cannot block it.
+          */}
+          <Button
+            variant="outline"
+            onClick={() => void handleSave("draft")}
+            disabled={isSaving}
+            className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm border-border bg-card hover:bg-secondary disabled:opacity-40"
+          >
+            {isSaving ? "Saving…" : "Save draft"}
           </Button>
 
           {currentStep < 6 ? (

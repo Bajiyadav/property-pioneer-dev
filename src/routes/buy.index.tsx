@@ -3,7 +3,7 @@ import { ShieldCheck, UserCheck, Calendar, Sparkles } from "lucide-react";
 import { CategoryLandingPage } from "@/modules/marketing/category/CategoryLandingPage";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
-export const Route = createFileRoute("/buy")({
+export const Route = createFileRoute("/buy/")({
   head: () => {
     const canonicalUrl = getCanonicalUrl("/buy");
     const ogImage = getOgImageUrl();
