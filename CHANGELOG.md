@@ -1,3 +1,8 @@
+## v0.29.1 — 2026-08-18
+
+### Fixes
+- fix(wizard): resolve JSON.parse syntax error on search params validation (8bdd44b)
+
 ## v0.29.0 — 2026-08-18
 
 ### Features
