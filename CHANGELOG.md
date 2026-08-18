@@ -1,3 +1,26 @@
+## v0.20.5 — 2026-08-18
+
+### Features
+- feat(mobile): production-ready India-wide Rent, Buy, Commercial app (d515ea6)
+- feat(brand): render official SEEDHA logo in watermarks and auth screens (b2dab4d)
+- feat(seo): update search engine favicons, PWA manifest, and Schema.org logo metadata (f07c82a)
+- feat(mobile): configure official app launcher icon and Pan-India links (cc40136)
+- feat(brand): expand Pan-India coverage and enhance official logo (5c4ac17)
+- feat(feedback): add interactive Studio Shodwe feedback banner and radiant Thank You modal (1b52d85)
+- feat(brand): update official SEEDHA Properties logo icon across web and mobile (c154d15)
+- feat(careers): add high-end Careers and Meet Our Founder page with Srinivasa Rao bio (6821ca1)
+- feat(marketing): apply clean editorial dream home styling without price gimmicks (06f6568)
+- feat(sync): enable realtime live sync stream between website and mobile app (e578022)
+- feat(mobile): add curated rental properties fallback and high-contrast chips (33059d5)
+- feat(ui): apply luxury architectural linen, espresso, and warm sunset background palette (9501fba)
+- feat(ui): elevate visual aesthetics, glassmorphism, and luxury card designs across web and mobile (d95fa1d)
+- feat(mobile): add 1-tap WhatsApp direct owner connect to property detail screen (5e41734)
+
+### Fixes
+- fix(mobile): configure Android-only launcher icon generation, disable iOS (4f8da39)
+- fix(mobile): configure android-only launcher icon generation (4a2489f)
+- fix(property): enforce data honesty and reliable public enquiry handling (98ddd2c)
+
 ## v0.20.4 — 2026-08-18
 
 ### Fixes
