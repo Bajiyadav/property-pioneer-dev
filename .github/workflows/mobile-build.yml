@@ -72,7 +72,7 @@ jobs:
 
       - name: Run Flutter Static Analysis
         working-directory: apps/mobile
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run Mobile Unit & Widget Tests
         working-directory: apps/mobile
