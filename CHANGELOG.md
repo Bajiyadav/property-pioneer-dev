@@ -1,3 +1,13 @@
+## v0.24.0 — 2026-08-18
+
+### Features
+- feat(chat): implement real-time in-app chat system across web and mobile (0c5c42c)
+
+### Migration notes
+- supabase/migrations/20260819000000_create_messages_table.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.23.0 — 2026-08-18
 
 ### Features
