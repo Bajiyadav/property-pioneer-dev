@@ -1,3 +1,21 @@
+## v0.20.4 — 2026-08-18
+
+### Fixes
+- fix(mobile): standardize package imports across all screens (16cbeca)
+- fix(mobile): make the Flutter app compile for the first time (4aac1dd)
+- fix(db): apply the migrations the CLI could not see (075b801)
+
+### Migration notes
+- supabase/migrations/20260818140000_recover_orphaned_property_columns.sql
+- supabase/migrations/20260818140100_recover_agent_workflow_tables.sql
+- supabase/migrations/README.md
+- supabase/migrations/properties/20260815190000_add_extended_video_fields.sql
+- supabase/migrations/properties/20260816000000_add_property_visits_and_agent_leads.sql
+- supabase/migrations/properties/20260817140000_add_housing_fields.sql
+- supabase/migrations/users/20260816010000_add_agent_applications.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.20.3 — 2026-08-18
 
 ### Fixes
