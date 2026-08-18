@@ -1,3 +1,8 @@
+## v0.29.0 — 2026-08-18
+
+### Features
+- feat(listing): add smart account recognition and 1-Click sign-in to Start Now card (505b20f)
+
 ## v0.28.1 — 2026-08-18
 
 ### Fixes
