@@ -1,3 +1,13 @@
+## v0.17.5 — 2026-08-18
+
+### Fixes
+- fix(db): create employee helper functions in public, not the auth schema (7f75a52)
+
+### Migration notes
+- supabase/migrations/20260817130000_employee_access_and_scoping.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.17.4 — 2026-08-18
 
 ### Fixes
