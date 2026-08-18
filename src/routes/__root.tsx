@@ -29,7 +29,7 @@ import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 
 /** Bump when the files in public/ that hold the brand icon change. */
-const ICON_VERSION = "2";
+const ICON_VERSION = "4";
 
 function NotFoundComponent() {
   return (
@@ -58,44 +58,36 @@ function NotFoundComponent() {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => {
-    const ogImage = getOgImageUrl();
+    const ogImage = "https://seedhaproperties.com/logo.png";
     return {
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: `${APP_NAME} — India's Premier Real Estate Platform` },
+        { name: "theme-color", content: "#0F766E" },
+        { title: `${APP_NAME} — Verified Direct-Owner Real Estate Marketplace Across India` },
         { name: "description", content: APP_DESCRIPTION },
-        { property: "og:title", content: `${APP_NAME} — India's Premier Real Estate Platform` },
+        {
+          property: "og:title",
+          content: `${APP_NAME} — Verified Direct-Owner Real Estate Across India`,
+        },
         { property: "og:description", content: APP_DESCRIPTION },
         { property: "og:type", content: "website" },
         { property: "og:image", content: ogImage },
         { property: "og:site_name", content: APP_NAME },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${APP_NAME} — India's Premier Real Estate Platform` },
+        {
+          name: "twitter:title",
+          content: `${APP_NAME} — Verified Direct-Owner Real Estate Across India`,
+        },
         { name: "twitter:description", content: APP_DESCRIPTION },
         { name: "twitter:image", content: ogImage },
       ],
       links: [
-        // No canonical or og:url here. Head tags from the root and the matched
-        // route are both emitted, so a hard-coded "/" here shipped a SECOND,
-        // conflicting canonical on every page that sets its own — and search
-        // engines discard both when they disagree. Each route owns its
-        // canonical via `getCanonicalUrl(path)`; the pages that set none are
-        // the authenticated ones we do not want indexed anyway.
         {
           rel: "stylesheet",
           href: appCss,
         },
-        // Our own mark, generated from the BrandMark house glyph. The file that
-        // shipped here was Lovable's heart logo — the icon visitors saw in the
-        // browser tab. /favicon.ico stays because browsers probe it directly.
-        //
-        // The ?v= is a cache buster, not decoration. Browsers cache favicons far
-        // more aggressively than pages and keep serving the old one long after
-        // the bytes change, so anyone who loaded the site before the icon was
-        // replaced keeps seeing the heart. Bump ICON_VERSION whenever the icon
-        // files change.
-        { rel: "icon", href: `/favicon.ico?v=${ICON_VERSION}`, sizes: "32x32" },
+        { rel: "icon", href: `/favicon.ico?v=${ICON_VERSION}` },
         {
           rel: "icon",
           href: `/favicon-32.png?v=${ICON_VERSION}`,
@@ -109,6 +101,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           sizes: "16x16",
         },
         {
+          rel: "icon",
+          href: `/favicon.png?v=${ICON_VERSION}`,
+          type: "image/png",
+        },
+        {
           rel: "apple-touch-icon",
           href: `/apple-touch-icon.png?v=${ICON_VERSION}`,
           sizes: "180x180",
@@ -119,6 +116,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         {
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap",
+        },
+      ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Seedha Properties",
+            url: "https://seedhaproperties.com",
+            logo: "https://seedhaproperties.com/logo.png",
+            sameAs: ["https://www.linkedin.com/in/srinivasa-rao-9520943a3/"],
+            description: "Direct-owner real estate marketplace across India with 0% brokerage.",
+          }),
         },
       ],
     };
