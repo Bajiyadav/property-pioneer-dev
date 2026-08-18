@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   Home,
@@ -66,6 +66,15 @@ function ListPropertyLandingPage() {
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!phone) {
+      const existingPhone = user?.phone || (user?.user_metadata?.phone as string | undefined);
+      if (existingPhone) {
+        setPhone(existingPhone);
+      }
+    }
+  }, [user, phone]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +197,7 @@ function ListPropertyLandingPage() {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" action="#" method="POST">
                   <div>
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
                       Property Category
@@ -197,7 +206,7 @@ function ListPropertyLandingPage() {
                       <button
                         type="button"
                         onClick={() => setPropertyType("Residential")}
-                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all ${
+                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
                           propertyType === "Residential"
                             ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
                             : "bg-background border-border text-muted-foreground hover:border-border/80"
@@ -208,7 +217,7 @@ function ListPropertyLandingPage() {
                       <button
                         type="button"
                         onClick={() => setPropertyType("Commercial")}
-                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all ${
+                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
                           propertyType === "Commercial"
                             ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
                             : "bg-background border-border text-muted-foreground hover:border-border/80"
@@ -229,7 +238,7 @@ function ListPropertyLandingPage() {
                           key={i}
                           type="button"
                           onClick={() => setIntent(i as "Rent" | "Sell" | "PG/Co-living")}
-                          className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all ${
+                          className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                             intent === i
                               ? "bg-[#0F766E] border-[#0F766E] text-white shadow-md"
                               : "bg-background border-border text-foreground hover:bg-secondary"
@@ -250,10 +259,13 @@ function ListPropertyLandingPage() {
                     </label>
                     <Input
                       id="listing-phone"
+                      name="phoneNumber"
                       type="tel"
+                      autoComplete="tel"
+                      required
                       maxLength={18}
                       placeholder="+91 98765 43210"
-                      className="h-12 min-h-[48px] rounded-xl text-base font-semibold px-4"
+                      className="h-12 min-h-[48px] rounded-xl text-base font-semibold px-4 cursor-text"
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
@@ -280,6 +292,7 @@ function ListPropertyLandingPage() {
                   <div className="pt-2">
                     <button
                       type="submit"
+                      id="start-now-submit-button"
                       aria-label="Start property listing now"
                       className="w-full min-h-[50px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F766E] via-[#115E59] to-[#0D9488] px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-teal-950/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                     >
