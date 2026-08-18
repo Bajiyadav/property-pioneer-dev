@@ -1,3 +1,8 @@
+## v0.20.6 — 2026-08-18
+
+### Fixes
+- fix(brand): update official logo asset and prevent brand text wrapping under logo on mobile (e62d568)
+
 ## v0.20.5 — 2026-08-18
 
 ### Features
