@@ -1,4 +1,5 @@
 import { BRAND } from "@/config/platform";
+import logoImg from "@/assets/logo.png";
 
 export interface PropertyWatermarkProps {
   /** Size variant tailored for thumbnails, standard cards, or high-res galleries */
@@ -60,23 +61,11 @@ export function PropertyWatermark({
       aria-hidden="true"
       className={`absolute z-10 pointer-events-none select-none inline-flex items-center ${sizeConfig.padding} ${sizeConfig.rounded} ${positionClasses} bg-black/60 text-white shadow-md backdrop-blur-md border border-white/20 ring-1 ring-black/20 transition-opacity duration-300 ${className}`}
     >
-      {/* Brand icon — drawn inline; see `BrandMark` for why there is no image. */}
+      {/* Brand logo image */}
       <div
-        className={`flex-none flex items-center justify-center rounded bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 p-0.5 text-white ${sizeConfig.iconSize}`}
+        className={`flex-none flex items-center justify-center rounded-sm bg-white p-0.5 shadow-sm overflow-hidden ${sizeConfig.iconSize}`}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-full w-full"
-        >
-          <path d="M3 21H21" />
-          <path d="M6 21V9L12 4L18 9V21" />
-          <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.3" />
-        </svg>
+        <img src={logoImg} alt="SEEDHA Properties" className="h-full w-full object-contain" />
       </div>
 
       {/* Brand Label */}

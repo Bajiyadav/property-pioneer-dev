@@ -27,24 +27,23 @@ class PropertyWatermarkWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 14,
-              height: 14,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0F766E),
-                shape: BoxShape.circle,
+              width: 16,
+              height: 16,
+              padding: const EdgeInsets.all(1),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(3),
               ),
-              child: const Center(
-                child: Text(
-                  'SP',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 7,
-                    fontWeight: FontWeight.w900,
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(),
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 5),
             const Text(
               'SEEDHA PROPERTIES',
               style: TextStyle(

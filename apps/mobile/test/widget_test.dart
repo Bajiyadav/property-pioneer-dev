@@ -17,6 +17,6 @@ void main() {
     );
 
     expect(find.text('SEEDHA PROPERTIES'), findsOneWidget);
-    expect(find.text('SP'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
   });
 }
