@@ -13,6 +13,13 @@ class AuthService {
 
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
+  Future<bool> signInWithGoogle() async {
+    return await _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: 'seedhaproperties://login-callback',
+    );
+  }
+
   Future<AuthResponse> signInWithEmail({
     required String email,
     required String password,

@@ -121,7 +121,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+                // Google 1-Click Sign-In
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            try {
+                              setState(() => _isLoading = true);
+                              final authService = ref.read(authServiceProvider);
+                              await authService.signInWithGoogle();
+                            } catch (e) {
+                              setState(() {
+                                _errorMessage = 'Google sign-in could not be completed: $e';
+                                _isLoading = false;
+                              });
+                            }
+                          },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: Colors.white,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.g_mobiledata, size: 28, color: Color(0xFFEA4335)),
+                        SizedBox(width: 6),
+                        Text(
+                          'Sign in with Google',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Row(
+                  children: [
+                    Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'OR WITH EMAIL',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 if (_errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),

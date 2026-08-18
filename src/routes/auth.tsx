@@ -8,7 +8,8 @@ import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
-import { ShieldCheck, Globe, MessageCircle, Github } from "lucide-react";
+import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
+import { ShieldCheck } from "lucide-react";
 
 const authSearchSchema = z.object({
   /** Where to send the user after a successful sign-in. */
@@ -126,54 +127,21 @@ function AuthPage() {
       )}
 
       {/* Form & Real-time Validation */}
-      <div className="mt-6 w-full rounded-3xl border border-border/60 bg-card p-6 shadow-xl">
-        <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
+      <div className="mt-6 w-full rounded-3xl border border-border/60 bg-card p-6 shadow-xl space-y-5">
+        {/* 1-Click Fast Sign-In */}
+        <GoogleSignInButton
+          redirect={redirect}
+          label={mode === "signin" ? "Sign in with Google" : "Continue with Google (1-Click)"}
+        />
 
-        {/*
-          Social sign-in bar.
-
-          No OAuth provider is enabled on the Supabase project yet, so these are
-          presented as "coming soon" rather than claiming to be active — a button
-          that says SSO works and then does nothing is worse than no button.
-          Enable the provider in Supabase → Auth → Providers, then swap the
-          handler for supabase.auth.signInWithOAuth({ provider }).
-        */}
-        <div className="mt-6 border-t border-border/40 pt-6">
-          <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Social sign-in — coming soon
-          </p>
-
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: "google", label: "Google", icon: <Globe className="h-4 w-4 text-rose-500" /> },
-              {
-                id: "whatsapp",
-                label: "WhatsApp",
-                icon: <MessageCircle className="h-4 w-4 text-emerald-500" />,
-              },
-              {
-                id: "github",
-                label: "GitHub",
-                icon: <Github className="h-4 w-4 text-foreground" />,
-              },
-            ].map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                disabled
-                aria-disabled="true"
-                title={`${p.label} sign-in is not enabled yet`}
-                className="flex cursor-not-allowed items-center justify-center gap-1.5 rounded-xl border border-border bg-secondary/40 py-2.5 text-xs font-semibold text-foreground opacity-50"
-              >
-                {p.icon} {p.label}
-              </button>
-            ))}
-          </div>
-
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Use your email and password above to sign in.
-          </p>
+        <div className="relative flex items-center justify-center">
+          <div className="w-full border-t border-border/60" />
+          <span className="absolute bg-card px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            or with email
+          </span>
         </div>
+
+        <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
       </div>
 
       <Link to="/" className="mt-6 text-xs font-bold text-muted-foreground hover:text-foreground">
