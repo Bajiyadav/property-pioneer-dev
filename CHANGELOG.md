@@ -1,3 +1,8 @@
+## v0.26.0 — 2026-08-18
+
+### Features
+- feat(ai): integrate Google Gemini AI assistant for web and mobile (341c422)
+
 ## v0.25.0 — 2026-08-18
 
 ### Features
