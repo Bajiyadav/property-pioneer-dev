@@ -39,7 +39,7 @@ export function formatPhoneNumber(phone: string): string {
  */
 export function buildWhatsAppLeadMessage(lead: LeadDetails): string {
   return [
-    `🏠 *New Property Enquiry - Urban Properties*`,
+    `🏠 *New Property Enquiry - Seedha Properties*`,
     ``,
     `*Property:* ${lead.propertyTitle}`,
     lead.propertyAddress ? `*Location:* ${lead.propertyAddress}` : null,
@@ -49,7 +49,7 @@ export function buildWhatsAppLeadMessage(lead: LeadDetails): string {
     `• *Phone:* ${lead.customerPhone}`,
     `• *Message:* "${lead.customerMessage}"`,
     ``,
-    `_Received via Urban Properties Platform. Direct owner connect enabled._`,
+    `_Received via Seedha Properties Platform. Direct owner connect enabled._`,
   ]
     .filter((line) => line !== null)
     .join("\n");
@@ -105,9 +105,36 @@ export async function dispatchLeadNotification(
     result.whatsappDirectUrl = generateWhatsAppDirectUrl(targetPhone, messageText);
   }
 
-  // 3. Automated WhatsApp Dispatch (via Webhook / Provider if configured in .env)
+  // 3. Automated WhatsApp Dispatch (via Meta WhatsApp Cloud API or configured Webhook)
+  const whatsappPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const whatsappToken = process.env.WHATSAPP_ACCESS_TOKEN;
   const whatsappWebhook = process.env.WHATSAPP_WEBHOOK_URL;
-  if (whatsappWebhook && targetPhone) {
+
+  if (whatsappPhoneId && whatsappToken && targetPhone) {
+    try {
+      const formattedPhone = formatPhoneNumber(targetPhone);
+      const res = await fetch(`https://graph.facebook.com/v18.0/${whatsappPhoneId}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${whatsappToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: formattedPhone,
+          type: "text",
+          text: { body: messageText },
+        }),
+      });
+
+      if (res.ok) {
+        result.whatsappMessageSent = true;
+      }
+    } catch (err) {
+      console.error("[leadNotification] Meta WhatsApp API failed:", err);
+    }
+  } else if (whatsappWebhook && targetPhone) {
     try {
       const res = await fetch(whatsappWebhook, {
         method: "POST",
@@ -137,7 +164,7 @@ export async function dispatchLeadNotification(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           to: formatPhoneNumber(targetPhone),
-          text: `[Urban Properties] New enquiry on ${lead.propertyTitle} from ${lead.customerName} (${lead.customerPhone}): "${lead.customerMessage.slice(0, 60)}"`,
+          text: `[Seedha Properties] New enquiry on ${lead.propertyTitle} from ${lead.customerName} (${lead.customerPhone}): "${lead.customerMessage.slice(0, 60)}"`,
         }),
       });
       if (res.ok) {

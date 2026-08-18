@@ -23,7 +23,7 @@ describe("Automated Lead Notifications", () => {
       customerMessage: "Hi, I would like to schedule a visit tomorrow at 11 AM.",
     });
 
-    expect(message).toContain("New Property Enquiry - Urban Properties");
+    expect(message).toContain("New Property Enquiry - Seedha Properties");
     expect(message).toContain("Luxury 3BHK in Gachibowli");
     expect(message).toContain("Rahul Sharma");
     expect(message).toContain("9876543210");
