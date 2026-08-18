@@ -54,15 +54,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(6),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F766E), Color(0xFF047857)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F766E).withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: const Text('UP', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)),
+              child: const Text('SP', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5)),
             ),
-            const SizedBox(width: 8),
-            const Text(AppConstants.appName, style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(width: 10),
+            const Text(AppConstants.appName, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, letterSpacing: -0.3)),
           ],
         ),
         actions: [
@@ -113,10 +122,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Hero Search Banner
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF0F766E), Color(0xFF134E4A)],
+                    colors: [Color(0xFF0F766E), Color(0xFF115E59), Color(0xFF047857)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -124,16 +133,74 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Find Verified Rental Homes',
-                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Direct From Owners',
+                              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              '0% Brokerage • 100% Direct Contact',
+                              style: TextStyle(color: Color(0xFF99F6E4), fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Zero Brokerage • Hyderabad & Across India',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    const SizedBox(height: 16),
+                    // Search Bar
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.search, color: Color(0xFF0F766E), size: 22),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              decoration: const InputDecoration(
+                                hintText: 'Search locality, BHK, or landmark...',
+                                hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                                border: InputBorder.none,
+                                isDense: true,
+                              ),
+                              onChanged: (val) {
+                                // Real-time client filter
+                                setState(() {
+                                  if (val.trim().isEmpty) {
+                                    _loadData();
+                                  } else {
+                                    final q = val.toLowerCase();
+                                    _properties = _properties.where((p) =>
+                                      p.title.toLowerCase().contains(q) ||
+                                      p.address.toLowerCase().contains(q) ||
+                                      (p.locality?.toLowerCase().contains(q) ?? false) ||
+                                      "${p.bedrooms} bhk".contains(q)
+                                    ).toList();
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     // Locality Chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,

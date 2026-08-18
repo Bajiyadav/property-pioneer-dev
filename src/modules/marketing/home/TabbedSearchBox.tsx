@@ -54,26 +54,31 @@ export function TabbedSearchBox({
   };
 
   return (
-    <div className="w-full max-w-4xl rounded-xl bg-card shadow-xl overflow-hidden mt-8 ring-1 ring-border">
+    <div className="w-full max-w-4xl rounded-2xl bg-white/95 backdrop-blur-md shadow-2xl overflow-hidden ring-1 ring-white/20 dark:bg-slate-900/95 dark:ring-slate-800 transition-all">
       {/* Tabs */}
-      <div className="flex bg-secondary/40 border-b border-border">
+      <div className="flex bg-slate-100/70 dark:bg-slate-950/50 border-b border-slate-200/80 dark:border-slate-800">
         {[
-          { id: "buy", label: "Buy", icon: Home },
           { id: "rent", label: "Rent", icon: Key },
+          { id: "buy", label: "Buy", icon: Home },
           { id: "commercial", label: "Commercial", icon: Building2 },
         ].map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id as SearchMode)}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition-all relative ${
               activeTab === tab.id
-                ? "bg-card text-primary border-b-2 border-primary"
-                : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <tab.icon className="h-4 w-4" />
+            <tab.icon
+              className={`h-4 w-4 ${activeTab === tab.id ? "text-emerald-600 dark:text-emerald-400" : ""}`}
+            />
             {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            )}
           </button>
         ))}
       </div>
@@ -162,7 +167,7 @@ export function TabbedSearchBox({
           {/* Search Button */}
           <button
             type="submit"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-3 sm:py-0 font-semibold transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-7 sm:px-9 py-3 sm:py-0 font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base active:scale-[0.99]"
           >
             <Search className="h-4 w-4" />
             Search

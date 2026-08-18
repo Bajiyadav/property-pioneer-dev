@@ -122,7 +122,7 @@ export function PropertyCard({ property }: { property: Property }) {
    * in, and that container should be built and tested at the same time.
    */
   const rootClasses =
-    "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40";
+    "group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/40";
 
   const imageClasses =
     "relative w-full shrink-0 aspect-[4/3] overflow-hidden bg-muted group/carousel";
@@ -316,7 +316,7 @@ export function PropertyCard({ property }: { property: Property }) {
           <Link
             to="/properties/$id"
             params={{ id: generatePropertySlug(property) }}
-            className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary hover:bg-primary/95 px-4.5 py-2 text-xs font-bold text-primary-foreground transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
+            className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4.5 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
           >
             <span>Get Owner Details</span>
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
