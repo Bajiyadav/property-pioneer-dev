@@ -30,7 +30,14 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: false
   image_path: "assets/logo.png"
+  remove_alpha_ios: true
   min_sdk_android: 21
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
 
 flutter:
   uses-material-design: true
