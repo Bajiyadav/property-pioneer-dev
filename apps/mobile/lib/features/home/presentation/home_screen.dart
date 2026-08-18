@@ -7,8 +7,8 @@ import '../../../models/property.dart';
 import '../../../models/user_profile.dart';
 import '../../../services/property_service.dart';
 import '../../../services/favorites_service.dart';
-import '../properties/presentation/property_card_widget.dart';
-import '../properties/presentation/property_detail_screen.dart';
+import '../../properties/presentation/property_card_widget.dart';
+import '../../properties/presentation/property_detail_screen.dart';
 import '../../../providers/app_providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
