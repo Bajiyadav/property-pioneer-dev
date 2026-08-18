@@ -1,3 +1,14 @@
+## v0.17.2 — 2026-08-18
+
+### Fixes
+- fix(build): repair a broken main — dead imports, missing table, untyped payments (3d85ab6)
+
+### Migration notes
+- supabase/migrations/20260818090000_add_customer_entitlements.sql
+- supabase/migrations/20260818120000_customer_payments.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.17.1 — 2026-08-18
 
 ### Fixes
