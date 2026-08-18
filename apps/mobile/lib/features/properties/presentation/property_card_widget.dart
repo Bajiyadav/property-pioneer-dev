@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../config/theme.dart';
-import '../../../models/property.dart';
-import '../../../shared/widgets/property_watermark_widget.dart';
+import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/models/property.dart';
+import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
 
 class PropertyCardWidget extends StatelessWidget {
   final Property property;

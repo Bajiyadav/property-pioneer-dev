@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
-import '../../../config/theme.dart';
-import '../../../models/property.dart';
-import '../../../services/property_service.dart';
-import '../../../services/enquiry_service.dart';
-import '../../../shared/widgets/property_watermark_widget.dart';
-import '../../../providers/app_providers.dart';
+import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/models/property.dart';
+import 'package:seedha_properties_mobile/services/property_service.dart';
+import 'package:seedha_properties_mobile/services/enquiry_service.dart';
+import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
+import 'package:seedha_properties_mobile/providers/app_providers.dart';
 
 class PropertyDetailScreen extends ConsumerStatefulWidget {
   final String propertyId;

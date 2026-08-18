@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../config/theme.dart';
-import '../../../models/enquiry.dart';
-import '../../../providers/app_providers.dart';
-import '../../../services/supabase_service.dart';
-import '../../properties/presentation/property_card_widget.dart';
+import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/models/enquiry.dart';
+import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/services/supabase_service.dart';
+import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 
 class CustomerDashboardScreen extends ConsumerStatefulWidget {
   const CustomerDashboardScreen({Key? key}) : super(key: key);
