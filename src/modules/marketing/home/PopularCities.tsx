@@ -137,6 +137,31 @@ export function PopularCities({ onSelectCity }: { onSelectCity?: (city: CityRoad
           );
         })}
       </div>
+
+      {/* Interactive Expansion Roadmap Trigger */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-primary/5 border border-primary/20 p-6">
+        <div>
+          <h3 className="font-bold text-foreground text-base">City Expansion & Feature Roadmap</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Explore our corridor plans and verified direct-owner rollout for Bangalore and upcoming
+            regions.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            handleCityClick({
+              name: "Bangalore",
+              tag: "Koramangala, Indiranagar & Whitefield",
+              status: "upcoming",
+              badge: "Roadmap",
+            })
+          }
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-sm hover:bg-primary/90 transition"
+        >
+          <Sparkles className="h-4 w-4" /> View Bangalore Expansion Roadmap
+        </button>
+      </div>
     </section>
   );
 }

@@ -32,20 +32,13 @@ export function HeroSection({
       <div className="absolute inset-0 -z-10">
         <img
           src={heroImg}
-          alt=""
-          aria-hidden="true"
+          alt="Modern sunlit living room representing Seedha Properties"
           className="h-full w-full object-cover object-center scale-105 transition-transform duration-1000"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-stone-950/55 via-stone-900/25 to-stone-950/60" />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
-        {/* Main Heading */}
-        {/*
-          Was a global superlative we cannot substantiate. The differentiator
-          that is actually true — no commission from us, and you deal with the
-          owner — is the stronger claim anyway.
-        */}
         <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl [text-shadow:0_2px_12px_rgb(2_6_23_/_0.75)]">
           Rent and buy properties direct from owners
         </h1>
@@ -66,19 +59,20 @@ export function HeroSection({
             Explore Cities:
           </span>
           {[
-            { name: "Bengaluru", query: "Bengaluru" },
-            { name: "Mumbai", query: "Mumbai" },
-            { name: "Delhi NCR", query: "Delhi NCR" },
-            { name: "Hyderabad", query: "Hyderabad" },
-            { name: "Pune", query: "Pune" },
-            { name: "Chennai", query: "Chennai" },
+            { name: "Bengaluru", query: "Bengaluru", isCity: true },
+            { name: "Mumbai", query: "Mumbai", isCity: true },
+            { name: "Delhi NCR", query: "Delhi NCR", isCity: true },
+            { name: "Hyderabad", query: "Hyderabad", isCity: true },
+            { name: "Madhapur", query: "Madhapur", isCity: false },
+            { name: "Pune", query: "Pune", isCity: true },
+            { name: "Chennai", query: "Chennai", isCity: true },
           ].map((item) => (
             <Link
               key={item.name}
               to="/properties"
               search={{
-                q: "",
-                city: item.query,
+                q: item.isCity ? "" : item.query,
+                city: item.isCity ? item.query : "",
                 listing: "rent",
                 minPrice: 0,
                 maxPrice: 0,

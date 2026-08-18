@@ -40,6 +40,11 @@ jobs:
           fi
 
           NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+          while git rev-parse "$NEXT" >/dev/null 2>&1; do
+            PATCH=$((PATCH+1))
+            NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+          done
+
           echo "next=$NEXT"  >> "$GITHUB_OUTPUT"
           echo "last=$LAST"  >> "$GITHUB_OUTPUT"
           echo "bump=$BUMP"  >> "$GITHUB_OUTPUT"
