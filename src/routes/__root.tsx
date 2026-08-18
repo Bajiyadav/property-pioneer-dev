@@ -267,17 +267,10 @@ function SiteHeader() {
               Why Us
             </Link>
             <Link
-              to="/"
-              hash="contact"
+              to="/careers"
               className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
-              onClick={(e) => {
-                if (window.location.pathname === "/") {
-                  e.preventDefault();
-                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
             >
-              Contact
+              Careers
             </Link>
           </nav>
 
@@ -520,6 +513,14 @@ function SiteFooter() {
               <li>
                 <Link to="/cookie-policy" className="hover:text-foreground transition">
                   Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/careers"
+                  className="hover:text-foreground transition font-semibold text-primary"
+                >
+                  Careers (We&apos;re Hiring)
                 </Link>
               </li>
               <li>

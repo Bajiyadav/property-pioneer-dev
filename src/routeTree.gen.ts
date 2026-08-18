@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as CareersRouteImport } from './routes/careers'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
@@ -81,6 +82,11 @@ const AuthRoute = AuthRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiePolicyRoute = CookiePolicyRouteImport.update({
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -423,6 +431,7 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
+    | '/careers'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
+    | '/careers'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/auth'
     | '/blog'
+    | '/careers'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -625,6 +637,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRoute
+  CareersRoute: typeof CareersRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
@@ -690,6 +703,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookie-policy': {
@@ -1094,6 +1114,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   AuthRoute: AuthRoute,
   BlogRoute: BlogRoute,
+  CareersRoute: CareersRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
