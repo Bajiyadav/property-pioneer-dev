@@ -1,3 +1,8 @@
+## v0.17.0 — 2026-08-18
+
+### Features
+- feat: complete SEO upgrades, Docker support, and mobile MVP (3b46e0e)
+
 ## v0.16.0 — 2026-08-18
 
 ### Features
