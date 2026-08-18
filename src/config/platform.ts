@@ -72,7 +72,15 @@ export const PAYMENT_PROVIDERS = [
 /** Monetisation SKUs. Wiring a provider later needs no schema redesign. */
 export const PLANS = [
   { id: "owner_free", audience: "owner", label: "Owner Free", priceInr: 0, listings: 2 },
-  { id: "owner_plus", audience: "owner", label: "Owner Plus", priceInr: 499, listings: 15 },
+  { id: "assist-basic", audience: "owner", label: "Assist Basic", priceInr: 249, listings: 15 },
+  { id: "assist-managed", audience: "owner", label: "Assist Plus", priceInr: 499, listings: 30 },
+  {
+    id: "assist-complete",
+    audience: "owner",
+    label: "Assist Complete",
+    priceInr: 999,
+    listings: 100,
+  },
   { id: "agent_pro", audience: "agent", label: "Agent Pro", priceInr: 1999, listings: 100 },
   {
     id: "builder_suite",
@@ -80,6 +88,34 @@ export const PLANS = [
     label: "Builder Suite",
     priceInr: 9999,
     listings: 1000,
+  },
+  {
+    id: "customer_basic",
+    audience: "customer",
+    label: "Customer Basic",
+    priceInr: 49,
+    listings: 0,
+  },
+  {
+    id: "customer_standard",
+    audience: "customer",
+    label: "Customer Standard",
+    priceInr: 99,
+    listings: 0,
+  },
+  {
+    id: "customer_premium",
+    audience: "customer",
+    label: "Customer Premium",
+    priceInr: 149,
+    listings: 0,
+  },
+  {
+    id: "customer_elite",
+    audience: "customer",
+    label: "Customer Elite",
+    priceInr: 199,
+    listings: 0,
   },
 ] as const;
 

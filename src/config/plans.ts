@@ -64,29 +64,29 @@ const B = DELIVERABLE_BENEFITS;
 export const OWNER_PLANS: OwnerPlan[] = [
   {
     id: "assist-basic",
-    badge: "On-call assistance",
-    name: "Assist",
-    mrpInr: 2499,
-    priceInr: 1999,
+    badge: "Starter",
+    name: "Assist Basic",
+    mrpInr: 499,
+    priceInr: 249,
     validityDays: 30,
     benefits: [B.ON_CALL_SUPPORT, B.MODERATION_PRIORITY],
   },
   {
     id: "assist-managed",
-    badge: "Dedicated manager",
+    badge: "Most Popular",
     name: "Assist Plus",
-    mrpInr: 4999,
-    priceInr: 3999,
+    mrpInr: 999,
+    priceInr: 499,
     validityDays: 45,
     benefits: [B.DEDICATED_MANAGER, B.ON_CALL_SUPPORT, B.MODERATION_PRIORITY, B.ENQUIRY_SCREENING],
     highlighted: true,
   },
   {
-    id: "assist-field",
-    badge: "Personal field assistant",
+    id: "assist-complete",
+    badge: "Full Service",
     name: "Assist Complete",
-    mrpInr: 9999,
-    priceInr: 7999,
+    mrpInr: 1999,
+    priceInr: 999,
     validityDays: 60,
     benefits: [
       B.DEDICATED_MANAGER,
@@ -99,15 +99,87 @@ export const OWNER_PLANS: OwnerPlan[] = [
   },
 ];
 
+export const DELIVERABLE_CUSTOMER_BENEFITS = {
+  UNLIMITED_CONTACTS: "Contact unlimited property owners directly",
+  PRIORITY_SCHEDULING: "Priority site visit scheduling",
+  DEDICATED_RELATIONSHIP_MANAGER: "Dedicated relationship manager for renting/buying",
+  LEGAL_ASSISTANCE: "Basic legal and documentation assistance",
+} as const;
+
+export type DeliverableCustomerBenefit =
+  (typeof DELIVERABLE_CUSTOMER_BENEFITS)[keyof typeof DELIVERABLE_CUSTOMER_BENEFITS];
+
+export interface CustomerPlan {
+  id: string;
+  badge: string;
+  name: string;
+  mrpInr: number;
+  priceInr: number;
+  validityDays: number;
+  benefits: DeliverableCustomerBenefit[];
+  highlighted?: boolean;
+}
+
+const CB = DELIVERABLE_CUSTOMER_BENEFITS;
+
+export const CUSTOMER_PLANS: CustomerPlan[] = [
+  {
+    id: "customer_basic",
+    badge: "Basic",
+    name: "Basic Access",
+    mrpInr: 99,
+    priceInr: 49,
+    validityDays: 15,
+    benefits: [CB.UNLIMITED_CONTACTS],
+  },
+  {
+    id: "customer_standard",
+    badge: "Standard",
+    name: "Standard Access",
+    mrpInr: 199,
+    priceInr: 99,
+    validityDays: 30,
+    benefits: [CB.UNLIMITED_CONTACTS, CB.PRIORITY_SCHEDULING],
+  },
+  {
+    id: "customer_premium",
+    badge: "Most Popular",
+    name: "Premium Access",
+    mrpInr: 299,
+    priceInr: 149,
+    validityDays: 45,
+    benefits: [CB.UNLIMITED_CONTACTS, CB.PRIORITY_SCHEDULING, CB.DEDICATED_RELATIONSHIP_MANAGER],
+    highlighted: true,
+  },
+  {
+    id: "customer_elite",
+    badge: "Elite",
+    name: "Elite Access",
+    mrpInr: 399,
+    priceInr: 199,
+    validityDays: 60,
+    benefits: [
+      CB.UNLIMITED_CONTACTS,
+      CB.PRIORITY_SCHEDULING,
+      CB.DEDICATED_RELATIONSHIP_MANAGER,
+      CB.LEGAL_ASSISTANCE,
+    ],
+  },
+];
+
 /** GST amount in paise for a plan. Integer throughout. */
-export function planGstPaise(plan: Pick<OwnerPlan, "priceInr">): number {
+export function planGstPaise(
+  plan: Pick<OwnerPlan, "priceInr"> | Pick<CustomerPlan, "priceInr">,
+): number {
   const basePaise = plan.priceInr * 100;
   // Rounded half-up at the paise level, which is what an invoice must show.
   return Math.round((basePaise * GST_BASIS_POINTS) / 10_000);
 }
 
 /** What the gateway is asked to charge, in paise, GST included. */
-export function planTotalPaise(plan: Pick<OwnerPlan, "priceInr">): number {
+export function planTotalPaise(
+  plan: Pick<OwnerPlan, "priceInr"> | Pick<CustomerPlan, "priceInr">,
+): number {
   return plan.priceInr * 100 + planGstPaise(plan);
 }
 
@@ -116,7 +188,9 @@ export function formatInr(amountInr: number): string {
   return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(amountInr)}`;
 }
 
-export function planDiscountPercent(plan: Pick<OwnerPlan, "mrpInr" | "priceInr">): number {
+export function planDiscountPercent(
+  plan: Pick<OwnerPlan, "mrpInr" | "priceInr"> | Pick<CustomerPlan, "mrpInr" | "priceInr">,
+): number {
   if (plan.mrpInr <= 0 || plan.priceInr >= plan.mrpInr) return 0;
   return Math.round(((plan.mrpInr - plan.priceInr) / plan.mrpInr) * 100);
 }

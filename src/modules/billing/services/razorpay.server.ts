@@ -1,5 +1,11 @@
 import crypto from "node:crypto";
-import { OWNER_PLANS, planTotalPaise, type OwnerPlan } from "@/config/plans";
+import {
+  OWNER_PLANS,
+  CUSTOMER_PLANS,
+  planTotalPaise,
+  type OwnerPlan,
+  type CustomerPlan,
+} from "@/config/plans";
 
 /**
  * Razorpay order creation and signature verification. Server-only.
@@ -48,17 +54,17 @@ export function isGatewayConfigured(): boolean {
   return credentials() !== null;
 }
 
-export function findPlan(planId: string): OwnerPlan | undefined {
-  return OWNER_PLANS.find((p) => p.id === planId);
+export function findPlan(planId: string): OwnerPlan | CustomerPlan | undefined {
+  return OWNER_PLANS.find((p) => p.id === planId) || CUSTOMER_PLANS.find((p) => p.id === planId);
 }
 
 /**
  * Creates a Razorpay order for a plan.
  *
- * `receipt` is derived from the owner id and plan so a duplicate submit maps to a
+ * `receipt` is derived from the user id and plan so a duplicate submit maps to a
  * recognisable receipt rather than an opaque random one.
  */
-export async function createPlanOrder(ownerId: string, planId: string): Promise<CreateOrderResult> {
+export async function createPlanOrder(userId: string, planId: string): Promise<CreateOrderResult> {
   const plan = findPlan(planId);
   if (!plan) {
     return { status: "unconfigured", details: `Unknown plan: ${planId}` };
@@ -90,8 +96,8 @@ export async function createPlanOrder(ownerId: string, planId: string): Promise<
     body: JSON.stringify({
       amount: amountPaise,
       currency: "INR",
-      receipt: `plan_${plan.id}_${ownerId.slice(0, 8)}`,
-      notes: { planId: plan.id, ownerId, validityDays: String(plan.validityDays) },
+      receipt: `plan_${plan.id}_${userId.slice(0, 8)}`,
+      notes: { planId: plan.id, userId, validityDays: String(plan.validityDays) },
     }),
   });
 

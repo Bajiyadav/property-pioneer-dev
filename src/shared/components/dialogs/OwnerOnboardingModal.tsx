@@ -13,6 +13,7 @@ interface PickedPhoto {
   name: string;
   dataUrl: string;
 }
+import { OwnerPlans } from "@/modules/billing/components/OwnerPlans";
 import {
   Dialog,
   DialogContent,
@@ -200,7 +201,7 @@ export function OwnerOnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl bg-card border-border p-0 overflow-hidden rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh]">
+      <DialogContent className="sm:max-w-4xl bg-card border-border p-0 overflow-hidden rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh]">
         <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
           <DialogHeader className="mb-6">
             <div className="flex items-center justify-between mb-2">
@@ -253,6 +254,11 @@ export function OwnerOnboardingModal({
                   approves it.
                 </p>
               </div>
+
+              <div className="mt-4 border-t border-border/50">
+                <OwnerPlans />
+              </div>
+
               <button
                 onClick={() => {
                   setSubmitted(false);

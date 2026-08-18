@@ -66,6 +66,16 @@ import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorMod
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { SimilarProperties } from "@/modules/property/components/SimilarProperties";
 import { APP_NAME, extractIdFromSlug } from "@/config/app";
+import { checkCustomerAccess } from "@/modules/billing/services/billingFunctions";
+import { useServerFn } from "@tanstack/react-start";
+import { CustomerPlans } from "@/modules/billing/components/CustomerPlans";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function PropertyDetailPage() {
   const { id: slugOrId } = useParams({ strict: false }) as { id: string };
@@ -89,6 +99,25 @@ export function PropertyDetailPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [customerPlansOpen, setCustomerPlansOpen] = useState(false);
+
+  const fetchCustomerAccess = useServerFn(checkCustomerAccess);
+  const { data: accessData, refetch: refetchAccess } = useQuery({
+    queryKey: ["customerAccess"],
+    queryFn: () => fetchCustomerAccess({}),
+    enabled: !!user,
+  });
+
+  const hasAccess = accessData?.hasAccess ?? false;
+
+  useEffect(() => {
+    const handlePaymentSuccess = () => {
+      setCustomerPlansOpen(false);
+      refetchAccess();
+    };
+    window.addEventListener("sp:payment-success", handlePaymentSuccess);
+    return () => window.removeEventListener("sp:payment-success", handlePaymentSuccess);
+  }, [refetchAccess]);
 
   const videoSectionRef = useRef<HTMLDivElement>(null);
 
@@ -607,13 +636,19 @@ export function PropertyDetailPage() {
 
               <div className="p-4 flex gap-3 border-t border-border/60 border-dashed bg-secondary/5">
                 <button
-                  onClick={() => setEnquiryOpen(true)}
+                  onClick={() => {
+                    if (hasAccess) setEnquiryOpen(true);
+                    else setCustomerPlansOpen(true);
+                  }}
                   className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
                 >
                   Contact
                 </button>
                 <button
-                  onClick={() => setScheduleOpen(true)}
+                  onClick={() => {
+                    if (hasAccess) setScheduleOpen(true);
+                    else setCustomerPlansOpen(true);
+                  }}
                   className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
                 >
                   Schedule Visit
@@ -675,6 +710,15 @@ export function PropertyDetailPage() {
           onClose={() => setReportOpen(false)}
           propertyTitle={property.title}
         />
+
+        <Dialog open={customerPlansOpen} onOpenChange={setCustomerPlansOpen}>
+          <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-transparent shadow-none">
+            <DialogTitle className="sr-only">Unlock Premium Features</DialogTitle>
+            <div className="bg-background rounded-xl overflow-y-auto max-h-[90vh]">
+              <CustomerPlans />
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <ScheduleVisitModal
           propertyId={property.id}

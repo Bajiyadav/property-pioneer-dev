@@ -71,3 +71,77 @@ export const confirmPlanPayment = createServerFn({ method: "POST" })
         "Payment verified. Plan activation is recorded manually until billing storage ships.",
     };
   });
+
+export const checkCustomerAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    /*
+     * Reads `customer_entitlements`, added by migration 20260818090000.
+     *
+     * The table is not typed in `types.ts` yet and is not present on the live
+     * database until that migration is applied, so this goes through an untyped
+     * client surface and treats a missing table as "no access" rather than
+     * throwing. Two reasons that matters:
+     *
+     *  - An exception here would break the page for every signed-in customer,
+     *    not just gate a feature.
+     *  - Failing OPEN would be worse than failing closed. If the lookup cannot
+     *    be performed, the honest answer is that we cannot confirm the customer
+     *    paid, so access is denied. A bug must never hand out a paid plan.
+     *
+     * `reason` is returned so the caller can distinguish "you have not
+     * subscribed" from "we could not check", and so a missing migration is
+     * visible in logs instead of looking like an empty customer base.
+     */
+    type EntitlementRow = { active_until: string | null };
+
+    const db = supabaseAdmin as unknown as {
+      from: (table: string) => {
+        select: (columns: string) => {
+          eq: (
+            column: string,
+            value: string,
+          ) => {
+            maybeSingle: () => Promise<{
+              data: EntitlementRow | null;
+              error: { code?: string; message?: string } | null;
+            }>;
+          };
+        };
+      };
+    };
+
+    const { data: entitlement, error } = await db
+      .from("customer_entitlements")
+      .select("active_until")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    if (error) {
+      // 42P01 undefined_table / PGRST205 unknown relation — migration pending.
+      const missingTable = error.code === "42P01" || error.code === "PGRST205";
+      if (missingTable) {
+        console.error(
+          "[billing] customer_entitlements is missing — apply migration 20260818090000",
+        );
+        return { hasAccess: false, reason: "entitlement_storage_missing" as const };
+      }
+      console.error("[billing] entitlement lookup failed", error);
+      return { hasAccess: false, reason: "lookup_failed" as const };
+    }
+
+    if (!entitlement) return { hasAccess: false, reason: "no_entitlement" as const };
+
+    // A null `active_until` means lifetime access.
+    if (entitlement.active_until === null) {
+      return { hasAccess: true, reason: "lifetime" as const };
+    }
+
+    const isActive = new Date(entitlement.active_until) > new Date();
+    return {
+      hasAccess: isActive,
+      reason: isActive ? ("active" as const) : ("expired" as const),
+    };
+  });

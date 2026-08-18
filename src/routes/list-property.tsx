@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-import { OwnerPlans } from "@/modules/billing/components/OwnerPlans";
+
 import { Input } from "@/shared/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -394,13 +394,6 @@ function ListPropertyLandingPage() {
           </div>
         </div>
       </div>
-
-      {/*
-        Optional paid assistance, placed after the free-listing benefits and before
-        the FAQ. Order matters here: an owner should have read that listing is free
-        before they meet a price list, or the page reads as a bait and switch.
-      */}
-      <OwnerPlans />
 
       {/* FAQ */}
       <div className="py-20 bg-secondary/20">

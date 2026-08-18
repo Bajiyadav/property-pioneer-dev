@@ -9,7 +9,8 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { RazorpayCheckoutHandler } from "@/components/RazorpayCheckoutHandler";
 import { Heart } from "lucide-react";
 import { BrandMark } from "@/shared/components/BrandMark";
 import { BRAND } from "@/config/platform";
@@ -137,6 +138,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <RazorpayCheckoutHandler />
       </body>
     </html>
   );
