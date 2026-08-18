@@ -139,61 +139,76 @@ function ListPropertyLandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-primary/5 pt-24 pb-16 md:pt-32 md:pb-24">
-        <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-[family-name:var(--font-display)] mb-6">
-              Sell or rent your property faster with{" "}
-              <span className="text-primary">{APP_NAME}</span>
+      {/* Hero Section with Luxury Teal Gradient & Mesh Glow */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#0F766E]/15 via-[#0F766E]/5 to-background pt-24 pb-16 md:pt-32 md:pb-24 border-b border-border/40">
+        <div className="absolute top-0 right-1/4 -mt-20 w-96 h-96 bg-[#14B8A6]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-0 -ml-20 w-80 h-80 bg-[#0F766E]/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto px-4 max-w-6xl grid md:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+          <div className="md:col-span-7 space-y-6 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> 100% Free Owner
+              Listing • 0% Brokerage
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-[family-name:var(--font-display)] leading-tight">
+              Sell or rent your home faster with{" "}
+              <span className="text-[#0F766E] dark:text-[#14B8A6]">{APP_NAME}</span>
             </h1>
-            <ul className="space-y-4 text-lg text-muted-foreground mb-8">
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="text-emerald-500 h-6 w-6" /> Post property for free
+
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto md:mx-0 leading-relaxed">
+              Direct owner contact with verified tenants & buyers across India. Zero commission,
+              zero listing fees, and instant WhatsApp inquiries.
+            </p>
+
+            <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-sm text-foreground/90 font-semibold max-w-lg mx-auto md:mx-0">
+              <li className="flex items-center gap-2 bg-card/60 p-2.5 rounded-xl border border-border/60">
+                <CheckCircle2 className="text-emerald-500 h-5 w-5 shrink-0" /> Post Free
               </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="text-emerald-500 h-6 w-6" /> Get verified buyers
+              <li className="flex items-center gap-2 bg-card/60 p-2.5 rounded-xl border border-border/60">
+                <CheckCircle2 className="text-emerald-500 h-5 w-5 shrink-0" /> Verified Leads
               </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="text-emerald-500 h-6 w-6" /> Get personalised assistance on
-                selling faster
+              <li className="flex items-center gap-2 bg-card/60 p-2.5 rounded-xl border border-border/60">
+                <CheckCircle2 className="text-emerald-500 h-5 w-5 shrink-0" /> Direct WhatsApp
               </li>
             </ul>
           </div>
 
-          <div className="w-full max-w-md mx-auto">
-            <Card className="shadow-2xl border-border/50 bg-card/80 backdrop-blur-xl">
-              {/*
-                The "Broker/Builder" tab next to this one was removed. It had no
-                onClick, so it did nothing when pressed — but the deeper problem
-                is that it should not exist: this platform's entire proposition
-                is direct owner listings with no broker in the middle, and every
-                page says so. Offering brokers a signup tab contradicted the
-                product and misled anyone who pressed it.
-              */}
-              <div className="flex border-b border-border/50">
-                <div className="flex-1 py-4 text-center font-bold text-primary border-b-2 border-primary bg-primary/5">
-                  Listing as an owner
-                </div>
+          <div className="md:col-span-5 w-full max-w-md mx-auto">
+            <Card className="shadow-2xl border border-border/80 bg-card/95 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <div className="bg-gradient-to-r from-[#0F766E] to-[#115E59] p-4 text-center text-white">
+                <p className="text-xs uppercase tracking-widest font-bold text-emerald-200">
+                  Start Your Listing
+                </p>
+                <h3 className="text-lg font-extrabold text-white mt-0.5">Post as an Owner Free</h3>
               </div>
-              <CardContent className="p-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
+
+              <CardContent className="p-5 sm:p-7">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label className="text-sm font-bold text-foreground mb-3 block">
-                      Property Type
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
+                      Property Category
                     </label>
-                    <div className="flex gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                       <button
                         type="button"
                         onClick={() => setPropertyType("Residential")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border ${propertyType === "Residential" ? "bg-primary/10 border-primary text-primary font-bold" : "bg-background border-border text-muted-foreground hover:border-border/80"}`}
+                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all ${
+                          propertyType === "Residential"
+                            ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
+                            : "bg-background border-border text-muted-foreground hover:border-border/80"
+                        }`}
                       >
                         <Home className="h-4 w-4" /> Residential
                       </button>
                       <button
                         type="button"
                         onClick={() => setPropertyType("Commercial")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border ${propertyType === "Commercial" ? "bg-primary/10 border-primary text-primary font-bold" : "bg-background border-border text-muted-foreground hover:border-border/80"}`}
+                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all ${
+                          propertyType === "Commercial"
+                            ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
+                            : "bg-background border-border text-muted-foreground hover:border-border/80"
+                        }`}
                       >
                         <Building2 className="h-4 w-4" /> Commercial
                       </button>
@@ -201,16 +216,20 @@ function ListPropertyLandingPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold text-foreground mb-3 block">
-                      You're looking to...
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
+                      I want to...
                     </label>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {["Rent", "Sell", "PG/Co-living"].map((i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => setIntent(i as "Rent" | "Sell" | "PG/Co-living")}
-                          className={`flex-1 py-2 rounded-full border text-xs sm:text-sm transition-all ${intent === i ? "bg-primary border-primary text-primary-foreground font-bold shadow-md" : "bg-background border-border text-foreground hover:bg-secondary"}`}
+                          className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all ${
+                            intent === i
+                              ? "bg-[#0F766E] border-[#0F766E] text-white shadow-md"
+                              : "bg-background border-border text-foreground hover:bg-secondary"
+                          }`}
                         >
                           {i}
                         </button>
@@ -221,52 +240,48 @@ function ListPropertyLandingPage() {
                   <div>
                     <label
                       htmlFor="listing-phone"
-                      className="text-sm font-bold text-foreground mb-3 block"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block"
                     >
-                      Phone Number (including country code)
+                      Your Mobile Number
                     </label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="listing-phone"
-                        type="tel"
-                        maxLength={18}
-                        placeholder="e.g. +91 98765 43210 or +1 555 123 4567"
-                        className="h-12 rounded-xl text-lg"
-                        value={phone}
-                        onChange={(e) => {
-                          // Allow digits, spaces, and leading plus
-                          setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
-                          if (phoneError) setPhoneError(null);
-                        }}
-                        aria-invalid={phoneError ? true : undefined}
-                        aria-describedby={phoneError ? "listing-phone-error" : undefined}
-                      />
-                    </div>
+                    <Input
+                      id="listing-phone"
+                      type="tel"
+                      maxLength={18}
+                      placeholder="+91 98765 43210"
+                      className="h-12 min-h-[48px] rounded-xl text-base font-semibold px-4"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
+                        if (phoneError) setPhoneError(null);
+                      }}
+                      aria-invalid={phoneError ? true : undefined}
+                      aria-describedby={phoneError ? "listing-phone-error" : undefined}
+                    />
                     {phoneError ? (
-                      // Announced, not just coloured: a message only conveyed by
-                      // styling is invisible to a screen reader.
                       <p
                         id="listing-phone-error"
                         role="alert"
-                        className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400"
+                        className="mt-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"
                       >
                         {phoneError}
                       </p>
                     ) : (
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        Buyers and tenants contact you on this number. Include your country code
-                        starting with +.
+                      <p className="mt-1.5 text-[11px] text-muted-foreground">
+                        Tenants & buyers connect directly with you on WhatsApp.
                       </p>
                     )}
                   </div>
 
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full h-14 text-lg font-bold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all uppercase tracking-wider"
-                  >
-                    START NOW
-                  </Button>
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      aria-label="Start property listing now"
+                      className="w-full min-h-[50px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F766E] via-[#115E59] to-[#0D9488] px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-teal-950/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    >
+                      <span>START NOW — FREE</span>
+                    </button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
