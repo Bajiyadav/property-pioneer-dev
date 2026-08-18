@@ -1,3 +1,8 @@
+## v0.19.0 — 2026-08-18
+
+### Features
+- feat: complete Docker orchestration, Cloudflare Turnstile, WhatsApp leads, and SEEDHA branding (5a698c7)
+
 ## v0.18.0 — 2026-08-18
 
 ### Features
