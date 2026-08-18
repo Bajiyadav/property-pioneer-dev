@@ -1,3 +1,8 @@
+## v0.20.2 — 2026-08-18
+
+### Fixes
+- fix(mobile): add asset folders and use Flutter native Gradle distribution (711231c)
+
 ## v0.20.1 — 2026-08-18
 
 ### Fixes
