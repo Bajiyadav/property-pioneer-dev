@@ -98,7 +98,7 @@ jobs:
           echo "SUCCESS: Found $APK_PATH (Size: $FILE_SIZE)"
 
       - name: Upload Android APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: seedha-properties-release-apk
           path: apps/mobile/build/app/outputs/flutter-apk/app-release.apk
