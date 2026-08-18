@@ -108,7 +108,25 @@ export function PropertyDetailPage() {
     enabled: !!user,
   });
 
-  const hasAccess = accessData?.hasAccess ?? false;
+  /*
+   * Default OPEN, not closed.
+   *
+   * This read `?? false`, so anyone the query had not answered for was treated
+   * as unpaid — and the query only runs when `user` is set. Every anonymous
+   * visitor therefore hit the paywall on "Contact" and "Schedule Visit", which
+   * are the platform's two conversion actions, on a site that advertises
+   * "Direct Contact" and "We charge you nothing".
+   *
+   * Denying by default is the right instinct for a permission. It is the wrong
+   * one for a paywall that cannot yet be paid: entitlement storage does not
+   * exist and no payment gateway is configured, so nothing here is purchasable.
+   * Withholding a feature nobody can buy is not caution, it is an outage.
+   *
+   * The server returns `hasAccess: true` with reason `paywall_not_active` while
+   * that is the case, so this closes automatically once the migration lands and
+   * a real answer starts coming back.
+   */
+  const hasAccess = accessData?.hasAccess ?? true;
 
   useEffect(() => {
     const handlePaymentSuccess = () => {

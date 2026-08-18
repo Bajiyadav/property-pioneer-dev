@@ -123,11 +123,29 @@ export const checkCustomerAccess = createServerFn({ method: "GET" })
       // 42P01 undefined_table / PGRST205 unknown relation — migration pending.
       const missingTable = error.code === "42P01" || error.code === "PGRST205";
       if (missingTable) {
+        /*
+         * Storage missing means the paywall is NOT IN FORCE, so access is
+         * granted rather than denied.
+         *
+         * This is the one case that must not fail closed, and the distinction is
+         * worth stating. Failing closed is right when we cannot verify a
+         * payment — a bug must never hand out a paid plan. But if the
+         * entitlements table does not exist, nobody has ever been able to buy
+         * anything, so denying access is not caution: it withholds a feature
+         * that is not for sale. In production that meant every visitor was
+         * blocked from contacting an owner or booking a visit, which is the
+         * platform's entire purpose, while the site still advertised "Direct
+         * Contact" and "We charge you nothing".
+         *
+         * The gate re-engages on its own once the migration lands.
+         */
         console.error(
-          "[billing] customer_entitlements is missing — apply migration 20260818090000",
+          "[billing] customer_entitlements is missing — apply migration 20260818090000. " +
+            "Customer access checks are open until it does.",
         );
-        return { hasAccess: false, reason: "entitlement_storage_missing" as const };
+        return { hasAccess: true, reason: "paywall_not_active" as const };
       }
+      // Storage exists but the read failed: we genuinely cannot verify, so deny.
       console.error("[billing] entitlement lookup failed", error);
       return { hasAccess: false, reason: "lookup_failed" as const };
     }

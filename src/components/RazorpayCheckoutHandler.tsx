@@ -75,6 +75,11 @@ export function RazorpayCheckoutHandler() {
         name: "Seedha Properties",
         description: "Premium Service Upgrade",
         order_id: order.orderId,
+        theme: { color: "#059669" },
+        prefill: {
+          email: order.userEmail || undefined,
+          contact: order.userPhone || undefined,
+        },
         handler: async function (response: RazorpaySuccessResponse) {
           toast.loading("Verifying payment...", { id: "payment-verify" });
           try {
@@ -100,9 +105,6 @@ export function RazorpayCheckoutHandler() {
           } catch (error) {
             toast.error("An error occurred during verification", { id: "payment-verify" });
           }
-        },
-        theme: {
-          color: "#f43f5e", // Rose-500 matching brand
         },
       };
 

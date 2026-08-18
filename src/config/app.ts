@@ -13,8 +13,9 @@ function getAppUrl(): string {
 export const APP_URL = getAppUrl();
 export const APP_NAME = "Seedha Properties";
 export const APP_SHORT_NAME = "Seedha";
+export const GLOBAL_TITLE = "Seedha Properties";
 export const APP_DESCRIPTION =
-  "Rent, buy and commercial property in Hyderabad, listed directly by owners and reviewed before publication. No platform commission.";
+  "Explore properties and connect with property owners through a simple, direct platform.";
 export const APP_LOGO = `${APP_URL}/favicon.ico`;
 /** Single source of truth for the footer copyright line shown on every page. */
 /**

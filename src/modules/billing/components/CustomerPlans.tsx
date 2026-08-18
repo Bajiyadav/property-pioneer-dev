@@ -17,7 +17,7 @@ import {
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 
 export function CustomerPlans() {
-  const { status } = useAuth();
+  const { status, session } = useAuth();
   const fetchAvailability = useServerFn(getPaymentAvailability);
   const startCheckout = useServerFn(createPlanCheckout);
   const [busyPlan, setBusyPlan] = useState<string | null>(null);
@@ -47,7 +47,15 @@ export function CustomerPlans() {
         });
         return;
       }
-      window.dispatchEvent(new CustomEvent("sp:open-razorpay", { detail: order }));
+      window.dispatchEvent(
+        new CustomEvent("sp:open-razorpay", {
+          detail: {
+            ...order,
+            userEmail: session?.user?.email,
+            userPhone: session?.user?.phone,
+          },
+        }),
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not start the payment.");
     } finally {
@@ -85,19 +93,19 @@ export function CustomerPlans() {
           const busy = busyPlan === plan.id;
 
           return (
-            <div key={plan.id} className="relative flex pt-4">
-              <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">
+            <div key={plan.id} className="relative flex pt-4 group">
+              <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-4 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary shadow-sm backdrop-blur-md">
                 {plan.badge}
               </span>
 
               <div
-                className={`flex min-w-0 flex-1 flex-col rounded-2xl border p-6 shadow-sm ${
+                className={`flex min-w-0 flex-1 flex-col rounded-2xl border p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
                   plan.highlighted
-                    ? "border-primary/50 bg-primary/[0.04] ring-1 ring-primary/20"
-                    : "border-border/80 bg-card"
+                    ? "border-primary/50 bg-gradient-to-br from-primary/[0.08] via-primary/[0.03] to-transparent ring-1 ring-primary/20 shadow-primary/10"
+                    : "border-border/80 bg-card hover:border-primary/30"
                 }`}
               >
-                <h3 className="font-[family-name:var(--font-display)] text-xl font-extrabold text-foreground text-center">
+                <h3 className="font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground text-center">
                   {plan.name}
                 </h3>
 

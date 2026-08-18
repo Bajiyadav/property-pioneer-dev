@@ -2,7 +2,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchProperties } from "@/modules/property/services/propertyQueries";
-import { APP_NAME, APP_DESCRIPTION, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+import {
+  APP_NAME,
+  APP_DESCRIPTION,
+  GLOBAL_TITLE,
+  getCanonicalUrl,
+  getOgImageUrl,
+} from "@/config/app";
 
 import { HeroSection } from "@/modules/marketing/home/HeroSection";
 import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
@@ -26,16 +32,16 @@ export const Route = createFileRoute("/")({
     const ogImage = getOgImageUrl();
     return {
       meta: [
-        { title: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
+        { title: GLOBAL_TITLE },
         { name: "description", content: APP_DESCRIPTION },
-        { property: "og:title", content: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
+        { property: "og:title", content: GLOBAL_TITLE },
         { property: "og:description", content: APP_DESCRIPTION },
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: ogImage },
         { property: "og:site_name", content: APP_NAME },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${APP_NAME} — Hyderabad Premier Real Estate Platform` },
+        { name: "twitter:title", content: GLOBAL_TITLE },
         { name: "twitter:description", content: APP_DESCRIPTION },
         { name: "twitter:image", content: ogImage },
         { name: "robots", content: "index, follow" },
