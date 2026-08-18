@@ -1,3 +1,8 @@
+## v0.20.3 — 2026-08-18
+
+### Fixes
+- fix(ci): use valid Java package namespace com.seedhaproperties for Android APK (500ba99)
+
 ## v0.20.2 — 2026-08-18
 
 ### Fixes
