@@ -156,6 +156,53 @@ test.describe("responsive layout", () => {
     });
   }
 
+  /**
+   * The card's LAYOUT INVARIANT, asserted directly rather than measured.
+   *
+   * A `layout` prop was added whose default put the card back to image-left /
+   * details-right inside a multi-column grid. On the live site the three stat
+   * labels painted on top of each other ("RENT/MDEPOSIT") and the button read
+   * "Get Ow… Det…".
+   *
+   * The three assertions above did not catch it, and that is worth recording
+   * honestly. Reproduced on the live page by forcing the row direction back, all
+   * four measures still read zero:
+   *
+   *     stat row  0px   card  0px   stat value  0 truncated   cell  0px
+   *
+   * Overlap is not overflow. When text paints across a neighbour rather than past
+   * its own box, scrollWidth never exceeds clientWidth, so no amount of measuring
+   * finds it. Screenshot comparison would; a geometric assertion will not.
+   *
+   * So this asserts the property that must hold instead of the symptom: every
+   * consumer renders this card inside a multi-column grid, therefore the card is
+   * a column. Cheap, deterministic, and it fails the moment the variant returns.
+   */
+  for (const width of [640, 1024, 1440]) {
+    test(`property card stacks vertically @ ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/properties${SEARCH}`, { waitUntil: "domcontentloaded" });
+
+      const rows = page.locator('[data-testid="stat-row"]');
+      await rows.first().waitFor({ state: "visible", timeout: 15_000 });
+
+      const directions = await rows.evaluateAll((nodes) =>
+        nodes.map((n) => {
+          // The card root is the nearest ancestor that hides overflow.
+          let el = n.parentElement;
+          while (el && getComputedStyle(el).overflowX !== "hidden") el = el.parentElement;
+          return el ? getComputedStyle(el).flexDirection : "none";
+        }),
+      );
+
+      const sideways = directions.filter((d) => d.startsWith("row"));
+      expect(
+        sideways,
+        `cards laid out horizontally inside a grid column: ${sideways.join(", ")}`,
+      ).toEqual([]);
+    });
+  }
+
   for (const width of [320, 360, 375, 414]) {
     test(`property card stat row does not overflow @ ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
