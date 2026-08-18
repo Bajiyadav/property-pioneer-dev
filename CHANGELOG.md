@@ -1,3 +1,8 @@
+## v0.28.0 — 2026-08-18
+
+### Features
+- feat(auth): integrate 1-Click Google Sign-In for Web and Flutter (62d4ac9)
+
 ## v0.27.0 — 2026-08-18
 
 ### Features
