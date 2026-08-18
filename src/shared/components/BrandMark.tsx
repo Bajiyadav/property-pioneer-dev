@@ -1,32 +1,15 @@
 import { BRAND } from "@/config/platform";
+import logoImg from "@/assets/logo.png";
 
 /**
- * SVG logo mark for Seedha Properties.
- *
- * Drawn inline rather than loaded as an image: the previous `urf-logo.png`
- * lived on a `/__l5e/` builder-CDN path that never resolves from our own
- * origin, so the image branch could only ever fall through to this icon.
+ * Official logo mark for Seedha Properties.
  */
 export function SeedhaLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <div
-      className={`relative flex-none flex items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 p-1.5 shadow-md ring-1 ring-white/20 text-white ${className}`}
+      className={`relative flex-none flex items-center justify-center rounded-xl bg-white p-0.5 shadow-sm border border-slate-200/80 overflow-hidden ${className}`}
     >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-full w-full drop-shadow-sm"
-      >
-        <path d="M3 21H21" />
-        <path d="M6 21V9L12 4L18 9V21" />
-        <path d="M9 14H15V21H9V14Z" fill="currentColor" fillOpacity="0.3" />
-        <path d="M9 10H10" />
-        <path d="M14 10H15" />
-      </svg>
+      <img src={logoImg} alt="SEEDHA Properties Logo" className="h-full w-full object-contain" />
     </div>
   );
 }
