@@ -155,6 +155,8 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -181,6 +183,7 @@ function RootComponent() {
           </main>
           <SiteFooter />
         </div>
+        <SeedhaAIAssistant />
         <Toaster position="top-center" richColors />
         <ConsentBanner />
       </AuthProvider>

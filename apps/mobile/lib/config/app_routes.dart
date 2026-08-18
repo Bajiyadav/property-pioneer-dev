@@ -15,6 +15,7 @@ import '../features/owner/presentation/list_property_screen.dart';
 import '../features/owner/presentation/kyc_upload_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
+import '../features/chat/presentation/ai_assistant_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -64,6 +65,10 @@ final GoRouter appRouter = GoRouter(
           propertyTitle: extra['propertyTitle'] as String?,
         );
       },
+    ),
+    GoRoute(
+      path: '/ai-assistant',
+      builder: (context, state) => const AIAssistantScreen(),
     ),
     GoRoute(
       path: '/login',

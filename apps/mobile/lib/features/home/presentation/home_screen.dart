@@ -116,6 +116,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome, color: Color(0xFFD97706)),
+            tooltip: 'Ask Seedha AI',
+            onPressed: () => context.push('/ai-assistant'),
+          ),
           Consumer(
             builder: (context, ref, child) {
               ref.watch(authStateChangesProvider);
