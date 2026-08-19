@@ -298,7 +298,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
         slivers: [
           // Collapsible Image Header with Watermark
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: 235,
             pinned: true,
             leading: IconButton(
               icon: Container(
