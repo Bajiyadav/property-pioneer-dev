@@ -84,22 +84,28 @@ export function TabbedSearchBox({
       {/* Property Type Radio Filter (For Rent Mode) */}
       {activeTab === "rent" && (
         <div className="flex items-center gap-6 px-6 py-3 border-b border-border/40 text-xs font-semibold text-muted-foreground bg-secondary/20">
-          {["Full House", "PG / Co-Living", "Flatmates"].map((type) => (
-            <label
-              key={type}
-              className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
-            >
-              <input
-                type="radio"
-                name="propType"
-                value={type}
-                checked={propertyType === type}
-                onChange={(e) => setPropertyType(e.target.value)}
-                className="text-primary focus:ring-primary h-3.5 w-3.5 accent-primary cursor-pointer"
-              />
-              <span>{type}</span>
-            </label>
-          ))}
+          {["Full House", "PG / Co-Living", "Flatmates"].map((type) => {
+            const radioId = `prop-type-${type.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+            return (
+              <label
+                key={type}
+                htmlFor={radioId}
+                className="flex items-center gap-2 cursor-pointer hover:text-foreground transition-colors"
+              >
+                <input
+                  id={radioId}
+                  type="radio"
+                  name="propType"
+                  value={type}
+                  checked={propertyType === type}
+                  onChange={(e) => setPropertyType(e.target.value)}
+                  aria-label={type}
+                  className="text-primary focus:ring-primary h-3.5 w-3.5 accent-primary cursor-pointer"
+                />
+                <span>{type}</span>
+              </label>
+            );
+          })}
         </div>
       )}
 

@@ -160,22 +160,9 @@ import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: APP_NAME,
-    url: APP_URL,
-    logo: `${APP_URL}/og-image.png`,
-    description: APP_DESCRIPTION,
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
         <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1">
