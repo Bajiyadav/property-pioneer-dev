@@ -20,6 +20,8 @@ export const Route = createFileRoute("/properties/")({
     baths: Number(search.baths) || undefined,
     type: search.type as string | undefined,
     sort: search.sort as PropertySearchParams["sort"],
+    page: Number(search.page) || undefined,
+    limit: Number(search.limit) || undefined,
   }),
   head: () => {
     const canonicalUrl = getCanonicalUrl("/properties");

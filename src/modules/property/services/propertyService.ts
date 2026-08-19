@@ -646,6 +646,10 @@ export type PropertySource = "database" | "fallback";
 
 export interface PropertyFeed {
   properties: Property[];
+  totalCount?: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
   source: PropertySource;
   /** Populated when the database query failed and the fallback was used. */
   error: string | null;
@@ -667,10 +671,13 @@ export interface PropertySearchParams {
   baths?: number;
   type?: string;
   locality?: string;
+  status?: PropertyStatus;
   sort?: "recommended" | "newest" | "lowest_rent" | "highest_rent" | "largest_area";
   tenantType?: string;
   furnishing?: string;
   amenities?: string[];
+  page?: number;
+  limit?: number;
 }
 
 /**
@@ -681,11 +688,15 @@ export interface PropertySearchParams {
  * the select list would still reference missing columns and still 400.
  */
 function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: boolean) {
-  let query = db.from("properties").select(propertyColumns(useExtended)).eq("is_approved", true);
+  let query = db
+    .from("properties")
+    .select(propertyColumns(useExtended), { count: "exact" })
+    .eq("is_approved", true);
 
   if (params) {
     if (params.city) query = query.ilike("city", params.city);
     if (params.listing) query = query.ilike("listing_type", params.listing);
+    if (params.status) query = query.eq("status", params.status);
     if (params.beds && params.beds > 0) query = query.gte("bedrooms", params.beds);
     if (params.baths && params.baths > 0) query = query.gte("bathrooms", params.baths);
     if (params.type) query = query.ilike("property_type", `%${params.type}%`);
@@ -716,21 +727,33 @@ function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: b
       .order("created_at", { ascending: false });
   }
 
+  // Apply pagination / range bounds if pagination parameters are provided
+  if (params?.page || params?.limit) {
+    const page = Math.max(1, params.page || 1);
+    const limit = Math.max(1, Math.min(100, params.limit || 20));
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.range(from, to);
+  }
+
   return query;
 }
 
 export async function fetchPublicPropertyFeed(
   params?: PropertySearchParams,
 ): Promise<PropertyFeed> {
+  const page = Math.max(1, params?.page || 1);
+  const limit = Math.max(1, Math.min(100, params?.limit || 20));
+
   try {
     const tryExtended = shouldTryExtended();
-    let { data, error } = await buildFeedQuery(params, tryExtended);
+    let { data, count, error } = await buildFeedQuery(params, tryExtended);
 
     if (error && tryExtended && isExtendedColumnUnavailable(error)) {
       // The video/location migration has not been applied to this database.
       // Latch the capability off and serve the query the schema can answer.
       schema.record(false);
-      ({ data, error } = await buildFeedQuery(params, false));
+      ({ data, count, error } = await buildFeedQuery(params, false));
     } else if (!error && tryExtended) {
       schema.record(true);
     }
@@ -767,37 +790,41 @@ export async function fetchPublicPropertyFeed(
         }
         return true;
       });
+
+      const totalCount = filtered.length;
+      const paginated =
+        params?.page || params?.limit ? filtered.slice((page - 1) * limit, page * limit) : filtered;
+
       return {
-        properties: filtered,
+        properties: paginated,
+        totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit) || 1,
         source: "fallback",
         error: error.message,
       };
     }
-    // An empty result is a truthful answer, not a failure to paper over.
-    //
-    // This branch used to substitute ALL_FALLBACK_PROPERTIES whenever the query
-    // returned no rows — filtered by the same city/locality/type the visitor
-    // searched, and returned with `error: null` so it looked like a clean
-    // database read. A search for a locality with no inventory therefore
-    // produced invented listings that were indistinguishable from real ones.
-    //
-    // That was masked until now. `pincode` did not exist, so the extended query
-    // always failed, the capability latched off, and buildFeedQuery dropped the
-    // locality filter entirely — every locality search quietly returned the full
-    // city list and was never empty. Applying the pincode column switches real
-    // locality filtering on, which makes empty results common and would have
-    // turned this branch into the normal path.
-    //
-    // `source: "fallback"` is now reserved for a genuine failure, which is what
-    // lets callers distinguish "nothing matched" from "we could not look".
+
+    const totalCount = count ?? (data?.length || 0);
+
     if (!data || data.length === 0) {
-      return { properties: [], source: "database", error: null };
+      return {
+        properties: [],
+        totalCount: totalCount || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((totalCount || 0) / limit) || 1,
+        source: "database",
+        error: null,
+      };
     }
     return {
-      // The column list is chosen at runtime, so PostgREST's generic row type is
-      // the honest static answer here; `withVerificationDefaults` is what
-      // guarantees the shape, defaulting anything the schema did not return.
       properties: (data as unknown as PropertyRow[]).map(withVerificationDefaults),
+      totalCount,
+      page,
+      limit,
+      totalPages: Math.ceil(totalCount / limit) || 1,
       source: "database",
       error: null,
     };
@@ -805,6 +832,10 @@ export async function fetchPublicPropertyFeed(
     console.error("[properties] unreachable", err);
     return {
       properties: [],
+      totalCount: 0,
+      page,
+      limit,
+      totalPages: 1,
       source: "fallback",
       error: err instanceof Error ? err.message : "Network error",
     };

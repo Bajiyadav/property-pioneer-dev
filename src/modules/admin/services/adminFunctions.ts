@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import { loadOverview } from "@/lib/admin.server";
 import { z } from "zod";
 
 /** Context injected by `requireSupabaseAuth` — an RLS-scoped client plus the caller's id. */
@@ -78,66 +79,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
     await assertEmployee(authCtx);
-
-    const weekAgoStr = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-    const [
-      { count: totalProps },
-      { count: approvedProps },
-      { count: featuredProps },
-      { count: rentProps },
-      { count: saleProps },
-      { count: totalEnq },
-      { count: recentEnq },
-      { data: cityData },
-    ] = await Promise.all([
-      authCtx.supabase.from("properties").select("*", { count: "exact", head: true }),
-      authCtx.supabase
-        .from("properties")
-        .select("*", { count: "exact", head: true })
-        .eq("is_approved", true),
-      authCtx.supabase
-        .from("properties")
-        .select("*", { count: "exact", head: true })
-        .eq("is_featured", true),
-      authCtx.supabase
-        .from("properties")
-        .select("*", { count: "exact", head: true })
-        .eq("listing_type", "rent"),
-      authCtx.supabase
-        .from("properties")
-        .select("*", { count: "exact", head: true })
-        .eq("listing_type", "sale"),
-      authCtx.supabase.from("enquiries").select("*", { count: "exact", head: true }),
-      authCtx.supabase
-        .from("enquiries")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", weekAgoStr),
-      authCtx.supabase.from("properties").select("city"),
-    ]);
-
-    // Aggregate cities on the subset returned
-    const cityCounts: Record<string, number> = {};
-    for (const p of cityData || []) {
-      if (!p.city) continue;
-      cityCounts[p.city] = (cityCounts[p.city] || 0) + 1;
-    }
-    const cities = Object.entries(cityCounts)
-      .map(([city, count]) => ({ city, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    return {
-      totalProperties: totalProps || 0,
-      approvedProperties: approvedProps || 0,
-      pendingProperties: (totalProps || 0) - (approvedProps || 0),
-      featuredProperties: featuredProps || 0,
-      forRent: rentProps || 0,
-      forSale: saleProps || 0,
-      totalEnquiries: totalEnq || 0,
-      enquiriesLast7Days: recentEnq || 0,
-      cities,
-    };
+    return loadOverview(authCtx.supabase);
   });
 
 export const getAdminProperties = createServerFn({ method: "GET" })

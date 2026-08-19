@@ -542,17 +542,24 @@ export function SearchUI({
                     Popular Localities
                   </h4>
                   <div className="flex flex-wrap justify-center gap-2">
-                    {["Madhapur", "Gachibowli", "Kondapur", "Hitech City"].map((loc) => (
+                    {[
+                      { city: "bangalore", locality: "koramangala", name: "Koramangala" },
+                      { city: "bangalore", locality: "indiranagar", name: "Indiranagar" },
+                      { city: "hyderabad", locality: "madhapur", name: "Madhapur" },
+                      { city: "hyderabad", locality: "gachibowli", name: "Gachibowli" },
+                      { city: "mumbai", locality: "bandra-west", name: "Bandra West" },
+                      { city: "pune", locality: "hinjewadi", name: "Hinjewadi" },
+                    ].map((loc) => (
                       <Link
-                        key={loc}
+                        key={loc.name}
                         to="/rent/$city/$locality"
                         params={{
-                          city: "hyderabad",
-                          locality: loc.toLowerCase().replace(" ", "-"),
+                          city: loc.city,
+                          locality: loc.locality,
                         }}
                         className="rounded-lg bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground transition hover:bg-secondary"
                       >
-                        {loc}
+                        {loc.name}
                       </Link>
                     ))}
                   </div>
@@ -560,10 +567,35 @@ export function SearchUI({
               </div>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="flex flex-col gap-6">
-              {properties.map((p) => (
-                <PropertyCard key={p.id} property={p} />
-              ))}
+            <div className="space-y-6">
+              <div className="flex flex-col gap-6">
+                {properties.map((p) => (
+                  <PropertyCard key={p.id} property={p} />
+                ))}
+              </div>
+
+              {/* Server-Side Pagination Bar */}
+              {(properties.length >= (search.limit || 20) || (search.page && search.page > 1)) && (
+                <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-6">
+                  <button
+                    onClick={() => update({ page: Math.max(1, (search.page || 1) - 1) })}
+                    disabled={!search.page || search.page <= 1}
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Previous Page
+                  </button>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Page {search.page || 1}
+                  </span>
+                  <button
+                    onClick={() => update({ page: (search.page || 1) + 1 })}
+                    disabled={properties.length < (search.limit || 20)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Next Page
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-[600px] w-full overflow-hidden rounded-3xl border border-border shadow-sm">

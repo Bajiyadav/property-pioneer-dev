@@ -2,20 +2,20 @@
 
 ## 🔴 High Priority Tasks (Pre-Production Fixes)
 
-- [ ] **Move Admin Role Check to Route Guard**:
-  - Update `src/routes/_authenticated/route.tsx` to verify `public.user_roles` inside `beforeLoad` instead of waiting for component mounting in `admin.tsx`.
-- [ ] **Standardize Wishlist LocalStorage Key**:
-  - Update `src/lib/useFavorites.ts` to use key `urf:favorites` instead of legacy `nestwise:favorites`.
-- [ ] **Database Server-Side Search & Pagination**:
-  - Refactor `fetchProperties()` (`src/lib/properties.ts`) and `properties.index.tsx` to accept page offset, limits, and server-side Supabase filter parameters (`.range()`, `.ilike()`).
-- [ ] **Environment Variable Canonical URLs**:
-  - Replace hardcoded `https://property-pioneer-dev.lovable.app` in `properties.index.tsx` and `properties.$id.tsx` with dynamic domain variable `import.meta.env.VITE_APP_URL`.
+- [x] **Move Admin Role Check to Route Guard**:
+  - Update `src/routes/_authenticated/route.tsx` to verify `public.user_roles` inside `beforeLoad` / route guard instead of waiting for component mounting in `admin.tsx`.
+- [x] **Standardize Wishlist LocalStorage Key**:
+  - Standardized on `urf:favorites` across the client storage adapters.
+- [x] **Database Server-Side Search & Pagination**:
+  - Refactored `fetchProperties()` (`src/lib/properties.ts`) and `properties.index.tsx` to accept page offset, limits, and server-side Supabase filter parameters (`.range()`, `.ilike()`).
+- [x] **Environment Variable Canonical URLs**:
+  - Dynamic domain variable `import.meta.env.VITE_APP_URL` / `APP_URL` across all routes.
 
 ---
 
 ## 🟡 Medium Priority Tasks (Growth & Scaling)
 
-- [ ] **SQL Aggregations for Admin Overview**:
+- [x] **SQL Aggregations for Admin Overview**:
   - Refactor `loadOverview()` in `src/lib/admin.server.ts` to execute Postgres `COUNT(*)` queries instead of loading full rows into Node memory.
 - [ ] **Image Optimization Pipeline**:
   - Implement image resizing parameters (`?w=600&q=80`) on Unsplash URLs rendered in `<PropertyCard />` and detail gallery.
