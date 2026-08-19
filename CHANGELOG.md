@@ -1,3 +1,8 @@
+## v0.34.1 — 2026-08-19
+
+### Fixes
+- fix(listing): harden START NOW button with onClick handler and router fallback (b3396e5)
+
 ## v0.34.0 — 2026-08-19
 
 ### Features
