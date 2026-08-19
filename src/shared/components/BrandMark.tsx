@@ -7,9 +7,13 @@ import logoImg from "@/assets/logo.png";
 export function SeedhaLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <div
-      className={`relative shrink-0 flex items-center justify-center rounded-xl bg-white p-0.5 shadow-sm border border-slate-200/80 overflow-hidden ${className}`}
+      className={`relative shrink-0 flex items-center justify-center rounded-xl bg-[#0a1220] p-0.5 shadow-xs border border-amber-500/30 overflow-hidden ${className}`}
     >
-      <img src={logoImg} alt="SEEDHA Properties Logo" className="h-full w-full object-contain" />
+      <img
+        src={logoImg}
+        alt="SEEDHA Properties Logo"
+        className="h-full w-full object-cover rounded-lg"
+      />
     </div>
   );
 }
