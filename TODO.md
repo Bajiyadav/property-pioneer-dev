@@ -39,9 +39,9 @@
 
 ## 🐞 Known Bugs & Tech Debt
 
-- **Bug**: Unprivileged authenticated users can navigate to `/_authenticated/admin` and trigger initial component render before `checkIsAdmin` returns `false`.
-- **Tech Debt**: In-memory array filtering in `properties.index.tsx` causes initial load to fetch full dataset regardless of user query filters.
-- **Tech Debt**: `loadOverview()` loads all rows from `enquiries` table into server memory.
+- [x] ~~**Bug**: Unprivileged authenticated users can navigate to `/_authenticated/admin` and trigger initial component render before `checkIsAdmin` returns `false`.~~ (Resolved via Admin Route Guard in `_authenticated/route.tsx`)
+- [x] ~~**Tech Debt**: In-memory array filtering in `properties.index.tsx` causes initial load to fetch full dataset regardless of user query filters.~~ (Resolved via PostgreSQL `.range()` and query filters)
+- [x] ~~**Tech Debt**: `loadOverview()` loads all rows from `enquiries` table into server memory.~~ (Resolved via PostgreSQL `head: true` count aggregations in `src/lib/admin.ts`)
 
 ---
 
