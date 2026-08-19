@@ -321,17 +321,20 @@ function SiteFooter() {
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <BrandMark size="sm" />
             <p className="mt-3.5 max-w-sm text-xs text-muted-foreground leading-relaxed">
-              {BRAND.tagline} — India&apos;s verified direct-owner marketplace with 0% brokerage and
-              moderator-reviewed listings.
+              <strong>{BRAND.tagline}</strong> — Connect directly with genuine property owners
+              across India with zero brokerage, zero middlemen, and 100% verified transparency.
             </p>
 
             {/* Verified Trust Badges */}
             <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-medium text-muted-foreground">
-              <span className="inline-flex items-center gap-1 bg-card/80 border border-border/60 rounded-full px-2.5 py-1 shadow-2xs">
-                🛡️ Direct Owner Listings
+              <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
+                🛡️ 100% Direct Owner
               </span>
-              <span className="inline-flex items-center gap-1 bg-card/80 border border-border/60 rounded-full px-2.5 py-1 shadow-2xs">
-                ⚡ No Platform Commission
+              <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
+                ⚡ Zero Brokerage Forever
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
+                ✓ Verified Transparency
               </span>
             </div>
           </div>

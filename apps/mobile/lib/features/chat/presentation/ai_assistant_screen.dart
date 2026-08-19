@@ -77,13 +77,17 @@ KEY FACTS:
       }
 
       if (reply.isEmpty) {
-        // Smart domain fallback
-        if (query.toLowerCase().contains('list') || query.toLowerCase().contains('owner')) {
-          reply = 'To list your property with 0% brokerage, tap the "List Property" button from your Owner Dashboard. You can upload photos, specify amenities, and get direct WhatsApp leads!';
-        } else if (query.toLowerCase().contains('brokerage') || query.toLowerCase().contains('fee')) {
+        final q = query.toLowerCase();
+        if (q.contains('list') || q.contains('owner') || q.contains('post')) {
+          reply = 'To list your property with 0% brokerage, tap "List Property". Complete the 6 steps (Location, Type, Details, Price, Photos, Contact). Your draft auto-saves so you never lose data!';
+        } else if (q.contains('brokerage') || q.contains('fee') || q.contains('commission')) {
           reply = 'Seedha Properties is 100% direct-owner with 0% brokerage. Neither tenants nor owners pay any commission or broker charges.';
+        } else if (q.contains('visit') || q.contains('schedule') || q.contains('tour')) {
+          reply = 'To schedule a walkthrough, open any property detail page and tap "Schedule Visit". Pick your date & time, and the owner will confirm your appointment!';
+        } else if (q.contains('badge') || q.contains('verify') || q.contains('trust')) {
+          reply = 'Seedha Properties features verified trust badges (✓ Direct Owner, ✓ Owner Verified, ✓ Property Verified) based on digital KYC checks to prevent scams.';
         } else {
-          reply = 'I am Seedha AI! You can search verified direct-owner properties or list your home with 0% brokerage across Hyderabad, Bengaluru, Mumbai and more.';
+          reply = 'Seedha Properties connects you directly with genuine owners at 0% brokerage across Hyderabad, Bengaluru, Mumbai, Delhi-NCR, Chennai, Pune, and Kolkata. What property are you looking for?';
         }
       }
 
@@ -126,14 +130,18 @@ KEY FACTS:
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.auto_awesome, color: Color(0xFFFCD34D), size: 20),
-            SizedBox(width: 8),
-            Text(
-              'Seedha AI Assistant',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.amber, size: 18),
             ),
+            const SizedBox(width: 8),
+            const Text('Seedha AI Concierge', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ],
         ),
         backgroundColor: AppTheme.primaryColor,
@@ -142,6 +150,21 @@ KEY FACTS:
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 20),
+            tooltip: 'Clear Conversation',
+            onPressed: () {
+              setState(() {
+                _messages.clear();
+                _messages.add({
+                  'role': 'model',
+                  'text': 'Namaste! 🙏 I am Seedha AI, your personal real estate guide. Ask me anything about finding direct-owner properties or listing your home with 0% brokerage!'
+                });
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -156,7 +179,7 @@ KEY FACTS:
                 SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Powered by Google Gemini • Real-Time 0% Brokerage Guide',
+                    'Seedha AI • Real-Time 0% Brokerage Guide',
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.primaryColor),
                   ),
                 ),

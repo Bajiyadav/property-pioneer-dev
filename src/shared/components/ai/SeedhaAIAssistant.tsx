@@ -89,7 +89,7 @@ export const SeedhaAIAssistant: React.FC = () => {
                   <ShieldCheck className="h-4 w-4 text-amber-300" />
                 </div>
                 <div className="text-[11px] text-teal-200">
-                  Powered by Google Gemini • 0% Brokerage Guide
+                  Seedha AI • 0% Brokerage Property Guide
                 </div>
               </div>
             </div>
