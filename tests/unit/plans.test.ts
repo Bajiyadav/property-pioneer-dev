@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   OWNER_PLANS,
+  CUSTOMER_PLANS,
   DELIVERABLE_BENEFITS,
   GST_BASIS_POINTS,
   planGstPaise,
@@ -110,5 +111,16 @@ describe("plan claims", () => {
   it("uses unique ids, since the id is what reaches the payment order", () => {
     const ids = OWNER_PLANS.map((p) => p.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("ensures customer assisted plans are valid with low price entry", () => {
+    expect(CUSTOMER_PLANS.length).toBeGreaterThanOrEqual(4);
+    for (const cp of CUSTOMER_PLANS) {
+      expect(cp.mrpInr).toBeGreaterThan(cp.priceInr);
+      expect(cp.priceInr).toBeGreaterThanOrEqual(199);
+      expect(cp.validityDays).toBeGreaterThan(0);
+      expect(cp.contactsCount).toBeGreaterThan(0);
+      expect(cp.benefits.length).toBeGreaterThan(0);
+    }
   });
 });

@@ -100,10 +100,15 @@ export const OWNER_PLANS: OwnerPlan[] = [
 ];
 
 export const DELIVERABLE_CUSTOMER_BENEFITS = {
-  UNLIMITED_CONTACTS: "Contact unlimited property owners directly",
-  PRIORITY_SCHEDULING: "Priority site visit scheduling",
-  DEDICATED_RELATIONSHIP_MANAGER: "Dedicated relationship manager for renting/buying",
-  LEGAL_ASSISTANCE: "Basic legal and documentation assistance",
+  DIRECT_OWNER_CONTACTS: "Get genuine house owner contacts matching requirements",
+  PREMIUM_FILTERS_ALERTS: "Premium filters & instant property alerts",
+  LOCALITY_EXPERTS: "Locality level price trends & commute metrics",
+  RENT_NEGOTIATION: "Rent negotiation assistance with owners",
+  RELATIONSHIP_MANAGER: "Dedicated Relationship Manager (House-Hunt Assistant)",
+  SCHEDULE_VISITS: "Assistant contacts owners & fixes property visit meetings",
+  MONEY_BACK_PROMISE: "Guaranteed home or 100% refund policy",
+  FIELD_RELATIONSHIP_MANAGER: "Field Relationship Manager (FRM) for physical & virtual home tours",
+  SHOW_MATCHING_PROPERTIES: "Shows nearby matching properties in the locality",
 } as const;
 
 export type DeliverableCustomerBenefit =
@@ -113,9 +118,11 @@ export interface CustomerPlan {
   id: string;
   badge: string;
   name: string;
+  tagline: string;
   mrpInr: number;
   priceInr: number;
   validityDays: number;
+  contactsCount: number;
   benefits: DeliverableCustomerBenefit[];
   highlighted?: boolean;
 }
@@ -124,45 +131,74 @@ const CB = DELIVERABLE_CUSTOMER_BENEFITS;
 
 export const CUSTOMER_PLANS: CustomerPlan[] = [
   {
-    id: "customer_basic",
-    badge: "Basic",
-    name: "Basic Access",
-    mrpInr: 99,
-    priceInr: 49,
-    validityDays: 15,
-    benefits: [CB.UNLIMITED_CONTACTS],
+    id: "plan_freedom",
+    badge: "Freedom",
+    name: "Freedom Plan",
+    tagline: "Get genuine house owner contacts matching your requirements",
+    mrpInr: 499,
+    priceInr: 199,
+    validityDays: 90,
+    contactsCount: 25,
+    benefits: [
+      CB.DIRECT_OWNER_CONTACTS,
+      CB.PREMIUM_FILTERS_ALERTS,
+      CB.LOCALITY_EXPERTS,
+      CB.RENT_NEGOTIATION,
+    ],
   },
   {
-    id: "customer_standard",
-    badge: "Standard",
-    name: "Standard Access",
-    mrpInr: 199,
-    priceInr: 99,
-    validityDays: 30,
-    benefits: [CB.UNLIMITED_CONTACTS, CB.PRIORITY_SCHEDULING],
-  },
-  {
-    id: "customer_premium",
+    id: "plan_relax",
     badge: "Most Popular",
-    name: "Premium Access",
-    mrpInr: 299,
-    priceInr: 149,
+    name: "Relax Plan",
+    tagline: "Get Relationship Manager to help you SAVE time and money",
+    mrpInr: 799,
+    priceInr: 299,
     validityDays: 45,
-    benefits: [CB.UNLIMITED_CONTACTS, CB.PRIORITY_SCHEDULING, CB.DEDICATED_RELATIONSHIP_MANAGER],
+    contactsCount: 50,
+    benefits: [
+      CB.RELATIONSHIP_MANAGER,
+      CB.SCHEDULE_VISITS,
+      CB.RENT_NEGOTIATION,
+      CB.LOCALITY_EXPERTS,
+      CB.PREMIUM_FILTERS_ALERTS,
+    ],
     highlighted: true,
   },
   {
-    id: "customer_elite",
-    badge: "Elite",
-    name: "Elite Access",
-    mrpInr: 399,
-    priceInr: 199,
-    validityDays: 60,
+    id: "plan_moneyback",
+    badge: "Guaranteed",
+    name: "MoneyBack Plan",
+    tagline: "Get Guaranteed home or 100% Refund",
+    mrpInr: 1299,
+    priceInr: 499,
+    validityDays: 45,
+    contactsCount: 50,
     benefits: [
-      CB.UNLIMITED_CONTACTS,
-      CB.PRIORITY_SCHEDULING,
-      CB.DEDICATED_RELATIONSHIP_MANAGER,
-      CB.LEGAL_ASSISTANCE,
+      CB.MONEY_BACK_PROMISE,
+      CB.RELATIONSHIP_MANAGER,
+      CB.SCHEDULE_VISITS,
+      CB.RENT_NEGOTIATION,
+      CB.LOCALITY_EXPERTS,
+      CB.PREMIUM_FILTERS_ALERTS,
+    ],
+  },
+  {
+    id: "plan_super_relax",
+    badge: "Field Assistance",
+    name: "Super Relax Plan",
+    tagline: "GET HOME TOURS with Field Relationship Manager (FRM)",
+    mrpInr: 1999,
+    priceInr: 799,
+    validityDays: 45,
+    contactsCount: 50,
+    benefits: [
+      CB.FIELD_RELATIONSHIP_MANAGER,
+      CB.SHOW_MATCHING_PROPERTIES,
+      CB.RELATIONSHIP_MANAGER,
+      CB.SCHEDULE_VISITS,
+      CB.RENT_NEGOTIATION,
+      CB.LOCALITY_EXPERTS,
+      CB.PREMIUM_FILTERS_ALERTS,
     ],
   },
 ];
