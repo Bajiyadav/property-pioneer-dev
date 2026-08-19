@@ -352,19 +352,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Feed Content
             if (_isLoading)
               const SliverFillRemaining(
+                hasScrollBody: false,
                 child: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
               )
             else if (_errorMessage != null)
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: Center(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.cloud_off_outlined, size: 52, color: Colors.grey),
+                        const Icon(Icons.cloud_off_outlined, size: 48, color: Colors.grey),
                         const SizedBox(height: 12),
-                        Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _loadData,
@@ -378,13 +385,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               )
             else if (_properties.isEmpty)
               SliverFillRemaining(
+                hasScrollBody: false,
                 child: Center(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.home_work_outlined, size: 52, color: Colors.grey),
+                        const Icon(Icons.home_work_outlined, size: 48, color: Colors.grey),
                         const SizedBox(height: 12),
                         Text(
                           "No ${activeCategory.label.toLowerCase()} properties currently listed in $activeCity",
