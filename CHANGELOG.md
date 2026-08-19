@@ -1,3 +1,13 @@
+## v0.37.0 — 2026-08-19
+
+### Features
+- feat(tenant): implement tenant registration, mandatory location matching, and commute metrics (1698ac5)
+
+### Migration notes
+- supabase/migrations/20260821000000_create_tenant_profiles_table.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.36.0 — 2026-08-19
 
 ### Features
