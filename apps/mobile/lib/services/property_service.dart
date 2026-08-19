@@ -28,13 +28,13 @@ class PropertyService {
       var query = _client
           .from('properties')
           .select()
-          .eq('status', 'available');
+          .or('status.eq.available,status.eq.Available,status.is.null');
 
       // Category filter
       if (category == PropertyCategory.rent) {
-        query = query.eq('listing_type', 'rent');
+        query = query.ilike('listing_type', '%rent%');
       } else if (category == PropertyCategory.buy) {
-        query = query.eq('listing_type', 'sale');
+        query = query.or('listing_type.ilike.%sale%,listing_type.ilike.%buy%');
       } else if (category == PropertyCategory.commercial) {
         // Commercial properties can be rented or purchased
         query = query.or(
