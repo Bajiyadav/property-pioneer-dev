@@ -1,3 +1,8 @@
+## v0.30.2 — 2026-08-19
+
+### Fixes
+- fix(a11y): add aria-labels to hero filter radio buttons and remove duplicate body JSON-LD script (92189f8)
+
 ## v0.30.1 — 2026-08-19
 
 ### Fixes
