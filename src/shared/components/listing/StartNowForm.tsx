@@ -1,10 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Home, Building2, Sparkles, Loader2, UserCheck, ShieldCheck } from "lucide-react";
+import {
+  Home,
+  Building2,
+  Sparkles,
+  Loader2,
+  UserCheck,
+  ShieldCheck,
+  MapPin,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
+import { LocationSelector } from "./LocationSelector";
+import { LocationIndexData } from "./LocationIndexData";
 
 export interface StartNowFormProps {
   className?: string;
@@ -12,14 +24,14 @@ export interface StartNowFormProps {
 }
 
 /**
- * Production-ready StartNowForm for Seedha Properties.
+ * Location-First StartNowForm for Seedha Properties.
  *
- * Key fixes:
- * - Immediate click responsiveness with zero mandatory blocking validations.
- * - Non-blocking phone number field (optional for initial wizard entry).
- * - Safe draft storage to localStorage & sessionStorage.
- * - Loading spinner & clean toast notifications.
- * - Mobile responsive 48px+ touch targets.
+ * Highlights:
+ * 1. Early location selection (7 Indian Metros + Locality Autocomplete).
+ * 2. Instant indexed market intelligence preview (Metro, tech corridors, 1/2/3 BHK averages).
+ * 3. Fast-track 1-Click Google OAuth.
+ * 4. Non-blocking phone number entry with auto draft persistence.
+ * 5. Mobile-first 48px+ touch targets with smooth transitions.
  */
 export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSuccess }) => {
   const navigate = useNavigate();
@@ -27,6 +39,9 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
 
   const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
   const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
+  const [city, setCity] = useState("Hyderabad");
+  const [locality, setLocality] = useState("Madhapur");
+  const [showLocationData, setShowLocationData] = useState(true);
   const [phone, setPhone] = useState(user?.phone || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +54,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
     setIsLoading(true);
 
     try {
-      // 1. Sanitize phone if provided (optional at start)
+      // 1. Sanitize phone if provided (optional for initial wizard entry)
       const cleanPhone = phone.trim();
       const pureDigits = cleanPhone.replace(/\D/g, "");
 
@@ -51,7 +66,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         return;
       }
 
-      // 2. Persist initial draft state in localStorage and sessionStorage
+      // 2. Persist initial draft state including location into localStorage and sessionStorage
       try {
         if (pureDigits.length > 0) {
           sessionStorage.setItem(LISTING_PHONE_KEY, cleanPhone);
@@ -59,6 +74,8 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         localStorage.setItem(
           "listing_draft",
           JSON.stringify({
+            city,
+            locality,
             property_type: propertyType,
             listing_type: intent.toLowerCase() === "sell" ? "sale" : "rent",
             intent,
@@ -67,7 +84,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
           }),
         );
       } catch {
-        // Private browsing safe
+        // Private browsing fallback
       }
 
       // 3. Callback if supplied
@@ -75,8 +92,8 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         onSuccess();
       }
 
-      // 4. Navigate smoothly to the 6-step listing wizard
-      toast.success("Starting your free listing...", {
+      // 4. Navigate smoothly to the 6-step listing wizard pre-filled with location
+      toast.success(`Starting listing in ${locality}, ${city}!`, {
         description: "Zero brokerage, direct owner connection.",
       });
 
@@ -95,17 +112,17 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
 
   return (
     <div
-      className={`w-full max-w-md bg-card/95 backdrop-blur-xl border border-border/80 rounded-3xl shadow-2xl overflow-hidden ${className}`}
+      className={`w-full max-w-lg bg-card/95 backdrop-blur-xl border border-border/80 rounded-3xl shadow-2xl overflow-hidden ${className}`}
     >
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-[#0F766E] to-[#115E59] p-4 text-center text-white">
         <p className="text-[11px] uppercase tracking-widest font-bold text-emerald-200 flex items-center justify-center gap-1">
-          <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Start Your Listing
+          <Sparkles className="h-3.5 w-3.5 text-amber-300" /> Location-First Direct Listing
         </p>
         <h3 className="text-lg font-extrabold text-white mt-0.5">Post as an Owner Free</h3>
       </div>
 
-      <div className="p-5 sm:p-7 space-y-5">
+      <div className="p-5 sm:p-6 space-y-5">
         {/* Authentication Notice / 1-Click Fast Track */}
         {status === "authenticated" ? (
           <div className="flex items-center gap-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
@@ -116,7 +133,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl bg-secondary/50 border border-border/70 p-3.5 text-xs space-y-2.5">
+          <div className="rounded-2xl bg-secondary/50 border border-border/70 p-3 text-xs space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-foreground">Have an account?</span>
               <span className="text-[10px] uppercase font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
@@ -126,12 +143,12 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             <GoogleSignInButton
               redirect="/list-property/wizard"
               label="Continue with Google (1-Click)"
-              className="h-11 w-full text-xs shadow-xs border-border"
+              className="h-10 w-full text-xs shadow-xs border-border"
             />
-            <div className="flex items-center gap-2 pt-1">
+            <div className="flex items-center gap-2 pt-0.5">
               <div className="flex-1 h-px bg-border/80" />
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
-                OR CONTINUE BELOW
+                OR CONTINUE WITH LOCATION BELOW
               </span>
               <div className="flex-1 h-px bg-border/80" />
             </div>
@@ -139,61 +156,86 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         )}
 
         <form onSubmit={handleStartNow} className="space-y-4">
-          {/* Property Category */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
-              Property Category
-            </label>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => setPropertyType("Residential")}
-                className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
-                  propertyType === "Residential"
-                    ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs ring-1 ring-[#0F766E]"
-                    : "bg-background border-border text-muted-foreground hover:border-border/80"
-                }`}
-              >
-                <Home className="h-4 w-4" /> Residential
-              </button>
-              <button
-                type="button"
-                onClick={() => setPropertyType("Commercial")}
-                className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
-                  propertyType === "Commercial"
-                    ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs ring-1 ring-[#0F766E]"
-                    : "bg-background border-border text-muted-foreground hover:border-border/80"
-                }`}
-              >
-                <Building2 className="h-4 w-4" /> Commercial
-              </button>
-            </div>
-          </div>
-
-          {/* Intent / I Want To */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">
-              I want to...
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(["Rent", "Sell", "PG/Co-living"] as const).map((i) => (
+          {/* Step 1: Category & Intent */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                Category
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
-                  key={i}
                   type="button"
-                  onClick={() => setIntent(i)}
-                  className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                    intent === i
-                      ? "bg-[#0F766E] border-[#0F766E] text-white shadow-md"
-                      : "bg-background border-border text-foreground hover:bg-secondary"
+                  onClick={() => setPropertyType("Residential")}
+                  className={`flex min-h-[44px] items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    propertyType === "Residential"
+                      ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] ring-1 ring-[#0F766E]"
+                      : "bg-background border-border text-muted-foreground hover:border-border/80"
                   }`}
                 >
-                  {i}
+                  <Home className="h-3.5 w-3.5" /> Residential
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setPropertyType("Commercial")}
+                  className={`flex min-h-[44px] items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    propertyType === "Commercial"
+                      ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] ring-1 ring-[#0F766E]"
+                      : "bg-background border-border text-muted-foreground hover:border-border/80"
+                  }`}
+                >
+                  <Building2 className="h-3.5 w-3.5" /> Commercial
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                I want to...
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["Rent", "Sell", "PG/Co-living"] as const).map((i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setIntent(i)}
+                    className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      intent === i
+                        ? "bg-[#0F766E] border-[#0F766E] text-white shadow-sm"
+                        : "bg-background border-border text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {i}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Optional Phone Number Input */}
+          {/* Step 2: Location Selector */}
+          <div className="pt-1 border-t border-border/60">
+            <LocationSelector
+              selectedCity={city}
+              selectedLocality={locality}
+              onCityChange={(c) => {
+                setCity(c);
+                if (c === "Hyderabad") setLocality("Madhapur");
+                else if (c === "Bengaluru") setLocality("Indiranagar");
+                else if (c === "Mumbai") setLocality("Powai");
+                else if (c === "Pune") setLocality("Hinjewadi");
+                else setLocality("Central");
+              }}
+              onLocalityChange={(l) => setLocality(l)}
+            />
+          </div>
+
+          {/* Step 3: Location Indexed Market Intelligence Preview */}
+          {locality && (
+            <div className="pt-1">
+              <LocationIndexData city={city} locality={locality} />
+            </div>
+          )}
+
+          {/* Step 4: Optional Phone Input */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
@@ -218,23 +260,23 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
                 setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
                 if (error) setError(null);
               }}
-              className="w-full h-12 min-h-[48px] rounded-xl border border-input bg-background px-4 text-sm font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F766E] transition-all"
+              className="w-full h-11 min-h-[44px] rounded-xl border border-input bg-background px-3.5 text-sm font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F766E] transition-all"
             />
             <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              Direct WhatsApp & verified buyer connections. Zero spam.
+              Direct WhatsApp & verified buyer connections in {locality}, {city}.
             </p>
           </div>
 
-          {/* Error Message */}
+          {/* Error Banner */}
           {error && (
-            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-3.5 py-2.5 rounded-xl text-xs font-medium">
+            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-3.5 py-2 rounded-xl text-xs font-medium">
               {error}
             </div>
           )}
 
           {/* START NOW Button */}
-          <div className="pt-2">
+          <div className="pt-1">
             <button
               type="submit"
               id="start-now-submit-button"
@@ -245,12 +287,13 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
               {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin text-white" />
-                  <span>Starting...</span>
+                  <span>Preparing Listing Wizard...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 text-amber-300 animate-pulse" />
-                  <span>START NOW — FREE</span>
+                  <span>START NOW — FREE IN {locality.toUpperCase()}</span>
+                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
