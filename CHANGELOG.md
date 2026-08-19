@@ -1,3 +1,8 @@
+## v0.29.6 — 2026-08-19
+
+### Fixes
+- fix(mobile): optimize property card image proportions and compact details layout (1c85f05)
+
 ## v0.29.5 — 2026-08-19
 
 ### Fixes
