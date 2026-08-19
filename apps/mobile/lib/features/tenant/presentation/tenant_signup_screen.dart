@@ -30,11 +30,11 @@ class _TenantSignUpScreenState extends State<TenantSignUpScreen> {
   String _locality = 'Madhapur';
   int _budgetMin = 15000;
   int _budgetMax = 35000;
-  List<String> _preferredBhk = ['2 BHK', '3 BHK'];
-  String _furnishing = 'semi-furnished';
+  final List<String> _preferredBhk = ['2 BHK', '3 BHK'];
+  final String _furnishing = 'semi-furnished';
   bool _isVeg = false;
   bool _petsAllowed = false;
-  int _maxCommute = 30;
+  final int _maxCommute = 30;
 
   @override
   void dispose() {

@@ -1,15 +1,33 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, X, Bot, User, Loader2, ShieldCheck, ChevronDown } from "lucide-react";
-import { type AIMessage, askSeedhaAI } from "@/modules/interactions/services/geminiService";
+import {
+  type AIMessage,
+  askSeedhaAI,
+  extractTenantPreferences,
+  type ExtractedTenantPreferences,
+} from "@/modules/interactions/services/geminiService";
 
-export const SeedhaAIAssistant: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export interface SeedhaAIAssistantProps {
+  mode?: "general" | "tenant";
+  inline?: boolean;
+  onProfileComplete?: (prefs: ExtractedTenantPreferences) => void;
+}
+
+export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
+  mode = "general",
+  inline = false,
+  onProfileComplete,
+}) => {
+  const [isOpen, setIsOpen] = useState(inline);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<AIMessage[]>([
     {
       role: "model",
-      text: "Namaste! 🙏 I am **Seedha AI**, your real estate assistant. Ask me anything about finding direct-owner properties, listing your home with 0% brokerage, or local tech corridor commute times!",
+      text:
+        mode === "tenant"
+          ? "Hi! 👋 Looking for a rental home? I can help you find perfect properties in your budget! Where do you want to rent?"
+          : "Namaste! 🙏 I am **Seedha AI**, your real estate assistant. Ask me anything about finding direct-owner properties, listing your home with 0% brokerage, or local tech corridor commute times!",
     },
   ]);
 
@@ -35,8 +53,22 @@ export const SeedhaAIAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const responseText = await askSeedhaAI(text, messages);
-      setMessages((prev) => [...prev, { role: "model", text: responseText }]);
+      const responseText = await askSeedhaAI(text, messages, mode);
+      const newMessages: AIMessage[] = [
+        ...messages,
+        userMsg,
+        { role: "model", text: responseText },
+      ];
+      setMessages(newMessages);
+
+      if (mode === "tenant" && onProfileComplete && newMessages.length >= 4) {
+        // Try extracting preferences
+        extractTenantPreferences(newMessages).then((extracted) => {
+          if (extracted.city && extracted.locality && extracted.bhk && extracted.phone) {
+            onProfileComplete(extracted);
+          }
+        });
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -58,9 +90,11 @@ export const SeedhaAIAssistant: React.FC = () => {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div
+      className={inline ? "w-full h-full flex flex-col relative" : "fixed bottom-6 right-6 z-50"}
+    >
       {/* Floating Trigger Button */}
-      {!isOpen && (
+      {!isOpen && !inline && (
         <button
           onClick={() => setIsOpen(true)}
           className="group relative flex items-center gap-2.5 px-4 py-3.5 rounded-full bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-teal-300/40"
@@ -76,7 +110,13 @@ export const SeedhaAIAssistant: React.FC = () => {
 
       {/* Interactive AI Chat Panel */}
       {isOpen && (
-        <div className="w-[90vw] sm:w-[400px] h-[520px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-teal-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div
+          className={
+            inline
+              ? "w-full h-full bg-white flex flex-col animate-in fade-in duration-200"
+              : "w-[90vw] sm:w-[400px] h-[520px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-teal-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200"
+          }
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-teal-800 to-teal-700 p-4 text-white flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
@@ -93,13 +133,15 @@ export const SeedhaAIAssistant: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 rounded-full bg-teal-900/40 hover:bg-teal-900/80 flex items-center justify-center text-teal-100 transition-colors"
-              aria-label="Close AI chat"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </button>
+            {!inline && (
+              <button
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8 rounded-full bg-teal-900/40 hover:bg-teal-900/80 flex items-center justify-center text-teal-100 transition-colors"
+                aria-label="Close AI chat"
+              >
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           {/* Messages Scroll Area */}

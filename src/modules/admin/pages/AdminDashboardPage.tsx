@@ -177,9 +177,11 @@ function AdminDashboard({ user }: { user: User | null }) {
   const properties = useMemo(() => feed?.properties ?? [], [feed]);
   const isSampleData = feed?.source === "fallback";
 
-  const USERS = adminUsers || [];
-  const owners = USERS.filter((u) => u.role === "Owner");
-  const agents = USERS.filter((u) => u.role === "Agent");
+  const USERS = useMemo(() => adminUsers || [], [adminUsers]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const owners = USERS.filter((u: any) => u.role === "Owner");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const agents = USERS.filter((u: any) => u.role === "Agent");
   /** Genuinely unapproved listings, straight from the service-role view. */
   const pendingApprovals = useMemo(
     () => (adminRows ?? []).filter((p) => !p.is_approved),
@@ -228,12 +230,13 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const filteredUsers = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
-    return USERS.filter((u) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return USERS.filter((u: any) => {
       if (roleFilter !== "all" && u.role.toLowerCase() !== roleFilter) return false;
       if (!q) return true;
       return `${u.name} ${u.email}`.toLowerCase().includes(q);
     });
-  }, [userQuery, roleFilter]);
+  }, [userQuery, roleFilter, USERS]);
 
   const filteredProperties = useMemo(() => {
     const q = propertyQuery.trim().toLowerCase();
@@ -833,7 +836,8 @@ function AdminDashboard({ user }: { user: User | null }) {
             />
             <KpiCard
               label="Active agents"
-              numericValue={agents.filter((a) => a.status === "Active").length}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              numericValue={agents.filter((a: any) => a.status === "Active").length}
               icon={<UserCheck className="h-4 w-4" />}
               accent="amber"
             />

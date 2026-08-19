@@ -6,6 +6,50 @@ export interface AIMessage {
   text: string;
 }
 
+export interface ExtractedTenantPreferences {
+  city?: string;
+  locality?: string;
+  budget_min?: number;
+  budget_max?: number;
+  bhk?: string;
+  phone?: string;
+}
+
+export const TENANT_SYSTEM_PROMPT = `
+You are Seedha AI, helping tenants find rental properties.
+
+TENANT CONVERSATION GOALS:
+1. Identify city/locality (REQUIRED)
+2. Get budget range (REQUIRED)
+3. Ask preferred BHK (REQUIRED)
+4. Get phone number (REQUIRED)
+5. Optional: Furnishing, amenities, move-in date
+
+CONVERSATION STYLE:
+- Friendly, conversational (not form-like)
+- Ask one thing at a time
+- Confirm understanding: "So 2BHK in Madhapur, ₹25K. Right?"
+- When all required data collected: Extract & confirm
+- Suggest properties once profile complete
+
+EXTRACTION RULES:
+- Extract: city, locality, budget_min, budget_max, bhk, phone
+- From: "I want 2bhk in madhapur around 25k"
+  Extract: { "city": "Hyderabad", "locality": "Madhapur", "bhk": "2BHK", "budget_max": 25000 }
+- Ask confirmation before showing results
+
+PROPERTY RECOMMENDATIONS:
+- Show top matches first with match score.
+- Include: Price, BHK, Location, Commute time (if available).
+- One-tap inquiry: "Interested? Share your phone to contact owner"
+
+AVOID:
+- Don't ask all questions at once
+- Don't ask company, salary, personal details upfront
+- Don't show properties before location is set
+- Don't force profile completion
+`;
+
 export const SEEDHA_SYSTEM_PROMPT = `
 You are "Seedha AI", the official, expert, and friendly AI real estate concierge for SEEDHA PROPERTIES (seedhaproperties.com).
 Your mission is to empower tenants, buyers, and property owners across India with 100% transparency, verified listings, and 0% brokerage.
@@ -222,7 +266,11 @@ async function generateTrainedLocalResponse(query: string): Promise<string> {
 /**
  * Main AI Prompt Dispatcher (Gemini API with Trained Fallback)
  */
-export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []): Promise<string> {
+export async function askSeedhaAI(
+  userQuery: string,
+  history: AIMessage[] = [],
+  mode: "general" | "tenant" = "general",
+): Promise<string> {
   const apiKey =
     process.env.GEMINI_API_KEY ||
     process.env.VITE_GEMINI_API_KEY ||
@@ -243,7 +291,7 @@ export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []):
       role: "user",
       parts: [
         {
-          text: `${SEEDHA_SYSTEM_PROMPT}\n\n[RELEVANT REAL ESTATE CONTEXT RETRIEVED]:\n${dynamicContext}\n\n[USER QUESTION]:\n${userQuery}`,
+          text: `${mode === "tenant" ? TENANT_SYSTEM_PROMPT : SEEDHA_SYSTEM_PROMPT}\n\n[RELEVANT REAL ESTATE CONTEXT RETRIEVED]:\n${dynamicContext}\n\n[USER QUESTION]:\n${userQuery}`,
         },
       ],
     },
@@ -298,5 +346,68 @@ export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []):
   } catch (error) {
     console.warn("[geminiService] Error calling Gemini API, using local AI engine:", error);
     return generateTrainedLocalResponse(userQuery);
+  }
+}
+
+export async function extractTenantPreferences(
+  history: AIMessage[],
+): Promise<ExtractedTenantPreferences> {
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env
+      ?.VITE_GEMINI_API_KEY ||
+    "";
+
+  if (!apiKey || apiKey.trim().length === 0) {
+    return {};
+  }
+
+  const prompt = `
+Extract the tenant preferences from this conversation.
+Return a valid JSON object with the following optional string/number fields (do not wrap in markdown tags):
+- city (e.g. Hyderabad, Bengaluru)
+- locality (e.g. Madhapur, HSR Layout)
+- budget_min (number)
+- budget_max (number)
+- bhk (e.g. "2 BHK")
+- phone (e.g. "+91 9876543210")
+
+Conversation:
+${history.map((m) => m.role + ": " + m.text).join("\\n")}
+  `;
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      return {};
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (text) {
+      try {
+        return JSON.parse(text) as ExtractedTenantPreferences;
+      } catch {
+        return {};
+      }
+    }
+    return {};
+  } catch (error) {
+    console.error("[geminiService] Error extracting preferences:", error);
+    return {};
   }
 }

@@ -153,7 +153,7 @@ function AgentDashboard({ user }: { user: User | null }) {
     queryFn: () => fetchDashboard({}),
   });
 
-  const LEADS = dashboard?.leads || [];
+  const LEADS = useMemo(() => dashboard?.leads || [], [dashboard?.leads]);
   const VISITS = (dashboard?.visits || []).map((v) => ({
     id: v.id,
     client: v.visitorName,
@@ -174,11 +174,12 @@ function AgentDashboard({ user }: { user: User | null }) {
 
   const filteredLeads = useMemo(() => {
     const q = leadQuery.trim().toLowerCase();
-    return LEADS.filter((l) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return LEADS.filter((l: any) => {
       if (!q) return true;
       return `${l.name} ${l.locality || ""} ${l.phone || ""}`.toLowerCase().includes(q);
     });
-  }, [leadQuery, stageFilter, LEADS]);
+  }, [leadQuery, LEADS]);
 
   const paidCommission = COMMISSIONS.filter((c) => c.status === "Paid").reduce(
     (s, c) => s + c.amount,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/tenant_profile.dart';
 
 class TenantMatchesScreen extends StatelessWidget {
@@ -113,14 +114,14 @@ class TenantMatchesScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.emerald.shade50,
-                            border: Border.all(color: Colors.emerald.shade200),
+                            color: Colors.teal.shade50,
+                            border: Border.all(color: Colors.teal.shade200),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '$score% Match',
                             style: TextStyle(
-                              color: Colors.emerald.shade800,
+                              color: Colors.teal.shade800,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),

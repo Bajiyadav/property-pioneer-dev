@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TenantSignUpFlow } from "@/modules/tenant/components/TenantSignUpFlow";
+import { TenantOnboardingAI } from "@/shared/components/ai/TenantOnboardingAI";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 export const Route = createFileRoute("/tenant/onboarding")({
@@ -26,8 +26,14 @@ export const Route = createFileRoute("/tenant/onboarding")({
 
 function TenantOnboardingPage() {
   return (
-    <div className="min-h-screen bg-neutral-50/80 dark:bg-background pt-20 pb-16">
-      <TenantSignUpFlow />
+    <div className="min-h-screen bg-neutral-50/80 dark:bg-background pt-20 pb-16 px-4">
+      <div className="max-w-4xl mx-auto mb-8 text-center">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Find Your Perfect Home</h1>
+        <p className="text-slate-600">
+          Chat with Seedha AI to discover properties matching your lifestyle and budget.
+        </p>
+      </div>
+      <TenantOnboardingAI />
     </div>
   );
 }

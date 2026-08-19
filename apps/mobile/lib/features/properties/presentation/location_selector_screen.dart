@@ -53,7 +53,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppTheme.cardBackground,
+        backgroundColor: AppTheme.cardColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -80,7 +80,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                     return ChoiceChip(
                       label: Text(city),
                       selected: isSelected,
-                      selectedColor: AppTheme.primaryTeal,
+                      selectedColor: AppTheme.primaryColor,
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
@@ -107,7 +107,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search locality in $_selectedCity...',
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.primaryTeal),
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.primaryColor),
                   filled: true,
                   fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
@@ -139,7 +139,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                   return ActionChip(
                     label: Text(loc),
                     avatar: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-                    backgroundColor: isSelected ? AppTheme.primaryTeal : Colors.grey.shade100,
+                    backgroundColor: isSelected ? AppTheme.primaryColor : Colors.grey.shade100,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -171,7 +171,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.location_on, color: AppTheme.primaryTeal),
+                        const Icon(Icons.location_on, color: AppTheme.primaryColor),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -182,7 +182,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.emerald.withOpacity(0.1),
+                            color: AppTheme.primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -211,8 +211,8 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      children: const [
+                    const Row(
+                      children: [
                         Icon(Icons.directions_subway, size: 16, color: Colors.blue),
                         SizedBox(width: 6),
                         Expanded(
@@ -235,7 +235,7 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryTeal,
+                    backgroundColor: AppTheme.primaryColor,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: () {
@@ -261,17 +261,17 @@ class _LocationSelectorScreenState extends ConsumerState<LocationSelectorScreen>
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       decoration: BoxDecoration(
-        color: isHighlighted ? AppTheme.primaryTeal.withOpacity(0.08) : Colors.grey.shade50,
+        color: isHighlighted ? AppTheme.primaryColor.withOpacity(0.08) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isHighlighted ? AppTheme.primaryTeal.withOpacity(0.3) : Colors.grey.shade200,
+          color: isHighlighted ? AppTheme.primaryColor.withOpacity(0.3) : Colors.grey.shade200,
         ),
       ),
       child: Column(
         children: [
           Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
           const SizedBox(height: 2),
-          Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isHighlighted ? AppTheme.primaryTeal : Colors.black87)),
+          Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isHighlighted ? AppTheme.primaryColor : Colors.black87)),
         ],
       ),
     );
