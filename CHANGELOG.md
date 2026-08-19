@@ -1,3 +1,12 @@
+## v0.33.0 — 2026-08-19
+
+### Features
+- feat(ai): improve assistant training, remove powered by gemini label, and elevate branding (c91c081)
+
+### Documentation
+- docs: expand README with architecture, API reference, roadmap, and troubleshooting (9c3a087)
+- docs: update README with pan-India marketplace architecture and status (0d1fa76)
+
 ## v0.32.0 — 2026-08-19
 
 ### Features
