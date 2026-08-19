@@ -1,3 +1,13 @@
+## v0.37.1 — 2026-08-19
+
+### Fixes
+- fix(types): resolve typescript and eslint errors blocking deployment (9c89d7e)
+
+### Migration notes
+- supabase/migrations/20260822000000_create_search_sessions_table.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.37.0 — 2026-08-19
 
 ### Features
