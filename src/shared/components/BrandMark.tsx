@@ -22,6 +22,7 @@ export function SeedhaLogoIcon({ className = "h-8 w-8" }: { className?: string }
 export function BrandMark({
   size = "md",
   showName = true,
+  responsiveName = false,
   className = "",
 }: {
   size?: "sm" | "md" | "lg";
@@ -33,27 +34,26 @@ export function BrandMark({
     size === "sm"
       ? "h-7 w-7 sm:h-8 sm:w-8"
       : size === "lg"
-        ? "h-12 w-12"
-        : "h-8 w-8 sm:h-10 sm:w-10";
+        ? "h-11 w-11 sm:h-12 sm:w-12"
+        : "h-8 w-8 sm:h-9 sm:w-9";
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-2 sm:gap-2.5 whitespace-nowrap ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 sm:gap-2.5 whitespace-nowrap select-none ${className}`}
     >
       <SeedhaLogoIcon className={logoSizeClass} />
 
       {showName && (
-        <div className="flex shrink-0 flex-col leading-none whitespace-nowrap">
-          <div className="flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
-            <span className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-foreground text-sm sm:text-lg lg:text-xl whitespace-nowrap">
-              SEEDHA
-            </span>
-            <span className="font-[family-name:var(--font-display)] font-bold tracking-widest text-[#B8860B] dark:text-[#D4AF37] text-[11px] sm:text-xs sm:text-sm uppercase whitespace-nowrap">
-              PROPERTIES
-            </span>
-          </div>
-          <span className="hidden sm:block text-[8px] sm:text-[9px] font-bold tracking-wider text-muted-foreground uppercase mt-0.5 whitespace-nowrap">
-            GA SEEDHA • PROPERTIES AAP KI
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 leading-none whitespace-nowrap">
+          <span className="font-[family-name:var(--font-display)] font-extrabold tracking-tight text-foreground text-sm sm:text-base lg:text-lg whitespace-nowrap">
+            SEEDHA
+          </span>
+          <span
+            className={`font-[family-name:var(--font-display)] font-bold tracking-widest text-[#B8860B] dark:text-[#D4AF37] text-[11px] sm:text-xs uppercase whitespace-nowrap ${
+              responsiveName ? "hidden xs:inline-block sm:inline-block" : ""
+            }`}
+          >
+            PROPERTIES
           </span>
         </div>
       )}
