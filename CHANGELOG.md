@@ -1,3 +1,8 @@
+## v0.30.0 — 2026-08-19
+
+### Features
+- feat(core): implement admin route guard, server-side search pagination, and SQL aggregations (8f86c94)
+
 ## v0.29.6 — 2026-08-19
 
 ### Fixes
