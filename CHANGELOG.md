@@ -1,3 +1,8 @@
+## v0.31.0 — 2026-08-19
+
+### Features
+- feat(branding): replace logo and favicons with client 3D gold emblem across web and mobile (08ee023)
+
 ## v0.30.3 — 2026-08-19
 
 ### Fixes
