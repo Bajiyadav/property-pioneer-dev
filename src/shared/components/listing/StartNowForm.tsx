@@ -46,9 +46,20 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleStartNow = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleStartNow = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (isLoading) return;
+
+    console.log("✅ [StartNowForm] START NOW clicked:", {
+      city,
+      locality,
+      propertyType,
+      intent,
+      phone,
+    });
 
     setError(null);
     setIsLoading(true);
@@ -97,12 +108,20 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         description: "Zero brokerage, direct owner connection.",
       });
 
-      await navigate({
-        to: "/list-property/wizard",
-        search: { propertyType, intent },
-      });
+      try {
+        await navigate({
+          to: "/list-property/wizard",
+          search: { propertyType, intent },
+        });
+      } catch (navErr) {
+        console.warn("Router navigate failed, falling back to window.location:", navErr);
+        window.location.assign(
+          `/list-property/wizard?propertyType=${encodeURIComponent(propertyType)}&intent=${encodeURIComponent(intent)}`,
+        );
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      console.error("❌ [StartNowForm] Error:", err);
       setError(msg);
       toast.error(msg);
     } finally {
@@ -280,6 +299,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             <button
               type="submit"
               id="start-now-submit-button"
+              onClick={handleStartNow}
               disabled={isLoading}
               aria-label="Start property listing now"
               className="w-full min-h-[50px] flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#0F766E] via-[#115E59] to-[#0D9488] px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-teal-950/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none cursor-pointer"
