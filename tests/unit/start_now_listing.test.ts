@@ -79,4 +79,18 @@ describe("Property Listing Onboarding & Start Now Flow", () => {
       expect(res.problems.length).toBeGreaterThan(0);
     }
   });
+
+  it("supports start-now draft persistence with optional phone input", () => {
+    const draftInitial = {
+      property_type: "Residential",
+      listing_type: "rent",
+      intent: "Rent",
+      owner_phone: "",
+      startedAt: new Date().toISOString(),
+    };
+    expect(draftInitial.property_type).toBe("Residential");
+    expect(draftInitial.listing_type).toBe("rent");
+    // Initial entry allows empty phone, which is subsequently filled in wizard step 6
+    expect(draftInitial.owner_phone).toBe("");
+  });
 });

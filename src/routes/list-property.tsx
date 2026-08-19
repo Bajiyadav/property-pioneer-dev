@@ -1,9 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Building2,
   Home,
-  Phone,
   CheckCircle2,
   Eye,
   Calculator,
@@ -12,12 +11,8 @@ import {
   MessageSquare,
   ChevronDown,
 } from "lucide-react";
-import { Input } from "@/shared/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-import { useAuth } from "@/modules/authentication/context/AuthContext";
-import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
-import { UserCheck, LogIn } from "lucide-react";
+import { StartNowForm } from "@/shared/components/listing/StartNowForm";
 
 export const Route = createFileRoute("/list-property")({
   /*
@@ -59,54 +54,16 @@ export const Route = createFileRoute("/list-property")({
 export const LISTING_PHONE_KEY = "sp_listing_phone";
 
 function ListPropertyLandingPage() {
-  const navigate = useNavigate();
-  const { status, user } = useAuth();
-  const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
-  const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
-  const [phone, setPhone] = useState("");
-  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!phone) {
-      const existingPhone = user?.phone || (user?.user_metadata?.phone as string | undefined);
-      if (existingPhone) {
-        setPhone(existingPhone);
-      }
-    }
-  }, [user, phone]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const digits = phone.replace(/[^0-9+]/g, "");
-    const pureDigits = digits.replace(/\D/g, "");
-    if (pureDigits.length < 7 || pureDigits.length > 15) {
-      setPhoneError(
-        pureDigits.length === 0
-          ? "Enter your mobile number so buyers and tenants can reach you."
-          : "Please enter a valid phone number (7 to 15 digits).",
-      );
-      return;
-    }
-
-    setPhoneError(null);
-    try {
-      sessionStorage.setItem(LISTING_PHONE_KEY, digits);
-    } catch {
-      // Private browsing fallback
-    }
-    navigate({ to: "/list-property/wizard", search: { propertyType, intent } });
-  };
 
   const faqs = [
     {
       q: `How to post a property on ${APP_NAME}?`,
-      a: "You can simply select your property type above, enter your phone number, and follow our 6-step listing wizard to add your details, pricing, and photos.",
+      a: "You can simply select your property category, enter your contact or continue with Google, and follow our 6-step listing wizard to add your details, pricing, and photos.",
     },
     {
       q: "Can I post a property for free?",
-      a: "Yes, posting a property as an owner is completely free. We also offer premium packages for higher visibility.",
+      a: "Yes, posting a property as an owner is completely free. Zero listing fees, zero broker commission.",
     },
     {
       q: "What type of property can I post for selling/renting?",
@@ -114,11 +71,11 @@ function ListPropertyLandingPage() {
     },
     {
       q: "What are the benefits of posting a property with us?",
-      a: "You get access to thousands of verified buyers and tenants, maximum visibility across the platform, and tools like our price calculator to help you get the best deal.",
+      a: "You get access to verified buyers and tenants, maximum visibility across top Indian metros, and direct WhatsApp contact.",
     },
     {
       q: "When do I start getting enquiries on my property?",
-      a: "Most listings start receiving enquiries within 2-4 hours of approval by our moderation team.",
+      a: "Most listings start receiving direct tenant enquiries within hours of verification by our moderation team.",
     },
   ];
 
@@ -159,149 +116,8 @@ function ListPropertyLandingPage() {
             </ul>
           </div>
 
-          <div className="md:col-span-5 w-full max-w-md mx-auto">
-            <Card className="shadow-2xl border border-border/80 bg-card/95 backdrop-blur-xl rounded-3xl overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0F766E] to-[#115E59] p-4 text-center text-white">
-                <p className="text-xs uppercase tracking-widest font-bold text-emerald-200">
-                  Start Your Listing
-                </p>
-                <h3 className="text-lg font-extrabold text-white mt-0.5">Post as an Owner Free</h3>
-              </div>
-
-              <CardContent className="p-5 sm:p-7">
-                {/* Account Status Notification */}
-                {status === "authenticated" ? (
-                  <div className="mb-4 flex items-center gap-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                    <UserCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <div className="truncate">
-                      Signed in as <span className="font-bold">{user?.email}</span> (Listing will be
-                      saved directly to your owner account).
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-4 rounded-xl bg-secondary/50 border border-border/70 p-3 text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-foreground">Have an account?</span>
-                      <span className="text-[10px] uppercase font-bold text-primary">
-                        Fast Track
-                      </span>
-                    </div>
-                    <GoogleSignInButton
-                      redirect="/list-property/wizard"
-                      label="Continue with Google (1-Click)"
-                      className="h-10 text-xs shadow-xs"
-                    />
-                    <p className="text-[10px] text-muted-foreground text-center">
-                      Or fill your number below to continue directly as guest.
-                    </p>
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-5" action="#" method="POST">
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
-                      Property Category
-                    </label>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setPropertyType("Residential")}
-                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
-                          propertyType === "Residential"
-                            ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
-                            : "bg-background border-border text-muted-foreground hover:border-border/80"
-                        }`}
-                      >
-                        <Home className="h-4 w-4" /> Residential
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPropertyType("Commercial")}
-                        className={`flex min-h-[48px] items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer ${
-                          propertyType === "Commercial"
-                            ? "bg-[#0F766E]/10 border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6] shadow-xs"
-                            : "bg-background border-border text-muted-foreground hover:border-border/80"
-                        }`}
-                      >
-                        <Building2 className="h-4 w-4" /> Commercial
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">
-                      I want to...
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["Rent", "Sell", "PG/Co-living"].map((i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setIntent(i as "Rent" | "Sell" | "PG/Co-living")}
-                          className={`min-h-[44px] rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                            intent === i
-                              ? "bg-[#0F766E] border-[#0F766E] text-white shadow-md"
-                              : "bg-background border-border text-foreground hover:bg-secondary"
-                          }`}
-                        >
-                          {i}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="listing-phone"
-                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block"
-                    >
-                      Your Mobile Number
-                    </label>
-                    <Input
-                      id="listing-phone"
-                      name="phoneNumber"
-                      type="tel"
-                      autoComplete="tel"
-                      required
-                      maxLength={18}
-                      placeholder="+91 98765 43210"
-                      className="h-12 min-h-[48px] rounded-xl text-base font-semibold px-4 cursor-text"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
-                        if (phoneError) setPhoneError(null);
-                      }}
-                      aria-invalid={phoneError ? true : undefined}
-                      aria-describedby={phoneError ? "listing-phone-error" : undefined}
-                    />
-                    {phoneError ? (
-                      <p
-                        id="listing-phone-error"
-                        role="alert"
-                        className="mt-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"
-                      >
-                        {phoneError}
-                      </p>
-                    ) : (
-                      <p className="mt-1.5 text-[11px] text-muted-foreground">
-                        Tenants & buyers connect directly with you on WhatsApp.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      id="start-now-submit-button"
-                      aria-label="Start property listing now"
-                      className="w-full min-h-[50px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0F766E] via-[#115E59] to-[#0D9488] px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-teal-950/20 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    >
-                      <span>START NOW — FREE</span>
-                    </button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+          <div className="md:col-span-5 w-full max-w-md mx-auto flex justify-center">
+            <StartNowForm />
           </div>
         </div>
       </div>
