@@ -1,3 +1,8 @@
+## v0.29.4 — 2026-08-19
+
+### Fixes
+- fix(mobile): resolve type-casting in Property.fromJson and make category query filters resilient (cbfcf49)
+
 ## v0.29.3 — 2026-08-18
 
 ### Fixes
