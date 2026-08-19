@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
-import { loadOverview } from "@/lib/admin.server";
+import { loadOverview } from "@/lib/admin";
 import { z } from "zod";
 
 /** Context injected by `requireSupabaseAuth` — an RLS-scoped client plus the caller's id. */
