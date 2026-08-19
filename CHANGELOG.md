@@ -1,3 +1,8 @@
+## v0.33.1 — 2026-08-19
+
+### Fixes
+- fix(listing): make START NOW button responsive, remove form validation blocker (9486b09)
+
 ## v0.33.0 — 2026-08-19
 
 ### Features
