@@ -1,3 +1,8 @@
+## v0.30.1 — 2026-08-19
+
+### Fixes
+- fix(security): separate admin stats module to preserve client/server import hygiene (6afa256)
+
 ## v0.30.0 — 2026-08-19
 
 ### Features
