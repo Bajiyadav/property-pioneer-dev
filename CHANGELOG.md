@@ -1,3 +1,8 @@
+## v0.32.0 — 2026-08-19
+
+### Features
+- feat(marketplace): enable multi-metro location, search, and visit booking (76bab65)
+
 ## v0.31.0 — 2026-08-19
 
 ### Features
