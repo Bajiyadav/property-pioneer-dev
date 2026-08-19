@@ -1,3 +1,11 @@
+## v0.30.3 — 2026-08-19
+
+### Fixes
+- fix(ui): eliminate mobile header overlap, remove tagline text, and make brand logo responsive (bb3c634)
+
+### Documentation
+- docs: update TODO.md resolving completed bugs and tech debt (6bfcd0b)
+
 ## v0.30.2 — 2026-08-19
 
 ### Fixes
