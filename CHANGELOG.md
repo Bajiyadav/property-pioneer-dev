@@ -1,3 +1,8 @@
+## v0.36.0 — 2026-08-19
+
+### Features
+- feat(wizard): pre-fill wizard from home page data and auto-skip location step 1 to step 2 (1e6408d)
+
 ## v0.35.0 — 2026-08-19
 
 ### Features
