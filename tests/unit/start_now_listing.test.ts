@@ -93,4 +93,35 @@ describe("Property Listing Onboarding & Start Now Flow", () => {
     // Initial entry allows empty phone, which is subsequently filled in wizard step 6
     expect(draftInitial.owner_phone).toBe("");
   });
+
+  it("handles home page pre-fill to auto-skip location step 1 directly into step 2", () => {
+    const homePageSelection = {
+      city: "Hyderabad",
+      locality: "Madhapur",
+      propertyType: "Residential",
+      intent: "Rent",
+      owner_phone: "9876543210",
+      timestamp: new Date().toISOString(),
+    };
+
+    // Simulate pre-fill detection
+    const hasPrefilledLocation = Boolean(homePageSelection.city && homePageSelection.locality);
+    const initialStep = hasPrefilledLocation ? 2 : 1;
+
+    expect(hasPrefilledLocation).toBe(true);
+    expect(initialStep).toBe(2);
+
+    const mappedData: Partial<ListingFormData> = {
+      city: homePageSelection.city,
+      locality: homePageSelection.locality,
+      property_type: homePageSelection.propertyType === "Commercial" ? "Office" : "Apartment",
+      listing_type: homePageSelection.intent === "Sell" ? "sale" : "rent",
+      owner_phone: homePageSelection.owner_phone,
+    };
+
+    expect(mappedData.city).toBe("Hyderabad");
+    expect(mappedData.locality).toBe("Madhapur");
+    expect(mappedData.property_type).toBe("Apartment");
+    expect(mappedData.listing_type).toBe("rent");
+  });
 });

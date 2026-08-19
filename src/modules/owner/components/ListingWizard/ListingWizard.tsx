@@ -23,6 +23,10 @@ interface ListingWizardProps {
   initialData?: {
     propertyType?: "Residential" | "Commercial";
     intent?: "Rent" | "Sell" | "PG/Co-living";
+    city?: string;
+    locality?: string;
+    prefilled?: boolean;
+    step?: number;
   };
 }
 
@@ -52,6 +56,7 @@ function saveDraft(data: ListingFormData): void {
 function clearDraft(): void {
   try {
     window.localStorage.removeItem(LISTING_DRAFT_KEY);
+    window.localStorage.removeItem("listing_prefill");
   } catch {
     /* nothing to recover */
   }
@@ -60,11 +65,50 @@ function clearDraft(): void {
 function readStashedDraft(): Partial<ListingFormData> | null {
   try {
     if (typeof window === "undefined") return null;
-    const raw = window.localStorage.getItem(LISTING_DRAFT_KEY);
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-    return parsed as Partial<ListingFormData>;
+
+    let draft: Partial<ListingFormData> = {};
+
+    // 1. Read main draft
+    const rawMain =
+      window.localStorage.getItem(LISTING_DRAFT_KEY) ||
+      window.localStorage.getItem("listing_draft");
+    if (rawMain) {
+      try {
+        const parsed = JSON.parse(rawMain);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          draft = { ...draft, ...parsed };
+        }
+      } catch {
+        // Ignore unparseable draft JSON
+      }
+    }
+
+    // 2. Read prefill from Start Now / Home
+    const rawPrefill = window.localStorage.getItem("listing_prefill");
+    if (rawPrefill) {
+      try {
+        const parsed = JSON.parse(rawPrefill);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          if (parsed.city) draft.city = parsed.city;
+          if (parsed.locality) draft.locality = parsed.locality;
+          if (parsed.propertyType === "Commercial" || parsed.property_type === "Commercial") {
+            draft.property_type = "Office";
+          } else if (parsed.property_type) {
+            draft.property_type = parsed.property_type;
+          }
+          if (parsed.intent === "Sell" || parsed.listing_type === "sale") {
+            draft.listing_type = "sale";
+          } else if (parsed.listing_type) {
+            draft.listing_type = parsed.listing_type;
+          }
+          if (parsed.owner_phone) draft.owner_phone = parsed.owner_phone;
+        }
+      } catch {
+        // Ignore unparseable prefill JSON
+      }
+    }
+
+    return Object.keys(draft).length > 0 ? draft : null;
   } catch {
     return null;
   }
@@ -81,7 +125,18 @@ const steps = [
 
 export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
+  const stashedDraft = readStashedDraft();
+
+  // Check if we have prefilled location from search params or localStorage
+  const hasPrefilledLocation = Boolean(
+    initialData?.prefilled ||
+    initialData?.step === 2 ||
+    (initialData?.city && initialData?.locality) ||
+    (stashedDraft?.city && stashedDraft?.locality),
+  );
+
+  const initialStep = initialData?.step ?? (hasPrefilledLocation ? 2 : 1);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
   const { status, refreshSession } = useAuth();
   const create = useServerFn(createListing);
@@ -91,12 +146,15 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     owner_name: "",
     owner_phone: readStashedPhone(),
     project_name: "",
-    city: "Hyderabad",
-    locality: "",
+    city: initialData?.city || stashedDraft?.city || "Hyderabad",
+    locality: initialData?.locality || stashedDraft?.locality || "",
     address: "",
     landmark: "",
-    property_type: initialData?.propertyType === "Commercial" ? "Office" : "Apartment",
-    listing_type: initialData?.intent === "Sell" ? "sale" : "rent",
+    property_type:
+      initialData?.propertyType === "Commercial"
+        ? "Office"
+        : stashedDraft?.property_type || "Apartment",
+    listing_type: initialData?.intent === "Sell" ? "sale" : stashedDraft?.listing_type || "rent",
     bhk_type: "2 BHK",
     bedrooms: 2,
     bathrooms: 2,
@@ -124,7 +182,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     facing: "East",
     available_from: "",
     rent_negotiable: false,
-    ...(readStashedDraft() ?? {}),
+    ...(stashedDraft ?? {}),
   });
 
   const updateFormData = (data: Partial<ListingFormData>) => {
@@ -239,6 +297,44 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
           if (stepId < currentStep) setCurrentStep(stepId);
         }}
       />
+
+      {/* Location-First Pre-Fill Continuation Banner */}
+      {formData.locality && formData.city && currentStep >= 2 && (
+        <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/50 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
+              📍
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md">
+                  Step 1 Completed
+                </span>
+                <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                  {formData.property_type || "Apartment"} ·{" "}
+                  {formData.listing_type === "sale" ? "For Sale" : "For Rent"}
+                </span>
+              </div>
+              <p className="text-sm sm:text-base font-bold text-emerald-950 dark:text-emerald-100 mt-0.5">
+                {formData.locality}, {formData.city}{" "}
+                <span className="text-xs font-normal text-emerald-700 dark:text-emerald-400">
+                  (Pre-filled from your selection)
+                </span>
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setCurrentStep(1);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-950 dark:hover:text-emerald-100 underline underline-offset-4 shrink-0 px-3 py-1.5 rounded-lg hover:bg-emerald-200/50 dark:hover:bg-emerald-900/50 transition-colors"
+          >
+            Change Location (Step 1)
+          </button>
+        </div>
+      )}
 
       {/* Main Form Step Container */}
       <div className="bg-card rounded-3xl border border-border/80 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300">

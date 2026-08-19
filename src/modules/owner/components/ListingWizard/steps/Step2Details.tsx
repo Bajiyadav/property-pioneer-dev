@@ -73,6 +73,23 @@ export function Step2Details({ data, updateData }: StepProps) {
         </p>
       </div>
 
+      {/* Pre-filled Location & Intent Info Banner */}
+      {data.city && (
+        <div className="rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-800 p-4">
+          <p className="text-xs sm:text-sm text-emerald-900 dark:text-emerald-200">
+            <strong>Listing for:</strong>{" "}
+            <span className="font-bold text-emerald-950 dark:text-emerald-100">
+              {data.property_type || "Residential"}
+            </span>{" "}
+            in{" "}
+            <span className="font-bold text-emerald-950 dark:text-emerald-100">
+              {data.locality ? `${data.locality}, ${data.city}` : data.city}
+            </span>{" "}
+            ({data.listing_type === "sale" ? "For Sale" : "For Rent"})
+          </p>
+        </div>
+      )}
+
       <div className="space-y-7">
         {/* Visual Property Type Cards */}
         <div className="space-y-3">

@@ -82,18 +82,20 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         if (pureDigits.length > 0) {
           sessionStorage.setItem(LISTING_PHONE_KEY, cleanPhone);
         }
-        localStorage.setItem(
-          "listing_draft",
-          JSON.stringify({
-            city,
-            locality,
-            property_type: propertyType,
-            listing_type: intent.toLowerCase() === "sell" ? "sale" : "rent",
-            intent,
-            owner_phone: cleanPhone,
-            startedAt: new Date().toISOString(),
-          }),
-        );
+        const prefillPayload = {
+          city,
+          locality,
+          property_type: propertyType === "Commercial" ? "Office" : "Apartment",
+          listing_type: intent.toLowerCase() === "sell" ? "sale" : "rent",
+          propertyType,
+          intent,
+          owner_phone: cleanPhone,
+          timestamp: new Date().toISOString(),
+        };
+
+        localStorage.setItem("listing_prefill", JSON.stringify(prefillPayload));
+        localStorage.setItem("listing_draft", JSON.stringify(prefillPayload));
+        localStorage.setItem("sp_listing_draft", JSON.stringify(prefillPayload));
       } catch {
         // Private browsing fallback
       }
@@ -103,20 +105,27 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         onSuccess();
       }
 
-      // 4. Navigate smoothly to the 6-step listing wizard pre-filled with location
+      // 4. Navigate smoothly to the 6-step listing wizard pre-filled with location (jumping directly to step 2)
       toast.success(`Starting listing in ${locality}, ${city}!`, {
-        description: "Zero brokerage, direct owner connection.",
+        description: "Pre-filled location. Continuing to Property Details (Step 2/6).",
       });
 
       try {
         await navigate({
           to: "/list-property/wizard",
-          search: { propertyType, intent },
+          search: {
+            propertyType,
+            intent,
+            city,
+            locality,
+            prefilled: true,
+            step: 2,
+          },
         });
       } catch (navErr) {
         console.warn("Router navigate failed, falling back to window.location:", navErr);
         window.location.assign(
-          `/list-property/wizard?propertyType=${encodeURIComponent(propertyType)}&intent=${encodeURIComponent(intent)}`,
+          `/list-property/wizard?propertyType=${encodeURIComponent(propertyType)}&intent=${encodeURIComponent(intent)}&city=${encodeURIComponent(city)}&locality=${encodeURIComponent(locality)}&prefilled=true&step=2`,
         );
       }
     } catch (err) {
