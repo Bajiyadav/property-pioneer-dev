@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   SEEDHA_SYSTEM_PROMPT,
   retrieveDynamicContext,
@@ -6,6 +6,32 @@ import {
 } from "@/modules/interactions/services/geminiService";
 
 describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: "You can list your apartment directly on Seedha Properties with 0% brokerage and connect with verified tenants.",
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("includes 0% brokerage and direct-owner domain knowledge in system prompt", () => {
     expect(SEEDHA_SYSTEM_PROMPT).toContain("0% Brokerage");
     expect(SEEDHA_SYSTEM_PROMPT).toContain("Direct-Owner");
@@ -25,7 +51,7 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
     expect(brokerageContext).toContain("Brokerage Policy Context");
   });
 
-  it("handles listing inquiries with direct owner guidance", { timeout: 30000 }, async () => {
+  it("handles listing inquiries with direct owner guidance", async () => {
     const response = await askSeedhaAI("How do I list my apartment for rent?");
     expect(response.length).toBeGreaterThan(20);
     expect(
@@ -36,7 +62,7 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
     ).toBe(true);
   });
 
-  it("answers zero-brokerage questions clearly", { timeout: 30000 }, async () => {
+  it("answers zero-brokerage questions clearly", async () => {
     const response = await askSeedhaAI("Is there any brokerage or commission fee?");
     expect(
       response.toLowerCase().includes("0%") ||
