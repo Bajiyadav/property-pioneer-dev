@@ -1,3 +1,9 @@
+## v0.29.5 — 2026-08-19
+
+### Fixes
+- fix(mobile): resolve RenderFlex overflow with hasScrollBody false (0c665c2)
+- fix(mobile): use explicit publicPropertyColumns to avoid 42501 permission denied (f7a4cb9)
+
 ## v0.29.4 — 2026-08-19
 
 ### Fixes
