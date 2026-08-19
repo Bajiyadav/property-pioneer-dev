@@ -25,7 +25,7 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
     expect(brokerageContext).toContain("Brokerage Policy Context");
   });
 
-  it("handles listing inquiries with direct owner guidance", { timeout: 15000 }, async () => {
+  it("handles listing inquiries with direct owner guidance", { timeout: 30000 }, async () => {
     const response = await askSeedhaAI("How do I list my apartment for rent?");
     expect(response.length).toBeGreaterThan(20);
     expect(
@@ -36,7 +36,7 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
     ).toBe(true);
   });
 
-  it("answers zero-brokerage questions clearly", { timeout: 15000 }, async () => {
+  it("answers zero-brokerage questions clearly", { timeout: 30000 }, async () => {
     const response = await askSeedhaAI("Is there any brokerage or commission fee?");
     expect(
       response.toLowerCase().includes("0%") ||
