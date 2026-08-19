@@ -67,7 +67,7 @@ import {
 } from "@/modules/customer/components/CustomerDashboardParts";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
 import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
-import { TenantProfileView } from "@/modules/tenant/components/TenantProfile";
+import { TenantProfile } from "@/modules/tenant/components/TenantProfile";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -574,7 +574,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
         </div>
       )}
 
-      {activeTab === "tenant-matches" && <TenantProfileView />}
+      {activeTab === "tenant-matches" && <TenantProfile />}
 
       {activeTab === "settings" && <SettingsPanel user={user} />}
     </DashboardLayout>

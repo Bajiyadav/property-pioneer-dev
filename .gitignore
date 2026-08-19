@@ -50,3 +50,4 @@ test-results/
 
 # Supabase CLI cache (project ref, CLI version) — not source.
 supabase/.temp/
+.claude-code-history

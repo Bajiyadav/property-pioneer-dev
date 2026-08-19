@@ -55,7 +55,7 @@ export function CityExpansionModal({
 
   return (
     <>
-      <Dialog open={Boolean(data)} onOpenChange={(open) => !open && onClose()}>
+      <Dialog open={Boolean(data)} onOpenChange={(open: boolean) => !open && onClose()}>
         <DialogContent className="sm:max-w-xl bg-card border-border p-6 rounded-3xl shadow-2xl">
           <DialogHeader>
             <div className="flex items-center justify-between">

@@ -1,0 +1,11 @@
+schema-version: v1.0
+sast:
+  use-rulesets:
+    - tsx-react
+    - typescript-best-practices
+    - typescript-browser-security
+    - typescript-code-style
+    - typescript-common-security
+    - typescript-express
+    - typescript-inclusive
+    - typescript-node-security

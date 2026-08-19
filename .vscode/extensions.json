@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ltex-plus.ltex-plus",
+    "valentjn.vscode-ltex",
+    "unifiedjs.vscode-mdx",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
+  ]
+}

@@ -47,7 +47,7 @@ export function ReportListingModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(val) => !val && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(val: boolean) => !val && onClose()}>
       <DialogContent className="max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl">
         <DialogHeader>
           <div className="flex items-center gap-2">

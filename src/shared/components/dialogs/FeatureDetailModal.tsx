@@ -50,7 +50,7 @@ export function FeatureDetailModal({
   const Icon = detail.icon;
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open: boolean) => !open && onClose()}>
       <DialogContent className="max-h-[85vh] gap-0 overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-2xl sm:max-w-lg">
         <DialogHeader className="text-left">
           <div className="flex items-start justify-between gap-3">

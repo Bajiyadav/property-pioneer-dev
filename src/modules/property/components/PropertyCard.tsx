@@ -25,12 +25,14 @@ import {
   PropertyImageBranding,
   DEFAULT_PROPERTY_COVER,
 } from "@/shared/components/PropertyImageBranding";
+import { InquiryPhoneModal } from "@/modules/tenant/components/InquiryPhoneModal";
 
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
   const saved = has(property.id);
   const [copied, setCopied] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const images =
     Array.isArray(property.images) && property.images.length > 0
@@ -313,16 +315,26 @@ export function PropertyCard({ property }: { property: Property }) {
           <span className="text-[10px] font-bold text-muted-foreground bg-secondary/30 px-2.5 py-1.5 rounded-lg border border-border/20">
             Direct Owner Listing
           </span>
-          <Link
-            to="/properties/$id"
-            params={{ id: generatePropertySlug(property) }}
-            className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4.5 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4.5 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0 cursor-pointer"
           >
             <span>Get Owner Details</span>
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-          </Link>
+          </button>
         </div>
       </div>
+      <InquiryPhoneModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        propertyId={property.id}
+        propertyTitle={property.title || "Property in Hyderabad"}
+      />
     </div>
   );
 }

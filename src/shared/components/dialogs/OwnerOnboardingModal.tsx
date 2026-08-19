@@ -200,7 +200,7 @@ export function OwnerOnboardingModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <DialogContent className="sm:max-w-4xl bg-card border-border p-0 overflow-hidden rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh]">
         <div className="p-6 md:p-8 overflow-y-auto flex-1 custom-scrollbar">
           <DialogHeader className="mb-6">

@@ -7,6 +7,7 @@ import { PropertyMapView } from "@/modules/property/components/PropertyMapView";
 import { LocationPicker } from "@/modules/property/components/LocationPicker";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
 import { trackSearch } from "@/modules/analytics/services/tracking";
+import { OptionalPreferencesCard } from "@/modules/tenant/components/OptionalPreferencesCard";
 
 interface SearchUIProps {
   properties: Property[];
@@ -568,6 +569,7 @@ export function SearchUI({
             </div>
           ) : viewMode === "grid" ? (
             <div className="space-y-6">
+              <OptionalPreferencesCard />
               <div className="flex flex-col gap-6">
                 {properties.map((p) => (
                   <PropertyCard key={p.id} property={p} />

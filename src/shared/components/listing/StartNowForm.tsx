@@ -15,8 +15,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
-import { LocationSelector } from "./LocationSelector";
-import { LocationIndexData } from "./LocationIndexData";
 
 export interface StartNowFormProps {
   className?: string;
@@ -39,9 +37,6 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
 
   const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
   const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
-  const [city, setCity] = useState("Hyderabad");
-  const [locality, setLocality] = useState("Madhapur");
-  const [showLocationData, setShowLocationData] = useState(true);
   const [phone, setPhone] = useState(user?.phone || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +49,6 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
     if (isLoading) return;
 
     console.log("✅ [StartNowForm] START NOW clicked:", {
-      city,
-      locality,
       propertyType,
       intent,
       phone,
@@ -83,8 +76,6 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
           sessionStorage.setItem(LISTING_PHONE_KEY, cleanPhone);
         }
         const prefillPayload = {
-          city,
-          locality,
           property_type: propertyType === "Commercial" ? "Office" : "Apartment",
           listing_type: intent.toLowerCase() === "sell" ? "sale" : "rent",
           propertyType,
@@ -105,9 +96,9 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
         onSuccess();
       }
 
-      // 4. Navigate smoothly to the 6-step listing wizard pre-filled with location (jumping directly to step 2)
-      toast.success(`Starting listing in ${locality}, ${city}!`, {
-        description: "Pre-filled location. Continuing to Property Details (Step 2/6).",
+      // 4. Navigate smoothly to the 6-step listing wizard
+      toast.success(`Starting your listing!`, {
+        description: "Continuing to Property Details.",
       });
 
       try {
@@ -116,16 +107,12 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
           search: {
             propertyType,
             intent,
-            city,
-            locality,
-            prefilled: true,
-            step: 2,
           },
         });
       } catch (navErr) {
         console.warn("Router navigate failed, falling back to window.location:", navErr);
         window.location.assign(
-          `/list-property/wizard?propertyType=${encodeURIComponent(propertyType)}&intent=${encodeURIComponent(intent)}&city=${encodeURIComponent(city)}&locality=${encodeURIComponent(locality)}&prefilled=true&step=2`,
+          `/list-property/wizard?propertyType=${encodeURIComponent(propertyType)}&intent=${encodeURIComponent(intent)}`,
         );
       }
     } catch (err) {
@@ -176,7 +163,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             <div className="flex items-center gap-2 pt-0.5">
               <div className="flex-1 h-px bg-border/80" />
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
-                OR CONTINUE WITH LOCATION BELOW
+                OR CONTINUE BELOW
               </span>
               <div className="flex-1 h-px bg-border/80" />
             </div>
@@ -239,31 +226,6 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             </div>
           </div>
 
-          {/* Step 2: Location Selector */}
-          <div className="pt-1 border-t border-border/60">
-            <LocationSelector
-              selectedCity={city}
-              selectedLocality={locality}
-              onCityChange={(c) => {
-                setCity(c);
-                if (c === "Hyderabad") setLocality("Madhapur");
-                else if (c === "Bengaluru") setLocality("Indiranagar");
-                else if (c === "Mumbai") setLocality("Powai");
-                else if (c === "Pune") setLocality("Hinjewadi");
-                else setLocality("Central");
-              }}
-              onLocalityChange={(l) => setLocality(l)}
-            />
-          </div>
-
-          {/* Step 3: Location Indexed Market Intelligence Preview */}
-          {locality && (
-            <div className="pt-1">
-              <LocationIndexData city={city} locality={locality} />
-            </div>
-          )}
-
-          {/* Step 4: Optional Phone Input */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label
@@ -292,7 +254,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             />
             <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              Direct WhatsApp & verified buyer connections in {locality}, {city}.
+              Direct WhatsApp & verified buyer connections.
             </p>
           </div>
 
@@ -321,7 +283,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 text-amber-300 animate-pulse" />
-                  <span>START NOW — FREE IN {locality.toUpperCase()}</span>
+                  <span>START NOW — FREE</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}

@@ -79,7 +79,7 @@ export function ScheduleVisitModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && close()}>
       <DialogContent className="sm:max-w-md bg-card border-border p-6 rounded-3xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-foreground">
