@@ -1,3 +1,8 @@
+## v0.35.0 — 2026-08-19
+
+### Features
+- feat(plans): introduce low-cost assisted seeker plans starting at ₹199 with FAQs and live chat (e6fbfa3)
+
 ## v0.34.1 — 2026-08-19
 
 ### Fixes
