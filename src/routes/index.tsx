@@ -73,7 +73,7 @@ function Index() {
     e.preventDefault();
     navigate({
       to: "/properties",
-      search: { q, city: "Hyderabad", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 },
+      search: { q, city: "", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 },
     });
   };
 

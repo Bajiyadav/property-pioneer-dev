@@ -2,11 +2,21 @@ import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
-import { MapPin, Search, Navigation, Building, Check } from "lucide-react";
+import { MapPin, Search, Navigation, Building, Check, Globe } from "lucide-react";
 import type { StepProps } from "../types";
 
-export function Step1Location({ data, updateData }: StepProps) {
-  const popularLocalities = [
+const MAJOR_METROS = [
+  "Hyderabad",
+  "Bengaluru",
+  "Mumbai",
+  "Delhi NCR",
+  "Chennai",
+  "Pune",
+  "Kolkata",
+];
+
+const CITY_LOCALITIES: Record<string, string[]> = {
+  Hyderabad: [
     "Gachibowli",
     "Madhapur",
     "Kondapur",
@@ -15,7 +25,43 @@ export function Step1Location({ data, updateData }: StepProps) {
     "Kokapet",
     "Jubilee Hills",
     "Banjara Hills",
-  ];
+  ],
+  Bengaluru: [
+    "Whitefield",
+    "Indiranagar",
+    "Koramangala",
+    "HSR Layout",
+    "Bellandur",
+    "Electronic City",
+    "JP Nagar",
+    "Hebbal",
+  ],
+  Mumbai: [
+    "Andheri West",
+    "Bandra West",
+    "Powai",
+    "Juhu",
+    "Worli",
+    "Thane West",
+    "Kandivali East",
+    "Navi Mumbai",
+  ],
+  "Delhi NCR": [
+    "Gurugram DLF",
+    "Golf Course Road",
+    "Noida Sector 62",
+    "South Extension",
+    "Vasant Kunj",
+    "Dwarka",
+  ],
+  Chennai: ["OMR", "Adyar", "Anna Nagar", "Velachery", "T. Nagar", "Thiruvanmiyur", "Besant Nagar"],
+  Pune: ["Kothrud", "Viman Nagar", "Hinjewadi", "Baner", "Wakad", "Kalyani Nagar", "Hadapsar"],
+  Kolkata: ["New Town", "Salt Lake Sector V", "Ballygunge", "Alipore", "Park Street", "Rajarhat"],
+};
+
+export function Step1Location({ data, updateData }: StepProps) {
+  const currentCity = data.city || "Hyderabad";
+  const popularLocalities = CITY_LOCALITIES[currentCity] || CITY_LOCALITIES["Hyderabad"];
 
   return (
     <div className="space-y-8">
@@ -112,6 +158,27 @@ export function Step1Location({ data, updateData }: StepProps) {
                 updateData({ pincode: e.target.value })
               }
             />
+          </div>
+
+          {/* Quick Metro Chips */}
+          <div className="col-span-2 flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[11px] text-muted-foreground font-medium mr-1 flex items-center gap-1">
+              <Globe className="h-3 w-3 text-primary" /> Top Metros:
+            </span>
+            {MAJOR_METROS.map((metro) => (
+              <button
+                key={metro}
+                type="button"
+                onClick={() => updateData({ city: metro, locality: "" })}
+                className={`text-[11px] rounded-lg px-2.5 py-1 font-semibold transition border cursor-pointer ${
+                  (data.city || "Hyderabad") === metro
+                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                    : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border-border/60"
+                }`}
+              >
+                {metro}
+              </button>
+            ))}
           </div>
         </div>
 

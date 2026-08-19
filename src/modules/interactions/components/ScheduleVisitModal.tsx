@@ -40,6 +40,19 @@ export function ScheduleVisitModal({
       mode: visitMode,
       when: `${format(selectedDate, "MMM d, yyyy")} · ${selectedTime}`,
     });
+
+    void fetch(`/api/public/properties/${propertyId}/schedule-visit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        preferredDate: format(selectedDate, "yyyy-MM-dd"),
+        preferredTime: selectedTime,
+        mode: visitMode,
+      }),
+    }).catch(() => {
+      // Background audit logging error fallback
+    });
+
     setIsSuccess(true);
   };
 
