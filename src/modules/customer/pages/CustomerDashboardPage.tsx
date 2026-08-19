@@ -67,9 +67,11 @@ import {
 } from "@/modules/customer/components/CustomerDashboardParts";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
 import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
+import { TenantProfileView } from "@/modules/tenant/components/TenantProfile";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "tenant-matches", label: "AI Matches", icon: Sparkles },
   { id: "profile", label: "Profile", icon: UserCircle },
   { id: "saved", label: "Saved Properties", icon: Heart },
   { id: "searches", label: "Recent Searches", icon: History },
@@ -571,6 +573,8 @@ function CustomerDashboard({ user }: { user: User | null }) {
           <ChatInterface currentUserId={user?.id || ""} role="tenant" chats={myChats} />
         </div>
       )}
+
+      {activeTab === "tenant-matches" && <TenantProfileView />}
 
       {activeTab === "settings" && <SettingsPanel user={user} />}
     </DashboardLayout>

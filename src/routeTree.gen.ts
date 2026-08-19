@@ -20,6 +20,8 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PlansRouteImport } from './routes/plans'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
@@ -35,6 +37,8 @@ import { Route as ListPropertyWizardRouteImport } from './routes/list-property.w
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as RentIndexRouteImport } from './routes/rent.index'
+import { Route as TenantMatchesRouteImport } from './routes/tenant.matches'
+import { Route as TenantOnboardingRouteImport } from './routes/tenant.onboarding'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated/admin/access'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin/activity'
@@ -114,6 +118,16 @@ const NotificationsRoute = NotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
@@ -187,6 +201,16 @@ const PropertiesIdRoute = PropertiesIdRouteImport.update({
 const RentIndexRoute = RentIndexRouteImport.update({
   id: '/rent/',
   path: '/rent/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantMatchesRoute = TenantMatchesRouteImport.update({
+  id: '/tenant/matches',
+  path: '/tenant/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantOnboardingRoute = TenantOnboardingRouteImport.update({
+  id: '/tenant/onboarding',
+  path: '/tenant/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -336,6 +360,8 @@ export interface FileRoutesByFullPath {
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
+  '/plans': typeof PlansRoute
+  '/pricing': typeof PricingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
@@ -347,6 +373,8 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/tenant/matches': typeof TenantMatchesRoute
+  '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
   '/commercial/': typeof CommercialIndexRoute
   '/properties/': typeof PropertiesIndexRoute
@@ -387,6 +415,8 @@ export interface FileRoutesByTo {
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
+  '/plans': typeof PlansRoute
+  '/pricing': typeof PricingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -395,6 +425,8 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/tenant/matches': typeof TenantMatchesRoute
+  '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy': typeof BuyIndexRoute
   '/commercial': typeof CommercialIndexRoute
   '/properties': typeof PropertiesIndexRoute
@@ -437,6 +469,8 @@ export interface FileRoutesById {
   '/help': typeof HelpRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
+  '/plans': typeof PlansRoute
+  '/pricing': typeof PricingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
@@ -448,6 +482,8 @@ export interface FileRoutesById {
   '/auth_/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/tenant/matches': typeof TenantMatchesRoute
+  '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
   '/commercial/': typeof CommercialIndexRoute
   '/properties/': typeof PropertiesIndexRoute
@@ -490,6 +526,8 @@ export interface FileRouteTypes {
     | '/help'
     | '/list-property'
     | '/notifications'
+    | '/plans'
+    | '/pricing'
     | '/privacy-policy'
     | '/profile'
     | '/properties'
@@ -501,6 +539,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/tenant/matches'
+    | '/tenant/onboarding'
     | '/buy/'
     | '/commercial/'
     | '/properties/'
@@ -541,6 +581,8 @@ export interface FileRouteTypes {
     | '/help'
     | '/list-property'
     | '/notifications'
+    | '/plans'
+    | '/pricing'
     | '/privacy-policy'
     | '/profile'
     | '/refund-policy'
@@ -549,6 +591,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/tenant/matches'
+    | '/tenant/onboarding'
     | '/buy'
     | '/commercial'
     | '/properties'
@@ -590,6 +634,8 @@ export interface FileRouteTypes {
     | '/help'
     | '/list-property'
     | '/notifications'
+    | '/plans'
+    | '/pricing'
     | '/privacy-policy'
     | '/profile'
     | '/properties'
@@ -601,6 +647,8 @@ export interface FileRouteTypes {
     | '/auth_/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/tenant/matches'
+    | '/tenant/onboarding'
     | '/buy/'
     | '/commercial/'
     | '/properties/'
@@ -643,6 +691,8 @@ export interface RootRouteChildren {
   HelpRoute: typeof HelpRoute
   ListPropertyRoute: typeof ListPropertyRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
+  PlansRoute: typeof PlansRoute
+  PricingRoute: typeof PricingRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
@@ -650,6 +700,8 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  TenantMatchesRoute: typeof TenantMatchesRoute
+  TenantOnboardingRoute: typeof TenantOnboardingRoute
   BuyIndexRoute: typeof BuyIndexRoute
   CommercialIndexRoute: typeof CommercialIndexRoute
   RentIndexRoute: typeof RentIndexRoute
@@ -745,6 +797,20 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy-policy': {
@@ -850,6 +916,20 @@ declare module '@tanstack/react-router' {
       path: '/rent'
       fullPath: '/rent/'
       preLoaderRoute: typeof RentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenant/matches': {
+      id: '/tenant/matches'
+      path: '/tenant/matches'
+      fullPath: '/tenant/matches'
+      preLoaderRoute: typeof TenantMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenant/onboarding': {
+      id: '/tenant/onboarding'
+      path: '/tenant/onboarding'
+      fullPath: '/tenant/onboarding'
+      preLoaderRoute: typeof TenantOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
@@ -1120,6 +1200,8 @@ const rootRouteChildren: RootRouteChildren = {
   HelpRoute: HelpRoute,
   ListPropertyRoute: ListPropertyRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
+  PlansRoute: PlansRoute,
+  PricingRoute: PricingRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
@@ -1127,6 +1209,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  TenantMatchesRoute: TenantMatchesRoute,
+  TenantOnboardingRoute: TenantOnboardingRoute,
   BuyIndexRoute: BuyIndexRoute,
   CommercialIndexRoute: CommercialIndexRoute,
   RentIndexRoute: RentIndexRoute,
