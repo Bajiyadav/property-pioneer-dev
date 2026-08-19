@@ -1,3 +1,13 @@
+## v0.34.0 — 2026-08-19
+
+### Features
+- feat(location): introduce location-first sign-up flow with real-time indexed locality data (dd14e48)
+
+### Migration notes
+- supabase/migrations/20260820000000_create_localities_table.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.33.1 — 2026-08-19
 
 ### Fixes
