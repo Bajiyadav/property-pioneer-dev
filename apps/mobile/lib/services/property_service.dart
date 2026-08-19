@@ -6,6 +6,9 @@ import 'supabase_service.dart';
 class PropertyService {
   final SupabaseClient _client;
 
+  static const String publicPropertyColumns =
+      'id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,locality,landmark,metro_station,it_park,hospital,college,video_url,video_status,total_floors,exact_floor,balconies,pincode,facing,available_from,rent_negotiable';
+
   PropertyService([SupabaseClient? client])
       : _client = client ?? SupabaseService.client;
 
@@ -27,7 +30,7 @@ class PropertyService {
     try {
       var query = _client
           .from('properties')
-          .select()
+          .select(publicPropertyColumns)
           .or('status.eq.available,status.eq.Available,status.is.null');
 
       // Category filter
@@ -164,7 +167,7 @@ class PropertyService {
     try {
       final response = await _client
           .from('properties')
-          .select()
+          .select(publicPropertyColumns)
           .eq('id', id)
           .maybeSingle();
 
@@ -180,7 +183,7 @@ class PropertyService {
     try {
       final response = await _client
           .from('properties')
-          .select()
+          .select(publicPropertyColumns)
           .eq('status', 'available')
           .eq('listing_type', current.listingType)
           .neq('id', current.id)

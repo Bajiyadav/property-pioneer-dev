@@ -51,11 +51,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[HomeScreen] Error loading properties: $e\n$st');
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Unable to connect to the database. Please check your network and retry.';
+          _errorMessage = 'Unable to connect to the database ($e). Please retry.';
         });
       }
     }
