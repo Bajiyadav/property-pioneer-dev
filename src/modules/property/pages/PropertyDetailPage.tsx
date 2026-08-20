@@ -95,6 +95,7 @@ export function PropertyDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [authGateOpen, setAuthGateOpen] = useState(false);
   const [emiOpen, setEmiOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -655,15 +656,25 @@ export function PropertyDetailPage() {
               <div className="p-4 flex gap-3 border-t border-border/60 border-dashed bg-secondary/5">
                 <button
                   onClick={() => {
+                    if (!user) {
+                      setAuthGateOpen(true);
+                      toast.info("Sign in to unlock direct owner contact without brokerage");
+                      return;
+                    }
                     if (hasAccess) setEnquiryOpen(true);
                     else setCustomerPlansOpen(true);
                   }}
                   className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
                 >
-                  Contact
+                  Contact Owner
                 </button>
                 <button
                   onClick={() => {
+                    if (!user) {
+                      setAuthGateOpen(true);
+                      toast.info("Sign in to unlock direct owner contact without brokerage");
+                      return;
+                    }
                     if (hasAccess) setScheduleOpen(true);
                     else setCustomerPlansOpen(true);
                   }}
@@ -728,6 +739,31 @@ export function PropertyDetailPage() {
           onClose={() => setReportOpen(false)}
           propertyTitle={property.title}
         />
+
+        <Dialog open={authGateOpen} onOpenChange={setAuthGateOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-foreground">
+                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                Sign in to unlock direct owner contact
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground pt-1">
+                SEEDHA Properties delivers 100% direct owner listings with 0% brokerage. Sign in or
+                create an account to view verified phone and WhatsApp details.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 pt-3">
+              <Link
+                to="/auth"
+                search={{ redirect: `/properties/${slugOrId}` }}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-md hover:bg-primary/90 transition-all"
+              >
+                Sign In / Register Account
+              </Link>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={customerPlansOpen} onOpenChange={setCustomerPlansOpen}>
           <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-transparent shadow-none">

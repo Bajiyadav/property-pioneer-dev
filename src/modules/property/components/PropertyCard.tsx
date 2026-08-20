@@ -320,6 +320,12 @@ export function PropertyCard({ property }: { property: Property }) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (typeof window !== "undefined" && !localStorage.getItem("supabase.auth.token")) {
+                toast.info("Sign in to unlock direct owner contact without brokerage", {
+                  description: "0% Brokerage — connect directly with verified owners upon login.",
+                  duration: 4000,
+                });
+              }
               setIsModalOpen(true);
             }}
             className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4.5 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0 cursor-pointer"

@@ -33,29 +33,54 @@ export function UserTable({ users }: { users: PlatformUser[] }) {
       columns={[
         {
           key: "name",
-          header: "User",
+          header: "User & Details",
           render: (u: PlatformUser) => (
             <div>
-              <p className="font-bold text-foreground">{u.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-foreground">{u.name}</p>
+                {u.role === "Owner" && (
+                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600 border border-emerald-500/20">
+                    Verified Owner
+                  </span>
+                )}
+                {u.role === "Agent" && (
+                  <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-bold text-blue-600 border border-blue-500/20">
+                    RERA Agent
+                  </span>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground">{u.email}</p>
             </div>
           ),
         },
         {
           key: "role",
-          header: "Role",
-          render: (u: PlatformUser) => <StatusPill label={u.role} tone="info" />,
+          header: "Role Category",
+          render: (u: PlatformUser) => (
+            <StatusPill
+              label={u.role}
+              tone={
+                u.role === "Admin"
+                  ? "danger"
+                  : u.role === "Owner"
+                    ? "success"
+                    : u.role === "Agent"
+                      ? "info"
+                      : "neutral"
+              }
+            />
+          ),
         },
         {
           key: "joined",
-          header: "Joined",
+          header: "Joined Date",
           render: (u: PlatformUser) => (
-            <span className="whitespace-nowrap text-muted-foreground">{u.joined}</span>
+            <span className="whitespace-nowrap text-muted-foreground text-xs">{u.joined}</span>
           ),
         },
         {
           key: "status",
-          header: "Status",
+          header: "Account Status",
           className: "text-right",
           render: (u: PlatformUser) => (
             <StatusPill

@@ -297,3 +297,106 @@ export const getAdminUsers = createServerFn({ method: "GET" })
       };
     });
   });
+
+export type JobApplication = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  position: string;
+  experience: string;
+  resume_url: string;
+  notes?: string;
+  status: "Pending" | "Shortlisted" | "Rejected";
+  created_at: string;
+};
+
+const INITIAL_JOB_APPLICATIONS: JobApplication[] = [
+  {
+    id: "app-1",
+    name: "Rajesh Varma",
+    email: "rajesh.v@gmail.com",
+    phone: "+919849012345",
+    position: "Lead Full-Stack / Mobile Engineer (Flutter & React)",
+    experience: "4 years",
+    resume_url: "https://linkedin.com/in/rajesh-varma-dev",
+    notes: "Expertise in TanStack Start, Flutter, and PostgreSQL.",
+    status: "Shortlisted",
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+  },
+  {
+    id: "app-2",
+    name: "Ananya Sharma",
+    email: "ananya.s@techhyderabad.in",
+    phone: "+919701234567",
+    position: "Growth & Community Marketing Lead",
+    experience: "3 years",
+    resume_url: "https://linkedin.com/in/ananya-sharma-marketing",
+    notes: "Led growth campaigns in Hitech City and Financial District.",
+    status: "Pending",
+    created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
+  },
+  {
+    id: "app-3",
+    name: "Kiran Kumar",
+    email: "kiran.k@gmail.com",
+    phone: "+919123456789",
+    position: "Property Verification & Operations Specialist",
+    experience: "2 years",
+    resume_url: "https://drive.google.com/file/d/sample-resume",
+    notes: "Field ops experience across Gachibowli and Kondapur.",
+    status: "Pending",
+    created_at: new Date().toISOString(),
+  },
+];
+
+export function getStoredJobApplications(): JobApplication[] {
+  if (typeof window === "undefined") return INITIAL_JOB_APPLICATIONS;
+  try {
+    const raw = localStorage.getItem("sp_job_applications");
+    if (!raw) {
+      localStorage.setItem("sp_job_applications", JSON.stringify(INITIAL_JOB_APPLICATIONS));
+      return INITIAL_JOB_APPLICATIONS;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return INITIAL_JOB_APPLICATIONS;
+  }
+}
+
+export function saveJobApplication(
+  app: Omit<JobApplication, "id" | "created_at" | "status">,
+): JobApplication {
+  const current = getStoredJobApplications();
+  const newApp: JobApplication = {
+    ...app,
+    id: `app-${Date.now()}`,
+    status: "Pending",
+    created_at: new Date().toISOString(),
+  };
+  const updated = [newApp, ...current];
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("sp_job_applications", JSON.stringify(updated));
+    } catch {
+      /* fallback */
+    }
+  }
+  return newApp;
+}
+
+export function updateStoredJobApplicationStatus(
+  id: string,
+  status: "Pending" | "Shortlisted" | "Rejected",
+): JobApplication[] {
+  const current = getStoredJobApplications();
+  const updated = current.map((item) => (item.id === id ? { ...item, status } : item));
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("sp_job_applications", JSON.stringify(updated));
+    } catch {
+      /* fallback */
+    }
+  }
+  return updated;
+}

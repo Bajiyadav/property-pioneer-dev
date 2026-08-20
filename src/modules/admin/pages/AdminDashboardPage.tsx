@@ -9,6 +9,7 @@ import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
+  Briefcase,
   Building2,
   CheckSquare,
   DollarSign,
@@ -58,6 +59,9 @@ import {
   updateAdminProperty,
   getAdminUsers,
   getAdminAuditLogs,
+  getStoredJobApplications,
+  updateStoredJobApplicationStatus,
+  type JobApplication,
   type PlatformUser,
 } from "@/modules/admin/services/adminFunctions";
 import { displayName } from "@/modules/authentication/services/session";
@@ -83,6 +87,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "approvals", label: "Pending Approvals", icon: CheckSquare },
   { id: "verification", label: "Verification Queue", icon: ShieldCheck },
   { id: "applications", label: "Agent Applications", icon: UserCheck },
+  { id: "job_applications", label: "Job Applications", icon: Briefcase },
   { id: "reports", label: "Reports", icon: FileBarChart },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "audit", label: "Audit Logs", icon: ScrollText },
@@ -798,6 +803,8 @@ function AdminDashboard({ user }: { user: User | null }) {
         </div>
       )}
 
+      {activeTab === "job_applications" && <JobApplicationsView />}
+
       {activeTab === "reports" && (
         <div className="space-y-6">
           <SectionHeader title="Platform reports" subtitle="Revenue, supply, and demand" />
@@ -963,5 +970,151 @@ function AdminDashboard({ user }: { user: User | null }) {
         </div>
       )}
     </DashboardLayout>
+  );
+}
+
+function JobApplicationsView() {
+  const [apps, setApps] = useState<JobApplication[]>(() => getStoredJobApplications());
+  const [statusFilter, setStatusFilter] = useState<"all" | "Pending" | "Shortlisted" | "Rejected">(
+    "all",
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleUpdateStatus = (id: string, newStatus: "Pending" | "Shortlisted" | "Rejected") => {
+    const updated = updateStoredJobApplicationStatus(id, newStatus);
+    setApps(updated);
+    toast.success(`Application marked as ${newStatus}`);
+  };
+
+  const filtered = apps.filter((app) => {
+    const matchesStatus = statusFilter === "all" || app.status === statusFilter;
+    const matchesSearch =
+      app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.position.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title={`Job Applications (${filtered.length})`}
+        subtitle="Manage candidate profiles submitted via Careers page"
+        action={
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search candidate name, email, or role..."
+          />
+        }
+      />
+
+      <FilterChips
+        active={statusFilter}
+        onChange={(val) => setStatusFilter(val as "all" | "Pending" | "Shortlisted" | "Rejected")}
+        options={[
+          { id: "all", label: `All (${apps.length})` },
+          {
+            id: "Pending",
+            label: `Pending (${apps.filter((a) => a.status === "Pending").length})`,
+          },
+          {
+            id: "Shortlisted",
+            label: `Shortlisted (${apps.filter((a) => a.status === "Shortlisted").length})`,
+          },
+          {
+            id: "Rejected",
+            label: `Rejected (${apps.filter((a) => a.status === "Rejected").length})`,
+          },
+        ]}
+      />
+
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<Briefcase className="h-6 w-6" />}
+          title="No applications found"
+          hint="Candidate applications submitted via /careers will land here."
+        />
+      ) : (
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-border/60 bg-secondary/30 text-muted-foreground uppercase font-bold tracking-wider">
+                <tr>
+                  <th className="px-5 py-3.5">Candidate</th>
+                  <th className="px-5 py-3.5">Position Applied</th>
+                  <th className="px-5 py-3.5">Experience</th>
+                  <th className="px-5 py-3.5">Applied Date</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40 font-medium">
+                {filtered.map((app) => (
+                  <tr key={app.id} className="hover:bg-secondary/10 transition-colors">
+                    <td className="px-5 py-4">
+                      <p className="font-bold text-foreground text-sm">{app.name}</p>
+                      <p className="text-muted-foreground text-[11px]">
+                        {app.email} • {app.phone}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 font-bold text-primary max-w-xs truncate">
+                      {app.position}
+                    </td>
+                    <td className="px-5 py-4 text-foreground">{app.experience}</td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {relativeTime(app.created_at)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                          app.status === "Shortlisted"
+                            ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                            : app.status === "Rejected"
+                              ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                        }`}
+                      >
+                        {app.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {app.resume_url && (
+                          <a
+                            href={app.resume_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-bold text-foreground hover:bg-secondary transition"
+                          >
+                            Resume ↗
+                          </a>
+                        )}
+                        {app.status !== "Shortlisted" && (
+                          <button
+                            onClick={() => handleUpdateStatus(app.id, "Shortlisted")}
+                            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-2.5 py-1.5 text-[11px] font-bold text-white transition"
+                          >
+                            Shortlist
+                          </button>
+                        )}
+                        {app.status !== "Rejected" && (
+                          <button
+                            onClick={() => handleUpdateStatus(app.id, "Rejected")}
+                            className="rounded-lg bg-rose-600 hover:bg-rose-500 px-2.5 py-1.5 text-[11px] font-bold text-white transition"
+                          >
+                            Reject
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
