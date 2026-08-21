@@ -1,3 +1,135 @@
+## v0.2.0 — 2026-08-21
+
+### Features
+- feat: list-property layout routing and wizard navigation fix (558460c)
+- feat: complete end-to-end audit and refactor for SEEDHA Properties (0ee254d)
+- feat(tenant): implement tenant registration, mandatory location matching, and commute metrics (1698ac5)
+- feat(wizard): pre-fill wizard from home page data and auto-skip location step 1 to step 2 (1e6408d)
+- feat(plans): introduce low-cost assisted seeker plans starting at ₹199 with FAQs and live chat (e6fbfa3)
+- feat(location): introduce location-first sign-up flow with real-time indexed locality data (dd14e48)
+- feat(ai): improve assistant training, remove powered by gemini label, and elevate branding (c91c081)
+- feat(marketplace): enable multi-metro location, search, and visit booking (76bab65)
+- feat(branding): replace logo and favicons with client 3D gold emblem across web and mobile (08ee023)
+- feat(core): implement admin route guard, server-side search pagination, and SQL aggregations (8f86c94)
+- feat(listing): add smart account recognition and 1-Click sign-in to Start Now card (505b20f)
+- feat(auth): integrate 1-Click Google Sign-In for Web and Flutter (62d4ac9)
+- feat(ai): enhance Gemini assistant with dynamic RAG context retrieval (13a3144)
+- feat(ai): integrate Google Gemini AI assistant for web and mobile (341c422)
+- feat(phase2): implement Owner KYC Verification and Free Commute Distance Service (dcd914e)
+- feat(chat): implement real-time in-app chat system across web and mobile (0c5c42c)
+- feat(notifications): add Meta WhatsApp Cloud API and Seedha brand templates (428b847)
+- feat(mobile): add SecurityUtils, createAccount auth helper, and scale config (b716022)
+- feat(listing): add mobile-first listing flow and fixed StartNowButton (2783bd8)
+- feat(mobile): production-ready India-wide Rent, Buy, Commercial app (d515ea6)
+- feat(brand): render official SEEDHA logo in watermarks and auth screens (b2dab4d)
+- feat(seo): update search engine favicons, PWA manifest, and Schema.org logo metadata (f07c82a)
+- feat(mobile): configure official app launcher icon and Pan-India links (cc40136)
+- feat(brand): expand Pan-India coverage and enhance official logo (5c4ac17)
+- feat(feedback): add interactive Studio Shodwe feedback banner and radiant Thank You modal (1b52d85)
+- feat(brand): update official SEEDHA Properties logo icon across web and mobile (c154d15)
+- feat(careers): add high-end Careers and Meet Our Founder page with Srinivasa Rao bio (6821ca1)
+- feat(marketing): apply clean editorial dream home styling without price gimmicks (06f6568)
+- feat(sync): enable realtime live sync stream between website and mobile app (e578022)
+- feat(mobile): add curated rental properties fallback and high-contrast chips (33059d5)
+- feat(ui): apply luxury architectural linen, espresso, and warm sunset background palette (9501fba)
+- feat(ui): elevate visual aesthetics, glassmorphism, and luxury card designs across web and mobile (d95fa1d)
+- feat(mobile): add 1-tap WhatsApp direct owner connect to property detail screen (5e41734)
+- feat(mobile): align Flutter app brand to SEEDHA Properties and sync API configuration (d049945)
+- feat: complete Docker orchestration, Cloudflare Turnstile, WhatsApp leads, and SEEDHA branding (5a698c7)
+- feat(auth): replace the password checklist with length-based strength (2d96ce7)
+- feat: complete SEO upgrades, Docker support, and mobile MVP (3b46e0e)
+- feat(listing): make the wizard actually save the listing (b147fe6)
+- feat(billing): owner assistance plans with Razorpay checkout (bc1ab40)
+- feat(listing): show owners what actually happens after they submit (73b759f)
+- feat(brand): rename the platform to Seedha Properties (cd8c8e2)
+- feat(admin): add region-based employee activity tracking (9fe8a84)
+- feat: update property specs and permissions (75853e5)
+- feat: update property specs and permissions (dfd7b38)
+- feat(privacy): consent-gated activity tracking, policy pages and data rights (61b6a98)
+
+### Fixes
+- fix: resolve migration timestamp collision and routing layout for list-property wizard (f06c1d6)
+- fix(types): resolve typescript and eslint errors blocking deployment (9c89d7e)
+- fix(listing): harden START NOW button with onClick handler and router fallback (b3396e5)
+- fix(listing): make START NOW button responsive, remove form validation blocker (9486b09)
+- fix(ui): eliminate mobile header overlap, remove tagline text, and make brand logo responsive (bb3c634)
+- fix(a11y): add aria-labels to hero filter radio buttons and remove duplicate body JSON-LD script (92189f8)
+- fix(security): separate admin stats module to preserve client/server import hygiene (6afa256)
+- fix(mobile): optimize property card image proportions and compact details layout (1c85f05)
+- fix(mobile): resolve RenderFlex overflow with hasScrollBody false (0c665c2)
+- fix(mobile): use explicit publicPropertyColumns to avoid 42501 permission denied (f7a4cb9)
+- fix(mobile): resolve type-casting in Property.fromJson and make category query filters resilient (cbfcf49)
+- fix(form): add name, autocomplete, prefill, and pointer cues to START NOW form (c1a4a29)
+- fix(router): configure safe parseSearch and stringifySearch to prevent JSON parser syntax error (6dd9e01)
+- fix(wizard): resolve JSON.parse syntax error on search params validation (8bdd44b)
+- fix(mobile): configure Android manifest permissions, OAuth deep links, and track native structure (11a3aa1)
+- fix(brand): update official logo asset and prevent brand text wrapping under logo on mobile (e62d568)
+- fix(mobile): configure Android-only launcher icon generation, disable iOS (4f8da39)
+- fix(mobile): configure android-only launcher icon generation (4a2489f)
+- fix(property): enforce data honesty and reliable public enquiry handling (98ddd2c)
+- fix(mobile): standardize package imports across all screens (16cbeca)
+- fix(mobile): make the Flutter app compile for the first time (4aac1dd)
+- fix(db): apply the migrations the CLI could not see (075b801)
+- fix(ci): use valid Java package namespace com.seedhaproperties for Android APK (500ba99)
+- fix(mobile): add asset folders and use Flutter native Gradle distribution (711231c)
+- fix(mobile): fix textAlign syntax and add widget test for SEEDHA Properties watermark (257c274)
+- fix(db): remove the duplicate entitlements table and define the missing trigger fn (59b0670)
+- fix(db): correct the admin check in the employee task policies (de4cea2)
+- fix(db): create employee helper functions in public, not the auth schema (7f75a52)
+- fix(property-card): remove the layout variant whose default broke every card (465941b)
+- fix(billing): stop an unpayable paywall blocking contact and visits (182fd5d)
+- fix(build): repair a broken main — dead imports, missing table, untyped payments (3d85ab6)
+- fix(seo,dashboards): repair the empty sitemap and restore a green build (958ed8b)
+- fix(seo): stop one missing column emptying the entire sitemap (57420ff)
+- fix(seo): require real depth before submitting a city or locality page (c31bb2f)
+- fix(seo): close four indexing defects found by auditing the live site (4d572ae)
+- fix(security): set the response headers that were missing (ec613bb)
+- fix(dashboards): stop presenting invented records as real data (0a93017)
+- fix(hero): show the photo at its own brightness instead of a dark wash (d5af2ba)
+- fix(property-card): stop truncate cutting the price off on desktop (41aecd7)
+- fix(property-card): stop the card clipping its own title, price and button (c8bd001)
+- fix(listing): store the owner's phone, so enquiries reach the owner (bab11b0)
+- fix(property-card): stop the price overflowing its column on mobile (4976668)
+- fix(brand): version the icon URLs so cached copies of the old logo refresh (c3fe820)
+- fix(build): pin engines.node back to an exact major (2395b85)
+- chore(deps): take the tooling bumps from PR #12 without its lockfile (cd587cd)
+- fix(seo): stop shipping two conflicting canonical tags on every inner page (b13ebf3)
+- fix(admin): commit the EmployeeAccessForm the dashboard imports (7d20bcd)
+- fix(ci): repair the lockfile and pin the npm major so `npm ci` stops drifting (edf1cdf)
+- fix(brand): replace the Lovable favicon, serve the OG image, correct env guidance (6d8289d)
+- fix(owner): restore owner-only isolation, and grant the role on first listing (6bebbf0)
+- fix: unbreak /admin, restore claim guards, align sitemap and stale tests (8b34145)
+- fix(home): drop unearned claims and name the unlabelled controls (de97efb)
+
+### Documentation
+- docs: expand README with architecture, API reference, roadmap, and troubleshooting (9c3a087)
+- docs: update README with pan-India marketplace architecture and status (0d1fa76)
+- docs: update TODO.md resolving completed bugs and tech debt (6bfcd0b)
+- docs(readme): rewrite to describe the project as it actually is (024c522)
+
+### Migration notes
+- supabase/migrations/20260817120000_add_customer_tracking.sql
+- supabase/migrations/20260817120100_storage_buckets_and_lead_routing_rbac.sql
+- supabase/migrations/20260817130000_employee_access_and_scoping.sql
+- supabase/migrations/20260817140000_add_critical_property_specs.sql
+- supabase/migrations/20260817140100_media_management_and_moderation.sql
+- supabase/migrations/20260817150000_employee_task_tracking.sql
+- supabase/migrations/20260818090000_add_customer_entitlements.sql
+- supabase/migrations/20260818120000_customer_payments.sql
+- supabase/migrations/20260818140000_recover_orphaned_property_columns.sql
+- supabase/migrations/20260818140100_recover_agent_workflow_tables.sql
+- supabase/migrations/20260819000000_create_messages_table.sql
+- supabase/migrations/20260819010000_create_kyc_system.sql
+- supabase/migrations/20260820000000_create_localities_table.sql
+- supabase/migrations/20260821000000_create_tenant_profiles_table.sql
+- supabase/migrations/20260822000000_create_search_sessions_table.sql
+- supabase/migrations/README.md
+- supabase/migrations/properties/20260815190000_add_extended_video_fields.sql
+- supabase/migrations/properties/20260816000000_add_property_visits_and_agent_leads.sql
+- supabase/migrations/users/20260816010000_add_agent_applications.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.37.1 — 2026-08-19
 
 ### Fixes
