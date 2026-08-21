@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Building2, Users } from "lucide-react";
+import { Building2, Users, Star, Download, Upload, CheckCircle2 } from "lucide-react";
 import { formatPrice, type Property } from "@/modules/property/services/propertyQueries";
 import {
   DataTable,
@@ -9,6 +11,9 @@ import {
   StatusPill,
 } from "@/modules/dashboard/components/DashboardKit";
 import type { PlatformUser } from "@/modules/admin/services/adminFunctions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 const DEFAULT_SEARCH_PARAMS = {
   q: "",
   city: "Hyderabad",
@@ -107,8 +112,46 @@ export function PropertyTable({
   isError: boolean;
   onRetry: () => void;
 }) {
+  const [featuredStates, setFeaturedStates] = useState<Record<string, boolean>>({});
+
   if (isLoading) return <LoadingSkeleton rows={4} />;
   if (isError) return <ErrorState onRetry={onRetry} />;
+
+  const toggleHighlight = async (propertyId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus;
+    setFeaturedStates((prev) => ({ ...prev, [propertyId]: newStatus }));
+
+    try {
+      const { error } = await (supabase.from as any)("properties")
+        .update({ is_featured: newStatus })
+        .eq("id", propertyId);
+
+      if (error) {
+        toast.error("Could not update feature status on Supabase.");
+        return;
+      }
+
+      toast.success(
+        newStatus
+          ? "Property Highlighted! Now featured on Home Page Hero."
+          : "Property unhighlighted.",
+      );
+    } catch {
+      toast.error("Failed to update status.");
+    }
+  };
+
+  const handleDownloadMedia = (p: Property) => {
+    const urls = p.images || [];
+    if (urls.length === 0) {
+      toast.error("No uploaded media found for this listing.");
+      return;
+    }
+    urls.forEach((url, i) => {
+      window.open(url, "_blank");
+    });
+    toast.success(`Opened ${urls.length} media file(s) for download.`);
+  };
 
   return (
     <DataTable
@@ -124,51 +167,73 @@ export function PropertyTable({
       columns={[
         {
           key: "title",
-          header: "Listing",
+          header: "Listing Details",
           render: (p: Property) => (
-            <Link
-              to="/properties/$id"
-              params={{ id: p.id }}
-              search={DEFAULT_SEARCH_PARAMS}
-              className="font-bold text-foreground hover:text-primary"
-            >
-              {p.title}
-            </Link>
+            <div>
+              <Link
+                to="/properties/$id"
+                params={{ id: p.id }}
+                search={DEFAULT_SEARCH_PARAMS}
+                className="font-bold text-foreground hover:text-primary flex items-center gap-1.5"
+              >
+                <span>{p.title}</span>
+                {(featuredStates[p.id] ?? p.is_featured) && (
+                  <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[9px] font-extrabold text-amber-600">
+                    <Star className="h-2.5 w-2.5 fill-amber-500 text-amber-500" /> Featured
+                  </span>
+                )}
+              </Link>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {p.locality}, {p.city} • {(p as any).bhk_type || "2 BHK"}
+              </p>
+            </div>
           ),
-        },
-        {
-          key: "city",
-          header: "City",
-          render: (p: Property) => (
-            <span className="text-muted-foreground">
-              {p.city} {p.pincode && ` - ${p.pincode}`}
-            </span>
-          ),
-        },
-        {
-          key: "type",
-          header: "Type",
-          render: (p: Property) => <span className="text-muted-foreground">{p.property_type}</span>,
         },
         {
           key: "price",
-          header: "Price",
+          header: "Price / Rent",
           render: (p: Property) => (
-            <span className="whitespace-nowrap font-bold text-foreground">
+            <span className="whitespace-nowrap font-bold text-foreground text-xs">
               {formatPrice(p.price, p.listing_type)}
             </span>
           ),
         },
         {
-          key: "status",
-          header: "Status",
-          className: "text-right",
+          key: "media",
+          header: "Media & Access",
           render: (p: Property) => (
-            <StatusPill
-              label={p.is_featured ? "Featured" : "Live"}
-              tone={p.is_featured ? "info" : "success"}
-            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleDownloadMedia(p)}
+                className="inline-flex items-center gap-1 rounded-xl bg-card border border-border/80 px-2.5 py-1 text-[11px] font-bold text-foreground hover:bg-secondary cursor-pointer shadow-xs"
+              >
+                <Download className="h-3 w-3 text-emerald-600" /> Media ({p.images?.length || 0})
+              </button>
+            </div>
           ),
+        },
+        {
+          key: "actions",
+          header: "Admin Actions",
+          className: "text-right",
+          render: (p: Property) => {
+            const isFeat = featuredStates[p.id] ?? p.is_featured;
+            return (
+              <button
+                type="button"
+                onClick={() => toggleHighlight(p.id, Boolean(isFeat))}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition shadow-xs cursor-pointer ${
+                  isFeat
+                    ? "bg-amber-500 text-white hover:bg-amber-600"
+                    : "bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/20"
+                }`}
+              >
+                <Star className={`h-3.5 w-3.5 ${isFeat ? "fill-white" : ""}`} />
+                <span>{isFeat ? "Highlighted" : "Highlight Property"}</span>
+              </button>
+            );
+          },
         },
       ]}
     />

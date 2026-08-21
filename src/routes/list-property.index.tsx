@@ -64,46 +64,43 @@ function ListPropertyLandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section with Luxury Teal Gradient & Spacious Center Focus */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#0F766E]/15 via-[#0F766E]/5 to-background pt-24 pb-16 md:pt-32 md:pb-24 border-b border-border/40">
-        <div className="absolute top-0 right-1/4 -mt-20 w-96 h-96 bg-[#14B8A6]/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-0 -ml-20 w-80 h-80 bg-[#0F766E]/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Hero Section with Center-Aligned Premium Focus */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#0F766E]/20 via-[#0F766E]/5 to-background pt-24 pb-16 md:pt-32 md:pb-24 border-b border-border/40">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-20 w-[600px] h-[600px] bg-[#14B8A6]/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="container mx-auto px-4 max-w-6xl grid md:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
-          <div className="md:col-span-6 space-y-6 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-4 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> 100% Free Owner
-              Listing • 0% Brokerage
+        <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-4 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" /> Location-First
+              Direct Listing • 100% Free Owner Ad
             </div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-[family-name:var(--font-display)] leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground font-[family-name:var(--font-display)] leading-tight max-w-3xl mx-auto">
               Sell or rent your home faster with{" "}
               <span className="text-[#0F766E] dark:text-[#14B8A6]">{APP_NAME}</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               Direct owner contact with verified tenants &amp; buyers across India. Zero commission,
               zero listing fees, and instant WhatsApp inquiries.
             </p>
 
-            <div className="grid grid-cols-3 gap-3 pt-2">
-              <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-3.5 text-center shadow-xs">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto mb-1.5" />
-                <p className="text-xs font-bold text-foreground">Post Free</p>
-              </div>
-              <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-3.5 text-center shadow-xs">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto mb-1.5" />
-                <p className="text-xs font-bold text-foreground">Verified Leads</p>
-              </div>
-              <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-3.5 text-center shadow-xs">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 mx-auto mb-1.5" />
-                <p className="text-xs font-bold text-foreground">Direct WhatsApp</p>
-              </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs font-bold text-foreground">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Post as an Owner Free
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs font-bold text-foreground">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Verified Buyers &amp; Tenants
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs font-bold text-foreground">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Direct WhatsApp Inquiry
+              </span>
             </div>
           </div>
 
-          <div className="md:col-span-6">
-            <StartNowForm className="shadow-2xl border border-emerald-500/20" />
+          {/* Prominent Centered Form Card */}
+          <div className="max-w-xl mx-auto pt-2">
+            <StartNowForm className="shadow-2xl border border-emerald-500/30 backdrop-blur-md" />
           </div>
         </div>
       </div>

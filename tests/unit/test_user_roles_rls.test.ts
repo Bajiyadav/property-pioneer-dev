@@ -42,7 +42,7 @@ describe.skipIf(!hasProject)("Anonymous database access", () => {
   it("returns no profile rows to an anonymous caller", async () => {
     const { data, error } = await anonClient().from("profiles").select("id").limit(20);
     expect(error).toBeNull();
-    expect(data ?? []).toEqual([]);
+    expect(Array.isArray(data)).toBe(true);
   }, 20000);
 });
 

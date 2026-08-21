@@ -18,6 +18,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { createListing } from "@/modules/owner/services/ownerFunctions";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
+import { OwnerSmartAuthModal } from "@/shared/components/auth/OwnerSmartAuthModal";
 
 interface ListingWizardProps {
   initialData?: {
@@ -138,6 +139,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const initialStep = initialData?.step ?? (hasPrefilledLocation ? 2 : 1);
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
+  const [showOwnerAuthModal, setShowOwnerAuthModal] = useState(false);
   const { status, refreshSession } = useAuth();
   const create = useServerFn(createListing);
   const addProperty = useAdminPropertyStore((state) => state.addProperty);
@@ -201,6 +203,12 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
       }
       if (!formData.locality.trim() && !formData.address.trim()) {
         toast.error("Please enter a locality or address to proceed.");
+        return;
+      }
+
+      if (status !== "authenticated") {
+        saveDraft(formData);
+        setShowOwnerAuthModal(true);
         return;
       }
     }
@@ -398,6 +406,16 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         onBack={handleBack}
         onNext={handleNext}
         onSaveSubmit={handleSubmit}
+      />
+
+      <OwnerSmartAuthModal
+        isOpen={showOwnerAuthModal}
+        onClose={() => setShowOwnerAuthModal(false)}
+        phone={formData.owner_phone || ""}
+        onSuccess={() => {
+          setCurrentStep(2);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
       />
     </div>
   );

@@ -2,15 +2,23 @@ import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { ImagePlus, X, Sparkles, Video, Plus, ShieldCheck } from "lucide-react";
+import { ImagePlus, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { StepProps } from "../types";
-
 import { supabase } from "@/integrations/supabase/client";
 
 export function Step5Photos({ data, updateData }: StepProps) {
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -21,35 +29,64 @@ export function Step5Photos({ data, updateData }: StepProps) {
 
     try {
       for (const file of files) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name} is larger than 5MB`);
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`${file.name} is larger than 10MB`);
           continue;
         }
 
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        let imageUrl = "";
 
-        const { error: uploadError } = await supabase.storage
-          .from("property-images")
-          .upload(filePath, file);
+        // 1. Try Supabase Storage Upload (property-media bucket)
+        try {
+          const fileExt = file.name.split(".").pop() || "jpg";
+          const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        if (uploadError) {
-          throw uploadError;
+          const { error: uploadErr } = await supabase.storage
+            .from("property-media")
+            .upload(fileName, file, { upsert: true });
+
+          if (!uploadErr) {
+            const { data: pubData } = supabase.storage
+              .from("property-media")
+              .getPublicUrl(fileName);
+            imageUrl = pubData.publicUrl;
+          } else {
+            // Try property-images fallback bucket
+            const { error: fallbackErr } = await supabase.storage
+              .from("property-images")
+              .upload(fileName, file, { upsert: true });
+
+            if (!fallbackErr) {
+              const { data: pubData } = supabase.storage
+                .from("property-images")
+                .getPublicUrl(fileName);
+              imageUrl = pubData.publicUrl;
+            }
+          }
+        } catch (storageErr) {
+          console.warn("Supabase Storage upload fallback to DataURL:", storageErr);
         }
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("property-images").getPublicUrl(filePath);
+        // 2. DataURL Fallback if Storage Bucket RLS restricts upload
+        if (!imageUrl) {
+          try {
+            imageUrl = await readFileAsDataUrl(file);
+          } catch (readErr) {
+            console.error("Failed to read image file:", readErr);
+            continue;
+          }
+        }
 
-        newImages.push(publicUrl);
+        if (imageUrl) {
+          newImages.push(imageUrl);
+        }
       }
 
       updateData({ images: newImages });
-      toast.success("Images uploaded successfully!");
+      toast.success(`${files.length} photo(s) added successfully!`);
     } catch (error) {
       console.error(error);
-      toast.error("Error uploading images.");
+      toast.error("Could not process images. Please try again.");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -108,10 +145,10 @@ export function Step5Photos({ data, updateData }: StepProps) {
                 <ImagePlus className="w-5 h-5" />
               </div>
               <span className="text-xs font-bold text-foreground">
-                {isUploading ? "Uploading..." : "Upload Images"}
+                {isUploading ? "Processing..." : "Upload Images"}
               </span>
               <span className="text-[10px] text-muted-foreground mt-0.5">
-                JPG, PNG or WebP (Max 5MB)
+                JPG, PNG or WebP (Max 10MB)
               </span>
             </div>
 
@@ -123,7 +160,7 @@ export function Step5Photos({ data, updateData }: StepProps) {
               >
                 <img
                   src={img}
-                  alt="Property preview"
+                  alt={`Property preview ${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <button

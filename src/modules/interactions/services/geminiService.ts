@@ -1,8 +1,5 @@
-/**
- * SEEDHA PROPERTIES — Intelligent Real Estate AI Knowledge Engine
- * Combines structured domain prompt engineering, dynamic RAG retrieval,
- * and high-context conversational reasoning across all 7 Indian metro hubs.
- */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AIMessage {
   role: "user" | "model" | "system";
@@ -101,233 +98,129 @@ export function retrieveDynamicContext(query: string): string {
     );
   }
 
-  if (
-    q.includes("deposit") ||
-    q.includes("agreement") ||
-    q.includes("lease") ||
-    q.includes("maintenance") ||
-    q.includes("rent vs buy") ||
-    q.includes("escalation")
-  ) {
-    contexts.push(
-      "[Lease & Financial Context]: Standard residential rent agreements in India run for 11 months with a standard 5% to 10% annual escalation. Security deposits typically range between 1 to 2 months rent in Hyderabad/Mumbai, and 2 to 6 months in Bengaluru.",
-    );
-  }
-
-  if (
-    q.includes("hyderabad") ||
-    q.includes("bengaluru") ||
-    q.includes("bangalore") ||
-    q.includes("mumbai") ||
-    q.includes("pune") ||
-    q.includes("delhi") ||
-    q.includes("ncr") ||
-    q.includes("gurgaon") ||
-    q.includes("noida") ||
-    q.includes("chennai") ||
-    q.includes("kolkata") ||
-    q.includes("madhapur") ||
-    q.includes("hitec") ||
-    q.includes("gachibowli") ||
-    q.includes("indiranagar") ||
-    q.includes("whitefield") ||
-    q.includes("hsr") ||
-    q.includes("bkc") ||
-    q.includes("powai") ||
-    q.includes("hinjewadi") ||
-    q.includes("omr")
-  ) {
-    contexts.push(
-      "[Multi-Metro Localities Context]: Seedha Properties features active direct-owner listings across all major Indian IT and commercial corridors including Hyderabad (Madhapur, HITEC City, Gachibowli, Kondapur), Bengaluru (Indiranagar, HSR Layout, Whitefield, Electronic City), Mumbai (BKC, Powai, Andheri), Delhi-NCR (Cyber City Gurgaon, Sector 62 Noida), Pune (Hinjewadi, Kharadi), Chennai (OMR), and Kolkata (Salt Lake Sector V).",
-    );
-  }
-
   return contexts.length > 0
     ? contexts.join("\n")
     : "[General Context]: Seedha Properties is India's premier 0% brokerage direct-owner PropTech discovery marketplace.";
 }
 
 /**
- * Intelligent Local Knowledge Fallback Engine
- * Generates rich, highly tailored answers when remote API keys are unconfigured or offline.
+ * Live Database Lookup for AI Queries
  */
-function generateTrainedLocalResponse(query: string, history: AIMessage[] = []): string {
+async function fetchLiveDbPropertyContext(userQuery: string): Promise<string> {
+  try {
+    const q = userQuery.toLowerCase();
+    const areas = [
+      "kondapur",
+      "madhapur",
+      "gachibowli",
+      "hitec",
+      "jubilee",
+      "banjara",
+      "manikonda",
+      "kukatpally",
+      "tellapur",
+      "nanakramguda",
+      "kokapet",
+    ];
+
+    const matchedArea = areas.find((a) => q.includes(a));
+    const searchTerm = matchedArea || (q.length >= 4 ? q.split(" ")[0] : "");
+
+    if (!searchTerm) return "";
+
+    const { data: props } = await (supabase.from as any)("properties")
+      .select("title, locality, price, rent_amount, bhk_type, image_urls, is_featured")
+      .or(`locality.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
+      .limit(5);
+
+    if (props && props.length > 0) {
+      const summary = props
+        .map(
+          (p: any) =>
+            `• ${p.title} (${p.bhk_type || "2 BHK"}) in ${p.locality} - ₹${(p.rent_amount || p.price || 0).toLocaleString("en-IN")}/mo [${p.image_urls?.length || 0} photos]`,
+        )
+        .join("\n");
+      return `\n[LIVE SUPABASE DATABASE LISTINGS IN '${searchTerm.toUpperCase()}']:\nFound ${props.length} active 0% brokerage listings:\n${summary}\n`;
+    }
+  } catch {
+    // Fail safe
+  }
+  return "";
+}
+
+/**
+ * Trained Local Response Generator
+ */
+async function generateTrainedLocalResponse(query: string): Promise<string> {
   const q = query.toLowerCase().trim();
+  const liveDbCtx = await fetchLiveDbPropertyContext(query);
 
-  // 1. Brokerage and Commission
-  if (
-    q.includes("brokerage") ||
-    q.includes("commission") ||
-    q.includes("how much fee") ||
-    q.includes("charges") ||
-    q.includes("is it free")
-  ) {
+  if (liveDbCtx) {
     return (
-      "**Seedha Properties is 100% Direct-Owner with 0% Brokerage!** 🎉\n\n" +
-      "• **For Tenants & Buyers:** You pay zero brokerage, zero agent commission, and no registration charges to contact owners.\n" +
-      "• **For Property Owners:** Listing your home is completely free on our standard direct tier with instant lead delivery via WhatsApp and in-app notifications."
+      `**Live Database Results for your search:** 🏡\n\n` +
+      liveDbCtx +
+      `\n\nTo view photos, videos, and contact property owners directly with 0% brokerage, search **'${query}'** in our top search bar!`
     );
   }
 
-  // 2. Listing Property / Owner Wizard
+  // BHK & Property Search Intent Parsing
   if (
-    q.includes("how to list") ||
-    q.includes("list my") ||
-    q.includes("post property") ||
-    q.includes("sell flat") ||
-    q.includes("rent out") ||
-    q.includes("post my ad")
+    q.includes("bhk") ||
+    q.includes("room") ||
+    q.includes("flat") ||
+    q.includes("house") ||
+    q.includes("apartment") ||
+    q.includes("villa") ||
+    q.includes("rent") ||
+    q.includes("buy")
   ) {
+    const bhkMatch = q.match(/\b([1-4])\s*bhk\b/i);
+    const bhkType = bhkMatch ? `${bhkMatch[1]} BHK` : "verified 1BHK/2BHK/3BHK";
+
     return (
-      "**How to List Your Property on Seedha Properties (0% Brokerage):**\n\n" +
-      "1. Tap the **'List Property'** button in the top navigation.\n" +
-      "2. **Step 1 - Location:** Select your city (Hyderabad, Bengaluru, Mumbai, Delhi-NCR, Chennai, Pune, Kolkata) and type your locality.\n" +
-      "3. **Step 2 - Property Type:** Choose Apartment, Villa / Independent House, Studio, or Commercial.\n" +
-      "4. **Step 3 - Details:** Enter BHK type, carpet area in sq.ft, floor number, and furnishing status.\n" +
-      "5. **Step 4 - Pricing:** Set your monthly expected rent or total sale price, security deposit, and maintenance.\n" +
-      "6. **Step 5 - Photos:** Upload real photos of the living room, bedrooms, and kitchen (up to 5MB each).\n" +
-      "7. **Step 6 - Owner Contact:** Add your verified phone number.\n\n" +
-      "💡 *Tip: If you're not logged in, your draft is auto-saved safely so you can log in without losing your entered data.*"
+      `**Looking for ${bhkType} options in Hyderabad?** 🏡\n\n` +
+      `We have verified 0% brokerage ${bhkType} listings across top tech corridors:\n` +
+      `• **Kondapur & Madhapur:** Starting from ₹24,000/month with modular kitchen & 24/7 security.\n` +
+      `• **Gachibowli & HITEC City:** Starting from ₹28,000/month near major IT hubs.\n\n` +
+      `👉 Tap **'Rent'** or **'Buy'** in the top navigation bar or type an area like **'Kondapur'** to view photos, video tours, and direct owner WhatsApp contact numbers!`
     );
   }
 
-  // 3. Verification & Trust Badging
+  // Locality default fallbacks
   if (
-    q.includes("badge") ||
-    q.includes("verify") ||
-    q.includes("verified owner") ||
-    q.includes("kyc") ||
-    q.includes("scam") ||
-    q.includes("safe") ||
-    q.includes("genuine")
-  ) {
-    return (
-      "**Seedha Properties Multi-Tier Trust & Verification Badging:** 🛡️\n\n" +
-      "• **✓ Direct Owner:** Confirms the listing is posted directly by the individual property owner with no brokerage involvement.\n" +
-      "• **✓ Owner Verified:** Granted after digital KYC verification of owner identity (Aadhaar, PAN, or Utility Bill).\n" +
-      "• **✓ Property Verified:** Authenticated property details, title ownership, and genuine uploaded photos.\n\n" +
-      "Properties with verified badges receive **3.5x higher tenant inquiries** and get featured on top of search results!"
-    );
-  }
-
-  // 4. Scheduling Visits & Walkthroughs
-  if (
-    q.includes("visit") ||
-    q.includes("schedule") ||
-    q.includes("see property") ||
-    q.includes("walkthrough") ||
-    q.includes("inspection") ||
-    q.includes("view flat")
-  ) {
-    return (
-      "**How to Schedule a Property Visit:** 📅\n\n" +
-      "1. Open any property details page you like.\n" +
-      "2. Click the **'Schedule Visit'** button on the right action card.\n" +
-      "3. Choose your preferred **Date** and **Time Slot** (e.g. Morning 10:00 AM or Evening 5:00 PM).\n" +
-      "4. Select visit mode: **In-Person Walkthrough** or **Video Tour**.\n" +
-      "5. Submit your request — the owner receives an instant alert on their dashboard and will confirm your appointment."
-    );
-  }
-
-  // 5. City & Locality specific recommendations
-  if (
-    q.includes("hyderabad") ||
+    q.includes("kondapur") ||
     q.includes("madhapur") ||
     q.includes("gachibowli") ||
-    q.includes("hitec") ||
-    q.includes("kondapur")
+    q.includes("hitec")
   ) {
     return (
-      "**Top Direct-Owner Rental & Sale Hubs in Hyderabad:** 🏙️\n\n" +
-      "• **HITEC City & Madhapur:** Ideal for IT professionals near Cyber Towers, Mindspace, and Inorbit Mall. 2 BHK rents average ₹28,000 - ₹45,000/mo.\n" +
-      "• **Gachibowli & Financial District:** Luxury gated communities near Waverock, Microsoft, and Amazon. 3 BHK rents average ₹45,000 - ₹75,000/mo.\n" +
-      "• **Kondapur & Manikonda:** Excellent value residential options with great schools and metro connectivity.\n\n" +
-      "Use the search bar at the top to filter by BHK, budget, and zero-brokerage direct listings!"
+      "**Available Properties & Rooms in " +
+      (q.includes("kondapur") ? "Kondapur" : "Madhapur") +
+      ":** 🏙️\n\n" +
+      "We have active 1BHK, 2BHK, 3BHK, and PG/Co-living listings with 0% brokerage!\n\n" +
+      "• **Kondapur:** 2 BHK average rent: ₹24,000 - ₹38,000/mo near Raghavendra Colony and Botanical Garden Road.\n" +
+      "• **Madhapur & HITEC City:** 2 BHK average rent: ₹28,000 - ₹45,000/mo near Cyber Towers and Inorbit Mall.\n\n" +
+      "👉 Tap on **'Rent'** or **'Buy'** in the top navigation bar to view full photos, videos, and direct owner WhatsApp contact numbers!"
     );
   }
 
-  if (
-    q.includes("bengaluru") ||
-    q.includes("bangalore") ||
-    q.includes("indiranagar") ||
-    q.includes("whitefield") ||
-    q.includes("hsr") ||
-    q.includes("koramangala")
-  ) {
+  if (q.includes("brokerage") || q.includes("commission") || q.includes("fee")) {
     return (
-      "**Top Direct-Owner Hubs in Bengaluru:** 🏙️\n\n" +
-      "• **Indiranagar & Koramangala:** Premium lifestyle, cafes, metro access, and central startup hubs.\n" +
-      "• **HSR Layout & Bellandur:** Top choice for tech workers along the Outer Ring Road (ORR) and Sarjapur Road.\n" +
-      "• **Whitefield & Electronic City:** High-rise gated societies close to tech parks (ITPB, Manyata, Infosys campus).\n\n" +
-      "Filter by Bangalore on our search page to explore direct-owner homes with 0% brokerage!"
+      "**Seedha Properties is 100% Direct-Owner with 0% Brokerage!** 🎉\n\n" +
+      "• **For Tenants & Buyers:** Zero brokerage, zero agent commission.\n" +
+      "• **For Property Owners:** Listing your home is 100% free."
     );
   }
 
-  if (
-    q.includes("mumbai") ||
-    q.includes("bkc") ||
-    q.includes("powai") ||
-    q.includes("andheri") ||
-    q.includes("thane")
-  ) {
-    return (
-      "**Top Direct-Owner Hubs in Mumbai & MMR:** 🏙️\n\n" +
-      "• **BKC & Bandra:** Prime commercial and upscale residential belt.\n" +
-      "• **Powai & Kanjurmarg:** Scenic lake view gated societies near Hiranandani and IIT Bombay.\n" +
-      "• **Andheri West/East & Goregaon:** Unbeatable metro and suburban rail connectivity.\n" +
-      "• **Thane & Navi Mumbai:** Spacious family homes with premium amenities at competitive pricing."
-    );
-  }
-
-  // 6. Security Deposit & Agreements
-  if (
-    q.includes("deposit") ||
-    q.includes("agreement") ||
-    q.includes("advance") ||
-    q.includes("rent contract") ||
-    q.includes("11 month")
-  ) {
-    return (
-      "**Rental Agreement & Security Deposit Guidelines in India:** 📑\n\n" +
-      "• **Security Deposit Norms:**\n" +
-      "  - Hyderabad, Mumbai & Pune: Typically 1 to 2 months rent.\n" +
-      "  - Bengaluru & Chennai: Typically 2 to 6 months rent.\n" +
-      "• **Lease Agreement:** Standard residential agreements are made for 11 months to avoid mandatory registration stamping, with an annual escalation clause of 5% - 10% upon renewal.\n" +
-      "• **Maintenance:** Clearly specify whether monthly maintenance is included or extra in the tenancy agreement."
-    );
-  }
-
-  // 7. Rent vs Buy / EMI guidance
-  if (
-    q.includes("buy") ||
-    q.includes("emi") ||
-    q.includes("loan") ||
-    q.includes("investment") ||
-    q.includes("rent vs buy")
-  ) {
-    return (
-      "**Rent vs. Buy Considerations on Seedha Properties:** 💰\n\n" +
-      "• **Rental Yield in Indian Metros:** Average gross rental yield is 2.8% to 4.2% in cities like Hyderabad and Bengaluru.\n" +
-      "• **Home Loan EMIs:** For a ₹1 Crore home loan at ~8.5% interest for 20 years, the estimated EMI is approximately ₹86,782/month.\n" +
-      "• **Direct Purchase Benefit:** On Seedha Properties, buying directly from verified property owners saves you lakhs in broker commissions (typically 1% - 2% of total transaction value)!"
-    );
-  }
-
-  // 8. General conversational fallback with rich options
   return (
-    "**Namaste! I am Seedha AI, your 24/7 Real Estate Guide.** 🏡\n\n" +
-    "Here is how I can assist you right now:\n\n" +
-    "• **Find Properties:** Ask me for homes in specific localities (e.g. *'Find 2 BHK in HSR Layout'* or *'Show flats in Madhapur'*).\n" +
-    "• **List Your Property:** Learn how to list your home with 0% brokerage in 6 simple steps.\n" +
-    "• **Trust & KYC:** Understand how owners get the **✓ Verified Owner** badge.\n" +
-    "• **Schedule a Visit:** Learn how to book in-person or video walkthroughs with owners.\n\n" +
-    "What would you like to explore today?"
+    `**Namaste! I am Seedha AI, your 24/7 Real Estate Assistant.** 🏡\n\n` +
+    `I can help you find verified 1BHK/2BHK/3BHK homes in **Kondapur**, **Madhapur**, **Gachibowli**, or any locality in Hyderabad with **0% brokerage**!\n\n` +
+    `Try asking me: *"Find 3BHK in Kondapur"* or *"How to list my property?"*`
   );
 }
 
 /**
- * Sends a query to Google Gemini API with System Prompt + Dynamic RAG Context,
- * falling back to our high-accuracy trained local engine when API keys are absent.
+ * Main AI Prompt Dispatcher (Gemini API with Trained Fallback)
  */
 export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []): Promise<string> {
   const apiKey =
@@ -337,12 +230,13 @@ export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []):
       ?.VITE_GEMINI_API_KEY ||
     "";
 
-  // If no API key is set in environment, use our comprehensive trained local AI engine directly
+  const liveDbCtx = await fetchLiveDbPropertyContext(userQuery);
+
   if (!apiKey || apiKey.trim().length === 0) {
-    return generateTrainedLocalResponse(userQuery, history);
+    return generateTrainedLocalResponse(userQuery);
   }
 
-  const dynamicContext = retrieveDynamicContext(userQuery);
+  const dynamicContext = retrieveDynamicContext(userQuery) + liveDbCtx;
 
   const contents = [
     {
@@ -355,7 +249,6 @@ export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []):
     },
   ];
 
-  // Append recent conversational context
   if (history.length > 0) {
     const recent = history.slice(-4);
     for (const msg of recent) {
@@ -394,18 +287,16 @@ export async function askSeedhaAI(userQuery: string, history: AIMessage[] = []):
 
       const data = await fallbackRes.json();
       return (
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        generateTrainedLocalResponse(userQuery, history)
+        data.candidates?.[0]?.content?.parts?.[0]?.text || generateTrainedLocalResponse(userQuery)
       );
     }
 
     const data = await response.json();
     return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      generateTrainedLocalResponse(userQuery, history)
+      data.candidates?.[0]?.content?.parts?.[0]?.text || generateTrainedLocalResponse(userQuery)
     );
   } catch (error) {
-    console.warn("[geminiService] Error calling Gemini API, using trained local AI engine:", error);
-    return generateTrainedLocalResponse(userQuery, history);
+    console.warn("[geminiService] Error calling Gemini API, using local AI engine:", error);
+    return generateTrainedLocalResponse(userQuery);
   }
 }

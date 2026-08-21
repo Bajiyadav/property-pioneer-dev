@@ -81,6 +81,13 @@ function AuthCallbackPage() {
         const role = await resolveRoleForSession(data.session);
         if (!active) return;
 
+        // If this is a password recovery link, direct to auth page to enter new password
+        if (type === "recovery") {
+          window.history.replaceState({}, "", "/auth");
+          navigate({ to: "/auth", search: { redirect: "" }, replace: true });
+          return;
+        }
+
         // Strip the credential from the address bar before moving on.
         window.history.replaceState({}, "", "/auth/callback");
         navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });

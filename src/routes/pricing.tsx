@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-import PlansPage from "./plans";
+import { PlansPage } from "@/modules/billing/components/PlansPage";
 
 export const Route = createFileRoute("/pricing")({
   head: () => {
@@ -23,5 +23,3 @@ export const Route = createFileRoute("/pricing")({
   },
   component: PlansPage,
 });
-
-export default PlansPage;

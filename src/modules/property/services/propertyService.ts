@@ -87,16 +87,8 @@ export type Property = {
 const BASE_PROPERTY_COLUMNS =
   "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
 
-/**
- * Columns added by `20260815131921_add_video_and_location_to_properties.sql`
- * (video tours and location context).
- */
 const EXTENDED_PROPERTY_COLUMNS =
-  // `pincode` belongs here, not in the base set: it arrives with migration
-  // 20260817160000, and putting an un-applied column in the "always present"
-  // list left the fallback query with nothing to fall back to — every listing
-  // query failed and collapsed onto seed data.
-  "pincode,video_url,video_status,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable";
+  "pincode,video_url,video_status,video_urls,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable,project_name,bhk_type,area_unit,deposit,maintenance,furnishing_status";
 
 export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
 
@@ -694,20 +686,32 @@ function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: b
     .eq("is_approved", true);
 
   if (params) {
-    if (params.city) query = query.ilike("city", params.city);
-    if (params.listing) query = query.ilike("listing_type", params.listing);
-    if (params.status) query = query.eq("status", params.status);
+    const city = params.city?.trim();
+    if (city) query = query.ilike("city", `%${city}%`);
+
+    const listing = params.listing?.trim();
+    if (listing) query = query.ilike("listing_type", `%${listing}%`);
+
+    const status = params.status?.trim();
+    if (status) query = query.eq("status", status);
+
     if (params.beds && params.beds > 0) query = query.gte("bedrooms", params.beds);
     if (params.baths && params.baths > 0) query = query.gte("bathrooms", params.baths);
-    if (params.type) query = query.ilike("property_type", `%${params.type}%`);
-    if (params.locality && useExtended) query = query.ilike("locality", `%${params.locality}%`);
+
+    const type = params.type?.trim();
+    if (type) query = query.ilike("property_type", `%${type}%`);
+
+    const locality = params.locality?.trim();
+    if (locality && useExtended) query = query.ilike("locality", `%${locality}%`);
+
     if (params.minPrice && params.minPrice > 0) query = query.gte("price", params.minPrice);
     if (params.maxPrice && params.maxPrice > 0) query = query.lte("price", params.maxPrice);
-    if (params.q) {
-      // A naive ilike across the searchable text columns.
+
+    const q = params.q?.trim().replace(/[%_]/g, "");
+    if (q) {
       const columns = ["title", "city", "address", "description"];
-      if (useExtended) columns.push("locality", "landmark");
-      query = query.or(columns.map((c) => `${c}.ilike.%${params.q}%`).join(","));
+      if (useExtended) columns.push("locality");
+      query = query.or(columns.map((c) => `${c}.ilike.%${q}%`).join(","));
     }
   }
 
