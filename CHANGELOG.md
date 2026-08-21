@@ -1,3 +1,21 @@
+## v0.38.0 — 2026-08-21
+
+### Features
+- feat: complete Phase 1 marketplace audit and query fixes (e99a0b8)
+- feat: list-property layout routing and wizard navigation fix (558460c)
+- feat: complete end-to-end audit and refactor for SEEDHA Properties (0ee254d)
+- feat: 4-role RBAC, area agent routing, media management, lead capture, vertical cards & static routes (f56afe3)
+
+### Fixes
+- fix: resolve migration timestamp collision and routing layout for list-property wizard (f06c1d6)
+
+### Migration notes
+- supabase/migrations/20260817120100_storage_buckets_and_lead_routing_rbac.sql
+- supabase/migrations/20260817140100_media_management_and_moderation.sql
+- supabase/migrations/20260821120000_add_extended_deposit_and_media_columns.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.37.1 — 2026-08-19
 
 ### Fixes
