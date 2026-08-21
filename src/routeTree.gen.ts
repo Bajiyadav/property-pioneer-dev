@@ -33,6 +33,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as BuyIndexRouteImport } from './routes/buy.index'
 import { Route as CommercialIndexRouteImport } from './routes/commercial.index'
+import { Route as ListPropertyIndexRouteImport } from './routes/list-property.index'
 import { Route as ListPropertyWizardRouteImport } from './routes/list-property.wizard'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
@@ -50,6 +51,7 @@ import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
 import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_authenticated/dashboard/customer'
 import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
+import { Route as AuthenticatedDashboardTenantProfileRouteImport } from './routes/_authenticated/dashboard/tenant-profile'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
@@ -183,6 +185,11 @@ const CommercialIndexRoute = CommercialIndexRouteImport.update({
   path: '/commercial/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListPropertyIndexRoute = ListPropertyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ListPropertyRoute,
+} as any)
 const ListPropertyWizardRoute = ListPropertyWizardRouteImport.update({
   id: '/wizard',
   path: '/wizard',
@@ -275,6 +282,12 @@ const AuthenticatedDashboardOwnerRoute =
   AuthenticatedDashboardOwnerRouteImport.update({
     id: '/owner',
     path: '/owner',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardTenantProfileRoute =
+  AuthenticatedDashboardTenantProfileRouteImport.update({
+    id: '/tenant-profile',
+    path: '/tenant-profile',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const ApiAuthLoginNotificationRoute =
@@ -377,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
   '/commercial/': typeof CommercialIndexRoute
+  '/list-property/': typeof ListPropertyIndexRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -388,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -413,7 +428,6 @@ export interface FileRoutesByTo {
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
-  '/list-property': typeof ListPropertyRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -429,6 +443,7 @@ export interface FileRoutesByTo {
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy': typeof BuyIndexRoute
   '/commercial': typeof CommercialIndexRoute
+  '/list-property': typeof ListPropertyIndexRoute
   '/properties': typeof PropertiesIndexRoute
   '/rent': typeof RentIndexRoute
   '/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -440,6 +455,7 @@ export interface FileRoutesByTo {
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -486,6 +502,7 @@ export interface FileRoutesById {
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
   '/commercial/': typeof CommercialIndexRoute
+  '/list-property/': typeof ListPropertyIndexRoute
   '/properties/': typeof PropertiesIndexRoute
   '/rent/': typeof RentIndexRoute
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
@@ -497,6 +514,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
+  '/_authenticated/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -543,6 +561,7 @@ export interface FileRouteTypes {
     | '/tenant/onboarding'
     | '/buy/'
     | '/commercial/'
+    | '/list-property/'
     | '/properties/'
     | '/rent/'
     | '/admin/access'
@@ -554,6 +573,7 @@ export interface FileRouteTypes {
     | '/dashboard/agent'
     | '/dashboard/customer'
     | '/dashboard/owner'
+    | '/dashboard/tenant-profile'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -579,7 +599,6 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/favorites'
     | '/help'
-    | '/list-property'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -595,6 +614,7 @@ export interface FileRouteTypes {
     | '/tenant/onboarding'
     | '/buy'
     | '/commercial'
+    | '/list-property'
     | '/properties'
     | '/rent'
     | '/admin/access'
@@ -606,6 +626,7 @@ export interface FileRouteTypes {
     | '/dashboard/agent'
     | '/dashboard/customer'
     | '/dashboard/owner'
+    | '/dashboard/tenant-profile'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -651,6 +672,7 @@ export interface FileRouteTypes {
     | '/tenant/onboarding'
     | '/buy/'
     | '/commercial/'
+    | '/list-property/'
     | '/properties/'
     | '/rent/'
     | '/_authenticated/admin/access'
@@ -662,6 +684,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/agent'
     | '/_authenticated/dashboard/customer'
     | '/_authenticated/dashboard/owner'
+    | '/_authenticated/dashboard/tenant-profile'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -890,6 +913,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommercialIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/list-property/': {
+      id: '/list-property/'
+      path: '/'
+      fullPath: '/list-property/'
+      preLoaderRoute: typeof ListPropertyIndexRouteImport
+      parentRoute: typeof ListPropertyRoute
+    }
     '/list-property/wizard': {
       id: '/list-property/wizard'
       path: '/wizard'
@@ -1007,6 +1037,13 @@ declare module '@tanstack/react-router' {
       path: '/owner'
       fullPath: '/dashboard/owner'
       preLoaderRoute: typeof AuthenticatedDashboardOwnerRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/tenant-profile': {
+      id: '/_authenticated/dashboard/tenant-profile'
+      path: '/tenant-profile'
+      fullPath: '/dashboard/tenant-profile'
+      preLoaderRoute: typeof AuthenticatedDashboardTenantProfileRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/api/auth/login-notification': {
@@ -1132,6 +1169,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardAgentRoute: typeof AuthenticatedDashboardAgentRoute
   AuthenticatedDashboardCustomerRoute: typeof AuthenticatedDashboardCustomerRoute
   AuthenticatedDashboardOwnerRoute: typeof AuthenticatedDashboardOwnerRoute
+  AuthenticatedDashboardTenantProfileRoute: typeof AuthenticatedDashboardTenantProfileRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -1141,6 +1179,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardAgentRoute: AuthenticatedDashboardAgentRoute,
     AuthenticatedDashboardCustomerRoute: AuthenticatedDashboardCustomerRoute,
     AuthenticatedDashboardOwnerRoute: AuthenticatedDashboardOwnerRoute,
+    AuthenticatedDashboardTenantProfileRoute:
+      AuthenticatedDashboardTenantProfileRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
@@ -1164,10 +1204,12 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface ListPropertyRouteChildren {
   ListPropertyWizardRoute: typeof ListPropertyWizardRoute
+  ListPropertyIndexRoute: typeof ListPropertyIndexRoute
 }
 
 const ListPropertyRouteChildren: ListPropertyRouteChildren = {
   ListPropertyWizardRoute: ListPropertyWizardRoute,
+  ListPropertyIndexRoute: ListPropertyIndexRoute,
 }
 
 const ListPropertyRouteWithChildren = ListPropertyRoute._addFileChildren(
