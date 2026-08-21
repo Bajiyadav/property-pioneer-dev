@@ -71,7 +71,7 @@ jobs:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: supabase db dump --db-url "$SUPABASE_DB_URL" -f "backup-$(date +%Y%m%d-%H%M%S).sql"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always() && env.skip != 'true'
         with:
           name: db-backup
