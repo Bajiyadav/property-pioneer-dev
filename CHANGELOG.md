@@ -1,6 +1,7 @@
-## v0.2.0 — 2026-08-21
+## v0.38.0 — 2026-08-21
 
 ### Features
+
 - feat: list-property layout routing and wizard navigation fix (558460c)
 - feat: complete end-to-end audit and refactor for SEEDHA Properties (0ee254d)
 - feat(tenant): implement tenant registration, mandatory location matching, and commute metrics (1698ac5)
@@ -48,6 +49,7 @@
 - feat(privacy): consent-gated activity tracking, policy pages and data rights (61b6a98)
 
 ### Fixes
+
 - fix: resolve migration timestamp collision and routing layout for list-property wizard (f06c1d6)
 - fix(types): resolve typescript and eslint errors blocking deployment (9c89d7e)
 - fix(listing): harden START NOW button with onClick handler and router fallback (b3396e5)
@@ -102,12 +104,14 @@
 - fix(home): drop unearned claims and name the unlabelled controls (de97efb)
 
 ### Documentation
+
 - docs: expand README with architecture, API reference, roadmap, and troubleshooting (9c3a087)
 - docs: update README with pan-India marketplace architecture and status (0d1fa76)
 - docs: update TODO.md resolving completed bugs and tech debt (6bfcd0b)
 - docs(readme): rewrite to describe the project as it actually is (024c522)
 
 ### Migration notes
+
 - supabase/migrations/20260817120000_add_customer_tracking.sql
 - supabase/migrations/20260817120100_storage_buckets_and_lead_routing_rbac.sql
 - supabase/migrations/20260817130000_employee_access_and_scoping.sql
@@ -127,15 +131,39 @@
 - supabase/migrations/properties/20260815190000_add_extended_video_fields.sql
 - supabase/migrations/properties/20260816000000_add_property_visits_and_agent_leads.sql
 - supabase/migrations/users/20260816010000_add_agent_applications.sql
+  \=======
+
+## v0.38.0 — 2026-08-21
+
+### Features
+
+- feat: complete Phase 1 marketplace audit and query fixes (e99a0b8)
+- feat: list-property layout routing and wizard navigation fix (558460c)
+- feat: complete end-to-end audit and refactor for SEEDHA Properties (0ee254d)
+- feat: 4-role RBAC, area agent routing, media management, lead capture, vertical cards & static routes (f56afe3)
+
+### Fixes
+
+- fix: resolve migration timestamp collision and routing layout for list-property wizard (f06c1d6)
+
+### Migration notes
+
+- supabase/migrations/20260817120100_storage_buckets_and_lead_routing_rbac.sql
+- supabase/migrations/20260817140100_media_management_and_moderation.sql
+- supabase/migrations/20260821120000_add_extended_deposit_and_media_columns.sql
+
+> > > > > > > 01ac8c73b80eb50baa3ca00b64e3980c5e0d86ae
 
 Apply with `supabase db push` before promoting.
 
 ## v0.37.1 — 2026-08-19
 
 ### Fixes
+
 - fix(types): resolve typescript and eslint errors blocking deployment (9c89d7e)
 
 ### Migration notes
+
 - supabase/migrations/20260822000000_create_search_sessions_table.sql
 
 Apply with `supabase db push` before promoting.
@@ -143,9 +171,11 @@ Apply with `supabase db push` before promoting.
 ## v0.37.0 — 2026-08-19
 
 ### Features
+
 - feat(tenant): implement tenant registration, mandatory location matching, and commute metrics (1698ac5)
 
 ### Migration notes
+
 - supabase/migrations/20260821000000_create_tenant_profiles_table.sql
 
 Apply with `supabase db push` before promoting.
@@ -153,24 +183,29 @@ Apply with `supabase db push` before promoting.
 ## v0.36.0 — 2026-08-19
 
 ### Features
+
 - feat(wizard): pre-fill wizard from home page data and auto-skip location step 1 to step 2 (1e6408d)
 
 ## v0.35.0 — 2026-08-19
 
 ### Features
+
 - feat(plans): introduce low-cost assisted seeker plans starting at ₹199 with FAQs and live chat (e6fbfa3)
 
 ## v0.34.1 — 2026-08-19
 
 ### Fixes
+
 - fix(listing): harden START NOW button with onClick handler and router fallback (b3396e5)
 
 ## v0.34.0 — 2026-08-19
 
 ### Features
+
 - feat(location): introduce location-first sign-up flow with real-time indexed locality data (dd14e48)
 
 ### Migration notes
+
 - supabase/migrations/20260820000000_create_localities_table.sql
 
 Apply with `supabase db push` before promoting.
@@ -178,112 +213,135 @@ Apply with `supabase db push` before promoting.
 ## v0.33.1 — 2026-08-19
 
 ### Fixes
+
 - fix(listing): make START NOW button responsive, remove form validation blocker (9486b09)
 
 ## v0.33.0 — 2026-08-19
 
 ### Features
+
 - feat(ai): improve assistant training, remove powered by gemini label, and elevate branding (c91c081)
 
 ### Documentation
+
 - docs: expand README with architecture, API reference, roadmap, and troubleshooting (9c3a087)
 - docs: update README with pan-India marketplace architecture and status (0d1fa76)
 
 ## v0.32.0 — 2026-08-19
 
 ### Features
+
 - feat(marketplace): enable multi-metro location, search, and visit booking (76bab65)
 
 ## v0.31.0 — 2026-08-19
 
 ### Features
+
 - feat(branding): replace logo and favicons with client 3D gold emblem across web and mobile (08ee023)
 
 ## v0.30.3 — 2026-08-19
 
 ### Fixes
+
 - fix(ui): eliminate mobile header overlap, remove tagline text, and make brand logo responsive (bb3c634)
 
 ### Documentation
+
 - docs: update TODO.md resolving completed bugs and tech debt (6bfcd0b)
 
 ## v0.30.2 — 2026-08-19
 
 ### Fixes
+
 - fix(a11y): add aria-labels to hero filter radio buttons and remove duplicate body JSON-LD script (92189f8)
 
 ## v0.30.1 — 2026-08-19
 
 ### Fixes
+
 - fix(security): separate admin stats module to preserve client/server import hygiene (6afa256)
 
 ## v0.30.0 — 2026-08-19
 
 ### Features
+
 - feat(core): implement admin route guard, server-side search pagination, and SQL aggregations (8f86c94)
 
 ## v0.29.6 — 2026-08-19
 
 ### Fixes
+
 - fix(mobile): optimize property card image proportions and compact details layout (1c85f05)
 
 ## v0.29.5 — 2026-08-19
 
 ### Fixes
+
 - fix(mobile): resolve RenderFlex overflow with hasScrollBody false (0c665c2)
 - fix(mobile): use explicit publicPropertyColumns to avoid 42501 permission denied (f7a4cb9)
 
 ## v0.29.4 — 2026-08-19
 
 ### Fixes
+
 - fix(mobile): resolve type-casting in Property.fromJson and make category query filters resilient (cbfcf49)
 
 ## v0.29.3 — 2026-08-18
 
 ### Fixes
+
 - fix(form): add name, autocomplete, prefill, and pointer cues to START NOW form (c1a4a29)
 
 ## v0.29.2 — 2026-08-18
 
 ### Fixes
+
 - fix(router): configure safe parseSearch and stringifySearch to prevent JSON parser syntax error (6dd9e01)
 
 ## v0.29.1 — 2026-08-18
 
 ### Fixes
+
 - fix(wizard): resolve JSON.parse syntax error on search params validation (8bdd44b)
 
 ## v0.29.0 — 2026-08-18
 
 ### Features
+
 - feat(listing): add smart account recognition and 1-Click sign-in to Start Now card (505b20f)
 
 ## v0.28.1 — 2026-08-18
 
 ### Fixes
+
 - fix(mobile): configure Android manifest permissions, OAuth deep links, and track native structure (11a3aa1)
 
 ## v0.28.0 — 2026-08-18
 
 ### Features
+
 - feat(auth): integrate 1-Click Google Sign-In for Web and Flutter (62d4ac9)
 
 ## v0.27.0 — 2026-08-18
 
 ### Features
+
 - feat(ai): enhance Gemini assistant with dynamic RAG context retrieval (13a3144)
 
 ## v0.26.0 — 2026-08-18
 
 ### Features
+
 - feat(ai): integrate Google Gemini AI assistant for web and mobile (341c422)
 
 ## v0.25.0 — 2026-08-18
 
 ### Features
+
 - feat(phase2): implement Owner KYC Verification and Free Commute Distance Service (dcd914e)
 
 ### Migration notes
+
 - supabase/migrations/20260819010000_create_kyc_system.sql
 
 Apply with `supabase db push` before promoting.
@@ -291,9 +349,11 @@ Apply with `supabase db push` before promoting.
 ## v0.24.0 — 2026-08-18
 
 ### Features
+
 - feat(chat): implement real-time in-app chat system across web and mobile (0c5c42c)
 
 ### Migration notes
+
 - supabase/migrations/20260819000000_create_messages_table.sql
 
 Apply with `supabase db push` before promoting.
@@ -301,26 +361,31 @@ Apply with `supabase db push` before promoting.
 ## v0.23.0 — 2026-08-18
 
 ### Features
+
 - feat(notifications): add Meta WhatsApp Cloud API and Seedha brand templates (428b847)
 
 ## v0.22.0 — 2026-08-18
 
 ### Features
+
 - feat(mobile): add SecurityUtils, createAccount auth helper, and scale config (b716022)
 
 ## v0.21.0 — 2026-08-18
 
 ### Features
+
 - feat(listing): add mobile-first listing flow and fixed StartNowButton (2783bd8)
 
 ## v0.20.6 — 2026-08-18
 
 ### Fixes
+
 - fix(brand): update official logo asset and prevent brand text wrapping under logo on mobile (e62d568)
 
 ## v0.20.5 — 2026-08-18
 
 ### Features
+
 - feat(mobile): production-ready India-wide Rent, Buy, Commercial app (d515ea6)
 - feat(brand): render official SEEDHA logo in watermarks and auth screens (b2dab4d)
 - feat(seo): update search engine favicons, PWA manifest, and Schema.org logo metadata (f07c82a)
@@ -337,6 +402,7 @@ Apply with `supabase db push` before promoting.
 - feat(mobile): add 1-tap WhatsApp direct owner connect to property detail screen (5e41734)
 
 ### Fixes
+
 - fix(mobile): configure Android-only launcher icon generation, disable iOS (4f8da39)
 - fix(mobile): configure android-only launcher icon generation (4a2489f)
 - fix(property): enforce data honesty and reliable public enquiry handling (98ddd2c)
@@ -344,11 +410,13 @@ Apply with `supabase db push` before promoting.
 ## v0.20.4 — 2026-08-18
 
 ### Fixes
+
 - fix(mobile): standardize package imports across all screens (16cbeca)
 - fix(mobile): make the Flutter app compile for the first time (4aac1dd)
 - fix(db): apply the migrations the CLI could not see (075b801)
 
 ### Migration notes
+
 - supabase/migrations/20260818140000_recover_orphaned_property_columns.sql
 - supabase/migrations/20260818140100_recover_agent_workflow_tables.sql
 - supabase/migrations/README.md
@@ -362,39 +430,47 @@ Apply with `supabase db push` before promoting.
 ## v0.20.3 — 2026-08-18
 
 ### Fixes
+
 - fix(ci): use valid Java package namespace com.seedhaproperties for Android APK (500ba99)
 
 ## v0.20.2 — 2026-08-18
 
 ### Fixes
+
 - fix(mobile): add asset folders and use Flutter native Gradle distribution (711231c)
 
 ## v0.20.1 — 2026-08-18
 
 ### Fixes
+
 - fix(mobile): fix textAlign syntax and add widget test for SEEDHA Properties watermark (257c274)
 
 ## v0.20.0 — 2026-08-18
 
 ### Features
+
 - feat(mobile): align Flutter app brand to SEEDHA Properties and sync API configuration (d049945)
 
 ## v0.19.0 — 2026-08-18
 
 ### Features
+
 - feat: complete Docker orchestration, Cloudflare Turnstile, WhatsApp leads, and SEEDHA branding (5a698c7)
 
 ## v0.18.0 — 2026-08-18
 
 ### Features
+
 - feat(auth): replace the password checklist with length-based strength (2d96ce7)
 
 ## v0.17.7 — 2026-08-18
 
 ### Fixes
+
 - fix(db): remove the duplicate entitlements table and define the missing trigger fn (59b0670)
 
 ### Migration notes
+
 - supabase/migrations/20260818120000_customer_payments.sql
 
 Apply with `supabase db push` before promoting.
@@ -402,9 +478,11 @@ Apply with `supabase db push` before promoting.
 ## v0.17.6 — 2026-08-18
 
 ### Fixes
+
 - fix(db): correct the admin check in the employee task policies (de4cea2)
 
 ### Migration notes
+
 - supabase/migrations/20260817150000_employee_task_tracking.sql
 
 Apply with `supabase db push` before promoting.
@@ -412,9 +490,11 @@ Apply with `supabase db push` before promoting.
 ## v0.17.5 — 2026-08-18
 
 ### Fixes
+
 - fix(db): create employee helper functions in public, not the auth schema (7f75a52)
 
 ### Migration notes
+
 - supabase/migrations/20260817130000_employee_access_and_scoping.sql
 
 Apply with `supabase db push` before promoting.
@@ -422,19 +502,23 @@ Apply with `supabase db push` before promoting.
 ## v0.17.4 — 2026-08-18
 
 ### Fixes
+
 - fix(property-card): remove the layout variant whose default broke every card (465941b)
 
 ## v0.17.3 — 2026-08-18
 
 ### Fixes
+
 - fix(billing): stop an unpayable paywall blocking contact and visits (182fd5d)
 
 ## v0.17.2 — 2026-08-18
 
 ### Fixes
+
 - fix(build): repair a broken main — dead imports, missing table, untyped payments (3d85ab6)
 
 ### Migration notes
+
 - supabase/migrations/20260818090000_add_customer_entitlements.sql
 - supabase/migrations/20260818120000_customer_payments.sql
 
@@ -443,129 +527,155 @@ Apply with `supabase db push` before promoting.
 ## v0.17.1 — 2026-08-18
 
 ### Fixes
+
 - fix(seo,dashboards): repair the empty sitemap and restore a green build (958ed8b)
 - fix(seo): stop one missing column emptying the entire sitemap (57420ff)
 
 ## v0.17.0 — 2026-08-18
 
 ### Features
+
 - feat: complete SEO upgrades, Docker support, and mobile MVP (3b46e0e)
 
 ## v0.16.0 — 2026-08-18
 
 ### Features
+
 - feat(listing): make the wizard actually save the listing (b147fe6)
 
 ## v0.15.5 — 2026-08-17
 
 ### Fixes
+
 - fix(seo): require real depth before submitting a city or locality page (c31bb2f)
 
 ## v0.15.4 — 2026-08-17
 
 ### Fixes
+
 - fix(seo): close four indexing defects found by auditing the live site (4d572ae)
 
 ## v0.15.3 — 2026-08-17
 
 ### Fixes
+
 - fix(security): set the response headers that were missing (ec613bb)
 
 ## v0.15.2 — 2026-08-17
 
 ### Fixes
+
 - fix(dashboards): stop presenting invented records as real data (0a93017)
 
 ## v0.15.1 — 2026-08-17
 
 ### Fixes
+
 - fix(hero): show the photo at its own brightness instead of a dark wash (d5af2ba)
 
 ### Documentation
+
 - docs(readme): rewrite to describe the project as it actually is (024c522)
 
 ## v0.15.0 — 2026-08-17
 
 ### Features
+
 - feat(billing): owner assistance plans with Razorpay checkout (bc1ab40)
 
 ## v0.14.2 — 2026-08-17
 
 ### Fixes
+
 - fix(property-card): stop truncate cutting the price off on desktop (41aecd7)
 
 ## v0.14.1 — 2026-08-17
 
 ### Fixes
+
 - fix(property-card): stop the card clipping its own title, price and button (c8bd001)
 
 ## v0.14.0 — 2026-08-17
 
 ### Features
+
 - feat(listing): show owners what actually happens after they submit (73b759f)
 
 ## v0.13.6 — 2026-08-17
 
 ### Fixes
+
 - fix(listing): store the owner's phone, so enquiries reach the owner (bab11b0)
 
 ## v0.13.5 — 2026-08-17
 
 ### Fixes
+
 - fix(property-card): stop the price overflowing its column on mobile (4976668)
 
 ## v0.13.4 — 2026-08-17
 
 ### Fixes
+
 - fix(brand): version the icon URLs so cached copies of the old logo refresh (c3fe820)
 
 ## v0.13.3 — 2026-08-17
 
 ### Fixes
+
 - fix(build): pin engines.node back to an exact major (2395b85)
 - chore(deps): take the tooling bumps from PR #12 without its lockfile (cd587cd)
 
 ## v0.13.2 — 2026-08-17
 
 ### Fixes
+
 - fix(seo): stop shipping two conflicting canonical tags on every inner page (b13ebf3)
 
 ## v0.13.1 — 2026-08-17
 
 ### Fixes
+
 - fix(admin): commit the EmployeeAccessForm the dashboard imports (7d20bcd)
 
 ## v0.13.0 — 2026-08-17
 
 ### Features
+
 - feat(brand): rename the platform to Seedha Properties (cd8c8e2)
 
 ## v0.12.4 — 2026-08-17
 
 ### Fixes
+
 - fix(ci): repair the lockfile and pin the npm major so `npm ci` stops drifting (edf1cdf)
 
 ## v0.12.3 — 2026-08-17
 
 ### Fixes
+
 - fix(brand): replace the Lovable favicon, serve the OG image, correct env guidance (6d8289d)
 
 ## v0.12.2 — 2026-08-17
 
 ### Fixes
+
 - fix(owner): restore owner-only isolation, and grant the role on first listing (6bebbf0)
 
 ## v0.12.1 — 2026-08-17
 
 ### Fixes
+
 - fix: unbreak /admin, restore claim guards, align sitemap and stale tests (8b34145)
 
 ## v0.12.0 — 2026-08-17
 
 ### Features
+
 - feat(admin): add region-based employee activity tracking (9fe8a84)
 
 ### Migration notes
+
 - supabase/migrations/20260817130000_employee_access_and_scoping.sql
 - supabase/migrations/20260817140000_add_critical_property_specs.sql
 - supabase/migrations/20260817150000_employee_task_tracking.sql
@@ -576,18 +686,22 @@ Apply with `supabase db push` before promoting.
 ## v0.11.0 — 2026-08-17
 
 ### Features
+
 - feat: update property specs and permissions (75853e5)
 - feat: update property specs and permissions (dfd7b38)
 
 ## v0.10.0 — 2026-08-17
 
 ### Features
+
 - feat(privacy): consent-gated activity tracking, policy pages and data rights (61b6a98)
 
 ### Fixes
+
 - fix(home): drop unearned claims and name the unlabelled controls (de97efb)
 
 ### Migration notes
+
 - supabase/migrations/20260817120000_add_customer_tracking.sql
 
 Apply with `supabase db push` before promoting.
@@ -595,23 +709,28 @@ Apply with `supabase db push` before promoting.
 ## v0.9.0 — 2026-08-17
 
 ### Features
+
 - feat(ui): update categories, add back buttons, and polish wizard (e269b61)
 
 ## v0.8.1 — 2026-08-16
 
 ### Fixes
+
 - fix(types): resolve all TS errors blocking pre-push hook (0a5ef9a)
 - fix(dashboard): restore sign-out by stopping an infinite render loop (74b72ad)
 
 ## v0.8.0 — 2026-08-16
 
 ### Features
+
 - feat: complete rent and interaction core loops, fix linting (fcf7ce9)
 
 ### Fixes
+
 - fix(auth): stop self-registration from granting its own role (f234307)
 
 ### Migration notes
+
 - supabase/migrations/20260817000000_restrict_self_registration_to_customer.sql
 
 Apply with `supabase db push` before promoting.
@@ -619,24 +738,29 @@ Apply with `supabase db push` before promoting.
 ## v0.7.6 — 2026-08-16
 
 ### Fixes
+
 - fix(cd): stop reporting success for deployments that never happened (7dabec0)
 
 ### Refactoring
+
 - refactor(dashboard): use typed navigation for role redirects (9802bf8)
 
 ## v0.7.5 — 2026-08-16
 
 ### Fixes
+
 - fix(ci): generate the lock with the npm major that CI actually runs (87d9a2f)
 
 ## v0.7.4 — 2026-08-16
 
 ### Fixes
+
 - fix(ci): repair the lock entries npm prunes on non-wasm platforms (81dffb7)
 
 ## v0.7.3 — 2026-08-16
 
 ### Fixes
+
 - fix(ci): resync package-lock so npm ci can install (07c746a)
 - fix(routing): let the locality route actually render (4087ee0)
 - fix(ui): stop the header overflowing at 320px (4f42c50)
@@ -644,6 +768,7 @@ Apply with `supabase db push` before promoting.
 - fix(property): survive the un-applied video/location migration (5f48796)
 
 ### Migration notes
+
 - supabase/migrations/20260815131921_add_video_and_location_to_properties.sql
 
 Apply with `supabase db push` before promoting.
@@ -651,21 +776,25 @@ Apply with `supabase db push` before promoting.
 ## v0.7.2 — 2026-08-16
 
 ### Fixes
+
 - fix(routing): remove conflicting splat route and streamline auth assertions (dfc4765)
 
 ## v0.7.1 — 2026-08-16
 
 ### Fixes
+
 - fix(routing): support non-trailing slash on /rent/$city and normalize test matcher (cf4575c)
 
 ## v0.7.0 — 2026-08-16
 
 ### Features
+
 - feat(ui): upgrade visual design system, enforce route security and audit marketing claims (4c810f3)
 
 ## v0.6.1 — 2026-08-15
 
 ### Fixes
+
 - fix(e2e): stabilize LocationPicker hydration and assertion timings (96279d8)
 
 ## v0.6.0 — 2026-08-15
