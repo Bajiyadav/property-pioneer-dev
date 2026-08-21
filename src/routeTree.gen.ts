@@ -15,6 +15,7 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CareersRouteImport } from './routes/careers'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
@@ -28,6 +29,7 @@ import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
+import { Route as WhyUsRouteImport } from './routes/why-us'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
@@ -95,6 +97,11 @@ const CareersRoute = CareersRouteImport.update({
   path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiePolicyRoute = CookiePolicyRouteImport.update({
   id: '/cookie-policy',
   path: '/cookie-policy',
@@ -158,6 +165,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const TermsOfServiceRoute = TermsOfServiceRouteImport.update({
   id: '/terms-of-service',
   path: '/terms-of-service',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhyUsRoute = WhyUsRouteImport.update({
+  id: '/why-us',
+  path: '/why-us',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -368,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -381,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
+  '/why-us': typeof WhyUsRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
@@ -425,6 +439,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -436,6 +451,7 @@ export interface FileRoutesByTo {
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
+  '/why-us': typeof WhyUsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
@@ -480,6 +496,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRoute
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
@@ -493,6 +510,7 @@ export interface FileRoutesById {
   '/refund-policy': typeof RefundPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
+  '/why-us': typeof WhyUsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/auth_/callback': typeof AuthCallbackRoute
@@ -539,6 +557,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/careers'
+    | '/contact'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -552,6 +571,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
+    | '/why-us'
     | '/admin'
     | '/dashboard'
     | '/auth/callback'
@@ -596,6 +616,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/careers'
+    | '/contact'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -607,6 +628,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
+    | '/why-us'
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
@@ -650,6 +672,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/careers'
+    | '/contact'
     | '/cookie-policy'
     | '/favorites'
     | '/help'
@@ -663,6 +686,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/sitemap.xml'
     | '/terms-of-service'
+    | '/why-us'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/auth_/callback'
@@ -709,6 +733,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRoute
   CareersRoute: typeof CareersRoute
+  ContactRoute: typeof ContactRoute
   CookiePolicyRoute: typeof CookiePolicyRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
@@ -722,6 +747,7 @@ export interface RootRouteChildren {
   RefundPolicyRoute: typeof RefundPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
+  WhyUsRoute: typeof WhyUsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   TenantMatchesRoute: typeof TenantMatchesRoute
   TenantOnboardingRoute: typeof TenantOnboardingRoute
@@ -785,6 +811,13 @@ declare module '@tanstack/react-router' {
       path: '/careers'
       fullPath: '/careers'
       preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookie-policy': {
@@ -876,6 +909,13 @@ declare module '@tanstack/react-router' {
       path: '/terms-of-service'
       fullPath: '/terms-of-service'
       preLoaderRoute: typeof TermsOfServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/why-us': {
+      id: '/why-us'
+      path: '/why-us'
+      fullPath: '/why-us'
+      preLoaderRoute: typeof WhyUsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -1237,6 +1277,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRoute,
   CareersRoute: CareersRoute,
+  ContactRoute: ContactRoute,
   CookiePolicyRoute: CookiePolicyRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
@@ -1250,6 +1291,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundPolicyRoute: RefundPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
+  WhyUsRoute: WhyUsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   TenantMatchesRoute: TenantMatchesRoute,
   TenantOnboardingRoute: TenantOnboardingRoute,

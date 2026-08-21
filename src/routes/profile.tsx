@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+import { sanitizeFullName } from "@/modules/authentication/services/passwordPolicy";
 
 export const Route = createFileRoute("/profile")({
   head: () => {
@@ -170,7 +171,8 @@ function ProfilePage() {
                       <input
                         type="text"
                         value={savingName}
-                        onChange={(e) => setSavingName(e.target.value)}
+                        onChange={(e) => setSavingName(sanitizeFullName(e.target.value))}
+                        onBlur={(e) => setSavingName(sanitizeFullName(e.target.value))}
                         className="rounded-xl border border-border bg-background px-3 py-1.5 text-sm font-bold text-foreground outline-none focus:ring-2 focus:ring-primary"
                         autoFocus
                       />
