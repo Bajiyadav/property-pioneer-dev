@@ -46,6 +46,16 @@ const listingSchema = z.object({
   it_park: z.string().trim().optional().nullable(),
   college: z.string().trim().optional().nullable(),
   hospital: z.string().trim().optional().nullable(),
+  balconies: z.number().int().min(0).max(20).optional().nullable(),
+  exact_floor: z.number().int().min(-5).max(200).optional().nullable(),
+  total_floors: z.number().int().min(0).max(200).optional().nullable(),
+  property_age: z.string().trim().optional().nullable(),
+  facing: z.string().trim().optional().nullable(),
+  parking_covered: z.number().int().min(0).max(20).optional().nullable(),
+  parking_open: z.number().int().min(0).max(20).optional().nullable(),
+  pincode: z.string().trim().optional().nullable(),
+  available_from: z.string().trim().optional().nullable(),
+  rent_negotiable: z.boolean().optional().nullable(),
 });
 
 export const getMyListings = createServerFn({ method: "GET" })

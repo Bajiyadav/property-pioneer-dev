@@ -26,6 +26,16 @@ export interface ListingPayload {
   status?: "draft" | "available";
   locality?: string | null;
   landmark?: string | null;
+  balconies?: number | null;
+  exact_floor?: number | null;
+  total_floors?: number | null;
+  property_age?: string | null;
+  facing?: string | null;
+  parking_covered?: number | null;
+  parking_open?: number | null;
+  pincode?: string | null;
+  available_from?: string | null;
+  rent_negotiable?: boolean | null;
 }
 
 export interface PayloadProblem {
@@ -130,6 +140,33 @@ export function buildListingPayload(
       status: mode === "draft" ? "draft" : "available",
       locality: d.locality?.trim() || null,
       landmark: d.landmark?.trim() || null,
+      balconies:
+        d.balconies !== undefined && d.balconies !== null && !isNaN(Number(d.balconies))
+          ? Math.max(0, Math.trunc(Number(d.balconies)))
+          : null,
+      exact_floor:
+        d.exact_floor !== undefined && d.exact_floor !== null && !isNaN(Number(d.exact_floor))
+          ? Math.trunc(Number(d.exact_floor))
+          : null,
+      total_floors:
+        d.total_floors !== undefined && d.total_floors !== null && !isNaN(Number(d.total_floors))
+          ? Math.max(0, Math.trunc(Number(d.total_floors)))
+          : null,
+      property_age: d.property_age?.trim() || null,
+      facing: d.facing?.trim() || null,
+      parking_covered:
+        d.parking_covered !== undefined &&
+        d.parking_covered !== null &&
+        !isNaN(Number(d.parking_covered))
+          ? Math.max(0, Math.trunc(Number(d.parking_covered)))
+          : null,
+      parking_open:
+        d.parking_open !== undefined && d.parking_open !== null && !isNaN(Number(d.parking_open))
+          ? Math.max(0, Math.trunc(Number(d.parking_open)))
+          : null,
+      pincode: d.pincode?.trim() || null,
+      available_from: d.available_from?.trim() || null,
+      rent_negotiable: typeof d.rent_negotiable === "boolean" ? d.rent_negotiable : null,
     },
   };
 }

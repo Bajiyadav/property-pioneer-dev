@@ -138,4 +138,35 @@ describe("listing payload", () => {
     const r = buildListingPayload({ ...base, listing_type: "sale" });
     expect(r.ok && r.payload.listing_type).toBe("sale");
   });
+
+  it("faithfully preserves all 10 extended property fields from wizard form data", () => {
+    const customData: ListingFormData = {
+      ...base,
+      balconies: 3,
+      exact_floor: 4,
+      total_floors: 12,
+      property_age: "1-5 Years",
+      facing: "North-East",
+      parking_covered: 2,
+      parking_open: 1,
+      pincode: "500081",
+      available_from: "2026-09-01",
+      rent_negotiable: true,
+    };
+
+    const r = buildListingPayload(customData);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    expect(r.payload.balconies).toBe(3);
+    expect(r.payload.exact_floor).toBe(4);
+    expect(r.payload.total_floors).toBe(12);
+    expect(r.payload.property_age).toBe("1-5 Years");
+    expect(r.payload.facing).toBe("North-East");
+    expect(r.payload.parking_covered).toBe(2);
+    expect(r.payload.parking_open).toBe(1);
+    expect(r.payload.pincode).toBe("500081");
+    expect(r.payload.available_from).toBe("2026-09-01");
+    expect(r.payload.rent_negotiable).toBe(true);
+  });
 });

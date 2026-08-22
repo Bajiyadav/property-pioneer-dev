@@ -47,6 +47,16 @@ export interface OwnerListingInput {
   it_park?: string | null;
   college?: string | null;
   hospital?: string | null;
+  balconies?: number | null;
+  exact_floor?: number | null;
+  total_floors?: number | null;
+  property_age?: string | null;
+  facing?: string | null;
+  parking_covered?: number | null;
+  parking_open?: number | null;
+  pincode?: string | null;
+  available_from?: string | null;
+  rent_negotiable?: boolean | null;
 }
 
 const BASE_OWNER_COLUMNS =
@@ -57,7 +67,7 @@ const BASE_OWNER_COLUMNS =
  * fields from `properties/20260815190000`.
  */
 const EXTENDED_OWNER_COLUMNS =
-  "video_url,video_thumbnail_url,video_duration,video_status,video_uploaded_at,locality,landmark,metro_station,it_park,college,hospital";
+  "video_url,video_thumbnail_url,video_duration,video_status,video_uploaded_at,locality,landmark,metro_station,it_park,college,hospital,balconies,exact_floor,total_floors,property_age,facing,parking_covered,parking_open,pincode,available_from,rent_negotiable";
 
 const OWNER_COLUMNS = `${BASE_OWNER_COLUMNS},${EXTENDED_OWNER_COLUMNS}`;
 

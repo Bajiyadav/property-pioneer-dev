@@ -322,6 +322,16 @@ export type Database = {
           media_notes: string | null;
           approx_latitude: number | null;
           approx_longitude: number | null;
+          balconies: number | null;
+          exact_floor: number | null;
+          total_floors: number | null;
+          property_age: string | null;
+          facing: string | null;
+          parking_covered: number | null;
+          parking_open: number | null;
+          pincode: string | null;
+          available_from: string | null;
+          rent_negotiable: boolean | null;
         };
         Insert: {
           id?: string;
@@ -374,6 +384,16 @@ export type Database = {
           media_notes?: string | null;
           approx_latitude?: number | null;
           approx_longitude?: number | null;
+          balconies?: number | null;
+          exact_floor?: number | null;
+          total_floors?: number | null;
+          property_age?: string | null;
+          facing?: string | null;
+          parking_covered?: number | null;
+          parking_open?: number | null;
+          pincode?: string | null;
+          available_from?: string | null;
+          rent_negotiable?: boolean | null;
         };
         Update: {
           id?: string;
@@ -426,6 +446,16 @@ export type Database = {
           media_notes?: string | null;
           approx_latitude?: number | null;
           approx_longitude?: number | null;
+          balconies?: number | null;
+          exact_floor?: number | null;
+          total_floors?: number | null;
+          property_age?: string | null;
+          facing?: string | null;
+          parking_covered?: number | null;
+          parking_open?: number | null;
+          pincode?: string | null;
+          available_from?: string | null;
+          rent_negotiable?: boolean | null;
         };
         Relationships: [];
       };
