@@ -10,7 +10,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { logLiveActivity } from "@/lib/leadRouting";
 
 interface Props {
   selectedBank?: string;
@@ -65,20 +65,15 @@ export function LoanInquiryForm({
     setIsSubmitting(true);
 
     try {
-      // Check current user session if authenticated
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      // Log lead to Supabase
-      try {
-        await supabase.from("messages").insert({
-          content: `[HOME LOAN INQUIRY] Bank: ${preferredBank} | Amount: ₹${loanAmount.toLocaleString("en-IN")} | City: ${city} | Type: ${employmentType} | Applicant: ${fullName} | Phone: +91 ${cleanPhone.slice(-10)}`,
-          receiver_id: session?.user?.id ?? "00000000-0000-0000-0000-000000000000",
-        });
-      } catch {
-        // Continue even if messages table has restrictive RLS for anon
-      }
+      // Log lead to live_activities table for real-time lead dispatch
+      await logLiveActivity({
+        activity_type: "enquiry",
+        locality: city,
+        city,
+        contact_name: fullName,
+        contact_phone: `+91 ${cleanPhone.slice(-10)}`,
+        search_query: `[Home Loan Inquiry] Bank: ${preferredBank} | Amount: ₹${loanAmount.toLocaleString("en-IN")} | Employment: ${employmentType}`,
+      });
 
       sessionStorage.setItem("last_loan_inquiry_ts", String(Date.now()));
       setIsSubmitted(true);
