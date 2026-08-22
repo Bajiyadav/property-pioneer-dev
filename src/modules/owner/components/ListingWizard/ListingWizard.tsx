@@ -1,12 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Check, ChevronRight, ArrowLeft, ArrowRight, Sparkles, Building2 } from "lucide-react";
-import { Step1Location } from "./steps/Step1Location";
-import { Step2Details } from "./steps/Step2Details";
+import {
+  Check,
+  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
+  Sparkles,
+  Building2,
+  ShieldCheck,
+} from "lucide-react";
+import { Step1PropertyDetails } from "./steps/Step1PropertyDetails";
+import { Step2Locality } from "./steps/Step2Locality";
 import { Step3Pricing } from "./steps/Step3Pricing";
 import { Step4Amenities } from "./steps/Step4Amenities";
 import { Step5Photos } from "./steps/Step5Photos";
-import { Step6Review } from "./steps/Step6Review";
+import { Step6Schedule } from "./steps/Step6Schedule";
+import { Step7Review } from "./steps/Step7Review";
 import { ProgressBar } from "./ProgressBar";
 import { MobileListingNav } from "./MobileListingNav";
 import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
@@ -118,20 +127,19 @@ function readStashedDraft(): Partial<ListingFormData> | null {
 }
 
 const steps = [
-  { id: 1, name: "Location", desc: "City & Address" },
-  { id: 2, name: "Details", desc: "Type & Rooms" },
-  { id: 3, name: "Pricing", desc: "Rent & Deposit" },
-  { id: 4, name: "Amenities", desc: "Features & Facilities" },
-  { id: 5, name: "Photos", desc: "Gallery & Video" },
-  { id: 6, name: "Review", desc: "Verify & Submit" },
+  { id: 1, name: "Property Details", desc: "Type, BHK & Area", percent: 0 },
+  { id: 2, name: "Locality", desc: "City & Address", percent: 20 },
+  { id: 3, name: "Pricing", desc: "Rent/Sale & Terms", percent: 40 },
+  { id: 4, name: "Amenities", desc: "Features & Facilities", percent: 60 },
+  { id: 5, name: "Gallery", desc: "Real Photos", percent: 75 },
+  { id: 6, name: "Schedule", desc: "Visit Slots & Days", percent: 90 },
+  { id: 7, name: "Review", desc: "Verify & Submit", percent: 100 },
 ];
 
 export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const navigate = useNavigate();
   const stashedDraft = readStashedDraft();
 
-  // Step comes from the URL search params ONLY — never from stashedDraft. See
-  // resolveInitialStep for why a saved draft must not be able to skip Step 1.
   const initialStep = resolveInitialStep(initialData);
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
@@ -162,12 +170,12 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     area_unit: "Sq.ft",
     furnishing_status: "semi-furnished",
     preferred_tenant: ["Family"],
-    food_preference: "Any",
+    food_preference: "Any (Non-Veg OK)",
     price: 25000,
     deposit: 50000,
     maintenance: 2500,
     maintenance_included: false,
-    amenities: ["Lift", "Power Backup", "Security", "Reserved Parking"],
+    amenities: ["Lift", "Power Backup", "24x7 Security", "Reserved Parking"],
     images: [],
     title: "",
     description: "",
@@ -180,6 +188,11 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     facing: "East",
     available_from: "",
     rent_negotiable: false,
+    visit_availability: "Immediate",
+    visit_days: ["All Days"],
+    visit_time_slots: ["Morning", "Evening"],
+    contact_preference: "all",
+    owner_declaration: false,
     ...(stashedDraft ?? {}),
   });
 
@@ -188,17 +201,29 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   };
 
   const handleNext = () => {
+    // Validation per step
     if (currentStep === 1) {
+      if (!formData.property_type) {
+        toast.error("Please select a property category.");
+        return;
+      }
+      if (!formData.area_sqft || formData.area_sqft < 50) {
+        toast.error("Please enter a valid built-up area (min 50 sq.ft.).");
+        return;
+      }
+    }
+
+    if (currentStep === 2) {
       if (!formData.owner_name?.trim()) {
         toast.error("Please enter your name to proceed.");
         return;
       }
       if (!/^[6-9]\d{9}$/.test((formData.owner_phone ?? "").replace(/\D/g, ""))) {
-        toast.error("Enter a valid 10-digit mobile number so tenants can reach you.");
+        toast.error("Enter a valid 10-digit mobile number so buyers/tenants can reach you.");
         return;
       }
       if (!formData.locality.trim() && !formData.address.trim()) {
-        toast.error("Please enter a locality or address to proceed.");
+        toast.error("Please enter a locality or street address to proceed.");
         return;
       }
 
@@ -208,7 +233,15 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         return;
       }
     }
-    if (currentStep < 6) {
+
+    if (currentStep === 3) {
+      if (!formData.price || formData.price <= 0) {
+        toast.error("Please enter the expected rent or price.");
+        return;
+      }
+    }
+
+    if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -224,6 +257,11 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const handleSave = async (mode: "draft" | "submit") => {
     if (isSaving) return;
 
+    if (mode === "submit" && !formData.owner_declaration) {
+      toast.error("Please accept the Owner Declaration checkbox before submitting.");
+      return;
+    }
+
     const built = buildListingPayload(formData, mode);
     if (!built.ok) {
       toast.error(built.problems[0].message);
@@ -233,7 +271,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     if (status !== "authenticated") {
       saveDraft(formData);
       toast.info("Sign in to save your listing", {
-        description: "Your details are kept and restored when you return.",
+        description: "Your details are kept safe and restored when you return.",
       });
       navigate({ to: "/auth", search: { redirect: "/list-property/wizard" } });
       return;
@@ -254,202 +292,152 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
           description:
             mode === "draft"
               ? "You can resume editing anytime from your dashboard."
-              : "Our moderation team will review and approve your listing within 2-4 hours.",
+              : "Our moderation team will review and verify your listing within 2-4 hours.",
         },
       );
 
-      navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
+      // Local optimistic store
+      addProperty({
+        title: built.payload.title,
+        description: built.payload.description,
+        price: built.payload.price,
+        locality: built.payload.locality || formData.locality,
+        city: built.payload.city,
+        address: built.payload.address,
+        property_type: built.payload.property_type,
+        listing_type: built.payload.listing_type,
+        bedrooms: built.payload.bedrooms,
+        bathrooms: built.payload.bathrooms,
+        area_sqft: built.payload.area_sqft,
+        is_approved: false,
+        is_featured: false,
+        images: built.payload.images.length > 0 ? built.payload.images : ["/placeholder.svg"],
+      });
+
+      navigate({ to: "/dashboard/owner" });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Network error";
-      toast.error(`Unable to save listing: ${message}`);
+      const msg = err instanceof Error ? err.message : "Failed to save listing";
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleSubmit = () => {
-    void handleSave("submit");
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-neutral-50/50">
-      {/* Custom Wizard Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/60 shadow-[var(--shadow-card)] h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" aria-label="Home" className="flex shrink-0 items-center">
-          <BrandMark responsiveName />
-        </Link>
-        <div className="flex items-center gap-3 sm:gap-4">
-          <span className="text-xs font-medium text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
-            {isSaving ? (
-              "Saving..."
-            ) : (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" /> Draft saved just now
-              </>
-            )}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleSave("draft")}
-            disabled={isSaving}
-            className="text-xs font-semibold rounded-full h-8 px-4"
-          >
-            Save &amp; Exit
-          </Button>
+    <div className="min-h-screen bg-background pb-28 md:pb-16">
+      {/* Top Header */}
+      <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border/80 px-4 py-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2">
+              <BrandMark size="sm" />
+            </Link>
+            <span className="text-border">/</span>
+            <span className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <span>Owner Listing Wizard</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSave("draft")}
+              disabled={isSaving}
+              className="text-xs font-semibold rounded-xl"
+            >
+              Save Draft
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 md:pb-12">
-        <div className="mb-4 sm:mb-6 flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-            List your property <span className="text-emerald-600">— 100% FREE</span>
-          </h1>
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-            <Sparkles className="h-3.5 w-3.5" /> Direct Owner
-          </span>
-        </div>
-
-        {/* Progress Stepper & Completion Bar */}
+      {/* Main Form Container */}
+      <main className="max-w-3xl mx-auto px-4 pt-6 sm:pt-8">
         <ProgressBar
           currentStep={currentStep}
-          totalSteps={steps.length}
+          totalSteps={7}
           steps={steps}
-          onStepClick={(stepId) => {
-            if (stepId < currentStep) setCurrentStep(stepId);
+          onStepClick={(id) => {
+            if (id < currentStep) setCurrentStep(id);
           }}
         />
 
-        {/* Location-First Pre-Fill Continuation Banner */}
-        {formData.locality && formData.city && currentStep >= 2 && (
-          <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/50 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
-                📍
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md">
-                    Step 1 Completed
-                  </span>
-                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                    {formData.property_type || "Apartment"} ·{" "}
-                    {formData.listing_type === "sale" ? "For Sale" : "For Rent"}
-                  </span>
-                </div>
-                <p className="text-sm sm:text-base font-bold text-emerald-950 dark:text-emerald-100 mt-0.5">
-                  {formData.locality}, {formData.city}{" "}
-                  <span className="text-xs font-normal text-emerald-700 dark:text-emerald-400">
-                    (Pre-filled from your selection)
-                  </span>
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentStep(1);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-950 dark:hover:text-emerald-100 underline underline-offset-4 shrink-0 px-3 py-1.5 rounded-lg hover:bg-emerald-200/50 dark:hover:bg-emerald-900/50 transition-colors"
-            >
-              Change Location (Step 1)
-            </button>
-          </div>
-        )}
+        {/* Dynamic Step Body */}
+        <div className="mt-4">
+          {currentStep === 1 && (
+            <Step1PropertyDetails data={formData} updateData={updateFormData} />
+          )}
+          {currentStep === 2 && <Step2Locality data={formData} updateData={updateFormData} />}
+          {currentStep === 3 && <Step3Pricing data={formData} updateData={updateFormData} />}
+          {currentStep === 4 && <Step4Amenities data={formData} updateData={updateFormData} />}
+          {currentStep === 5 && <Step5Photos data={formData} updateData={updateFormData} />}
+          {currentStep === 6 && <Step6Schedule data={formData} updateData={updateFormData} />}
+          {currentStep === 7 && <Step7Review data={formData} updateData={updateFormData} />}
+        </div>
 
-        {/* Main Form Step Container */}
-        <div className="bg-card rounded-3xl border border-border/80 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300">
-          <div className="p-5 sm:p-8 md:p-10">
-            {currentStep === 1 && <Step1Location data={formData} updateData={updateFormData} />}
-            {currentStep === 2 && <Step2Details data={formData} updateData={updateFormData} />}
-            {currentStep === 3 && <Step3Pricing data={formData} updateData={updateFormData} />}
-            {currentStep === 4 && <Step4Amenities data={formData} updateData={updateFormData} />}
-            {currentStep === 5 && <Step5Photos data={formData} updateData={updateFormData} />}
-            {currentStep === 6 && <Step6Review data={formData} />}
-          </div>
-
-          {/* Desktop Footer Actions */}
-          <div className="hidden md:flex px-6 md:px-10 py-5 bg-secondary/30 border-t border-border justify-between items-center">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentStep === 1}
-              className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm flex items-center gap-2 border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Previous Step
-            </Button>
-
-            <div className="flex items-center gap-3">
+        {/* Desktop Step Action Footer */}
+        <div className="hidden md:flex items-center justify-between gap-4 mt-10 pt-6 border-t border-border/80">
+          <div>
+            {currentStep > 1 && (
               <Button
                 variant="outline"
-                onClick={() => void handleSave("draft")}
+                onClick={handleBack}
                 disabled={isSaving}
-                className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
+                className="gap-2 rounded-xl text-sm font-semibold"
               >
-                {isSaving ? "Saving…" : "Save Draft"}
+                <ArrowLeft className="h-4 w-4" /> Back
               </Button>
+            )}
+          </div>
 
-              {currentStep < 6 ? (
-                <Button
-                  onClick={handleNext}
-                  className="rounded-xl px-7 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#0F766E] hover:bg-[#0F766E]/90 text-white shadow-md hover:shadow-lg transition-all min-h-[44px]"
-                >
-                  {currentStep === 1 ? "Continue to Property Details" : "Save & Continue"}
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSaving}
-                  className="rounded-xl px-8 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all min-h-[44px]"
-                >
-                  {isSaving ? "Submitting..." : "Submit Listing Now"}
-                </Button>
-              )}
-            </div>
+          <div className="flex items-center gap-3">
+            {currentStep === 7 ? (
+              <Button
+                onClick={() => handleSave("submit")}
+                disabled={isSaving}
+                className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md"
+              >
+                <Check className="h-4 w-4" />
+                <span>{isSaving ? "Submitting..." : "Submit for Moderation"}</span>
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNext}
+                disabled={isSaving}
+                className="gap-2 bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-xl shadow-xs"
+              >
+                <span>Continue</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
+      </main>
 
-        {/* Mobile Fixed Bottom Navigation Bar */}
-        <MobileListingNav
-          currentStep={currentStep}
-          totalSteps={steps.length}
-          isSaving={isSaving}
-          onBack={handleBack}
-          onNext={handleNext}
-          onSaveSubmit={handleSubmit}
-        />
+      {/* Mobile Sticky Action Bar */}
+      <MobileListingNav
+        currentStep={currentStep}
+        totalSteps={7}
+        isSaving={isSaving}
+        onBack={handleBack}
+        onNext={handleNext}
+        onSaveSubmit={() => handleSave("submit")}
+      />
 
-        <OwnerSmartAuthModal
-          isOpen={showOwnerAuthModal}
-          onClose={() => setShowOwnerAuthModal(false)}
-          phone={formData.owner_phone || ""}
-          onSuccess={() => {
-            setCurrentStep(2);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
-      </div>
-
-      {/* Minimal Wizard Footer */}
-      <footer className="mt-auto border-t border-border/60 bg-secondary/30 py-6">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
-          <p>© {new Date().getFullYear()} Seedha Properties</p>
-          <div className="flex items-center gap-4">
-            <Link to="/help" className="hover:text-foreground">
-              Need help?
-            </Link>
-            <Link to="/privacy-policy" className="hover:text-foreground">
-              Privacy
-            </Link>
-            <Link to="/terms-of-service" className="hover:text-foreground">
-              Terms
-            </Link>
-          </div>
-        </div>
-      </footer>
+      {/* Owner Auth Modal when step 2 phone requires authentication */}
+      <OwnerSmartAuthModal
+        isOpen={showOwnerAuthModal}
+        onClose={() => setShowOwnerAuthModal(false)}
+        phone={formData.owner_phone || ""}
+        onSuccess={async () => {
+          setShowOwnerAuthModal(false);
+          await refreshSession();
+          toast.success("Phone verified! Proceeding with your listing.");
+          setCurrentStep(3);
+        }}
+      />
     </div>
   );
 }
