@@ -2,7 +2,7 @@ import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { IndianRupee, Users, Sparkles, Check, Info, ShieldCheck, Tag } from "lucide-react";
-import type { StepProps } from "../types";
+import type { StepProps, ListingFormData } from "../types";
 
 export function Step3Pricing({ data, updateData }: StepProps) {
   const isSale = data.listing_type === "sale";

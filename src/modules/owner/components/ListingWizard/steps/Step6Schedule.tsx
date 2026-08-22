@@ -2,7 +2,7 @@ import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Calendar, Clock, Phone, MessageSquare, ShieldCheck, Check, Sparkles } from "lucide-react";
-import type { StepProps } from "../types";
+import type { StepProps, ListingFormData } from "../types";
 
 export function Step6Schedule({ data, updateData }: StepProps) {
   const availabilityOptions = [
