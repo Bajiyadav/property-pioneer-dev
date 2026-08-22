@@ -44,7 +44,7 @@ jobs:
 
       - name: Lint migration SQL
         run: |
-          if grep -rniE '\b(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE)\b' supabase/migrations/; then
+          if grep -rniE '\b(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE|DELETE\s+FROM|UPDATE\s+public\.)\b' supabase/migrations/; then
             echo "::error::Destructive migration detected — requires explicit review"; exit 1
           fi
           echo "✓ No destructive statements in migrations"

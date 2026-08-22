@@ -280,3 +280,25 @@ describe("profile self-service cannot become authorisation", () => {
     );
   });
 });
+
+describe("executable migrations safety", () => {
+  it("contains no destructive statements in active migration files", () => {
+    const files = topLevelFiles().map((f) => ({
+      name: f,
+      content: readFileSync(join(MIGRATIONS, f), "utf-8"),
+    }));
+
+    const destructivePattern =
+      /\b(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE|DELETE\s+FROM|UPDATE\s+public\.)\b/i;
+
+    const offendingFiles = files.filter((f) => {
+      const stripped = f.content.replace(/--.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+      return destructivePattern.test(stripped);
+    });
+
+    expect(
+      offendingFiles.map((f) => f.name),
+      "executable migrations must not contain destructive DROP, TRUNCATE, DELETE, or UPDATE statements",
+    ).toEqual([]);
+  });
+});
