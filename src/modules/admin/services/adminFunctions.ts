@@ -90,7 +90,7 @@ export const getAdminProperties = createServerFn({ method: "GET" })
     const { data } = await authCtx.supabase
       .from("properties")
       .select(
-        "id, title, city, locality, region, listing_type, status, price, created_at, is_approved, is_featured, video_url, video_status",
+        "id, title, description, price, city, address, bedrooms, bathrooms, area_sqft, property_type, listing_type, status, images, owner_name, owner_phone, owner_email, is_approved, is_featured, owner_verification_status, property_verification_status, verified_by, verified_at, verification_notes, is_zero_brokerage, video_url, video_status, locality, landmark, region, created_at",
       )
       .order("created_at", { ascending: false });
     return data || [];
@@ -179,8 +179,12 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
         id: z.string().uuid(),
         is_approved: z.boolean().optional(),
         is_featured: z.boolean().optional(),
-        status: z.enum(["available", "rented", "sold"]).optional(),
+        status: z.enum(["available", "rented", "sold", "rejected", "pending", "draft"]).optional(),
+        verification_status: z.enum(["pending", "verified", "rejected"]).optional(),
+        verification_notes: z.string().optional(),
         video_status: z.enum(["pending", "approved", "rejected"]).optional(),
+        verified_at: z.string().optional(),
+        verified_by: z.string().optional(),
       })
       .parse(input),
   )
@@ -188,7 +192,10 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
     const authCtx = context as AuthContext;
     await assertEmployee(authCtx);
     const { id, ...patch } = data;
-    const { error } = await authCtx.supabase.from("properties").update(patch).eq("id", id);
+    const { error } = await authCtx.supabase
+      .from("properties")
+      .update(patch as Database["public"]["Tables"]["properties"]["Update"])
+      .eq("id", id);
     if (error) throw new Error(error.message);
 
     // Log employee action
