@@ -29,6 +29,14 @@ export type Property = {
   video_status?: "pending" | "approved" | "rejected";
   locality?: string | null;
   landmark?: string | null;
+  /**
+   * Approximate map position, rounded to ~110 m by a generated column.
+   * The exact latitude/longitude are deliberately absent from this type:
+   * they are not granted to anon or authenticated, so no public query can
+   * return them. See migration 20260822143802.
+   */
+  approx_latitude?: number | null;
+  approx_longitude?: number | null;
   metro_station?: string | null;
   it_park?: string | null;
   college?: string | null;
@@ -52,6 +60,14 @@ export type Property = {
   furnishing_status?: "fully-furnished" | "semi-furnished" | "unfurnished";
   amenities?: string[];
   admin_notes?: string;
+  /**
+   * Media moderation, written by admins and area agents through
+   * PropertyMediaModal. Not in EXTENDED_PROPERTY_COLUMNS on purpose: these are
+   * staff fields and are not granted to anon, so a public select naming them
+   * would fail with 42501.
+   */
+  media_status?: "pending_review" | "verified" | "needs_reshoot" | null;
+  media_notes?: string | null;
   owner_id?: string;
   floor_number?: string;
   total_rooms?: number;
@@ -88,7 +104,7 @@ const BASE_PROPERTY_COLUMNS =
   "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
 
 const EXTENDED_PROPERTY_COLUMNS =
-  "pincode,video_url,video_status,video_urls,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable,project_name,bhk_type,area_unit,deposit,maintenance,furnishing_status";
+  "pincode,approx_latitude,approx_longitude,video_url,video_status,video_urls,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable,project_name,bhk_type,area_unit,deposit,maintenance,furnishing_status";
 
 export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
 

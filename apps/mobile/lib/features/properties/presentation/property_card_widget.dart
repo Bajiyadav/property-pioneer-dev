@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PropertyCardWidget extends StatelessWidget {
   final Property property;
@@ -53,10 +54,16 @@ class PropertyCardWidget extends StatelessWidget {
                       SizedBox(
                         height: 185,
                         width: double.infinity,
-                        child: Image.network(
-                          coverImage,
+                        child: CachedNetworkImage(
+                          imageUrl: coverImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey.shade100,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
                             color: Colors.grey.shade100,
                             child: const Center(
                               child: Icon(Icons.home_work_outlined, size: 44, color: Colors.grey),

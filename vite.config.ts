@@ -23,6 +23,10 @@ import { nitro } from "nitro/vite";
  * silently ignored. Reproducing a no-op would only look like configuration.
  */
 export default defineConfig(({ command }) => ({
+  server: {
+    allowedHosts: true,
+  },
+
   css: {
     // Matches the previous behaviour. lightningcss ships with Vite 8.
     transformer: "lightningcss",

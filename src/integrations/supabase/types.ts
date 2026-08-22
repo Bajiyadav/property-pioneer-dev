@@ -318,6 +318,10 @@ export type Database = {
           project_name: string | null;
           bhk_type: string | null;
           area_unit: string | null;
+          media_status: string | null;
+          media_notes: string | null;
+          approx_latitude: number | null;
+          approx_longitude: number | null;
         };
         Insert: {
           id?: string;
@@ -366,6 +370,10 @@ export type Database = {
           project_name?: string | null;
           bhk_type?: string | null;
           area_unit?: string | null;
+          media_status?: string | null;
+          media_notes?: string | null;
+          approx_latitude?: number | null;
+          approx_longitude?: number | null;
         };
         Update: {
           id?: string;
@@ -414,6 +422,10 @@ export type Database = {
           project_name?: string | null;
           bhk_type?: string | null;
           area_unit?: string | null;
+          media_status?: string | null;
+          media_notes?: string | null;
+          approx_latitude?: number | null;
+          approx_longitude?: number | null;
         };
         Relationships: [];
       };

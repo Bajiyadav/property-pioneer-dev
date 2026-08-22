@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'config/theme.dart';
 import 'config/app_routes.dart';
 import 'services/supabase_service.dart';
@@ -11,7 +12,13 @@ void main() async {
   } catch (e) {
     // Offline resilience
   }
-  runApp(const ProviderScope(child: SeedhaPropertiesMobileApp()));
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = const String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+      options.tracesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(const ProviderScope(child: SeedhaPropertiesMobileApp())),
+  );
 }
 
 class SeedhaPropertiesMobileApp extends StatelessWidget {

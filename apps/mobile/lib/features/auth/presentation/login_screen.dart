@@ -201,17 +201,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    labelText: 'Email Address',
-                    hintText: 'name@example.com',
+                    labelText: 'Email Address or Mobile Number',
                     prefixIcon: const Icon(Icons.email_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Please enter a valid email address';
+                      return 'Please enter your email or phone number';
                     }
                     return null;
                   },
@@ -234,6 +230,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     }
                     return null;
                   },
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.go('/forgot-password'),
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 SizedBox(

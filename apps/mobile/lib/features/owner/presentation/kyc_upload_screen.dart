@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../config/theme.dart';
 import '../../../services/supabase_service.dart';
 
@@ -16,6 +19,8 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
   bool _isLoading = true;
   bool _isUploading = false;
   List<Map<String, dynamic>> _documents = [];
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   String get currentUserId => SupabaseService.client.auth.currentUser?.id ?? '';
 
@@ -46,20 +51,53 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() => _selectedImage = File(pickedFile.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _submitVerification() async {
     if (currentUserId.isEmpty || _isUploading) return;
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a document image first.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
 
     setState(() => _isUploading = true);
 
     try {
+      final filePath = '$currentUserId/${_selectedDocType}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      // Upload to properties bucket (or kyc bucket if exists)
+      await SupabaseService.client.storage.from('properties').upload(
+        filePath,
+        _selectedImage!,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+      );
+
+      final publicUrl = SupabaseService.client.storage.from('properties').getPublicUrl(filePath);
+
       await SupabaseService.client.from('kyc_documents').insert({
         'owner_id': currentUserId,
         'document_type': _selectedDocType,
-        'file_path': '$currentUserId/${_selectedDocType}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        'file_path': publicUrl,
         'status': 'pending',
       });
 
       if (mounted) {
+        setState(() => _selectedImage = null);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Document submitted for verification review!'),
@@ -210,7 +248,7 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
                         ),
                         const SizedBox(height: 20),
                         InkWell(
-                          onTap: _submitVerification,
+                          onTap: _pickImage,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -219,18 +257,23 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: const Color(0xFF99F6E4), style: BorderStyle.solid),
                             ),
-                            child: Column(
-                              children: [
-                                const Icon(Icons.cloud_upload_outlined, size: 36, color: AppTheme.primaryColor),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Tap to Attach $_selectedDocType Document',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryColor),
-                                ),
-                                const SizedBox(height: 4),
-                                const Text('Encrypted securely in private storage', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-                              ],
-                            ),
+                            child: _selectedImage != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(_selectedImage!, height: 120, fit: BoxFit.cover),
+                                  )
+                                : Column(
+                                    children: [
+                                      const Icon(Icons.cloud_upload_outlined, size: 36, color: AppTheme.primaryColor),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Tap to Attach $_selectedDocType Document',
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primaryColor),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text('Encrypted securely in private storage', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                                    ],
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 20),

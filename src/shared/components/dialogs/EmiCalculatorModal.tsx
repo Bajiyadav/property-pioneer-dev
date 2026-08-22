@@ -195,9 +195,19 @@ export function EmiCalculatorModal({ isOpen, onClose, initialPrice = 5000000 }: 
             </div>
           </div>
 
-          <p className="text-[11px] text-muted-foreground">
-            An indicative estimate only. Seedha Properties is not a lender and does not arrange
-            finance — confirm actual rates and eligibility with your bank.
+          <div className="pt-2">
+            <a
+              href="/home-loans"
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90"
+            >
+              Explore Full Home Loan Hub &amp; Bank Offers →
+            </a>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground text-center">
+            An indicative estimate only. Seedha Properties connects buyers with verified lenders —
+            confirm actual sanctions and eligibility with your bank.
           </p>
         </div>
       </div>

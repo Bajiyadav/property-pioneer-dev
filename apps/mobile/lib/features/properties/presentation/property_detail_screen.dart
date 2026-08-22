@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:seedha_properties_mobile/config/env.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/services/enquiry_service.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PropertyDetailScreen extends ConsumerStatefulWidget {
   final String propertyId;
@@ -235,27 +241,51 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   }
 
   Future<void> _openWhatsApp(BuildContext context, Property property) async {
-    final phone = property.ownerPhone ?? '+919876543210';
-    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    final msg = Uri.encodeComponent(
-      "Hi! I am interested in your property listed on Seedha Properties: '${property.title}' (${property.formattedPrice}) in ${property.locationLabel}. Is it still available for direct booking?",
-    );
-    final url = Uri.parse("https://wa.me/$cleanPhone?text=$msg");
-
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
+      final token = Supabase.instance.client.auth.currentSession?.accessToken;
+      final headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      final response = await http.post(
+        Uri.parse('${AppEnv.apiBaseUrl}/public/properties/${property.id}/contact'),
+        headers: headers,
+        body: jsonEncode({}), // Optional turnstileToken could be added here
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['ok'] == true) {
+        final url = Uri.parse(data['whatsappUrl']);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Could not open WhatsApp. Please check if it is installed.')),
+            );
+          }
+        }
+      } else if (response.statusCode == 403 || response.statusCode == 409 || response.statusCode == 429) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['error'] ?? 'Contact limit reached.')),
+          );
+        }
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open WhatsApp. Connecting owner directly...')),
+            SnackBar(content: Text(data['error'] ?? 'Could not contact owner. Try again.')),
           );
         }
       }
-    } catch (_) {
+    } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('WhatsApp launched.')),
+          SnackBar(content: Text('An error occurred: $e')),
         );
       }
     }
@@ -341,10 +371,16 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       final url = property.images.isNotEmpty
                           ? property.images[idx]
                           : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
-                      return Image.network(
-                        url,
+                      return CachedNetworkImage(
+                        imageUrl: url,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
                           color: Colors.grey.shade200,
                           child: const Center(
                             child: Icon(Icons.home, size: 64, color: Colors.grey),
@@ -412,6 +448,34 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    onTap: () => context.push('/loans'),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.2)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.account_balance_outlined, size: 14, color: Color(0xFF0284C7)),
+                          SizedBox(width: 6),
+                          Text(
+                            'Home Loans from 8.40% p.a. • Calculate EMI →',
+                            style: TextStyle(
+                              color: Color(0xFF0284C7),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -580,14 +644,15 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                           child: ListTile(
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                simProp.images.isNotEmpty
+                              child: CachedNetworkImage(
+                                imageUrl: simProp.images.isNotEmpty
                                     ? simProp.images.first
                                     : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200&auto=format&fit=crop&q=80',
                                 width: 56,
                                 height: 56,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.home, size: 32),
+                                placeholder: (context, url) => const SizedBox(width: 56, height: 56, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+                                errorWidget: (context, url, error) => const Icon(Icons.home, size: 32),
                               ),
                             ),
                             title: Text(simProp.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),

@@ -9,7 +9,17 @@ import {
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { Calendar, Clock, Video, User, Phone, Mail, Loader2, CheckCircle2, ShieldCheck } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Video,
+  User,
+  Phone,
+  Mail,
+  Loader2,
+  CheckCircle2,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { scheduleCustomerVisit } from "@/lib/leadRouting";
 import { useAuthSession } from "@/hooks/useAuthSession";
@@ -32,7 +42,9 @@ export function ScheduleVisitModal({
   const { user } = useAuthSession();
   const [visitType, setVisitType] = useState<"in_person" | "video_call">("in_person");
   const [customerName, setCustomerName] = useState(user?.user_metadata?.full_name || "");
-  const [customerPhone, setCustomerPhone] = useState(user?.user_metadata?.phone?.replace("+91", "") || "");
+  const [customerPhone, setCustomerPhone] = useState(
+    user?.user_metadata?.phone?.replace("+91", "") || "",
+  );
   const [customerEmail, setCustomerEmail] = useState(user?.email || "");
   const [preferredDate, setPreferredDate] = useState(() => {
     const tomorrow = new Date();
@@ -87,7 +99,8 @@ export function ScheduleVisitModal({
             <Calendar className="h-5 w-5 text-primary" /> Schedule Property Visit
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">
-            Book an in-person or live video tour for <strong className="text-foreground">{propertyTitle}</strong> ({locality})
+            Book an in-person or live video tour for{" "}
+            <strong className="text-foreground">{propertyTitle}</strong> ({locality})
           </DialogDescription>
         </DialogHeader>
 
@@ -99,8 +112,14 @@ export function ScheduleVisitModal({
             <div>
               <h3 className="text-lg font-bold text-foreground">Visit Request Received!</h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Your request for a <strong className="text-foreground">{visitType === "video_call" ? "Video Tour" : "In-Person Visit"}</strong> on <strong className="text-foreground">{preferredDate}</strong> ({preferredSlot}) has been logged.
-                The assigned <strong className="text-foreground">{locality} Area Agent</strong> will contact you shortly.
+                Your request for a{" "}
+                <strong className="text-foreground">
+                  {visitType === "video_call" ? "Video Tour" : "In-Person Visit"}
+                </strong>{" "}
+                on <strong className="text-foreground">{preferredDate}</strong> ({preferredSlot})
+                has been logged. The assigned{" "}
+                <strong className="text-foreground">{locality} Area Agent</strong> will contact you
+                shortly.
               </p>
             </div>
             <button
@@ -190,7 +209,9 @@ export function ScheduleVisitModal({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-bold text-foreground mb-1 block">Mobile Number *</Label>
+                  <Label className="text-xs font-bold text-foreground mb-1 block">
+                    Mobile Number *
+                  </Label>
                   <Input
                     required
                     type="tel"
@@ -201,7 +222,9 @@ export function ScheduleVisitModal({
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-bold text-foreground mb-1 block">Email Address</Label>
+                  <Label className="text-xs font-bold text-foreground mb-1 block">
+                    Email Address
+                  </Label>
                   <Input
                     type="email"
                     placeholder="you@email.com"
@@ -229,7 +252,11 @@ export function ScheduleVisitModal({
                 disabled={submitting}
                 className="w-full py-3 bg-primary text-primary-foreground font-black rounded-2xl text-xs shadow-lg transition hover:brightness-110 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ShieldCheck className="h-4 w-4" />
+                )}
                 Confirm & Request Visit
               </button>
             </div>

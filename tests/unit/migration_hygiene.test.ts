@@ -161,3 +161,122 @@ describe("recovery migrations are present", () => {
     expect(existsSync(join(MIGRATIONS, "README.md"))).toBe(true);
   });
 });
+
+describe("exact property coordinates are never exposed publicly", () => {
+  const sql = allSql();
+  const service = readFileSync(
+    join(process.cwd(), "src/modules/property/services/propertyService.ts"),
+    "utf-8",
+  );
+
+  /**
+   * The location migration originally shipped a SECURITY DEFINER function doing
+   * `SELECT * FROM public.properties` inside a bounding-box filter, with EXECUTE
+   * defaulting to PUBLIC and no `is_approved` filter. SECURITY DEFINER bypasses
+   * both RLS and the column-level grants, so any anonymous caller could have
+   * read every column of every listing — including `owner_phone`, which a direct
+   * read correctly refuses with 42501, and listings still awaiting moderation.
+   */
+  it("defines no SECURITY DEFINER function that selects * from properties", () => {
+    const offenders: string[] = [];
+    // Strip `--` comments first: this file's own header quotes the vulnerable
+    // definition verbatim to explain it, and an unstripped scan matches that
+    // comment and fires on every run. The capture must also reach PAST the
+    // opening `$$` — a non-greedy match stops there and never sees the body,
+    // which makes the whole assertion silently vacuous.
+    const code = sql.replace(/--.*$/gm, "");
+    for (const m of code.matchAll(/CREATE (?:OR REPLACE )?FUNCTION([\s\S]*?\$\$[\s\S]*?)\$\$/gi)) {
+      const body = m[1];
+      if (/SECURITY DEFINER/i.test(body) && /SELECT\s+\*\s+FROM\s+public\.properties/i.test(body)) {
+        offenders.push(body.slice(0, 80).replace(/\s+/g, " "));
+      }
+    }
+    expect(
+      offenders,
+      "a SECURITY DEFINER function returning properties.* bypasses RLS and the " +
+        "column grants that keep owner_phone private",
+    ).toEqual([]);
+  });
+
+  it("never grants the exact latitude or longitude to a public role", () => {
+    const granted = [...sql.matchAll(/GRANT SELECT\s*\(([^)]+)\)/gi)]
+      .flatMap((m) => m[1].split(","))
+      .map((c) => c.trim().toLowerCase());
+    for (const col of ["latitude", "longitude", "location"]) {
+      expect(
+        granted,
+        `${col} must stay private — grant the approximate pair instead`,
+      ).not.toContain(col);
+    }
+  });
+
+  it("selects only the approximate pair on public queries", () => {
+    const cols = service
+      .replace(/^\s*\/\/.*$/gm, "")
+      .match(/const EXTENDED_PROPERTY_COLUMNS\s*=\s*"([^"]+)"/)?.[1]
+      .split(",")
+      .map((c) => c.trim());
+    expect(cols).toContain("approx_latitude");
+    expect(cols).toContain("approx_longitude");
+    expect(cols, "the exact coordinate must never be requested publicly").not.toContain("latitude");
+    expect(cols, "the exact coordinate must never be requested publicly").not.toContain(
+      "longitude",
+    );
+  });
+});
+
+describe("profile self-service cannot become authorisation", () => {
+  // Comments must be stripped: the migration that FIXES this quotes the
+  // vulnerable policy verbatim in its header to explain it.
+  const code = allSql().replace(/--.*$/gm, "");
+
+  /**
+   * `authenticated` held a table-level UPDATE grant on public.profiles, which
+   * covers every column, while RLS let a user update their own row. Together
+   * that let any signed-up user write their own `profiles.role`. An UPDATE
+   * policy on public.properties then trusted that column for admin, so the
+   * escalation ran from "edit my display name" to "edit every listing".
+   */
+  it("grants profile UPDATE column by column, never table-wide", () => {
+    expect(
+      code,
+      "the broad table-level grant must be revoked before a column grant means anything",
+    ).toMatch(/REVOKE\s+UPDATE\s+ON\s+public\.profiles\s+FROM\s+authenticated/i);
+
+    const columnGrants = [
+      ...code.matchAll(/GRANT\s+UPDATE\s*\(([^)]+)\)\s*\n?\s*ON\s+public\.profiles/gi),
+    ]
+      .flatMap((m) => m[1].split(","))
+      .map((c) => c.trim().toLowerCase());
+    expect(
+      columnGrants.length,
+      "expected a column-scoped UPDATE grant on profiles",
+    ).toBeGreaterThan(0);
+    for (const priv of ["role", "assigned_localities", "agent_status", "agency_name", "id"]) {
+      expect(
+        columnGrants,
+        `${priv} is privilege-bearing and must not be user-writable`,
+      ).not.toContain(priv);
+    }
+  });
+
+  it("derives authorisation from user_roles, not from profiles.role", () => {
+    const offenders = [...code.matchAll(/CREATE POLICY([\s\S]*?);/gi)]
+      .map((m) => m[1])
+      .filter((body) => /profiles\.role\s*=\s*'admin'/i.test(body));
+    expect(
+      offenders.map((o) => o.slice(0, 60).replace(/\s+/g, " ")),
+      "profiles.role is writable by the account holder; use public.is_admin() / " +
+        "public.caller_has_role(), which read the authoritative user_roles table",
+    ).toEqual([]);
+  });
+
+  it("keeps the role helpers callable only by signed-in users", () => {
+    expect(code).toMatch(
+      /REVOKE ALL ON FUNCTION public\.caller_has_role\(text\) FROM PUBLIC, anon/i,
+    );
+    expect(code).toMatch(
+      /GRANT EXECUTE ON FUNCTION public\.caller_has_role\(text\) TO authenticated/i,
+    );
+  });
+});

@@ -9,16 +9,31 @@ import '../features/properties/presentation/property_detail_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/signup_screen.dart';
 import '../features/auth/presentation/verify_email_screen.dart';
+import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/customer/presentation/customer_dashboard_screen.dart';
 import '../features/owner/presentation/owner_dashboard_screen.dart';
-import '../features/owner/presentation/list_property_screen.dart';
+import '../features/properties/presentation/wizard/listing_wizard_screen.dart';
 import '../features/owner/presentation/kyc_upload_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
+import '../features/loans/presentation/home_loans_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
+  redirect: (context, state) {
+    final session = Supabase.instance.client.auth.currentSession;
+    final isAuth = session != null;
+    final path = state.uri.path;
+    
+    final isProtected = path.contains('-dashboard') || path.startsWith('/profile');
+    
+    if (isProtected && !isAuth) {
+      return '/login';
+    }
+    return null;
+  },
   routes: [
     // Bottom Navigation Shell with 5 Tabs
     ShellRoute(
@@ -71,6 +86,14 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const AIAssistantScreen(),
     ),
     GoRoute(
+      path: '/loans',
+      builder: (context, state) => const HomeLoansScreen(),
+    ),
+    GoRoute(
+      path: '/home-loans',
+      builder: (context, state) => const HomeLoansScreen(),
+    ),
+    GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
     ),
@@ -80,7 +103,14 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/verify-email',
-      builder: (context, state) => const VerifyEmailScreen(),
+      builder: (context, state) {
+        final email = state.extra as String?;
+        return VerifyEmailScreen(email: email);
+      },
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
       path: '/customer-dashboard',
@@ -92,7 +122,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/owner-dashboard/list-property',
-      builder: (context, state) => const ListPropertyScreen(),
+      builder: (context, state) => const ListingWizardScreen(),
     ),
     GoRoute(
       path: '/owner-dashboard/kyc',

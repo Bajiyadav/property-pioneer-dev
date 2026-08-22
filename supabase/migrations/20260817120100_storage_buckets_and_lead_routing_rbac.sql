@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS public.live_activities (
 -- Indexes for high performance filtering
 CREATE INDEX IF NOT EXISTS idx_live_activities_locality ON public.live_activities(locality);
 CREATE INDEX IF NOT EXISTS idx_live_activities_created ON public.live_activities(created_at DESC);
+ALTER TABLE public.live_activities ADD COLUMN IF NOT EXISTS assigned_agent_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_live_activities_agent ON public.live_activities(assigned_agent_id);
 
 ALTER TABLE public.live_activities ENABLE ROW LEVEL SECURITY;

@@ -3,7 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, SlidersHorizontal, List, MapPin, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
-import { PropertyMapView } from "@/modules/property/components/PropertyMapView";
+import { PropertyMap } from "@/components/PropertyMap";
+import { toMapProperties } from "@/components/propertyMapData";
 import { LocationPicker } from "@/modules/property/components/LocationPicker";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
 import { trackSearch } from "@/modules/analytics/services/tracking";
@@ -601,7 +602,7 @@ export function SearchUI({
             </div>
           ) : (
             <div className="h-[600px] w-full overflow-hidden rounded-3xl border border-border shadow-sm">
-              <PropertyMapView properties={properties} />
+              <PropertyMap properties={toMapProperties(properties)} />
             </div>
           )}
         </div>

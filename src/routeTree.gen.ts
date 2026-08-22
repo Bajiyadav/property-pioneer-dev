@@ -19,7 +19,9 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as HomeLoansRouteImport } from './routes/home-loans'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
+import { Route as LoansRouteImport } from './routes/loans'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -54,6 +56,7 @@ import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardCustomerRouteImport } from './routes/_authenticated/dashboard/customer'
 import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authenticated/dashboard/owner'
 import { Route as AuthenticatedDashboardTenantProfileRouteImport } from './routes/_authenticated/dashboard/tenant-profile'
+import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
@@ -117,9 +120,19 @@ const HelpRoute = HelpRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeLoansRoute = HomeLoansRouteImport.update({
+  id: '/home-loans',
+  path: '/home-loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListPropertyRoute = ListPropertyRouteImport.update({
   id: '/list-property',
   path: '/list-property',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoansRoute = LoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -302,6 +315,11 @@ const AuthenticatedDashboardTenantProfileRoute =
     path: '/tenant-profile',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const ApiAiChatRoute = ApiAiChatRouteImport.update({
+  id: '/api/ai/chat',
+  path: '/api/ai/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthLoginNotificationRoute =
   ApiAuthLoginNotificationRouteImport.update({
     id: '/api/auth/login-notification',
@@ -384,7 +402,9 @@ export interface FileRoutesByFullPath {
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
+  '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
+  '/loans': typeof LoansRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -417,6 +437,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -443,6 +464,8 @@ export interface FileRoutesByTo {
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
+  '/home-loans': typeof HomeLoansRoute
+  '/loans': typeof LoansRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -472,6 +495,7 @@ export interface FileRoutesByTo {
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -500,7 +524,9 @@ export interface FileRoutesById {
   '/cookie-policy': typeof CookiePolicyRoute
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
+  '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
+  '/loans': typeof LoansRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -533,6 +559,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
   '/_authenticated/dashboard/owner': typeof AuthenticatedDashboardOwnerRoute
   '/_authenticated/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -561,7 +588,9 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/favorites'
     | '/help'
+    | '/home-loans'
     | '/list-property'
+    | '/loans'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -594,6 +623,7 @@ export interface FileRouteTypes {
     | '/dashboard/customer'
     | '/dashboard/owner'
     | '/dashboard/tenant-profile'
+    | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -620,6 +650,8 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/favorites'
     | '/help'
+    | '/home-loans'
+    | '/loans'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -649,6 +681,7 @@ export interface FileRouteTypes {
     | '/dashboard/customer'
     | '/dashboard/owner'
     | '/dashboard/tenant-profile'
+    | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -676,7 +709,9 @@ export interface FileRouteTypes {
     | '/cookie-policy'
     | '/favorites'
     | '/help'
+    | '/home-loans'
     | '/list-property'
+    | '/loans'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -709,6 +744,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/customer'
     | '/_authenticated/dashboard/owner'
     | '/_authenticated/dashboard/tenant-profile'
+    | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
@@ -737,7 +773,9 @@ export interface RootRouteChildren {
   CookiePolicyRoute: typeof CookiePolicyRoute
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
+  HomeLoansRoute: typeof HomeLoansRoute
   ListPropertyRoute: typeof ListPropertyRouteWithChildren
+  LoansRoute: typeof LoansRoute
   NotificationsRoute: typeof NotificationsRoute
   PlansRoute: typeof PlansRoute
   PricingRoute: typeof PricingRoute
@@ -754,6 +792,7 @@ export interface RootRouteChildren {
   BuyIndexRoute: typeof BuyIndexRoute
   CommercialIndexRoute: typeof CommercialIndexRoute
   RentIndexRoute: typeof RentIndexRoute
+  ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
@@ -841,11 +880,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home-loans': {
+      id: '/home-loans'
+      path: '/home-loans'
+      fullPath: '/home-loans'
+      preLoaderRoute: typeof HomeLoansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/list-property': {
       id: '/list-property'
       path: '/list-property'
       fullPath: '/list-property'
       preLoaderRoute: typeof ListPropertyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loans': {
+      id: '/loans'
+      path: '/loans'
+      fullPath: '/loans'
+      preLoaderRoute: typeof LoansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -1086,6 +1139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardTenantProfileRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/api/ai/chat': {
+      id: '/api/ai/chat'
+      path: '/api/ai/chat'
+      fullPath: '/api/ai/chat'
+      preLoaderRoute: typeof ApiAiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/login-notification': {
       id: '/api/auth/login-notification'
       path: '/api/auth/login-notification'
@@ -1281,7 +1341,9 @@ const rootRouteChildren: RootRouteChildren = {
   CookiePolicyRoute: CookiePolicyRoute,
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
+  HomeLoansRoute: HomeLoansRoute,
   ListPropertyRoute: ListPropertyRouteWithChildren,
+  LoansRoute: LoansRoute,
   NotificationsRoute: NotificationsRoute,
   PlansRoute: PlansRoute,
   PricingRoute: PricingRoute,
@@ -1298,6 +1360,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuyIndexRoute: BuyIndexRoute,
   CommercialIndexRoute: CommercialIndexRoute,
   RentIndexRoute: RentIndexRoute,
+  ApiAiChatRoute: ApiAiChatRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,

@@ -1,8 +1,7 @@
 import React from "react";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
-import { MapPin, Search, Navigation, Building, Check, Globe } from "lucide-react";
+import { MapPin, Search, Building, Check, Globe, Sparkles, Map } from "lucide-react";
 import type { StepProps } from "../types";
 
 const MAJOR_METROS = [
@@ -64,228 +63,260 @@ export function Step1Location({ data, updateData }: StepProps) {
   const popularLocalities = CITY_LOCALITIES[currentCity] || CITY_LOCALITIES["Hyderabad"];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out">
       <div>
-        <span className="text-xs font-bold uppercase tracking-wider text-primary">Step 1 of 6</span>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1 flex items-center gap-2">
-          <MapPin className="h-6 w-6 text-primary" /> Where is your property located?
+        <h2 className="text-xl sm:text-2xl font-extrabold text-foreground mt-1 flex items-center gap-2">
+          Where is your property located?
         </h2>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1.5">
           Accurate location details help genuine buyers and tenants discover your listing
           immediately.
         </p>
       </div>
 
-      <div className="space-y-6">
-        {/* Your Name */}
-        <div className="space-y-2.5">
-          <Label htmlFor="owner_name" className="text-sm font-semibold text-foreground">
-            Your Name *
-          </Label>
-          <Input
-            id="owner_name"
-            placeholder="Enter your full name"
-            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-            value={data.owner_name || ""}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              updateData({ owner_name: e.target.value })
-            }
-          />
-        </div>
+      {/* Owner Details Card */}
+      <div className="bg-card rounded-2xl border border-border/60 p-5 sm:p-7 shadow-sm space-y-6">
+        <h3 className="text-base font-bold text-foreground border-b border-border/40 pb-3 flex items-center justify-between">
+          <span>Owner Details</span>
+          <span className="text-[10px] tracking-wider uppercase font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+            Private
+          </span>
+        </h3>
 
-        {/*
-          Owner's WhatsApp number.
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          <div className="space-y-2.5">
+            <Label htmlFor="owner_name" className="text-sm font-semibold text-foreground">
+              Your Name *
+            </Label>
+            <Input
+              id="owner_name"
+              placeholder="Enter your full name"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+              value={data.owner_name || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ owner_name: e.target.value })
+              }
+            />
+          </div>
 
-          Shown rather than hidden even though it is usually prefilled from
-          /list-property: this is the address every enquiry is delivered to, so
-          the owner needs to see it and be able to correct a typo. Before this
-          field existed the wizard collected no number at all, which left every
-          listing uncontactable.
-        */}
-        <div className="space-y-2.5">
-          <Label htmlFor="owner_phone" className="text-sm font-semibold text-foreground">
-            WhatsApp Number *
-          </Label>
-          <div className="flex gap-2">
-            <div className="flex h-11 items-center justify-center rounded-xl border border-border/80 bg-secondary px-3.5 text-sm font-medium text-foreground">
-              +91
+          <div className="space-y-2.5">
+            <Label htmlFor="owner_phone" className="text-sm font-semibold text-foreground">
+              WhatsApp Number *
+            </Label>
+            <div className="flex gap-2">
+              <div className="flex h-11 w-14 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-secondary/50 text-sm font-semibold text-foreground">
+                +91
+              </div>
+              <div className="relative flex-1">
+                <Input
+                  id="owner_phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  maxLength={10}
+                  placeholder="10-digit mobile number"
+                  className="h-11 w-full rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 pr-10 transition-all"
+                  value={data.owner_phone || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    updateData({ owner_phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
+                  }
+                />
+                {data.owner_phone?.length === 10 && (
+                  <Check className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-500 animate-in zoom-in duration-300" />
+                )}
+              </div>
             </div>
-            <Input
-              id="owner_phone"
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel-national"
-              maxLength={10}
-              placeholder="10-digit mobile number"
-              className="h-11 flex-1 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-              value={data.owner_phone || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ owner_phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
-              }
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Tenants and buyers reach you on this number. It is never shown publicly on the listing.
-          </p>
-        </div>
-
-        {/* City & Pincode Input */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2.5">
-            <Label htmlFor="city" className="text-sm font-semibold text-foreground">
-              City *
-            </Label>
-            <Input
-              id="city"
-              placeholder="e.g. Hyderabad"
-              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-              value={data.city || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ city: e.target.value })
-              }
-            />
-          </div>
-          <div className="space-y-2.5">
-            <Label htmlFor="pincode" className="text-sm font-semibold text-foreground">
-              Pin / Postal Code *
-            </Label>
-            <Input
-              id="pincode"
-              placeholder="e.g. 500081"
-              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-              value={data.pincode || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ pincode: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Quick Metro Chips */}
-          <div className="col-span-2 flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span className="text-[11px] text-muted-foreground font-medium mr-1 flex items-center gap-1">
-              <Globe className="h-3 w-3 text-primary" /> Top Metros:
-            </span>
-            {MAJOR_METROS.map((metro) => (
-              <button
-                key={metro}
-                type="button"
-                onClick={() => updateData({ city: metro, locality: "" })}
-                className={`text-[11px] rounded-lg px-2.5 py-1 font-semibold transition border cursor-pointer ${
-                  (data.city || "Hyderabad") === metro
-                    ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                    : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border-border/60"
-                }`}
-              >
-                {metro}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Building / Project / Society */}
-        <div className="space-y-2.5">
-          <Label htmlFor="project_name" className="text-sm font-semibold text-foreground">
-            Building/Project/Society{" "}
-            <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
-          </Label>
-          <div className="relative">
-            <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="project_name"
-              placeholder="e.g. Prestige High Fields, My Home Bhooja"
-              className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-              value={data.project_name || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ project_name: e.target.value })
-              }
-            />
-          </div>
-        </div>
-
-        {/* Locality Input & Quick Chips */}
-        <div className="space-y-2.5">
-          <Label htmlFor="locality" className="text-sm font-semibold text-foreground">
-            Locality / Area Name *
-          </Label>
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="locality"
-              placeholder="e.g. Madhapur, Gachibowli, Financial District"
-              className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-              value={data.locality}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ locality: e.target.value })
-              }
-            />
-          </div>
-
-          {/* Quick Locality Suggestions */}
-          <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] text-muted-foreground font-medium mr-1">Suggested:</span>
-            {popularLocalities.slice(0, 5).map((loc) => (
-              <button
-                key={loc}
-                type="button"
-                onClick={() => updateData({ locality: loc })}
-                className="text-[11px] rounded-lg bg-secondary/50 px-2 py-1 text-muted-foreground hover:text-primary hover:bg-secondary transition border border-border/40 cursor-pointer"
-              >
-                {loc}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Full Address */}
-        <div className="space-y-2.5">
-          <Label htmlFor="address" className="text-sm font-semibold text-foreground">
-            Full Address / Building Name *
-          </Label>
-          <Input
-            id="address"
-            placeholder="Flat No, Wing / Floor, Apartment or Building Name, Street / Road"
-            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-            value={data.address}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              updateData({ address: e.target.value })
-            }
-          />
-        </div>
-
-        {/* Landmark */}
-        <div className="space-y-2.5">
-          <Label htmlFor="landmark" className="text-sm font-semibold text-foreground">
-            Prominent Landmark{" "}
-            <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
-          </Label>
-          <Input
-            id="landmark"
-            placeholder="e.g. Opposite Cyber Towers, Near Apollo Cradle Hospital"
-            className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20"
-            value={data.landmark}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              updateData({ landmark: e.target.value })
-            }
-          />
-        </div>
-      </div>
-
-      {/* Google Map Pin Confirmation Card */}
-      <div className="p-5 bg-gradient-to-br from-primary/5 via-secondary/20 to-transparent border border-border/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <MapPin className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-foreground">Google Map Geolocation Sync</h4>
-            <p className="text-xs text-muted-foreground mt-0.5 max-w-md">
-              Listing addresses in {data.city || "Hyderabad"} are automatically geocoded with
-              satellite coordinates and nearby metro & transit hubs.
+            <p className="text-[11px] text-muted-foreground mt-1.5 leading-snug">
+              Tenants and buyers reach you on this number. It is never shown publicly on the
+              listing.
             </p>
           </div>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-          <Check className="h-3.5 w-3.5" /> Auto-Geocoded
+      </div>
+
+      {/* Property Location Card */}
+      <div className="bg-card rounded-2xl border border-border/60 p-5 sm:p-7 shadow-sm space-y-6">
+        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <h3 className="text-base font-bold text-foreground">Property Location</h3>
+          <button
+            type="button"
+            className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5 transition-colors duration-200"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Ask Seedha AI
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* City & Pincode Input */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="city" className="text-sm font-semibold text-foreground">
+                City *
+              </Label>
+              <Input
+                id="city"
+                placeholder="e.g. Hyderabad"
+                className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                value={data.city || ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateData({ city: e.target.value })
+                }
+              />
+              {/* Quick Metro Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[11px] text-muted-foreground font-medium mr-1 flex items-center gap-1">
+                  <Globe className="h-3 w-3 text-primary" /> Metros:
+                </span>
+                {MAJOR_METROS.map((metro) => (
+                  <button
+                    key={metro}
+                    type="button"
+                    onClick={() => updateData({ city: metro, locality: "" })}
+                    className={`text-[10px] rounded-md px-2 py-0.5 font-semibold transition border cursor-pointer ${
+                      (data.city || "Hyderabad") === metro
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
+                        : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border-border/60"
+                    }`}
+                  >
+                    {metro}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              <Label htmlFor="pincode" className="text-sm font-semibold text-foreground">
+                Pin / Postal Code *
+              </Label>
+              <Input
+                id="pincode"
+                placeholder="e.g. 500081"
+                className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                value={data.pincode || ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateData({ pincode: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            {/* Locality Input & Quick Chips */}
+            <div className="space-y-2.5">
+              <Label htmlFor="locality" className="text-sm font-semibold text-foreground">
+                Locality / Area Name *
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="locality"
+                  placeholder="e.g. Madhapur, Gachibowli..."
+                  className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                  value={data.locality}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    updateData({ locality: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* Quick Locality Suggestions */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[11px] text-muted-foreground font-medium mr-1">
+                  Suggested:
+                </span>
+                {popularLocalities.slice(0, 4).map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => updateData({ locality: loc })}
+                    className="text-[10px] rounded-md bg-secondary/50 px-2 py-0.5 text-muted-foreground hover:text-primary hover:bg-secondary transition border border-border/40 cursor-pointer"
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Building / Project / Society */}
+            <div className="space-y-2.5">
+              <Label htmlFor="project_name" className="text-sm font-semibold text-foreground">
+                Building/Project/Society{" "}
+                <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+              </Label>
+              <div className="relative">
+                <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="project_name"
+                  placeholder="e.g. Prestige High Fields"
+                  className="pl-10 h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                  value={data.project_name || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    updateData({ project_name: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+            {/* Full Address */}
+            <div className="space-y-2.5">
+              <Label htmlFor="address" className="text-sm font-semibold text-foreground">
+                Full Address / Building Name *
+              </Label>
+              <Input
+                id="address"
+                placeholder="Flat No, Wing, Street / Road"
+                className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                value={data.address}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateData({ address: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Landmark */}
+            <div className="space-y-2.5">
+              <Label htmlFor="landmark" className="text-sm font-semibold text-foreground">
+                Prominent Landmark{" "}
+                <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+              </Label>
+              <Input
+                id="landmark"
+                placeholder="e.g. Opposite Cyber Towers"
+                className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                value={data.landmark}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  updateData({ landmark: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Map Preview Area */}
+        <div className="mt-6 overflow-hidden rounded-xl border border-border/60 bg-muted/30 relative h-32 flex items-center justify-center">
+          {/* Faux map background pattern */}
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "url('data:image/svg+xml,%3Csvg width=\\'60\\' height=\\'60\\' viewBox=\\'0 0 60 60\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cg fill=\\'none\\' fill-rule=\\'evenodd\\'%3E%3Cg fill=\\'%23000000\\' fill-opacity=\\'1\\'%3E%3Cpath d=\\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')",
+            }}
+          ></div>
+
+          <div className="z-10 flex flex-col items-center gap-2 p-4 text-center">
+            <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center shadow-sm">
+              <MapPin className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Location Detected</p>
+              <p className="text-xs text-muted-foreground max-w-xs mt-0.5">
+                We've mapped your address to {data.city || "Hyderabad"} for accurate buyer search
+                results.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

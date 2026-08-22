@@ -79,14 +79,24 @@ export function formatPriceCompact(price: number, listingType: ListingType | str
   return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(n)}`;
 }
 
+import { supabase } from "@/integrations/supabase/client";
+
 export async function fetchOwnerContact(
   propertyId: string,
   turnstileToken?: string,
 ): Promise<{ ok: boolean; whatsappUrl?: string; error?: string }> {
   try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (session?.access_token) {
+      headers["Authorization"] = `Bearer ${session.access_token}`;
+    }
+
     const res = await fetch(`/api/public/properties/${propertyId}/contact`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ turnstileToken }),
     });
     const data = await res.json();

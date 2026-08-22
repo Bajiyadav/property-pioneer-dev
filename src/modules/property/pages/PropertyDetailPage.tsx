@@ -297,7 +297,10 @@ export function PropertyDetailPage() {
               </span>
             </div>
             <div className="pl-4">
-              <button className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-6 py-2.5 rounded shadow-sm transition">
+              <button
+                onClick={() => setEmiOpen(true)}
+                className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-6 py-2.5 rounded shadow-sm transition active:scale-95"
+              >
                 Apply Loan
               </button>
             </div>

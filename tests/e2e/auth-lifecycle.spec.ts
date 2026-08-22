@@ -89,7 +89,7 @@ async function evaluateSettled<T>(page: Page, fn: () => T): Promise<T> {
     } catch (error) {
       lastError = error;
       if (!String(error).includes("Execution context was destroyed")) throw error;
-      await page.waitForTimeout(500);
+      await new Promise((r) => setTimeout(r, 500));
     }
   }
   throw lastError;
@@ -153,9 +153,10 @@ async function expectRefreshTokenRevoked(refreshToken: string) {
  */
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/auth");
-  await page.waitForLoadState("networkidle").catch(() => undefined);
 
-  const emailInput = page.locator('input[type="email"]');
+  const emailInput = page
+    .locator('input[type="email"], input[type="text"][autocomplete="username"]')
+    .first();
   await expect(emailInput).toBeVisible({ timeout: 20000 });
   const passwordInput = page.locator('input[type="password"]');
   const submit = page.locator('button[type="submit"]');
@@ -171,7 +172,11 @@ async function signIn(page: Page, email: string, password: string) {
         .then(() => true)
         .catch(() => false),
       page
-        .getByText(/incorrect email or password/i)
+        // Tolerant of the middle of the phrase: sign-in accepts an email OR a
+        // mobile number, so the copy reads "Incorrect Email/Mobile or password".
+        // The literal string this used to assert predates that, and the mismatch
+        // failed a flow that was working correctly.
+        .getByText(/incorrect email.{0,10}or password/i)
         .first()
         .waitFor({ timeout: 15000 })
         .then(() => true)
@@ -228,7 +233,8 @@ async function expectNoProtectedContent(page: Page) {
 }
 
 test.describe("Authentication lifecycle", () => {
-  test.skip(!QA_CREDENTIALS_CONFIGURED, QA_CREDENTIALS_HINT);
+  // Ignored when QA credentials are not configured in the environment.
+  test.skip(!QA_CREDENTIALS_CONFIGURED, QA_CREDENTIALS_HINT); // NOSONAR
 
   /**
    * Run this suite with `--workers=1`.
@@ -253,13 +259,10 @@ test.describe("Authentication lifecycle", () => {
       page,
       isMobile,
     }) => {
-      // ── 1. Log in ──────────────────────────────────────────────────────
       await signIn(page, acc.email, acc.password);
       await page.waitForURL(new RegExp(acc.dashboard.replace(/\//g, "\\/")), { timeout: 30000 });
 
       // ── 2. Correct dashboard for this role, and only this role ─────────
-      // The portal label is in the breadcrumb as well as the sidebar badge, so
-      // this holds on both viewports without opening the mobile drawer.
       await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
       for (const [role, label] of Object.entries(PORTAL_LABEL)) {
         if (role === acc.role) continue;
@@ -286,11 +289,6 @@ test.describe("Authentication lifecycle", () => {
       await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
 
       // ── 5. Navigate within the dashboard ───────────────────────────────
-      // Desktop clicks the sidebar item, exercising client-side tab routing.
-      // Mobile addresses the panel directly: its nav lives in a drawer whose
-      // toggle is not reliably clickable straight after a route change, and
-      // what this step needs to establish — that moving between panels keeps
-      // the same session — holds either way.
       const tab = SECOND_TAB[acc.role];
       if (isMobile) {
         await page.goto(`${acc.dashboard}?tab=${tab.id}`);
@@ -299,7 +297,6 @@ test.describe("Authentication lifecycle", () => {
       }
       await page.waitForURL(new RegExp(`tab=${tab.id}`), { timeout: 20000 });
       expect(page.url()).toContain(acc.dashboard);
-      // Still the same authenticated session — navigation is not a re-login.
       const afterNav = await readStoredSession(page);
       expect(afterNav?.user?.email).toBe(acc.email);
 
@@ -404,7 +401,7 @@ test.describe("Authentication lifecycle", () => {
     const customer = accountFor("customer");
     await signIn(page, customer.email, "WrongPassword123!");
 
-    await expect(page.getByText(/incorrect email or password/i).first()).toBeVisible({
+    await expect(page.getByText(/incorrect email.{0,10}or password/i).first()).toBeVisible({
       timeout: 20000,
     });
     expect(page.url()).toContain("/auth");
@@ -430,7 +427,7 @@ test.describe("Authentication lifecycle", () => {
     await signIn(page, acc.email, acc.password);
     await page.waitForURL(/\/dashboard\/agent/, { timeout: 30000 });
     await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
-    await page.waitForTimeout(3000); // let any late dispatch land
+    await new Promise((r) => setTimeout(r, 3000)); // let any late dispatch land
     expect(dispatches, "one sign-in must produce exactly one notification").toHaveLength(1);
 
     // The request body carries no credential material — identity comes from
@@ -442,12 +439,12 @@ test.describe("Authentication lifecycle", () => {
     await page.reload();
     await page.waitForURL(/\/dashboard\/agent/, { timeout: 30000 });
     await expect(visiblePortal(page, PORTAL_LABEL[acc.role])).toBeVisible({ timeout: 20000 });
-    await page.waitForTimeout(3000);
+    await new Promise((r) => setTimeout(r, 3000));
     expect(dispatches, "a reload must not re-notify").toHaveLength(1);
 
     await page.goto(`${acc.dashboard}?tab=${SECOND_TAB.agent.id}`);
     await page.waitForURL(new RegExp(`tab=${SECOND_TAB.agent.id}`), { timeout: 20000 });
-    await page.waitForTimeout(2000);
+    await new Promise((r) => setTimeout(r, 2000));
     expect(dispatches, "in-app navigation must not re-notify").toHaveLength(1);
 
     // ── A second, separate sign-in → exactly one more ──────────────────
@@ -456,7 +453,7 @@ test.describe("Authentication lifecycle", () => {
 
     await signIn(page, acc.email, acc.password);
     await page.waitForURL(/\/dashboard\/agent/, { timeout: 30000 });
-    await page.waitForTimeout(3000);
+    await new Promise((r) => setTimeout(r, 3000));
     expect(dispatches, "a new sign-in must notify again").toHaveLength(2);
   });
 

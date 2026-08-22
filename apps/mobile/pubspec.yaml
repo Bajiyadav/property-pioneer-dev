@@ -18,9 +18,11 @@ dependencies:
   url_launcher: ^6.2.6
   shared_preferences: ^2.2.3
   flutter_secure_storage: ^9.0.0
-  lucide_icons: ^0.257.0
   crypto: ^3.0.3
   http: ^1.2.1
+  image_picker: ^1.2.3
+  uuid: ^4.6.0
+  sentry_flutter: ^8.14.2
 
 dev_dependencies:
   flutter_test:

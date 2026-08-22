@@ -40,15 +40,29 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
+      final email = _emailController.text.trim();
+      final purePhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+      final formattedPhone = '+91$purePhone';
+
+      // Duplicate Check
+      final isDuplicate = await authService.checkPhoneExists(formattedPhone, purePhone);
+      if (isDuplicate) {
+        setState(() {
+          _errorMessage = 'This phone number is already registered. Please sign in instead.';
+          _isLoading = false;
+        });
+        return;
+      }
+
       await authService.signUpWithEmail(
-        email: _emailController.text.trim(),
+        email: email,
         password: _passwordController.text,
         fullName: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: formattedPhone,
         role: _selectedRole,
       );
       if (mounted) {
-        context.go('/verify-email');
+        context.go('/verify-email', extra: email);
       }
     } catch (e) {
       setState(() {
@@ -188,6 +202,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your phone number';
+                    }
+                    final pureDigits = value.replaceAll(RegExp(r'\D'), '');
+                    if (pureDigits.length != 10) {
+                      return 'Phone number must be exactly 10 digits';
                     }
                     return null;
                   },

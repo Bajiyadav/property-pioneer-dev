@@ -266,23 +266,44 @@ async function generateTrainedLocalResponse(query: string): Promise<string> {
 /**
  * Main AI Prompt Dispatcher (Gemini API with Trained Fallback)
  */
+/**
+ * Calls the server-side AI proxy.
+ *
+ * The browser never holds the Gemini credential. `VITE_GEMINI_API_KEY` used to
+ * be read here, and any VITE_-prefixed variable is inlined into the client
+ * bundle by Vite at build time — the key was recoverable verbatim from the
+ * shipped JavaScript, so anyone who loaded the site could spend the project's
+ * quota. The key now lives only in the server environment as GEMINI_API_KEY;
+ * see src/routes/api/ai/chat.ts.
+ *
+ * Returns null when the assistant is unavailable or unconfigured, so callers
+ * fall back to the local response engine rather than invent an answer.
+ */
+async function callAiProxy(
+  contents: Array<{ role: string; parts: Array<{ text: string }> }>,
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/ai/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { text?: string; unconfigured?: boolean };
+    if (data.unconfigured) return null;
+    return data.text ?? null;
+  } catch (error) {
+    console.warn("[geminiService] AI proxy unreachable:", error);
+    return null;
+  }
+}
+
 export async function askSeedhaAI(
   userQuery: string,
   history: AIMessage[] = [],
   mode: "general" | "tenant" = "general",
 ): Promise<string> {
-  const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.VITE_GEMINI_API_KEY ||
-    (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env
-      ?.VITE_GEMINI_API_KEY ||
-    "";
-
   const liveDbCtx = await fetchLiveDbPropertyContext(userQuery);
-
-  if (!apiKey || apiKey.trim().length === 0) {
-    return generateTrainedLocalResponse(userQuery);
-  }
 
   const dynamicContext = retrieveDynamicContext(userQuery) + liveDbCtx;
 
@@ -309,60 +330,13 @@ export async function askSeedhaAI(
     }
   }
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents }),
-      },
-    );
-
-    if (!response.ok) {
-      const fallbackRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents }),
-        },
-      );
-
-      if (!fallbackRes.ok) {
-        throw new Error(`Gemini API returned status ${response.status}`);
-      }
-
-      const data = await fallbackRes.json();
-      return (
-        data.candidates?.[0]?.content?.parts?.[0]?.text || generateTrainedLocalResponse(userQuery)
-      );
-    }
-
-    const data = await response.json();
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text || generateTrainedLocalResponse(userQuery)
-    );
-  } catch (error) {
-    console.warn("[geminiService] Error calling Gemini API, using local AI engine:", error);
-    return generateTrainedLocalResponse(userQuery);
-  }
+  const text = await callAiProxy(contents);
+  return text ?? generateTrainedLocalResponse(userQuery);
 }
 
 export async function extractTenantPreferences(
   history: AIMessage[],
 ): Promise<ExtractedTenantPreferences> {
-  const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.VITE_GEMINI_API_KEY ||
-    (import.meta as unknown as { env?: { VITE_GEMINI_API_KEY?: string } }).env
-      ?.VITE_GEMINI_API_KEY ||
-    "";
-
-  if (!apiKey || apiKey.trim().length === 0) {
-    return {};
-  }
-
   const prompt = `
 Extract the tenant preferences from this conversation.
 Return a valid JSON object with the following optional string/number fields (do not wrap in markdown tags):
@@ -377,37 +351,16 @@ Conversation:
 ${history.map((m) => m.role + ": " + m.text).join("\\n")}
   `;
 
+  // NOTE: this request never worked before. The URL was written with an escaped
+  // template literal (`?key=\${apiKey}`), so the literal seven characters
+  // "${apiKey}" were sent as the key and Google rejected every call. The
+  // function silently returned {} on every invocation.
+  const text = await callAiProxy([{ role: "user", parts: [{ text: prompt }] }]);
+  if (!text) return {};
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-          },
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      return {};
-    }
-
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (text) {
-      try {
-        return JSON.parse(text) as ExtractedTenantPreferences;
-      } catch {
-        return {};
-      }
-    }
-    return {};
-  } catch (error) {
-    console.error("[geminiService] Error extracting preferences:", error);
+    return JSON.parse(text) as ExtractedTenantPreferences;
+  } catch {
+    // The model is asked for JSON but is not guaranteed to comply.
     return {};
   }
 }

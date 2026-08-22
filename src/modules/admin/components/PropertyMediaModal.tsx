@@ -41,9 +41,9 @@ export function PropertyMediaModal({
   const [images, setImages] = useState<string[]>(property.images || []);
   const [videoUrl, setVideoUrl] = useState<string | null>(property.video_url || null);
   const [mediaStatus, setMediaStatus] = useState<"pending_review" | "verified" | "needs_reshoot">(
-    (property as any).media_status || "pending_review",
+    property.media_status ?? "pending_review",
   );
-  const [mediaNotes, setMediaNotes] = useState<string>((property as any).media_notes || "");
+  const [mediaNotes, setMediaNotes] = useState<string>(property.media_notes ?? "");
 
   const [uploading, setUploading] = useState(false);
   const [zipping, setZipping] = useState(false);
@@ -71,7 +71,10 @@ export function PropertyMediaModal({
       const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
       return publicUrlData.publicUrl;
     } catch (err) {
-      console.warn("Supabase Storage upload failed or offline. Generating local Object URL fallback.", err);
+      console.warn(
+        "Supabase Storage upload failed or offline. Generating local Object URL fallback.",
+        err,
+      );
       toast.info("Supabase Storage offline — media cached locally for session preview.");
       return URL.createObjectURL(file);
     }
@@ -156,7 +159,9 @@ export function PropertyMediaModal({
     }
 
     const cleanTitle = property.title.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 20);
-    await downloadFilesAsZip(itemsToDownload, `${cleanTitle}_Media.zip`, (pct) => setZipProgress(pct));
+    await downloadFilesAsZip(itemsToDownload, `${cleanTitle}_Media.zip`, (pct) =>
+      setZipProgress(pct),
+    );
 
     setZipping(false);
     toast.success("Media ZIP package generated and downloaded!");
@@ -174,7 +179,7 @@ export function PropertyMediaModal({
           media_status: mediaStatus,
           media_notes: mediaNotes,
           updated_at: new Date().toISOString(),
-        } as any)
+        })
         .eq("id", property.id);
 
       if (error) throw error;
@@ -208,7 +213,9 @@ export function PropertyMediaModal({
               </h2>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Locality: <strong className="text-foreground">{property.locality || property.city}</strong> · ID: {property.id}
+              Locality:{" "}
+              <strong className="text-foreground">{property.locality || property.city}</strong> ·
+              ID: {property.id}
             </p>
           </div>
 
@@ -245,7 +252,8 @@ export function PropertyMediaModal({
           {/* Moderation Status Banner */}
           <div className="p-4 rounded-2xl border border-border bg-secondary/40 space-y-3">
             <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-primary" /> Listing Media Moderation &amp; Verification Tag
+              <ShieldCheck className="h-4 w-4 text-primary" /> Listing Media Moderation &amp;
+              Verification Tag
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -299,11 +307,16 @@ export function PropertyMediaModal({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-primary" /> Photo Gallery ({images.length} Photos)
+                <ImageIcon className="h-4 w-4 text-primary" /> Photo Gallery ({images.length}{" "}
+                Photos)
               </h3>
 
               <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow hover:bg-primary/90 transition cursor-pointer">
-                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {uploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="h-3.5 w-3.5" />
+                )}
                 <span>Upload New Photos</span>
                 <input
                   type="file"
@@ -319,8 +332,12 @@ export function PropertyMediaModal({
             {images.length === 0 ? (
               <div className="p-8 rounded-2xl border border-dashed border-border text-center space-y-2">
                 <ImageIcon className="h-8 w-8 text-muted-foreground mx-auto" />
-                <p className="text-xs font-bold text-foreground">No photos uploaded for this property</p>
-                <p className="text-[11px] text-muted-foreground">Click 'Upload New Photos' to add high-resolution gallery images.</p>
+                <p className="text-xs font-bold text-foreground">
+                  No photos uploaded for this property
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Click 'Upload New Photos' to add high-resolution gallery images.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -343,7 +360,12 @@ export function PropertyMediaModal({
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                         <button
                           type="button"
-                          onClick={() => triggerSingleDownload(img, `Photo_${idx + 1}_${property.id.slice(0, 5)}.jpg`)}
+                          onClick={() =>
+                            triggerSingleDownload(
+                              img,
+                              `Photo_${idx + 1}_${property.id.slice(0, 5)}.jpg`,
+                            )
+                          }
                           className="p-2 rounded-full bg-white/90 text-black hover:bg-white shadow transition cursor-pointer"
                           title="Download photo"
                         >
@@ -427,7 +449,9 @@ export function PropertyMediaModal({
                   <span className="text-muted-foreground truncate max-w-sm">{videoUrl}</span>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => triggerSingleDownload(videoUrl, `Video_${property.id.slice(0, 5)}.mp4`)}
+                      onClick={() =>
+                        triggerSingleDownload(videoUrl, `Video_${property.id.slice(0, 5)}.mp4`)
+                      }
                       className="px-3 py-1 bg-secondary rounded-lg text-foreground font-bold hover:bg-secondary/80 flex items-center gap-1 cursor-pointer"
                     >
                       <Download className="h-3.5 w-3.5" /> Download Video
@@ -448,7 +472,9 @@ export function PropertyMediaModal({
               <div className="p-6 rounded-2xl border border-dashed border-border text-center space-y-1 bg-secondary/20">
                 <Film className="h-6 w-6 text-muted-foreground mx-auto" />
                 <p className="text-xs font-bold text-foreground">No video tour attached</p>
-                <p className="text-[11px] text-muted-foreground">Upload an MP4/WebM video walkthrough for tenant virtual tours.</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Upload an MP4/WebM video walkthrough for tenant virtual tours.
+                </p>
               </div>
             )}
           </div>
@@ -468,7 +494,11 @@ export function PropertyMediaModal({
             disabled={saving}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-extrabold shadow-lg hover:bg-primary/90 transition disabled:opacity-50 cursor-pointer"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             <span>Save Media &amp; Verification Status</span>
           </button>
         </div>

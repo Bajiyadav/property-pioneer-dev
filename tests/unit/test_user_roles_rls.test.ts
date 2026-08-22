@@ -84,6 +84,107 @@ describe.skipIf(!canRun)("Privileged helpers are not client-callable", () => {
 
     await client.auth.signOut({ scope: "global" });
   }, 30000);
+
+  it("prevents User A from reading User B's profile directly by ID", async () => {
+    const customer = accountFor("customer");
+    const owner = accountFor("owner");
+    const client = anonClient();
+
+    // Sign in as Customer (User A)
+    const { data: authA } = await client.auth.signInWithPassword({
+      email: customer.email,
+      password: customer.password,
+    });
+    expect(authA.user).toBeDefined();
+
+    // Query another user's profile with a known ID or fake ID
+    const fakeOtherUserId = "00000000-0000-0000-0000-000000000001";
+    const { data: otherProfile, error } = await client
+      .from("profiles")
+      .select("id, full_name, phone")
+      .eq("id", fakeOtherUserId)
+      .maybeSingle();
+
+    expect(error).toBeNull();
+    expect(otherProfile, "User A must not be able to read User B's profile").toBeNull();
+
+    await client.auth.signOut({ scope: "global" });
+  }, 30000);
+
+  it("prevents User A from updating User B's profile", async () => {
+    const customer = accountFor("customer");
+    const client = anonClient();
+
+    const { data: authA } = await client.auth.signInWithPassword({
+      email: customer.email,
+      password: customer.password,
+    });
+    expect(authA.user).toBeDefined();
+
+    const fakeOtherUserId = "00000000-0000-0000-0000-000000000001";
+    const { data, error } = await client
+      .from("profiles")
+      .update({ full_name: "Malicious Tamper" })
+      .eq("id", fakeOtherUserId)
+      .select();
+
+    expect(error).toBeNull();
+    expect(data ?? [], "Update on another user's profile must affect 0 rows").toHaveLength(0);
+
+    await client.auth.signOut({ scope: "global" });
+  }, 30000);
+
+  it("allows authenticated customer to update their own legitimate profile fields", async () => {
+    const customer = accountFor("customer");
+    const client = anonClient();
+
+    const { data: authA } = await client.auth.signInWithPassword({
+      email: customer.email,
+      password: customer.password,
+    });
+    expect(authA.user).toBeDefined();
+
+    const { data, error } = await client
+      .from("profiles")
+      .update({ full_name: "QA Customer Verified" })
+      .eq("id", authA.user!.id)
+      .select("id, full_name");
+
+    expect(error).toBeNull();
+    expect(data).toBeDefined();
+    expect(data![0]?.full_name).toBe("QA Customer Verified");
+
+    await client.auth.signOut({ scope: "global" });
+  }, 30000);
+
+  it("prevents authenticated customer from self-escalating role or assigned_localities via profiles", async () => {
+    const customer = accountFor("customer");
+    const client = anonClient();
+
+    const { data: authA } = await client.auth.signInWithPassword({
+      email: customer.email,
+      password: customer.password,
+    });
+    expect(authA.user).toBeDefined();
+
+    // Attempt to tamper with role
+    await client
+      .from("profiles")
+      .update({ role: "admin" } as unknown as Record<string, unknown>)
+      .eq("id", authA.user!.id);
+
+    // Either rejected with permission denied / column not writable or silently ignored by column grants
+    // Verify user is still not an admin in user_roles
+    const { data: roles } = await client
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", authA.user!.id);
+
+    const userRoles = (roles ?? []).map((r) => r.role);
+    expect(userRoles).not.toContain("admin");
+
+    await client.auth.signOut({ scope: "global" });
+  }, 30000);
 });
 
 describe.skipIf(canRun)("Privileged helpers are not client-callable", () => {

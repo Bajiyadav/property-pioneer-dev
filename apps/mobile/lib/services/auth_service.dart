@@ -24,8 +24,28 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    String resolvedEmail = email.trim();
+    final pureDigits = email.replaceAll(RegExp(r'\D'), '');
+
+    if (RegExp(r'^[6-9]\d{9}$').hasMatch(pureDigits) || pureDigits.length == 10) {
+      try {
+        final profile = await _client
+            .from('profiles')
+            .select('email')
+            .or('phone.eq.$pureDigits,phone.eq.+91$pureDigits')
+            .maybeSingle();
+        if (profile != null && profile['email'] != null) {
+          resolvedEmail = profile['email'] as String;
+        } else {
+          resolvedEmail = 'owner_$pureDigits@urbanproperties.in';
+        }
+      } catch (_) {
+        resolvedEmail = '$pureDigits@urbanproperties.in';
+      }
+    }
+
     return await _client.auth.signInWithPassword(
-      email: email,
+      email: resolvedEmail,
       password: password,
     );
   }
@@ -64,6 +84,64 @@ class AuthService {
     );
   }
 
+  Future<bool> checkPhoneExists(String fullFormattedPhone, String purePhone) async {
+    try {
+      final data = await _client
+          .from('profiles')
+          .select('id, phone')
+          .or('phone.eq.$fullFormattedPhone,phone.eq.$purePhone')
+          .maybeSingle();
+      return data != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<AuthResponse> verifyOtp({
+    required String email,
+    required String token,
+    required String type,
+  }) async {
+    return await _client.auth.verifyOTP(
+      email: email,
+      token: token,
+      type: type == 'signup' ? OtpType.signup : OtpType.recovery,
+    );
+  }
+
+  Future<void> resendOtp({required String email}) async {
+    await _client.auth.resend(
+      type: OtpType.signup,
+      email: email,
+    );
+  }
+
+  Future<void> resetPasswordForEmail({required String identifier}) async {
+    String targetEmail = identifier.trim();
+    final pureDigits = identifier.replaceAll(RegExp(r'\D'), '');
+
+    if (RegExp(r'^[6-9]\d{9}$').hasMatch(pureDigits) || pureDigits.length == 10) {
+      try {
+        final profile = await _client
+            .from('profiles')
+            .select('email')
+            .or('phone.eq.$pureDigits,phone.eq.+91$pureDigits')
+            .maybeSingle();
+        if (profile != null && profile['email'] != null) {
+          targetEmail = profile['email'] as String;
+        }
+      } catch (_) {}
+    }
+
+    await _client.auth.resetPasswordForEmail(targetEmail);
+  }
+
+  Future<UserResponse> updateUser({required String newPassword}) async {
+    return await _client.auth.updateUser(UserAttributes(
+      password: newPassword,
+    ));
+  }
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
@@ -79,7 +157,6 @@ class AuthService {
           .eq('id', user.id)
           .maybeSingle();
 
-      // Check role
       final roleData = await _client
           .from('user_roles')
           .select('role')

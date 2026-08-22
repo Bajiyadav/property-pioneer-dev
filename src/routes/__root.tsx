@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
+  useRouter,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -159,16 +160,18 @@ import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const isWizardRoute = router.state.location.pathname.startsWith("/list-property/wizard");
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="flex min-h-screen flex-col">
-          <SiteHeader />
+          {!isWizardRoute && <SiteHeader />}
           <main className="flex-1">
             <Outlet />
           </main>
-          <SiteFooter />
+          {!isWizardRoute && <SiteFooter />}
         </div>
         <SeedhaAIAssistant />
         <Toaster position="top-center" richColors />
@@ -202,7 +205,7 @@ function SiteHeader() {
             : "border-b border-border/40 bg-background/90 backdrop-blur-md py-2.5 sm:py-3.5"
         }`}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-1.5 sm:gap-4 px-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-1 sm:gap-4 px-2 sm:px-6">
           <Link
             to="/"
             aria-label={`${BRAND.name} home`}
@@ -215,7 +218,7 @@ function SiteHeader() {
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold bg-secondary/60 p-1 rounded-full border border-border/50 backdrop-blur-sm">
             <Link
               to="/"
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Home
             </Link>
@@ -229,14 +232,14 @@ function SiteHeader() {
                 maxPrice: 0,
                 beds: 0,
               }}
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Rent
             </Link>
 
             <Link
               to="/buy"
-              className="relative inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Buy
               <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
@@ -246,7 +249,7 @@ function SiteHeader() {
 
             <Link
               to="/commercial"
-              className="relative inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Commercial
               <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
@@ -255,9 +258,19 @@ function SiteHeader() {
             </Link>
 
             <Link
+              to="/home-loans"
+              className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+            >
+              Home Loans
+              <span className="rounded-full bg-blue-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-blue-700 dark:text-blue-400">
+                New
+              </span>
+            </Link>
+
+            <Link
               to="/"
               hash="why-us"
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
               onClick={(e) => {
                 if (window.location.pathname === "/") {
                   e.preventDefault();
@@ -269,7 +282,7 @@ function SiteHeader() {
             </Link>
             <Link
               to="/careers"
-              className="rounded-full px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
+              className="rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Careers
             </Link>
@@ -278,7 +291,7 @@ function SiteHeader() {
           {/*
             User Actions & CTAs
           */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2.5">
+          <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-2.5">
             <Link
               to="/favorites"
               aria-label="Saved Properties"
@@ -291,7 +304,7 @@ function SiteHeader() {
 
             <Link
               to="/list-property"
-              className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
+              className="inline-flex shrink-0 items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-2 sm:px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
             >
               <span className="whitespace-nowrap">List Property</span>
               <span className="sr-only sm:not-sr-only sm:inline-block sm:rounded-full sm:bg-white/20 sm:px-1.5 sm:py-0.5 sm:text-[10px] sm:font-bold sm:uppercase sm:text-white">
@@ -322,19 +335,20 @@ function SiteFooter() {
             <BrandMark size="sm" />
             <p className="mt-3.5 max-w-sm text-xs text-muted-foreground leading-relaxed">
               <strong>{BRAND.tagline}</strong> — Connect directly with genuine property owners
-              across India with zero brokerage, zero middlemen, and 100% verified transparency.
+              across India. No platform commission, no middlemen, and every listing moderated before
+              it goes live.
             </p>
 
             {/* Verified Trust Badges */}
             <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-medium text-muted-foreground">
               <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
-                🛡️ 100% Direct Owner
+                🛡️ Direct Owner Contact
               </span>
               <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
-                ⚡ Zero Brokerage Forever
+                ⚡ No Platform Commission
               </span>
               <span className="inline-flex items-center gap-1.5 bg-card/80 border border-border/60 rounded-full px-3 py-1 shadow-2xs text-foreground">
-                ✓ Verified Transparency
+                ✓ Moderated Listings
               </span>
             </div>
           </div>
@@ -369,6 +383,11 @@ function SiteFooter() {
               <li>
                 <Link to="/commercial" className="hover:text-foreground transition">
                   Commercial Spaces
+                </Link>
+              </li>
+              <li>
+                <Link to="/home-loans" className="hover:text-foreground transition">
+                  Home Loans &amp; EMI
                 </Link>
               </li>
             </ul>

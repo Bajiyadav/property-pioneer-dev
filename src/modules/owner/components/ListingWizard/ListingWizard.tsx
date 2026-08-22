@@ -14,11 +14,13 @@ import { Button } from "@/shared/components/ui/button";
 import { toast } from "sonner";
 import type { ListingFormData } from "./types";
 import { buildListingPayload } from "./buildListingPayload";
+import { BrandMark } from "@/shared/components/BrandMark";
 import { useServerFn } from "@tanstack/react-start";
 import { createListing } from "@/modules/owner/services/ownerFunctions";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
 import { OwnerSmartAuthModal } from "@/shared/components/auth/OwnerSmartAuthModal";
+import { resolveInitialStep } from "./resolveInitialStep";
 
 interface ListingWizardProps {
   initialData?: {
@@ -128,15 +130,9 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const navigate = useNavigate();
   const stashedDraft = readStashedDraft();
 
-  // Check if we have prefilled location from search params or localStorage
-  const hasPrefilledLocation = Boolean(
-    initialData?.prefilled ||
-    initialData?.step === 2 ||
-    (initialData?.city && initialData?.locality) ||
-    (stashedDraft?.city && stashedDraft?.locality),
-  );
-
-  const initialStep = initialData?.step ?? (hasPrefilledLocation ? 2 : 1);
+  // Step comes from the URL search params ONLY — never from stashedDraft. See
+  // resolveInitialStep for why a saved draft must not be able to skip Step 1.
+  const initialStep = resolveInitialStep(initialData);
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
   const [showOwnerAuthModal, setShowOwnerAuthModal] = useState(false);
@@ -276,147 +272,184 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 md:pb-12">
-      {/* Navigation Breadcrumb */}
-      <div className="mb-4 sm:mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition">
-            Home
-          </Link>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <Link to="/list-property" className="hover:text-foreground transition">
-            Post Property
-          </Link>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-primary font-bold">Wizard</span>
-        </div>
-
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-          <Sparkles className="h-3.5 w-3.5" /> 100% Free Owner Listing
-        </span>
-      </div>
-
-      {/* Progress Stepper & Completion Bar */}
-      <ProgressBar
-        currentStep={currentStep}
-        totalSteps={steps.length}
-        steps={steps}
-        onStepClick={(stepId) => {
-          if (stepId < currentStep) setCurrentStep(stepId);
-        }}
-      />
-
-      {/* Location-First Pre-Fill Continuation Banner */}
-      {formData.locality && formData.city && currentStep >= 2 && (
-        <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/50 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
-              📍
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md">
-                  Step 1 Completed
-                </span>
-                <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-                  {formData.property_type || "Apartment"} ·{" "}
-                  {formData.listing_type === "sale" ? "For Sale" : "For Rent"}
-                </span>
-              </div>
-              <p className="text-sm sm:text-base font-bold text-emerald-950 dark:text-emerald-100 mt-0.5">
-                {formData.locality}, {formData.city}{" "}
-                <span className="text-xs font-normal text-emerald-700 dark:text-emerald-400">
-                  (Pre-filled from your selection)
-                </span>
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setCurrentStep(1);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            className="text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-950 dark:hover:text-emerald-100 underline underline-offset-4 shrink-0 px-3 py-1.5 rounded-lg hover:bg-emerald-200/50 dark:hover:bg-emerald-900/50 transition-colors"
-          >
-            Change Location (Step 1)
-          </button>
-        </div>
-      )}
-
-      {/* Main Form Step Container */}
-      <div className="bg-card rounded-3xl border border-border/80 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300">
-        <div className="p-5 sm:p-8 md:p-10">
-          {currentStep === 1 && <Step1Location data={formData} updateData={updateFormData} />}
-          {currentStep === 2 && <Step2Details data={formData} updateData={updateFormData} />}
-          {currentStep === 3 && <Step3Pricing data={formData} updateData={updateFormData} />}
-          {currentStep === 4 && <Step4Amenities data={formData} updateData={updateFormData} />}
-          {currentStep === 5 && <Step5Photos data={formData} updateData={updateFormData} />}
-          {currentStep === 6 && <Step6Review data={formData} />}
-        </div>
-
-        {/* Desktop Footer Actions */}
-        <div className="hidden md:flex px-6 md:px-10 py-5 bg-secondary/30 border-t border-border justify-between items-center">
+    <div className="flex flex-col min-h-screen bg-neutral-50/50">
+      {/* Custom Wizard Header */}
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/60 shadow-[var(--shadow-card)] h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/" aria-label="Home" className="flex shrink-0 items-center">
+          <BrandMark responsiveName />
+        </Link>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="text-xs font-medium text-muted-foreground hidden sm:inline-flex items-center gap-1.5">
+            {isSaving ? (
+              "Saving..."
+            ) : (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-500" /> Draft saved just now
+              </>
+            )}
+          </span>
           <Button
             variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-            className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm flex items-center gap-2 border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
+            size="sm"
+            onClick={() => handleSave("draft")}
+            disabled={isSaving}
+            className="text-xs font-semibold rounded-full h-8 px-4"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Previous Step
+            Save &amp; Exit
           </Button>
+        </div>
+      </header>
 
-          <div className="flex items-center gap-3">
+      <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-24 md:pb-12">
+        <div className="mb-4 sm:mb-6 flex items-center justify-between">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+            List your property <span className="text-emerald-600">— 100% FREE</span>
+          </h1>
+          <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
+            <Sparkles className="h-3.5 w-3.5" /> Direct Owner
+          </span>
+        </div>
+
+        {/* Progress Stepper & Completion Bar */}
+        <ProgressBar
+          currentStep={currentStep}
+          totalSteps={steps.length}
+          steps={steps}
+          onStepClick={(stepId) => {
+            if (stepId < currentStep) setCurrentStep(stepId);
+          }}
+        />
+
+        {/* Location-First Pre-Fill Continuation Banner */}
+        {formData.locality && formData.city && currentStep >= 2 && (
+          <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/50 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
+                📍
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-200/80 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md">
+                    Step 1 Completed
+                  </span>
+                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                    {formData.property_type || "Apartment"} ·{" "}
+                    {formData.listing_type === "sale" ? "For Sale" : "For Rent"}
+                  </span>
+                </div>
+                <p className="text-sm sm:text-base font-bold text-emerald-950 dark:text-emerald-100 mt-0.5">
+                  {formData.locality}, {formData.city}{" "}
+                  <span className="text-xs font-normal text-emerald-700 dark:text-emerald-400">
+                    (Pre-filled from your selection)
+                  </span>
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentStep(1);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-950 dark:hover:text-emerald-100 underline underline-offset-4 shrink-0 px-3 py-1.5 rounded-lg hover:bg-emerald-200/50 dark:hover:bg-emerald-900/50 transition-colors"
+            >
+              Change Location (Step 1)
+            </button>
+          </div>
+        )}
+
+        {/* Main Form Step Container */}
+        <div className="bg-card rounded-3xl border border-border/80 shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300">
+          <div className="p-5 sm:p-8 md:p-10">
+            {currentStep === 1 && <Step1Location data={formData} updateData={updateFormData} />}
+            {currentStep === 2 && <Step2Details data={formData} updateData={updateFormData} />}
+            {currentStep === 3 && <Step3Pricing data={formData} updateData={updateFormData} />}
+            {currentStep === 4 && <Step4Amenities data={formData} updateData={updateFormData} />}
+            {currentStep === 5 && <Step5Photos data={formData} updateData={updateFormData} />}
+            {currentStep === 6 && <Step6Review data={formData} />}
+          </div>
+
+          {/* Desktop Footer Actions */}
+          <div className="hidden md:flex px-6 md:px-10 py-5 bg-secondary/30 border-t border-border justify-between items-center">
             <Button
               variant="outline"
-              onClick={() => void handleSave("draft")}
-              disabled={isSaving}
-              className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
+              onClick={handleBack}
+              disabled={currentStep === 1}
+              className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm flex items-center gap-2 border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
             >
-              {isSaving ? "Saving…" : "Save Draft"}
+              <ArrowLeft className="w-4 h-4" />
+              Previous Step
             </Button>
 
-            {currentStep < 6 ? (
+            <div className="flex items-center gap-3">
               <Button
-                onClick={handleNext}
-                className="rounded-xl px-7 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#0F766E] hover:bg-[#0F766E]/90 text-white shadow-md hover:shadow-lg transition-all min-h-[44px]"
-              >
-                Save &amp; Continue
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleSubmit}
+                variant="outline"
+                onClick={() => void handleSave("draft")}
                 disabled={isSaving}
-                className="rounded-xl px-8 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all min-h-[44px]"
+                className="rounded-xl px-5 py-2.5 font-semibold text-xs sm:text-sm border-border bg-card hover:bg-secondary disabled:opacity-40 min-h-[44px]"
               >
-                {isSaving ? "Submitting..." : "Submit Listing Now"}
+                {isSaving ? "Saving…" : "Save Draft"}
               </Button>
-            )}
+
+              {currentStep < 6 ? (
+                <Button
+                  onClick={handleNext}
+                  className="rounded-xl px-7 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-[#0F766E] hover:bg-[#0F766E]/90 text-white shadow-md hover:shadow-lg transition-all min-h-[44px]"
+                >
+                  {currentStep === 1 ? "Continue to Property Details" : "Save & Continue"}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSaving}
+                  className="rounded-xl px-8 py-2.5 font-bold text-xs sm:text-sm flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all min-h-[44px]"
+                >
+                  {isSaving ? "Submitting..." : "Submit Listing Now"}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Mobile Fixed Bottom Navigation Bar */}
+        <MobileListingNav
+          currentStep={currentStep}
+          totalSteps={steps.length}
+          isSaving={isSaving}
+          onBack={handleBack}
+          onNext={handleNext}
+          onSaveSubmit={handleSubmit}
+        />
+
+        <OwnerSmartAuthModal
+          isOpen={showOwnerAuthModal}
+          onClose={() => setShowOwnerAuthModal(false)}
+          phone={formData.owner_phone || ""}
+          onSuccess={() => {
+            setCurrentStep(2);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
       </div>
 
-      {/* Mobile Fixed Bottom Navigation Bar */}
-      <MobileListingNav
-        currentStep={currentStep}
-        totalSteps={steps.length}
-        isSaving={isSaving}
-        onBack={handleBack}
-        onNext={handleNext}
-        onSaveSubmit={handleSubmit}
-      />
-
-      <OwnerSmartAuthModal
-        isOpen={showOwnerAuthModal}
-        onClose={() => setShowOwnerAuthModal(false)}
-        phone={formData.owner_phone || ""}
-        onSuccess={() => {
-          setCurrentStep(2);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }}
-      />
+      {/* Minimal Wizard Footer */}
+      <footer className="mt-auto border-t border-border/60 bg-secondary/30 py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-muted-foreground">
+          <p>© {new Date().getFullYear()} Seedha Properties</p>
+          <div className="flex items-center gap-4">
+            <Link to="/help" className="hover:text-foreground">
+              Need help?
+            </Link>
+            <Link to="/privacy-policy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link to="/terms-of-service" className="hover:text-foreground">
+              Terms
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

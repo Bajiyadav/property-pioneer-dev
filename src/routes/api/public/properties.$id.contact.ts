@@ -52,7 +52,18 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         const userAgent = getUserAgent(request);
         const propertyId = params.id;
 
-        // 1. Rate limiting check
+        // 1. Authenticate user from header
+        const authHeader = request.headers.get("Authorization");
+        let user = null;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        if (authHeader) {
+          const token = authHeader.replace("Bearer ", "");
+          const { data: userData } = await supabaseAdmin.auth.getUser(token);
+          user = userData?.user;
+        }
+
+        // 1. Rate limiting & Quota check
         const rateLimitResult = await checkRateLimits([
           { rule: PER_IP_CONTACT, count: (since) => countRecentContactRequests(ip, since) },
         ]);
@@ -64,8 +75,50 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
             userAgent,
             subjectType: "property",
             subjectId: propertyId,
+            actorId: user?.id,
           });
           return jsonResponse({ error: "Too many contact requests. Please try again later." }, 429);
+        }
+
+        // Check 3-contact quota
+        const match = user
+          ? { event: "contact.requested", actor_id: user.id }
+          : { event: "contact.requested", ip_address: ip };
+
+        const { count: currentPropertyCount } = await supabaseAdmin
+          .from("audit_logs")
+          .select("*", { count: "exact", head: true })
+          .match({ ...match, subject_id: propertyId });
+
+        const alreadyContacted = (currentPropertyCount ?? 0) > 0;
+
+        if (!alreadyContacted) {
+          const { data: logs } = await supabaseAdmin
+            .from("audit_logs")
+            .select("subject_id")
+            .match(match);
+
+          const distinctProperties = new Set((logs || []).map((l) => l.subject_id));
+          if (distinctProperties.size >= 3) {
+            await recordAudit({
+              event: "contact.rejected",
+              outcome: "error",
+              ip,
+              userAgent,
+              subjectType: "property",
+              subjectId: propertyId,
+              actorId: user?.id,
+              details: { reason: "quota_exceeded" },
+            });
+            return jsonResponse(
+              {
+                error: user
+                  ? "You have reached your 3 free owner contacts limit."
+                  : "You've viewed 3 free contacts. Please sign in to view more.",
+              },
+              403,
+            );
+          }
         }
 
         // 2. Parse body & Turnstile verification
@@ -100,7 +153,6 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         // it as anon is therefore rejected with 42501 insufficient_privilege,
         // which this handler turned into "Property not found" — so the one
         // endpoint allowed to see the number was the one guaranteed not to.
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: property, error } = await supabaseAdmin
           .from("properties")
           .select("id, title, price, listing_type, address, city, owner_phone")
@@ -132,6 +184,7 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
             event: "contact.requested",
             outcome: "error",
             ip,
+            actorId: user?.id,
             details: { channel: "whatsapp", reason: "owner_phone_missing", propertyId },
           });
           return jsonResponse(
@@ -180,6 +233,7 @@ Thank you.`;
           userAgent,
           subjectType: "property",
           subjectId: propertyId,
+          actorId: user?.id,
           details: { channel: "whatsapp" },
         });
 
@@ -190,6 +244,7 @@ Thank you.`;
           userAgent,
           subjectType: "property",
           subjectId: propertyId,
+          actorId: user?.id,
         });
 
         return jsonResponse({ ok: true, whatsappUrl });
