@@ -116,7 +116,7 @@ class Property {
       videoUrl: json['video_url'] as String?,
       videoStatus: json['video_status'] as String?,
       isFeatured: json['is_featured'] as bool? ?? false,
-      isZeroBrokerage: json['is_zero_brokerage'] as bool? ?? true,
+      isZeroBrokerage: json['is_zero_brokerage'] == true,
       furnishingStatus: json['furnishing_status'] as String?,
       amenities: (json['amenities'] as List<dynamic>?)
               ?.map((e) => e.toString())

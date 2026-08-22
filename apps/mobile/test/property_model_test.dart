@@ -113,5 +113,41 @@ void main() {
       expect(prop.isRent, true);
       expect(prop.formattedPrice, '₹2,50,000/mo');
     });
+
+    test('Correctly handles is_zero_brokerage flag without defaulting null to true', () {
+      final jsonNull = {
+        'id': 'test-null',
+        'title': 'Test Property',
+        'price': 10000,
+        'city': 'Hyderabad',
+        'address': 'Test Address',
+        'bedrooms': 2,
+        'bathrooms': 2,
+        'area_sqft': 1000,
+        'property_type': 'apartment',
+        'listing_type': 'rent',
+        'status': 'available',
+        'is_zero_brokerage': null,
+        'created_at': '2026-08-18T12:00:00.000Z',
+      };
+      expect(Property.fromJson(jsonNull).isZeroBrokerage, false);
+
+      final jsonTrue = {
+        'id': 'test-true',
+        'title': 'Test Property',
+        'price': 10000,
+        'city': 'Hyderabad',
+        'address': 'Test Address',
+        'bedrooms': 2,
+        'bathrooms': 2,
+        'area_sqft': 1000,
+        'property_type': 'apartment',
+        'listing_type': 'rent',
+        'status': 'available',
+        'is_zero_brokerage': true,
+        'created_at': '2026-08-18T12:00:00.000Z',
+      };
+      expect(Property.fromJson(jsonTrue).isZeroBrokerage, true);
+    });
   });
 }

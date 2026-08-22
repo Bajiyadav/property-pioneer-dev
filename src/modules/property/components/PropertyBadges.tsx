@@ -16,7 +16,7 @@ export function PropertyBadges({
 }) {
   const ownerVerified = isOwnerVerified(property);
   const propertyVerified = isPropertyVerified(property);
-  const isZeroBrokerage = property.is_zero_brokerage !== false;
+  const isZeroBrokerage = property.is_zero_brokerage === true;
   const isFeatured = property.is_featured;
   const isPremium = Boolean(property.is_premium);
 
