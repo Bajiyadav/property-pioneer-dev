@@ -93,11 +93,14 @@ function ModerationQueue() {
     mutationFn: (args: {
       id: string;
       is_approved?: boolean;
+      is_featured?: boolean;
       status?: "available" | "rented" | "sold" | "rejected" | "pending" | "draft";
       verification_status?: "pending" | "verified" | "rejected";
       verification_notes?: string;
+      video_status?: "pending" | "approved" | "rejected";
       verified_at?: string;
-    }) => updateAdminProperty({ data: args as Parameters<typeof updateAdminProperty>[0]["data"] }),
+      verified_by?: string;
+    }) => updateAdminProperty({ data: args }),
     onSuccess: () => {
       refetch();
       setSelectedProperty(null);
