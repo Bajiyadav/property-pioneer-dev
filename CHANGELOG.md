@@ -1,3 +1,22 @@
+## v0.39.0 — 2026-08-22
+
+### Features
+- feat: complete Seedha Properties production updates (c164f67)
+
+### Fixes
+- fix: route home loan inquiries through lead activity (0a7c588)
+
+### Migration notes
+- supabase/migrations/20260817120100_storage_buckets_and_lead_routing_rbac.sql
+- supabase/migrations/20260817140100_media_management_and_moderation.sql
+- supabase/migrations/20260822010000_create_ai_tenant_conversations.sql
+- supabase/migrations/20260822143802_add_postgis_and_location_to_properties.sql
+- supabase/migrations/20260822144459_contact_quotas_and_cleanup.sql
+- supabase/migrations/20260822160000_strict_profiles_rls.sql
+- supabase/migrations/20260822170000_close_profiles_role_escalation.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.38.0 — 2026-08-21
 
 ### Features
