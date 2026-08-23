@@ -264,18 +264,33 @@ export function EnterprisePasswordForm({
 
     setResolvedResetEmail(targetEmail);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(targetEmail, {
-      redirectTo: emailRedirectTo,
-    });
+    // Route through the server endpoint so per-IP and per-email limits apply,
+    // and so the response is enumeration-safe. The previous direct
+    // resetPasswordForEmail call, plus a success toast that echoed the address,
+    // revealed whether an account existed — this closes that leak. A 429 is the
+    // only non-generic outcome, and it still says nothing about account existence.
+    let rateLimited = false;
+    try {
+      const res = await fetch("/api/auth/request-password-reset", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: targetEmail }),
+      });
+      rateLimited = res.status === 429;
+    } catch {
+      // Network failure: fall through to the same generic message rather than
+      // confirming or denying anything about the address.
+    }
 
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message || "Could not send reset email. Check address and try again.");
+    if (rateLimited) {
+      toast.error("Too many reset requests. Please wait a while and try again.");
       return;
     }
 
-    toast.success(`Password reset link/code sent to ${targetEmail}! Check your inbox.`);
+    // Generic on purpose: identical whether or not the email is registered.
+    toast.success("If an account exists for that email, a reset link is on its way.");
     setResetStep("verify");
   };
 

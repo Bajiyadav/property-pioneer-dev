@@ -2,7 +2,7 @@ import { PropertyImage } from "@/shared/components/PropertyImage";
 
 import { CreditCard, Star } from "lucide-react";
 import { SectionHeader } from "@/modules/dashboard/components/DashboardKit";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import type { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -133,9 +133,25 @@ export function ListingRows({
 }
 
 export function OwnerSettings({ user }: { user: User | null }) {
-  const [name, setName] = useState((user?.user_metadata?.full_name as string) ?? "");
-  const [phone, setPhone] = useState((user?.user_metadata?.phone as string) ?? "");
+  const [name, setName] = useState(
+    (user?.user_metadata?.full_name as string) || (user?.user_metadata?.name as string) || "",
+  );
+  const [phone, setPhone] = useState((user?.user_metadata?.phone as string) || user?.phone || "");
   const [saving, setSaving] = useState(false);
+
+  // Load authoritative profile data from public.profiles
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.full_name) setName(data.full_name);
+        if (data?.phone) setPhone(data.phone);
+      });
+  }, [user?.id]);
 
   return (
     <div className="space-y-5">
@@ -145,15 +161,43 @@ export function OwnerSettings({ user }: { user: User | null }) {
         className="max-w-xl space-y-4 rounded-3xl border border-border/60 bg-card p-6 text-xs"
         onSubmit={async (e) => {
           e.preventDefault();
+          if (!user?.id) return;
           setSaving(true);
-          const { error } = await supabase.auth.updateUser({
-            data: { full_name: name, phone },
-          });
-          setSaving(false);
-          if (error) toast.error(error.message);
-          else toast.success("Owner profile updated");
+          try {
+            // Update auth user metadata
+            await supabase.auth.updateUser({
+              data: { full_name: name, phone },
+            });
+            // Update public.profiles row
+            const { error: profErr } = await supabase
+              .from("profiles")
+              .update({ full_name: name, phone, updated_at: new Date().toISOString() })
+              .eq("id", user.id);
+            if (profErr) throw profErr;
+
+            toast.success("Owner profile updated successfully!");
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "Failed to update profile";
+            toast.error(msg);
+          } finally {
+            setSaving(false);
+          }
         }}
       >
+        <div>
+          <label htmlFor="o-email" className="mb-1 block font-semibold text-muted-foreground">
+            Account email
+          </label>
+          <input
+            id="o-email"
+            value={user?.email || ""}
+            disabled
+            className="w-full rounded-xl border border-border bg-secondary/30 px-3 py-2 text-muted-foreground cursor-not-allowed outline-none"
+          />
+          <p className="mt-1 text-[10px] text-muted-foreground">
+            Your verified login identity managed by Supabase Auth.
+          </p>
+        </div>
         <div>
           <label htmlFor="o-name" className="mb-1 block font-semibold text-muted-foreground">
             Full name
@@ -162,6 +206,7 @@ export function OwnerSettings({ user }: { user: User | null }) {
             id="o-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
             className="w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-foreground outline-none focus:ring-2 focus:ring-primary"
           />
         </div>

@@ -34,6 +34,8 @@ import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as WhyUsRouteImport } from './routes/why-us'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiReadyRouteImport } from './routes/api/ready'
 import { Route as AuthCallbackRouteImport } from './routes/auth_.callback'
 import { Route as BuyIndexRouteImport } from './routes/buy.index'
 import { Route as CommercialIndexRouteImport } from './routes/commercial.index'
@@ -59,7 +61,9 @@ import { Route as AuthenticatedDashboardTenantProfileRouteImport } from './route
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiAuthRequestOtpRouteImport } from './routes/api/auth/request-otp'
+import { Route as ApiAuthRequestPasswordResetRouteImport } from './routes/api/auth/request-password-reset'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
+import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
 import { Route as CommercialCityIndexRouteImport } from './routes/commercial.$city.index'
@@ -199,6 +203,16 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReadyRoute = ApiReadyRouteImport.update({
+  id: '/api/ready',
+  path: '/api/ready',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth_/callback',
   path: '/auth/callback',
@@ -335,9 +349,20 @@ const ApiAuthRequestOtpRoute = ApiAuthRequestOtpRouteImport.update({
   path: '/api/auth/request-otp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthRequestPasswordResetRoute =
+  ApiAuthRequestPasswordResetRouteImport.update({
+    id: '/api/auth/request-password-reset',
+    path: '/api/auth/request-password-reset',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   id: '/api/public/enquiries',
   path: '/api/public/enquiries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
+  id: '/api/webhooks/stripe',
+  path: '/api/webhooks/stripe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuyCityIndexRoute = BuyCityIndexRouteImport.update({
@@ -442,6 +467,8 @@ export interface FileRoutesByFullPath {
   '/why-us': typeof WhyUsRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
@@ -465,7 +492,9 @@ export interface FileRoutesByFullPath {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
+  '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
@@ -504,6 +533,8 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
+  '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
@@ -527,7 +558,9 @@ export interface FileRoutesByTo {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
+  '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
@@ -572,6 +605,8 @@ export interface FileRoutesById {
   '/why-us': typeof WhyUsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
+  '/api/ready': typeof ApiReadyRoute
   '/auth_/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
@@ -595,7 +630,9 @@ export interface FileRoutesById {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
+  '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
   '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
@@ -640,6 +677,8 @@ export interface FileRouteTypes {
     | '/why-us'
     | '/admin'
     | '/dashboard'
+    | '/api/health'
+    | '/api/ready'
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
@@ -663,7 +702,9 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
+    | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
     | '/list-property/promote/$id'
@@ -702,6 +743,8 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/why-us'
+    | '/api/health'
+    | '/api/ready'
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
@@ -725,7 +768,9 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
+    | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
     | '/list-property/promote/$id'
@@ -769,6 +814,8 @@ export interface FileRouteTypes {
     | '/why-us'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/api/health'
+    | '/api/ready'
     | '/auth_/callback'
     | '/list-property/wizard'
     | '/properties/$id'
@@ -792,7 +839,9 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
+    | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
     | '/list-property/promote/$id'
@@ -835,6 +884,8 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   WhyUsRoute: typeof WhyUsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiReadyRoute: typeof ApiReadyRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   TenantMatchesRoute: typeof TenantMatchesRoute
   TenantOnboardingRoute: typeof TenantOnboardingRoute
@@ -844,7 +895,9 @@ export interface RootRouteChildren {
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiAuthRequestOtpRoute: typeof ApiAuthRequestOtpRoute
+  ApiAuthRequestPasswordResetRoute: typeof ApiAuthRequestPasswordResetRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
+  ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
   CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
   RentCityLocalityRoute: typeof RentCityLocalityRoute
@@ -1035,6 +1088,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ready': {
+      id: '/api/ready'
+      path: '/api/ready'
+      fullPath: '/api/ready'
+      preLoaderRoute: typeof ApiReadyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth_/callback': {
       id: '/auth_/callback'
       path: '/auth/callback'
@@ -1210,11 +1277,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthRequestOtpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/request-password-reset': {
+      id: '/api/auth/request-password-reset'
+      path: '/api/auth/request-password-reset'
+      fullPath: '/api/auth/request-password-reset'
+      preLoaderRoute: typeof ApiAuthRequestPasswordResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/enquiries': {
       id: '/api/public/enquiries'
       path: '/api/public/enquiries'
       fullPath: '/api/public/enquiries'
       preLoaderRoute: typeof ApiPublicEnquiriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/stripe': {
+      id: '/api/webhooks/stripe'
+      path: '/api/webhooks/stripe'
+      fullPath: '/api/webhooks/stripe'
+      preLoaderRoute: typeof ApiWebhooksStripeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buy/$city/': {
@@ -1449,6 +1530,8 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   WhyUsRoute: WhyUsRoute,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiReadyRoute: ApiReadyRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   TenantMatchesRoute: TenantMatchesRoute,
   TenantOnboardingRoute: TenantOnboardingRoute,
@@ -1458,7 +1541,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiAuthRequestOtpRoute: ApiAuthRequestOtpRoute,
+  ApiAuthRequestPasswordResetRoute: ApiAuthRequestPasswordResetRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
+  ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
   CommercialCityLocalityRoute: CommercialCityLocalityRoute,
   RentCityLocalityRoute: RentCityLocalityRoute,

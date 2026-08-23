@@ -1,6 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getClientIp, getUserAgent, jsonResponse } from "@/lib/security.server";
-import { logAuditEvent } from "@/modules/audit/auditLogger.server";
+import {
+  getClientIp,
+  getUserAgent,
+  jsonResponse,
+  checkRateLimits,
+  recordAudit,
+} from "@/lib/security.server";
+import { RATE_LIMIT_CONFIG, rateLimitExceededResponse } from "@/lib/rateLimitConfig.server";
+import { supabase } from "@/integrations/supabase/client";
+
+async function countRecentVisitRequests(ip: string, sinceIso: string): Promise<number> {
+  const { count } = await supabase
+    .from("audit_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("event", "visit_requested")
+    .eq("ip_address", ip)
+    .gte("created_at", sinceIso);
+  return count ?? 0;
+}
 
 export const Route = createFileRoute("/api/public/properties/$id/schedule-visit")({
   server: {
@@ -12,6 +29,28 @@ export const Route = createFileRoute("/api/public/properties/$id/schedule-visit"
 
         if (!propertyId || propertyId.trim().length === 0) {
           return jsonResponse({ error: "Property ID is required." }, 400);
+        }
+
+        // Rate limit: Max 6 visit requests per hour per IP
+        const limit = await checkRateLimits([
+          {
+            rule: RATE_LIMIT_CONFIG.VISIT_IP_HOURLY,
+            count: (since) => countRecentVisitRequests(ip, since),
+          },
+        ]);
+        if (!limit.allowed) {
+          await recordAudit({
+            event: "visit.rejected",
+            outcome: "rate_limited",
+            ip,
+            userAgent,
+            subjectId: propertyId,
+            details: { rule: limit.rule?.name },
+          });
+          return rateLimitExceededResponse(
+            limit.rule?.name ?? "visit:ip:hourly",
+            limit.retryAfterSeconds,
+          );
         }
 
         let body: {
@@ -45,11 +84,12 @@ export const Route = createFileRoute("/api/public/properties/$id/schedule-visit"
           }
         }
 
-        await logAuditEvent({
+        await recordAudit({
           event: "visit_requested",
           ip,
           userAgent,
-          propertyId,
+          subjectType: "property",
+          subjectId: propertyId,
           details: {
             preferredDate: body.preferredDate,
             preferredTime: body.preferredTime,

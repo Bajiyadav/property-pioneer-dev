@@ -34,6 +34,21 @@ describe("Seedha Gemini AI Assistant (Structured RAG + Knowledge Grounding)", ()
   });
 
   describe("Intent Classification & Structured Filter Extraction", () => {
+    it("correctly identifies GREETING intent for short friendly greetings like 'hi', 'hello', 'namaste'", () => {
+      expect(classifyAndExtractIntent("hi").intent).toBe("GREETING");
+      expect(classifyAndExtractIntent("hello").intent).toBe("GREETING");
+      expect(classifyAndExtractIntent("hey").intent).toBe("GREETING");
+      expect(classifyAndExtractIntent("namaste").intent).toBe("GREETING");
+      expect(classifyAndExtractIntent("good morning").intent).toBe("GREETING");
+    });
+
+    it("correctly identifies PROPERTY_SEARCH intent for predefined chips", () => {
+      expect(classifyAndExtractIntent("Find a home for rent").intent).toBe("PROPERTY_SEARCH");
+      expect(classifyAndExtractIntent("Show 2 BHK rentals").intent).toBe("PROPERTY_SEARCH");
+      expect(classifyAndExtractIntent("Homes under ₹30,000").intent).toBe("PROPERTY_SEARCH");
+      expect(classifyAndExtractIntent("Properties in Hyderabad").city).toBe("Hyderabad");
+    });
+
     it("correctly identifies PROPERTY_SEARCH intent and extracts locality, BHK, and price", () => {
       const parsed = classifyAndExtractIntent("Find 2BHK in Madhapur under 30k with parking");
       expect(parsed.intent).toBe("PROPERTY_SEARCH");

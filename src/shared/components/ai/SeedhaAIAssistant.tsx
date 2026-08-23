@@ -82,12 +82,50 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
     }
   };
 
-  const SUGGESTED_PROMPTS = [
-    "How do I list my property with 0% brokerage?",
-    "Find 2 BHK in Madhapur under ₹30,000",
-    "How does the Gold Verified Owner badge work?",
-    "What are top tech corridors in Bengaluru?",
+  const SUGGESTED_CATEGORIES = [
+    {
+      title: "Find Home",
+      icon: "🏠",
+      prompts: [
+        "Find a home for rent",
+        "Find a home to buy",
+        "Homes near me",
+        "Homes under ₹30,000",
+      ],
+    },
+    {
+      title: "Properties",
+      icon: "📋",
+      prompts: [
+        "Show 2 BHK rentals",
+        "Find commercial properties",
+        "Properties in Hyderabad",
+        "Search properties in Bengaluru",
+      ],
+    },
+    {
+      title: "0% Brokerage",
+      icon: "ℹ️",
+      prompts: [
+        "How does 0% brokerage work?",
+        "How do I list my property?",
+        "How do I contact an owner?",
+        "Is my information safe?",
+      ],
+    },
+    {
+      title: "AI Help",
+      icon: "🤖",
+      prompts: [
+        "Best areas for IT employees",
+        "Tech corridors near my location",
+        "Help me choose a budget",
+        "What documents do I need?",
+      ],
+    },
   ];
+
+  const [activeCategory, setActiveCategory] = useState<number>(0);
 
   return (
     <div
@@ -190,18 +228,41 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Suggestion Chips */}
+          {/* Categorized Quick Suggestion Chips */}
           {messages.length <= 2 && !isLoading && (
-            <div className="px-3 pt-2 pb-1 bg-slate-50 flex flex-wrap gap-1.5 border-t border-slate-100">
-              {SUGGESTED_PROMPTS.map((prompt, i) => (
-                <button
-                  key={i}
-                  onClick={() => void handleSend(prompt)}
-                  className="px-2.5 py-1 text-[11px] font-medium bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 rounded-full transition-all text-left"
-                >
-                  {prompt}
-                </button>
-              ))}
+            <div className="px-3 pt-2.5 pb-2 bg-slate-50 border-t border-slate-100 space-y-2">
+              {/* Category Pills */}
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+                {SUGGESTED_CATEGORIES.map((cat, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveCategory(idx)}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg shrink-0 transition-all ${
+                      activeCategory === idx
+                        ? "bg-teal-700 text-white shadow-xs"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="mr-1">{cat.icon}</span>
+                    {cat.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* Prompts for Active Category */}
+              <div className="flex flex-wrap gap-1.5">
+                {SUGGESTED_CATEGORIES[activeCategory]?.prompts.map((prompt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => void handleSend(prompt)}
+                    className="px-2.5 py-1 text-[11px] font-medium bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 rounded-full transition-all text-left"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

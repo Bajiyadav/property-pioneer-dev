@@ -34,6 +34,7 @@ export interface OwnerListingInput {
   listing_type: "rent" | "sale";
   /** Owner's WhatsApp number, digits only. The contact API reads this. */
   owner_phone: string;
+  owner_name?: string | null;
   images: string[];
   status?: "draft" | "available";
   video_url?: string | null;
@@ -170,6 +171,20 @@ export async function createOwnerProperty(ownerId: string, input: OwnerListingIn
   // Idempotent, and deliberately silent on failure: a bookkeeping error must not
   // undo a listing the user just created successfully.
   await grantOwnerRole(db, ownerId);
+
+  // Sync owner contact profile details so name & phone persist seamlessly
+  if (input.owner_name || input.owner_phone) {
+    try {
+      const updates: { full_name?: string; phone?: string; updated_at: string } = {
+        updated_at: new Date().toISOString(),
+      };
+      if (input.owner_name) updates.full_name = input.owner_name;
+      if (input.owner_phone) updates.phone = input.owner_phone;
+      await db.from("profiles").update(updates).eq("id", ownerId);
+    } catch (err) {
+      console.warn("[owner] could not sync profile info", err);
+    }
+  }
 
   return data;
 }

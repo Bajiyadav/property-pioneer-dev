@@ -6,8 +6,8 @@ import {
   jsonResponse,
   recordAudit,
   checkRateLimits,
-  type RateLimitRule,
 } from "@/lib/security.server";
+import { RATE_LIMIT_CONFIG, rateLimitExceededResponse } from "@/lib/rateLimitConfig.server";
 
 /**
  * Server-side proxy for the Gemini call.
@@ -27,12 +27,6 @@ import {
  * text; it never sees a credential.
  */
 
-const PER_IP_AI: RateLimitRule = {
-  name: "ai:ip:hourly",
-  windowSeconds: 3600,
-  max: 40,
-};
-
 const GEMINI_MODELS = ["gemini-1.5-flash", "gemini-flash-latest"] as const;
 
 /** Shape accepted from the client — prompt content only, never a key. */
@@ -40,12 +34,16 @@ interface ChatRequest {
   contents?: Array<{ role: string; parts: Array<{ text: string }> }>;
 }
 
-async function countRecentAiRequests(ip: string, sinceIso: string): Promise<number> {
+async function countRecentAiRequests(
+  field: "ip_address" | "actor_id",
+  value: string,
+  sinceIso: string,
+): Promise<number> {
   const { count } = await supabase
     .from("audit_logs")
     .select("*", { count: "exact", head: true })
     .eq("event", "ai.chat")
-    .eq("ip_address", ip)
+    .eq(field, value)
     .gte("created_at", sinceIso);
   return count ?? 0;
 }
@@ -57,26 +55,84 @@ export const Route = createFileRoute("/api/ai/chat")({
         const ip = getClientIp(request);
         const userAgent = getUserAgent(request);
 
-        // The proxy spends real money per call, so it is rate limited per IP for
-        // the same reason the contact endpoint is.
-        const limit = await checkRateLimits([
-          { rule: PER_IP_AI, count: (since) => countRecentAiRequests(ip, since) },
-        ]);
+        // Optional authenticated user identification
+        const authHeader = request.headers.get("Authorization");
+        let userId: string | null = null;
+        if (authHeader?.startsWith("Bearer ")) {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const token = authHeader.replace("Bearer ", "").trim();
+            const { data } = await supabaseAdmin.auth.getUser(token);
+            if (data?.user) userId = data.user.id;
+          } catch {
+            // Ignore malformed token
+          }
+        }
+
+        // Multi-layer rate limit: IP hourly limit + User quota
+        const rulesToCheck = [
+          {
+            rule: RATE_LIMIT_CONFIG.AI_IP_HOURLY,
+            count: (since: string) => countRecentAiRequests("ip_address", ip, since),
+          },
+        ];
+
+        if (userId) {
+          rulesToCheck.push({
+            rule: RATE_LIMIT_CONFIG.AI_USER_HOURLY,
+            count: (since: string) => countRecentAiRequests("actor_id", userId!, since),
+          });
+        }
+
+        const limit = await checkRateLimits(rulesToCheck);
         if (!limit.allowed) {
-          await recordAudit({ event: "ai.rejected", outcome: "rate_limited", ip, userAgent });
-          return jsonResponse({ error: "Too many requests. Please try again later." }, 429);
+          await recordAudit({
+            event: "ai.rejected",
+            outcome: "rate_limited",
+            ip,
+            userAgent,
+            actorId: userId,
+            details: { rule: limit.rule?.name },
+          });
+          return rateLimitExceededResponse(
+            limit.rule?.name ?? "ai:rate_limit",
+            limit.retryAfterSeconds,
+          );
+        }
+
+        // Request body size limit
+        const raw = await request.text();
+        if (raw.length > RATE_LIMIT_CONFIG.AI_MAX_PAYLOAD_BYTES) {
+          await recordAudit({
+            event: "ai.rejected",
+            outcome: "rejected",
+            ip,
+            userAgent,
+            actorId: userId,
+            details: { reason: "payload_too_large", bytes: raw.length },
+          });
+          return jsonResponse({ error: "Request body exceeds allowed size limit (16KB)." }, 413);
         }
 
         let body: ChatRequest = {};
         try {
-          body = (await request.json()) as ChatRequest;
+          body = JSON.parse(raw) as ChatRequest;
         } catch {
-          return jsonResponse({ error: "Invalid request body." }, 400);
+          return jsonResponse({ error: "Invalid JSON request body." }, 400);
         }
 
         const contents = body.contents;
         if (!Array.isArray(contents) || contents.length === 0) {
           return jsonResponse({ error: "No prompt supplied." }, 400);
+        }
+
+        // Validate prompt length
+        const totalPromptLength = contents.reduce((acc, c) => {
+          return acc + (c.parts || []).reduce((pAcc, p) => pAcc + (p.text?.length || 0), 0);
+        }, 0);
+
+        if (totalPromptLength > RATE_LIMIT_CONFIG.AI_MAX_PROMPT_CHARS) {
+          return jsonResponse({ error: "Prompt exceeds maximum allowed character length." }, 400);
         }
 
         const apiKey = process.env.GEMINI_API_KEY ?? "";

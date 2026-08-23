@@ -7,7 +7,12 @@ interface CategoryCard {
   subtitle: string;
   tag: string;
   icon: React.ElementType;
-  path: LinkProps["to"];
+  search: {
+    listing?: string;
+    type?: string;
+    q?: string;
+    city?: string;
+  };
   gradient: string;
   accentBg: string;
   borderColor: string;
@@ -20,7 +25,7 @@ const CATEGORIES: CategoryCard[] = [
     subtitle: "Apartments, Gated Communities & Standalone Homes",
     tag: "Verified Owners",
     icon: Key,
-    path: "/properties",
+    search: { listing: "rent" },
     gradient: "from-emerald-500 to-teal-600",
     accentBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     borderColor: "hover:border-emerald-500/50",
@@ -31,7 +36,7 @@ const CATEGORIES: CategoryCard[] = [
     subtitle: "Flats, Luxury Residences & Independent Homes",
     tag: "0% Commission",
     icon: Home,
-    path: "/buy",
+    search: { listing: "sale" },
     gradient: "from-blue-500 to-indigo-600",
     accentBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     borderColor: "hover:border-blue-500/50",
@@ -42,7 +47,7 @@ const CATEGORIES: CategoryCard[] = [
     subtitle: "Modern Offices, Retail Shops & Coworking Hubs",
     tag: "High ROI Corridors",
     icon: Building2,
-    path: "/commercial",
+    search: { type: "commercial" },
     gradient: "from-purple-500 to-pink-600",
     accentBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
     borderColor: "hover:border-purple-500/50",
@@ -73,7 +78,8 @@ export function PropertyCategories() {
           return (
             <Link
               key={cat.id}
-              to={cat.path}
+              to="/properties"
+              search={cat.search}
               className={`group relative flex flex-col justify-between rounded-3xl border border-border/80 bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 overflow-hidden ${cat.borderColor}`}
             >
               {/* Subtle top glow */}

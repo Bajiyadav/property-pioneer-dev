@@ -27,7 +27,13 @@ export interface ExtractedTenantPreferences {
 }
 
 export type AIIntent =
-  "PROPERTY_SEARCH" | "PROPERTY_DETAIL" | "SEEDHA_KNOWLEDGE" | "GENERAL" | "MIXED";
+  | "GREETING"
+  | "INCOMPLETE_SEARCH"
+  | "PROPERTY_SEARCH"
+  | "PROPERTY_DETAIL"
+  | "SEEDHA_KNOWLEDGE"
+  | "GENERAL"
+  | "MIXED";
 
 export interface ExtractedPropertyFilters {
   intent: AIIntent;
@@ -114,18 +120,25 @@ COMMUNICATION STYLE:
  */
 export function classifyAndExtractIntent(query: string): ExtractedPropertyFilters {
   const q = query.toLowerCase();
+  const trimmed = q.trim();
+  const isGreeting =
+    /^(hi|hello|hey|namaste|helo|hii|hiii|good morning|good afternoon|good evening|start|help|who are you)\b/i.test(
+      trimmed,
+    ) && trimmed.split(/\s+/).length <= 4;
 
   const hasPropertySearchTerms =
-    /\b(bhk|bedroom|flat|apartment|house|villa|rent|buy|budget|price|under|below|near|locality|deposit)\b/i.test(
+    /\b(bhk|bedroom|flat|apartment|house|villa|rent|buy|budget|price|under|below|near|locality|deposit|home|room)\b/i.test(
       q,
     );
   const hasKnowledgeTerms =
-    /\b(brokerage|commission|fee|how to list|how to post|kyc|verification|badge|schedule|visit|policy|refund|terms|safe|contact owner|rules)\b/i.test(
+    /\b(brokerage|commission|fee|how to list|how to post|kyc|verification|badge|schedule|visit|policy|refund|terms|safe|contact owner|rules|documents)\b/i.test(
       q,
     );
 
   let intent: AIIntent = "GENERAL";
-  if (hasPropertySearchTerms && hasKnowledgeTerms) {
+  if (isGreeting) {
+    intent = "GREETING";
+  } else if (hasPropertySearchTerms && hasKnowledgeTerms) {
     intent = "MIXED";
   } else if (hasPropertySearchTerms) {
     intent = "PROPERTY_SEARCH";

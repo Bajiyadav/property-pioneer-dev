@@ -84,7 +84,16 @@ import { supabase } from "@/integrations/supabase/client";
 export async function fetchOwnerContact(
   propertyId: string,
   turnstileToken?: string,
-): Promise<{ ok: boolean; whatsappUrl?: string; error?: string }> {
+): Promise<{
+  ok: boolean;
+  whatsappUrl?: string;
+  error?: string;
+  status?: number;
+  contactsUsed?: number;
+  contactsLimit?: number;
+  contactsRemaining?: number;
+  plans?: Array<{ id: string; name: string; priceInr: number; contactsCount: number }>;
+}> {
   try {
     const {
       data: { session },
@@ -100,8 +109,25 @@ export async function fetchOwnerContact(
       body: JSON.stringify({ turnstileToken }),
     });
     const data = await res.json();
-    if (!res.ok) return { ok: false, error: data.error || "Failed to generate contact request." };
-    return { ok: true, whatsappUrl: data.whatsappUrl };
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        error: data.error || data.message || "Failed to generate contact request.",
+        contactsUsed: data.contactsUsed,
+        contactsLimit: data.contactsLimit,
+        contactsRemaining: data.contactsRemaining,
+        plans: data.plans,
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      whatsappUrl: data.whatsappUrl,
+      contactsUsed: data.contactsUsed,
+      contactsLimit: data.contactsLimit,
+      contactsRemaining: data.contactsRemaining,
+    };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Network error." };
   }

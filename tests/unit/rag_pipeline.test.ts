@@ -92,12 +92,46 @@ describe("Seedha AI End-to-End RAG Pipeline", () => {
       expect(response.totalLatencyMs).toBeGreaterThanOrEqual(0);
     });
 
+    it("handles simple greetings like 'hi' immediately without lengthy policy dumps", async () => {
+      const mockProxy = vi.fn();
+      const response = await runRAGPipeline("hi", mockProxy);
+
+      expect(mockProxy).not.toHaveBeenCalled();
+      expect(response.intent).toBe("GREETING");
+      expect(response.answer).toContain("Namaste!");
+      expect(response.answer).toContain("Seedha AI");
+      expect(response.answer).toContain("Find a Home for Rent");
+    });
+
+    it("handles incomplete searches like 'I want a home' by asking progressive clarifying questions", async () => {
+      const mockProxy = vi.fn();
+      const response = await runRAGPipeline("I want a home", mockProxy);
+
+      expect(mockProxy).not.toHaveBeenCalled();
+      expect(response.intent).toBe("INCOMPLETE_SEARCH");
+      expect(response.answer).toContain("Rent or Buy");
+      expect(response.answer).toContain("City");
+    });
+
+    it("returns truthful zero-match message without fabricating properties when offline", async () => {
+      const mockOfflineProxy = vi.fn().mockResolvedValue(null);
+      const response = await runRAGPipeline(
+        "2BHK in NonExistentLocality123 under 5000",
+        mockOfflineProxy,
+      );
+
+      expect(response.answer).toContain("I couldn't find any matching properties right now.");
+      expect(response.answer).toContain("Madhapur");
+      expect(response.matchedPropertiesCount).toBe(0);
+    });
+
     it("falls back gracefully to grounded local response when AI proxy is offline", async () => {
       const mockOfflineProxy = vi.fn().mockResolvedValue(null);
       const response = await runRAGPipeline("Does Seedha charge any brokerage?", mockOfflineProxy);
 
       expect(response.answer).toBeTruthy();
       expect(response.answer.toLowerCase()).toContain("brokerage");
+      expect(response.sourceCitations.length).toBeGreaterThan(0);
     });
   });
 });

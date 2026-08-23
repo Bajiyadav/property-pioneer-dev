@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/modules/property/services/propertyQueries";
@@ -80,56 +81,153 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
           return jsonResponse({ error: "Too many contact requests. Please try again later." }, 429);
         }
 
-        // Free owner-contact quota.
-        //
-        // The limit is enforced here but was never reported back, so a visitor
-        // discovered it only by hitting it — three successful contacts, then a
-        // refusal with no prior warning. The counts below ride on every response
-        // so the UI can show what is left BEFORE it runs out.
+        // ── Quota & Entitlement Check (Atomic RPC with Legacy Fallback)
         const FREE_CONTACT_LIMIT = 3;
-        const match = user
-          ? { event: "contact.requested", actor_id: user.id }
-          : { event: "contact.requested", ip_address: ip };
+        let quotaHandledByRpc = false;
+        let alreadyContacted = false;
+        let usedBefore = 0;
+        let passRemaining: number | null = null;
+        let totalAllowedQuota = FREE_CONTACT_LIMIT;
 
-        const { count: currentPropertyCount } = await supabaseAdmin
-          .from("audit_logs")
-          .select("*", { count: "exact", head: true })
-          .match({ ...match, subject_id: propertyId });
+        if (user) {
+          const { data: rpcRes, error: rpcErr } = await (supabaseAdmin.rpc as any)(
+            "authorize_and_consume_contact",
+            { p_property_id: propertyId },
+          );
 
-        const alreadyContacted = (currentPropertyCount ?? 0) > 0;
+          if (!rpcErr && rpcRes && typeof rpcRes === "object") {
+            quotaHandledByRpc = true;
+            const d = rpcRes as {
+              allowed?: boolean;
+              reason?: "already" | "paid" | "free" | "payment_required" | "unauthenticated";
+              contacts_remaining?: number;
+              free_used?: number;
+              free_limit?: number;
+            };
 
-        // Counted on every request, not only when the quota might bite, so the
-        // success path can report the remaining allowance too.
-        const { data: logs } = await supabaseAdmin
-          .from("audit_logs")
-          .select("subject_id")
-          .match(match);
-        const distinctProperties = new Set((logs || []).map((l) => l.subject_id));
-        const usedBefore = distinctProperties.size;
+            if (!d.allowed) {
+              await recordAudit({
+                event: "contact.rejected",
+                outcome: "error",
+                ip,
+                userAgent,
+                subjectType: "property",
+                subjectId: propertyId,
+                actorId: user.id,
+                details: { reason: d.reason, free_used: d.free_used },
+              });
+              const { CUSTOMER_PLANS } = await import("@/config/plans");
+              return jsonResponse(
+                {
+                  error: "CONTACT_SUBSCRIPTION_REQUIRED",
+                  code: "CONTACT_SUBSCRIPTION_REQUIRED",
+                  message:
+                    "You have used all 3 free owner contacts. Please choose a contact pass to unlock more direct owners.",
+                  contactsUsed: d.free_used ?? FREE_CONTACT_LIMIT,
+                  contactsLimit: d.free_limit ?? FREE_CONTACT_LIMIT,
+                  contactsRemaining: 0,
+                  plans: CUSTOMER_PLANS,
+                },
+                402,
+              );
+            }
 
-        if (!alreadyContacted) {
-          if (usedBefore >= FREE_CONTACT_LIMIT) {
-            await recordAudit({
-              event: "contact.rejected",
-              outcome: "error",
-              ip,
-              userAgent,
-              subjectType: "property",
-              subjectId: propertyId,
-              actorId: user?.id,
-              details: { reason: "quota_exceeded" },
-            });
-            return jsonResponse(
-              {
-                error: user
-                  ? `You have used all ${FREE_CONTACT_LIMIT} free owner contacts.`
-                  : `You've viewed ${FREE_CONTACT_LIMIT} free contacts. Please sign in to view more.`,
-                contactsUsed: usedBefore,
-                contactsLimit: FREE_CONTACT_LIMIT,
-                contactsRemaining: 0,
-              },
-              403,
-            );
+            if (d.reason === "paid") {
+              passRemaining = d.contacts_remaining ?? null;
+              await recordAudit({
+                event: "contact.paid",
+                outcome: "success",
+                ip,
+                userAgent,
+                subjectType: "property",
+                subjectId: propertyId,
+                actorId: user.id,
+                details: { contacts_remaining: passRemaining },
+              });
+            }
+          }
+        }
+
+        // ── Fallback Path: Guest or pre-migration DB ──────────────────────
+        if (!quotaHandledByRpc) {
+          let paidContactsAllowed = 0;
+          if (user) {
+            try {
+              type EntitlementRow = { contacts_allowed?: number | null };
+              const { data: entitlement } = await (
+                supabaseAdmin as unknown as {
+                  from: (table: string) => {
+                    select: (cols: string) => {
+                      eq: (
+                        col: string,
+                        val: string,
+                      ) => {
+                        maybeSingle: () => Promise<{ data: EntitlementRow | null }>;
+                      };
+                    };
+                  };
+                }
+              )
+                .from("customer_entitlements")
+                .select("contacts_allowed")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+              if (entitlement && typeof entitlement.contacts_allowed === "number") {
+                paidContactsAllowed = Math.max(0, entitlement.contacts_allowed);
+              }
+            } catch {
+              // Non-blocking fallback
+            }
+          }
+
+          totalAllowedQuota = FREE_CONTACT_LIMIT + paidContactsAllowed;
+          const match = user
+            ? { event: "contact.requested", actor_id: user.id }
+            : { event: "contact.requested", ip_address: ip };
+
+          const { count: currentPropertyCount } = await supabaseAdmin
+            .from("audit_logs")
+            .select("*", { count: "exact", head: true })
+            .match({ ...match, subject_id: propertyId });
+
+          alreadyContacted = (currentPropertyCount ?? 0) > 0;
+
+          const { data: logs } = await supabaseAdmin
+            .from("audit_logs")
+            .select("subject_id")
+            .match(match);
+          const distinctProperties = new Set((logs || []).map((l) => l.subject_id));
+          usedBefore = distinctProperties.size;
+
+          if (!alreadyContacted) {
+            if (usedBefore >= totalAllowedQuota) {
+              await recordAudit({
+                event: "contact.rejected",
+                outcome: "error",
+                ip,
+                userAgent,
+                subjectType: "property",
+                subjectId: propertyId,
+                actorId: user?.id,
+                details: { reason: "quota_exceeded", usedBefore, totalAllowedQuota },
+              });
+              const { CUSTOMER_PLANS } = await import("@/config/plans");
+              return jsonResponse(
+                {
+                  error: "CONTACT_SUBSCRIPTION_REQUIRED",
+                  code: "CONTACT_SUBSCRIPTION_REQUIRED",
+                  message: user
+                    ? `You have used all ${totalAllowedQuota} owner contacts. Please choose a contact pass to unlock more direct owners.`
+                    : `You've viewed ${FREE_CONTACT_LIMIT} free contacts. Please sign in to continue.`,
+                  contactsUsed: usedBefore,
+                  contactsLimit: totalAllowedQuota,
+                  contactsRemaining: 0,
+                  plans: CUSTOMER_PLANS,
+                },
+                402,
+              );
+            }
           }
         }
 
@@ -238,16 +336,18 @@ Thank you.`;
         const whatsappUrl = `https://wa.me/${phone}?text=${encodedMsg}`;
 
         // 4. Audit & Analytics Logging
-        await recordAudit({
-          event: "contact.requested",
-          outcome: "success",
-          ip,
-          userAgent,
-          subjectType: "property",
-          subjectId: propertyId,
-          actorId: user?.id,
-          details: { channel: "whatsapp" },
-        });
+        if (!quotaHandledByRpc) {
+          await recordAudit({
+            event: "contact.requested",
+            outcome: "success",
+            ip,
+            userAgent,
+            subjectType: "property",
+            subjectId: propertyId,
+            actorId: user?.id,
+            details: { channel: "whatsapp" },
+          });
+        }
 
         await recordAudit({
           event: "whatsapp.clicked",
@@ -259,8 +359,15 @@ Thank you.`;
           actorId: user?.id,
         });
 
-        // Re-contacting a property already contacted spends no new allowance,
-        // so the used figure must not increment for it.
+        if (passRemaining !== null) {
+          return jsonResponse({
+            ok: true,
+            whatsappUrl,
+            pass: true,
+            contactsRemaining: passRemaining,
+          });
+        }
+
         const usedAfter = alreadyContacted ? usedBefore : usedBefore + 1;
         return jsonResponse({
           ok: true,
