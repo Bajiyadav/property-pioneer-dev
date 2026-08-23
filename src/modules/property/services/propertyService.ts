@@ -935,6 +935,34 @@ export async function fetchPublicPropertyById(id: string): Promise<Property | nu
   return ALL_FALLBACK_PROPERTIES.find((p) => p.id === id) ?? null;
 }
 
+/**
+ * Distinct localities that actually have approved listings in a city — the
+ * "available locations" we surface so a visitor SELECTS from existing data
+ * instead of typing. Reuses the public property feed (locality is public);
+ * returns [] on any error so the UI degrades to "no locations".
+ */
+export async function fetchAvailableLocalities(city: string): Promise<string[]> {
+  const c = city.trim();
+  if (!c) return [];
+  try {
+    const { data, error } = await db
+      .from("properties")
+      .select("locality")
+      .eq("is_approved", true)
+      .ilike("city", `%${c}%`)
+      .not("locality", "is", null);
+    if (error || !data) return [];
+    const set = new Set<string>();
+    for (const row of data as { locality: string | null }[]) {
+      const l = (row.locality ?? "").trim();
+      if (l) set.add(l);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  } catch {
+    return [];
+  }
+}
+
 export function isOwnerVerified(property: Property): boolean {
   return (
     property.owner_verification_status === "verified" ||

@@ -25,6 +25,8 @@ const service = src("modules/property/services/propertyService.ts");
 const structured = src("modules/property/components/PropertyStructuredData.tsx");
 const route = src("routes/api/public/properties.$id.location.ts");
 const card = src("modules/property/components/PropertyCard.tsx");
+const reveal = src("modules/property/components/PropertyLocationReveal.tsx");
+const enquiry = src("modules/property/components/PropertyEnquiryForm.tsx");
 
 const HYD = { city: "Hyderabad", locality: "Madhapur" };
 const HYD_NO_LOCALITY = { city: "Hyderabad", locality: null };
@@ -131,5 +133,49 @@ describe("reveal endpoint releases the address only on a validated match", () =>
   it("is rate-limited to deter address scraping", () => {
     expect(route).toContain("checkRateLimits");
     expect(route).toContain("PER_IP_LOCATION");
+  });
+});
+
+describe("location is SELECTED from existing data, not typed", () => {
+  it("the reveal offers city + locality from existing data (LIVE_CITIES + fetchAvailableLocalities)", () => {
+    expect(reveal).toContain("LIVE_CITIES");
+    expect(reveal).toContain("fetchAvailableLocalities");
+    // Real dropdowns, not a free-text locality box.
+    expect(reveal).toContain("<select");
+  });
+
+  it("shows the exact required message when a location has no matching properties", () => {
+    expect(reveal).toContain("No properties are currently available in this location.");
+  });
+
+  it("fetchAvailableLocalities queries approved listings' distinct localities", () => {
+    expect(service).toContain("export async function fetchAvailableLocalities");
+    expect(service).toMatch(/fetchAvailableLocalities[\s\S]*\.eq\("is_approved", true\)/);
+    expect(service).toMatch(/fetchAvailableLocalities[\s\S]*\.select\("locality"\)/);
+  });
+
+  it("the reveal step never asks for the visitor's name", () => {
+    expect(reveal).not.toMatch(/full.?name|Your name|placeholder="Your/i);
+  });
+});
+
+describe("existing profile info is reused — the name is never re-collected", () => {
+  it("the enquiry form reads the signed-in user's name/phone from the session", () => {
+    expect(enquiry).toContain("useAuthSession");
+    expect(enquiry).toContain("user_metadata");
+    expect(enquiry).toContain("knownName");
+    expect(enquiry).toContain("knownPhone");
+  });
+
+  it("hides the name input when we already have the name (no duplicate collection)", () => {
+    // The name <input> is only rendered in the else-branch of `knownName`.
+    expect(enquiry).toMatch(
+      /knownName \?[\s\S]*Enquiring as[\s\S]*: \([\s\S]*placeholder="Your full name"/,
+    );
+  });
+
+  it("name/phone state is initialised from the profile, not empty", () => {
+    expect(enquiry).toContain("useState(knownName)");
+    expect(enquiry).toContain("useState(knownPhone)");
   });
 });
