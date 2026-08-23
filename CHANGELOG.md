@@ -1,3 +1,11 @@
+## v0.44.0 — 2026-08-23
+
+### Features
+- feat(owner): enhance owner listing flow with direct dashboard routing and contact pass entitlement (e109c56)
+
+### Fixes
+- fix(owner): direct navigation to owner dashboard on property submission and preserve auth redirect (480272e)
+
 ## v0.43.0 — 2026-08-23
 
 ### Features
