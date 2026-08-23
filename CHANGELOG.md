@@ -1,3 +1,8 @@
+## v0.40.1 — 2026-08-23
+
+### Fixes
+- fix(ui): use 2-column grid for property catalogue cards (d64743f)
+
 ## v0.40.0 — 2026-08-23
 
 ### Features
