@@ -33,8 +33,7 @@ export default defineConfig(({ command }) => ({
   },
 
   resolve: {
-    // tsConfigPaths already maps `@/*` from tsconfig.json, but the explicit
-    // alias is kept so a resolution failure cannot depend on plugin ordering.
+    // Explicit alias ensures zero resolution failures across environments
     alias: { "@": new URL("./src", import.meta.url).pathname },
     // Two copies of React, or of the query client, silently break hooks and
     // cache identity. Deduping is not an optimisation here, it is correctness.
@@ -60,7 +59,6 @@ export default defineConfig(({ command }) => ({
 
   plugins: [
     tailwindcss(),
-    tsConfigPaths({ projects: ["./tsconfig.json"] }),
 
     tanstackStart({
       // Keeps server-only modules out of the client bundle, and fails the build

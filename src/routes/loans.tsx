@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HomeLoansPage } from "./home-loans";
+import { HomeLoansView } from "@/modules/loans/components/HomeLoansView";
 
 export const Route = createFileRoute("/loans")({
   head: () => ({
@@ -14,5 +14,5 @@ export const Route = createFileRoute("/loans")({
       },
     ],
   }),
-  component: HomeLoansPage,
+  component: HomeLoansView,
 });
