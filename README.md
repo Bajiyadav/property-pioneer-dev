@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Database](https://img.shields.io/badge/Database-Supabase_Postgres-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-26%2F26%20Passed-brightgreen?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Tests-35%2F35%20Suites%20Passed-brightgreen?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict%200%20Errors-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
@@ -26,9 +26,10 @@ _India's Direct-Owner Real Estate Discovery Marketplace — 0% Brokerage._
 - [Architecture](#-architecture)
 - [Quick Start](#-quick-start)
 - [Environment Configuration](#-environment-configuration)
+- [7-Step Owner Listing Experience](#-7-step-owner-listing-experience)
 - [Feature Matrix](#-feature-matrix)
 - [API Reference](#-api-reference)
-- [Database Schema](#-database-schema)
+- [Database Schema & PostGIS Privacy](#-database-schema--postgis-privacy)
 - [Performance & Core Web Vitals](#-performance--core-web-vitals)
 - [Security & Privacy](#-security--privacy)
 - [Deployment](#-deployment)
@@ -49,7 +50,9 @@ _India's Direct-Owner Real Estate Discovery Marketplace — 0% Brokerage._
 
 - **0% Brokerage & Zero Hidden Fees**: Direct buyer/tenant to owner connections via verified contacts and WhatsApp.
 - **Un-Gated Discovery**: Visitors can browse properties, search by dynamic localities, filter by budget/BHK, and inspect amenities without being forced to log in.
-- **Owner Verification**: 6-step listing submission with moderation workflows and trust badges (`✓ Direct Owner`, `✓ Owner Verified`, `✓ Property Verified`).
+- **7-Step Owner Listing Workflow**: Intuitive owner listing workflow collecting comprehensive property specs, privacy-safe location, pricing & rental terms, authentic photos, and visit schedules.
+- **Admin Moderation & 8-Point Checklist**: Employee-only moderation queue to verify real media, zero-brokerage claims, accurate pricing, and legal declaration before publishing.
+- **Privacy-Safe PostGIS Mapping**: Exact coordinates (`latitude`, `longitude`) are kept strictly private on the database level, while public maps display privacy-safe ~110m approximate circles (`approx_latitude`, `approx_longitude`).
 - **Omnichannel Experience**: Unified backend serving both a full-stack SSR Web app (TanStack Start) and a native Flutter mobile app (Impeller OpenGLES).
 
 ---
@@ -82,9 +85,10 @@ _India's Direct-Owner Real Estate Discovery Marketplace — 0% Brokerage._
    │     SUPABASE POSTGRES     │      │     STORAGE & MEDIA       │      │    EXTERNAL INTEGRATIONS  │
    │                           │      │                           │      │                           │
    │ • Row-Level Security(RLS) │      │ • Property Image CDN      │      │ • Cloudflare Turnstile    │
-   │ • user_roles & profiles   │      │ • KYC Secure Bucket       │      │ • Google Maps / Distance  │
-   │ • properties & enquiries  │      │ • Auto-resizing & WebP    │      │ • Resend (Email Alert)    │
-   │ • scheduled_visits        │      │ • Watermarking Pipeline   │      │ • Razorpay (Order Verify) │
+   │ • PostGIS Spatial (v3.3)  │      │ • KYC Secure Bucket       │      │ • Google Maps / Distance  │
+   │ • user_roles & profiles   │      │ • Auto-resizing & WebP    │      │ • Resend (Email Alert)    │
+   │ • properties & enquiries  │      │ • Watermarking Pipeline   │      │ • Razorpay (Order Verify) │
+   │ • scheduled_visits        │      │                           │      │                           │
    └───────────────────────────┘      └───────────────────────────┘      └───────────────────────────┘
 ```
 
@@ -175,6 +179,20 @@ RAZORPAY_KEY_SECRET=your-razorpay-key-secret
 
 ---
 
+## 📝 7-Step Owner Listing Experience
+
+Seedha Properties provides a dedicated, direct-owner listing flow built specifically for the Indian real estate market:
+
+1. **Step 1: Property Details** — Category (Residential/Commercial/PG), Type, BHK Configuration, Area (Built-up & Carpet), Floor details, Property Age, Facing direction, and Covered/Open Parking specs.
+2. **Step 2: Locality & Privacy** — City, Locality, Landmark, and Pincode with transparent buyer privacy circles (~110m radius) protecting exact home addresses.
+3. **Step 3: Rent/Sale & Pricing** — Price, Monthly Rent, Security Deposit, Maintenance charges & inclusion toggle, Price Negotiability, Available From date, and Furnishing status.
+4. **Step 4: Amenities & Features** — Multi-select curated amenities (Power Backup, Lift, 24/7 Security, Reserved Parking, Gym, Swimming Pool, Gas Pipeline, etc.).
+5. **Step 5: Photos & Video Gallery** — Real property image upload pipeline, cover image selection, reordering, and video walkthrough support. Stock photos and watermarks are rejected.
+6. **Step 6: Visit Schedule & Contact Preferences** — Visit availability (Immediate, 15 days, 30 days, Specific Date), available days & time slots, and communication preferences (WhatsApp/Call).
+7. **Step 7: Review & Owner Declaration** — Complete listing preview and legally binding 0% brokerage owner declaration before submitting to moderation.
+
+---
+
 ## 📊 Feature Matrix
 
 | Feature                                  | Web (SSR) | Mobile (Flutter) | Status                    |
@@ -184,11 +202,12 @@ RAZORPAY_KEY_SECRET=your-razorpay-key-secret
 | **Direct WhatsApp & Phone Connect**      |    ✅     |        ✅        | **Live**                  |
 | **Property Details & Photo Gallery**     |    ✅     |        ✅        | **Live**                  |
 | **Verified Badging (`✓ Direct Owner`)**  |    ✅     |        ✅        | **Live**                  |
+| **Privacy-Safe PostGIS Mapping**         |    ✅     |        ✅        | **Live**                  |
 | **Schedule Visit Booking Flow**          |    ✅     |        ✅        | **Live**                  |
-| **List Property 6-Step Wizard**          |    ✅     |        ✅        | **Live**                  |
+| **7-Step Owner Listing Wizard**          |    ✅     |        ✅        | **Live**                  |
 | **Client-side Draft Auto-Save**          |    ✅     |        ✅        | **Live**                  |
-| **Admin Moderation & Approval Queue**    |    ✅     |        —         | **Live**                  |
-| **Admin Route Level Guard**              |    ✅     |        —         | **Live**                  |
+| **Admin 8-Point Moderation Queue**       |    ✅     |        —         | **Live**                  |
+| **Admin Role Route Guard**               |    ✅     |        —         | **Live**                  |
 | **Owner Dashboard & Enquiry Management** |    ✅     |        ✅        | **Live**                  |
 | **Favorites & Saved Searches**           |    ✅     |        ✅        | **Live**                  |
 | **In-App Realtime Chat**                 |    🔄     |        🔄        | **In Progress (Phase 2)** |
@@ -203,7 +222,8 @@ RAZORPAY_KEY_SECRET=your-razorpay-key-secret
 ### Public Endpoints
 
 - `GET /api/public/properties` — Paginated property search with multi-metro, locality, and price range filters.
-- `GET /api/public/properties/$id` — Single property detail view with verified amenities and commute estimates.
+- `GET /api/public/properties/$id` — Single property detail view with verified amenities, privacy coordinates, and commute estimates.
+- `POST /api/public/properties/$id/contact` — Secure contact quota and lead delivery endpoint.
 - `POST /api/public/properties/$id/schedule-visit` — Book a property walkthrough appointment (validates date format & prevents past dates).
 - `POST /api/public/enquiries` — Submit direct buyer/tenant interest to the property owner.
 
@@ -215,19 +235,20 @@ RAZORPAY_KEY_SECRET=your-razorpay-key-secret
 
 ### Admin & Moderation Endpoints
 
-- `GET /api/admin/moderation/queue` — Fetch listings awaiting approval (guarded by admin role).
-- `POST /api/admin/moderation/$id/action` — Approve, reject, or request changes on a property listing.
+- `GET /api/admin/moderation/queue` — Fetch listings awaiting approval (guarded by admin/agent role in `user_roles`).
+- `POST /api/admin/moderation/$id/action` — Approve, reject, or request changes on a property listing with structured notes.
 
 ---
 
-## 🗄️ Database Schema
+## 🗄️ Database Schema & PostGIS Privacy
 
 ### Core Tables & Relationships
 
 - **`user_roles`**: Maps `user_id` to system roles (`customer`, `owner`, `agent`, `admin`). Strict RLS prevents privilege self-escalation.
 - **`profiles`**: Stores user display name, avatar, phone verification status, and notification preferences.
-- **`properties`**: Core real estate table with price, listing type (`rent` | `sale`), address, locality, coordinates, bedrooms, bathrooms, area, amenities, and approval flags (`is_approved`).
+- **`properties`**: Core real estate table with price, listing type (`rent` | `sale`), address, locality, PostGIS geometry, bedrooms, bathrooms, area, amenities, and approval flags (`is_approved`).
 - **`enquiries`**: Visitor lead submissions linking `property_id`, `visitor_name`, `phone`, and `message`.
+- **`scheduled_visits`**: Walkthrough appointments booked by potential buyers/renters.
 - **`audit_logs`**: Immutable security audit trail recording auth events, role changes, visit bookings, and moderation actions.
 
 ```mermaid
@@ -239,6 +260,11 @@ erDiagram
     PROPERTIES ||--o{ SCHEDULED_VISITS : schedules
     USERS ||--o{ AUDIT_LOGS : triggers
 ```
+
+### PostGIS Location Architecture
+
+- **Private Exact Data**: `latitude`, `longitude`, and `location` (geometry) are strictly restricted on the PostgreSQL column permission level (`REVOKE ALL ON latitude, longitude FROM anon, authenticated`).
+- **Public Approximate Data**: `approx_latitude` and `approx_longitude` are publicly readable generated columns rounding coordinates to ~110m resolution to maintain seller privacy while powering interactive neighborhood discovery maps.
 
 ---
 
@@ -259,10 +285,10 @@ We maintain production-grade performance standards across both web and native ap
 
 ## 🔒 Security & Privacy
 
-- **Row-Level & Column-Level Security**: Supabase RLS policies isolate user records. Owner personal identifiable information (PII) like phone numbers and email addresses are withheld from public queries and served only via rate-limited, authenticated RPCs.
-- **Role Verification**: Admin access is verified server-side before protected routes render (`_authenticated/route.tsx`).
+- **Row-Level & Column-Level Security**: Supabase RLS policies isolate user records. Owner PII (phone number, email address) is withheld from public queries and served only via rate-limited, authenticated RPCs.
+- **Role Verification**: Admin and agent access is verified server-side via `assertEmployee` checking `user_roles` before executing protected functions.
 - **Anti-Abuse Protection**: Cloudflare Turnstile bot detection, honeypot inputs, and sliding-window rate limiters defend public enquiry routes.
-- **Automated Security Scanning**: CodeQL, Gitleaks, and audit checks run automatically on every pull request.
+- **Migration Hygiene Guards**: CI/CD pipelines enforce automated AST regex scanners rejecting destructive SQL (`DELETE FROM`, `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `UPDATE public.`) from executable migrations.
 
 ---
 
@@ -294,9 +320,9 @@ flutter build apk --release --split-per-abi
 ```text
 PHASE 1: Core Marketplace (✅ Live)
 ├── 7 Indian Metro Discovery & Search
-├── 6-Step Property Listing Wizard
-├── Scheduled Visit Booking Flow
-├── Admin Moderation Queue & Role Route Guard
+├── 7-Step Zero-Brokerage Property Listing Wizard
+├── Privacy-Safe PostGIS Mapping & Location Buffer
+├── Admin 8-Point Moderation Queue & Role Route Guard
 └── Native Flutter Mobile Release APK
 
 PHASE 2: Trust & Real-Time Engagement (🔄 Current Focus)
@@ -320,7 +346,7 @@ PHASE 4: Scale & Ecosystem (📅 Q4 2026)
 
 ### 1. `Supabase connection timeout / 400 Bad Request`
 
-- **Cause**: Extended schema columns (e.g. `pincode`, `metro_station`) probed on an unmigrated database instance.
+- **Cause**: Extended schema columns probed on an unmigrated database instance.
 - **Fix**: The codebase includes automated schema fallback detection (`createSchemaCapability`), which gracefully degrades to base columns without throwing errors.
 
 ### 2. `npm install fails with ERESOLVE peer dependencies`
