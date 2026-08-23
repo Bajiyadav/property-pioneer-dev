@@ -53,10 +53,11 @@ function AuthPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        window.location.href = "/dashboard";
+        const target = redirect ? safeRedirect(redirect) : null;
+        window.location.href = target || "/dashboard";
       }
     });
-  }, []);
+  }, [redirect]);
 
   const handleSuccess = (userObj: { name: string; email: string; phone: string; role: string }) => {
     const destRole = isUserRole(userObj.role) ? userObj.role : "customer";
