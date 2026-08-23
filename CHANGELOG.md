@@ -1,3 +1,8 @@
+## v0.48.0 — 2026-08-23
+
+### Features
+- feat(security): implement admin MFA and harden JWT/JWS verification (8cfb836)
+
 ## v0.47.0 — 2026-08-23
 
 ### Features
