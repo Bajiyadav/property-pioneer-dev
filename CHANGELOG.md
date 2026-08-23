@@ -1,3 +1,9 @@
+## v0.46.0 — 2026-08-23
+
+### Features
+- feat(ui): implement unified production UI state system for web and mobile (69893c6)
+- feat(home): consolidate location selection to one canonical source (a296ae5)
+
 ## v0.45.0 — 2026-08-23
 
 ### Features
