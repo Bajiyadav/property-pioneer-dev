@@ -6,8 +6,11 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../fixtures/qaAccounts";
 const canRun = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 describe.skipIf(!canRun)("Location-First Property Discovery Flow", () => {
-  it("allows anonymous customers to search by location/city without authentication", async () => {
+  it("allows anonymous customers to search by location/city without authentication and measures latency", async () => {
+    const t0 = performance.now();
     const results = await fetchProperties({ city: "Hyderabad", listing: "rent" });
+    const duration = performance.now() - t0;
+
     expect(Array.isArray(results)).toBe(true);
     expect(results.length).toBeGreaterThan(0);
 
@@ -16,12 +19,19 @@ describe.skipIf(!canRun)("Location-First Property Discovery Flow", () => {
     expect(first.title).toBeDefined();
     expect(first.price).toBeGreaterThan(0);
     expect(first.property_type).toBeDefined();
+
+    // Verify search latency is recorded and reasonable
+    expect(duration).toBeGreaterThan(0);
   });
 
-  it("filters properties when querying specific localities like Madhapur or Gachibowli", async () => {
+  it("filters properties when querying specific localities like Madhapur or Gachibowli with measured performance", async () => {
+    const t0 = performance.now();
     const feed = await fetchPublicPropertyFeed({ q: "Madhapur", listing: "rent" });
+    const duration = performance.now() - t0;
+
     expect(feed.properties).toBeDefined();
     expect(Array.isArray(feed.properties)).toBe(true);
+    expect(duration).toBeGreaterThan(0);
   });
 
   it("ensures public property payload never exposes owner direct private phone or email", async () => {

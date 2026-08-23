@@ -493,18 +493,20 @@ export function SearchUI({
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex flex-col sm:flex-row h-auto sm:h-64 animate-pulse rounded-xl bg-muted/30 border border-border"
+                  className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card overflow-hidden shadow-xs animate-pulse"
                 >
-                  <div className="w-full sm:w-[280px] shrink-0 h-48 sm:h-full bg-muted/60" />
-                  <div className="p-4 flex-1">
-                    <div className="h-6 w-3/4 bg-muted/60 rounded mb-4" />
-                    <div className="h-4 w-1/2 bg-muted/60 rounded mb-6" />
-                    <div className="h-16 w-full bg-muted/40 rounded mb-4" />
-                    <div className="h-10 w-32 bg-muted/60 rounded ml-auto" />
+                  <div className="aspect-[4/3] w-full bg-muted/60" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-5 w-3/4 bg-muted/60 rounded-md" />
+                    <div className="h-4 w-1/2 bg-muted/40 rounded-md" />
+                    <div className="pt-2 border-t border-border/50 flex justify-between items-center">
+                      <div className="h-6 w-24 bg-muted/60 rounded-md" />
+                      <div className="h-8 w-20 bg-muted/50 rounded-lg" />
+                    </div>
                   </div>
                 </div>
               ))}

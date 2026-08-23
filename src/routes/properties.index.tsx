@@ -58,6 +58,8 @@ function PropertiesPage() {
     queryKey: ["properties", search],
     queryFn: () => fetchProperties(search),
     staleTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false,
   });
 
   // Feeds the customer dashboard's "Recent searches" panel.
