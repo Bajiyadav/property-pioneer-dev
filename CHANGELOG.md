@@ -1,3 +1,8 @@
+## v0.52.0 — 2026-08-23
+
+### Features
+- feat(ui): redesign mobile experience with clean branding and navigation (a00d2e5)
+
 ## v0.51.0 — 2026-08-23
 
 ### Features
