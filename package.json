@@ -96,7 +96,6 @@
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.62.1",
-    "@rolldown/binding-darwin-arm64": "^1.2.5",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -128,5 +127,8 @@
       "prettier --write"
     ]
   },
-  "version": "0.47.0"
+  "version": "0.47.0",
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.2.5"
+  }
 }
