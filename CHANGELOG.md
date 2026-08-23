@@ -1,3 +1,8 @@
+## v0.40.3 — 2026-08-23
+
+### Fixes
+- fix(ui): polish property detail specs card with balanced grid and spacious layout (48e490f)
+
 ## v0.40.2 — 2026-08-23
 
 ### Fixes
