@@ -1,3 +1,13 @@
+## v0.42.0 — 2026-08-23
+
+### Features
+- feat(ai): implement structured property search and grounded hybrid RAG architecture (c5cd357)
+
+## v0.41.1 — 2026-08-23
+
+### Performance
+- perf(search): optimize location query caching and align loading skeletons (172252e)
+
 ## v0.41.0 — 2026-08-23
 
 ### Features

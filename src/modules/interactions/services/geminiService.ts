@@ -244,9 +244,6 @@ export function classifyAndExtractIntent(query: string): ExtractedPropertyFilter
   };
 }
 
-/**
- * Backward compatible helper for context retrieval.
- */
 export function retrieveDynamicContext(query: string): string {
   const docs = retrieveSemanticKnowledge(query, 3);
   return docs.map((d) => `[${d.title}]: ${d.content}`).join("\n\n");
@@ -323,9 +320,6 @@ export async function retrieveStructuredProperties(
   }
 }
 
-/**
- * Server-Side AI Proxy Dispatcher
- */
 async function callAiProxy(
   contents: Array<{ role: string; parts: Array<{ text: string }> }>,
 ): Promise<string | null> {
