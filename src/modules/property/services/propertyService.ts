@@ -16,7 +16,13 @@ export type Property = {
   price: number;
   city: string;
   pincode?: string | null;
-  address: string;
+  /**
+   * Exact street address — SENSITIVE. Deliberately NOT in the public column
+   * grant/select, so the public payload never carries it. It is released only
+   * by /api/public/properties/$id/location after a matching city+locality, the
+   * same way owner_phone is gated by the contact endpoint. Hence optional here.
+   */
+  address?: string | null;
   bedrooms: number;
   bathrooms: number;
   area_sqft: number;
@@ -100,11 +106,15 @@ export type Property = {
  * They are re-attached with safe defaults by `withVerificationDefaults` below and
  * will start flowing through automatically once the migration lands.
  */
+// `address` and `landmark` are SENSITIVE and intentionally excluded from the
+// public select (like owner_phone) — the exact address is released only by
+// /api/public/properties/$id/location after a matching city+locality. The coarse
+// `locality`/`city` stay public for browsing and SEO.
 const BASE_PROPERTY_COLUMNS =
-  "id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
+  "id,title,description,price,city,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at";
 
 const EXTENDED_PROPERTY_COLUMNS =
-  "pincode,approx_latitude,approx_longitude,video_url,video_status,video_urls,locality,landmark,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable,project_name,bhk_type,area_unit,deposit,maintenance,furnishing_status";
+  "pincode,approx_latitude,approx_longitude,video_url,video_status,video_urls,locality,metro_station,it_park,college,hospital,property_age,total_floors,exact_floor,balconies,parking_covered,parking_open,facing,available_from,rent_negotiable,project_name,bhk_type,area_unit,deposit,maintenance,furnishing_status";
 
 export const PUBLIC_PROPERTY_COLUMNS = `${BASE_PROPERTY_COLUMNS},${EXTENDED_PROPERTY_COLUMNS}`;
 
@@ -725,7 +735,11 @@ function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: b
 
     const q = params.q?.trim().replace(/[%_]/g, "");
     if (q) {
-      const columns = ["title", "city", "address", "description"];
+      // `address` is intentionally NOT searched: it is sensitive and excluded
+      // from the public grant, so filtering on it would both leak intent and
+      // (once the column grant is revoked) fail for anon. Locality covers area
+      // search below.
+      const columns = ["title", "city", "description"];
       if (useExtended) columns.push("locality");
       query = query.or(columns.map((c) => `${c}.ilike.%${q}%`).join(","));
     }
@@ -804,7 +818,7 @@ export async function fetchPublicPropertyFeed(
           !p.title.toLowerCase().includes(q) &&
           !p.description.toLowerCase().includes(q) &&
           !(p.locality?.toLowerCase().includes(q) ?? false) &&
-          !p.address.toLowerCase().includes(q)
+          !(p.address?.toLowerCase().includes(q) ?? false)
         ) {
           return false;
         }

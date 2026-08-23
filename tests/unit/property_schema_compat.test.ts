@@ -21,13 +21,12 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../fixtures/qaAccounts";
 const canRun = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 describe("Property column set", () => {
-  it("still requests the video and location fields", () => {
+  it("still requests the video and coarse location fields", () => {
     // Guards against "fixing" the schema gap by deleting the feature.
     for (const column of [
       "video_url",
       "video_status",
       "locality",
-      "landmark",
       "metro_station",
       "it_park",
       "college",
@@ -35,6 +34,14 @@ describe("Property column set", () => {
     ]) {
       expect(PUBLIC_PROPERTY_COLUMNS).toContain(column);
     }
+  });
+
+  it("does NOT request the exact address or landmark (gated — see locationGate)", () => {
+    // The exact street address and landmark are sensitive and released only by
+    // /api/public/properties/$id/location after a matching city+locality, so
+    // they must never be in the public select.
+    expect(PUBLIC_PROPERTY_COLUMNS).not.toContain("address");
+    expect(PUBLIC_PROPERTY_COLUMNS).not.toContain("landmark");
   });
 });
 

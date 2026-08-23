@@ -66,6 +66,7 @@ import { ScheduleVisitModal } from "@/modules/interactions/components/ScheduleVi
 import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
 import { SimilarProperties } from "@/modules/property/components/SimilarProperties";
+import { PropertyLocationReveal } from "@/modules/property/components/PropertyLocationReveal";
 import { APP_NAME, extractIdFromSlug } from "@/config/app";
 import { checkCustomerAccess } from "@/modules/billing/services/billingFunctions";
 import { useServerFn } from "@tanstack/react-start";
@@ -548,6 +549,9 @@ export function PropertyDetailPage() {
                 {property.description}
               </p>
             </div>
+
+            {/* Location — coarse shown publicly; exact address gated server-side */}
+            <PropertyLocationReveal property={property} />
 
             {/* Video Tour Section */}
             {property.video_url && (

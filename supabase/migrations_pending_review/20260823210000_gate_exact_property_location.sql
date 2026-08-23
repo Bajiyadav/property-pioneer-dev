@@ -1,0 +1,28 @@
+-- Gate the EXACT property location (street address + landmark) at the grant
+-- level, completing the server-side enforcement done in application code.
+--
+-- REVIEW-ONLY: lives outside supabase/migrations/ so `supabase db push` in CD
+-- cannot auto-apply it. DO NOT apply to production without approval + a check of
+-- the live column grants + PITR/backup verification.
+--
+-- Model (mirrors owner_phone / owner_name / owner_email, which are withheld from
+-- anon but kept for authenticated so admins can still read them via their
+-- RLS-scoped session — see supabase/migrations/users/20260807120000...sql:31):
+--   * anon loses SELECT on properties.address and properties.landmark, so an
+--     anonymous scraper with the publishable key cannot read the exact address
+--     directly — it is available ONLY through the server endpoint
+--     /api/public/properties/$id/location after a matching city+locality.
+--   * authenticated KEEPS SELECT so the admin portal (getAdminProperties reads
+--     address/landmark via the authenticated RLS client) is unaffected.
+--
+-- Additive and idempotent: REVOKE of a privilege that is absent is a no-op.
+-- It removes no data, no policies, and does not touch any other column.
+--
+-- FOLLOW-UP (higher blast radius, deliberately NOT included here): to also block
+-- an authenticated user from reading the exact address via a hand-crafted query,
+-- revoke these columns from `authenticated` as well AND switch the admin property
+-- read (adminFunctions.getAdminProperties) to the service-role client first, so
+-- admins keep access. That mirrors extending the owner_phone gate and should be
+-- done as its own reviewed change.
+
+REVOKE SELECT (address, landmark) ON public.properties FROM anon;

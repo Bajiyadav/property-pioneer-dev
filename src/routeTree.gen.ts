@@ -74,6 +74,7 @@ import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
 import { Route as ListPropertyPromoteIdCheckoutRouteImport } from './routes/list-property.promote.$id.checkout'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
+import { Route as ApiPublicPropertiesIdLocationRouteImport } from './routes/api/public/properties.$id.location'
 import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
 import { Route as ApiPublicPropertiesIdSaveRouteImport } from './routes/api/public/properties.$id.save'
 import { Route as ApiPublicPropertiesIdScheduleVisitRouteImport } from './routes/api/public/properties.$id.schedule-visit'
@@ -417,6 +418,12 @@ const ApiPublicPropertiesIdContactRoute =
     path: '/api/public/properties/$id/contact',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicPropertiesIdLocationRoute =
+  ApiPublicPropertiesIdLocationRouteImport.update({
+    id: '/api/public/properties/$id/location',
+    path: '/api/public/properties/$id/location',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPropertiesIdReportRoute =
   ApiPublicPropertiesIdReportRouteImport.update({
     id: '/api/public/properties/$id/report',
@@ -507,6 +514,7 @@ export interface FileRoutesByFullPath {
   '/rent/$city/': typeof RentCityIndexRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/location': typeof ApiPublicPropertiesIdLocationRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
@@ -573,6 +581,7 @@ export interface FileRoutesByTo {
   '/rent/$city': typeof RentCityIndexRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/location': typeof ApiPublicPropertiesIdLocationRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
@@ -645,6 +654,7 @@ export interface FileRoutesById {
   '/rent/$city/': typeof RentCityIndexRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
+  '/api/public/properties/$id/location': typeof ApiPublicPropertiesIdLocationRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
@@ -717,6 +727,7 @@ export interface FileRouteTypes {
     | '/rent/$city/'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/location'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
@@ -783,6 +794,7 @@ export interface FileRouteTypes {
     | '/rent/$city'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/location'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
@@ -854,6 +866,7 @@ export interface FileRouteTypes {
     | '/rent/$city/'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
+    | '/api/public/properties/$id/location'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
@@ -905,6 +918,7 @@ export interface RootRouteChildren {
   CommercialCityIndexRoute: typeof CommercialCityIndexRoute
   RentCityIndexRoute: typeof RentCityIndexRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
+  ApiPublicPropertiesIdLocationRoute: typeof ApiPublicPropertiesIdLocationRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
   ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
   ApiPublicPropertiesIdScheduleVisitRoute: typeof ApiPublicPropertiesIdScheduleVisitRoute
@@ -1368,6 +1382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPropertiesIdContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/properties/$id/location': {
+      id: '/api/public/properties/$id/location'
+      path: '/api/public/properties/$id/location'
+      fullPath: '/api/public/properties/$id/location'
+      preLoaderRoute: typeof ApiPublicPropertiesIdLocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/properties/$id/report': {
       id: '/api/public/properties/$id/report'
       path: '/api/public/properties/$id/report'
@@ -1551,6 +1572,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommercialCityIndexRoute: CommercialCityIndexRoute,
   RentCityIndexRoute: RentCityIndexRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
+  ApiPublicPropertiesIdLocationRoute: ApiPublicPropertiesIdLocationRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,
   ApiPublicPropertiesIdSaveRoute: ApiPublicPropertiesIdSaveRoute,
   ApiPublicPropertiesIdScheduleVisitRoute:

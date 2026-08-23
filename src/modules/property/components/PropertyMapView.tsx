@@ -36,7 +36,7 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
     > = {};
 
     properties.forEach((p) => {
-      const loc = p.locality || p.address || "Hyderabad";
+      const loc = p.locality || p.city || "Hyderabad";
       if (!counts[loc]) {
         counts[loc] = {
           count: 0,

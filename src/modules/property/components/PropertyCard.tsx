@@ -79,11 +79,12 @@ export function PropertyCard({ property }: { property: Property }) {
 
   const isRental = property.listing_type === "rent";
   const estimatedDeposit = isRental && property.price ? property.price * 2 : null;
+  // Coarse location only. The exact street address is sensitive and gated
+  // (revealed on the detail page after a matching city+locality), so cards
+  // never show it — locality/city is the public label.
   const locationLabel = property.locality
     ? `${property.locality}, ${property.city}`
-    : property.address
-      ? `${property.address}, ${property.city}`
-      : property.city || "Hyderabad";
+    : property.city || "Hyderabad";
 
   // Mock furnishing status
   const furnishingStatus =

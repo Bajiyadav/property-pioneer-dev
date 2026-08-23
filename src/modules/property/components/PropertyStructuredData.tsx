@@ -7,7 +7,6 @@ export interface PropertyStructuredDataProps {
     description: string;
     price: number;
     city: string;
-    address: string;
     bedrooms: number;
     bathrooms: number;
     area_sqft: number;
@@ -43,8 +42,11 @@ export function PropertyStructuredData({ property }: PropertyStructuredDataProps
       image: property.images,
       address: {
         "@type": "PostalAddress",
-        streetAddress: property.address,
+        // Coarse only — the exact streetAddress is sensitive and intentionally
+        // omitted from public structured data (it is gated behind a matching
+        // location via /api/public/properties/$id/location).
         addressLocality: property.locality || property.city,
+        addressRegion: property.city,
         addressCountry: "IN",
       },
       numberOfBedrooms: property.bedrooms || undefined,
