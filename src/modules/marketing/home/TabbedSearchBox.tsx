@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, MapPin, Building2, Home, Key, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
+import { LIVE_CITIES } from "@/config/platform";
 
 type SearchMode = "rent" | "buy" | "commercial";
 
@@ -125,6 +126,9 @@ export function TabbedSearchBox({
           {/* City Selector */}
           <div className="flex items-center px-4 py-2 sm:py-0 border-b sm:border-b-0 sm:border-r border-border bg-secondary/10 sm:min-w-[140px]">
             <MapPin className="h-4 w-4 text-muted-foreground mr-2 flex-none" />
+            {/* Cities come from the single canonical source (config/platform
+                CITIES), not a hardcoded list that drifts. "All India" is the
+                empty-city default. */}
             <select
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -132,14 +136,11 @@ export function TabbedSearchBox({
               className="bg-transparent text-sm font-medium text-foreground outline-none w-full py-2 cursor-pointer appearance-none"
             >
               <option value="All Cities">All India</option>
-              <option value="Bengaluru">Bengaluru</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Delhi NCR">Delhi NCR</option>
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Pune">Pune</option>
-              <option value="Chennai">Chennai</option>
-              <option value="Kolkata">Kolkata</option>
-              <option value="Ahmedabad">Ahmedabad</option>
+              {LIVE_CITIES.map((c) => (
+                <option key={c.slug} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
 
