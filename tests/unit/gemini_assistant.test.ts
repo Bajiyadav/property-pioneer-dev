@@ -3,6 +3,8 @@ import {
   SEEDHA_SYSTEM_PROMPT,
   retrieveDynamicContext,
   askSeedhaAI,
+  classifyAndExtractIntent,
+  retrieveStructuredProperties,
 } from "@/modules/interactions/services/geminiService";
 
 describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
@@ -12,17 +14,7 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: "You can list your apartment directly on Seedha Properties with 0% brokerage and connect with verified tenants.",
-                  },
-                ],
-              },
-            },
-          ],
+          text: "You can list your apartment directly on Seedha Properties with 0% brokerage and connect with verified tenants.",
         }),
       }),
     );
@@ -42,13 +34,13 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
 
   it("retrieves accurate dynamic context snippets based on user queries", () => {
     const listingContext = retrieveDynamicContext("How to post my flat?");
-    expect(listingContext).toContain("Listing Guide Context");
+    expect(listingContext).toContain("Guided Listing Wizard");
 
     const kycContext = retrieveDynamicContext("Tell me about verified badge");
-    expect(kycContext).toContain("KYC Trust Context");
+    expect(kycContext).toContain("Verification Badges and KYC Framework");
 
     const brokerageContext = retrieveDynamicContext("What is the fee or commission?");
-    expect(brokerageContext).toContain("Brokerage Policy Context");
+    expect(brokerageContext).toContain("Zero Brokerage Policy");
   });
 
   it("handles listing inquiries with direct owner guidance", async () => {
@@ -70,5 +62,18 @@ describe("Seedha Gemini AI Assistant (System Instructions + RAG)", () => {
         response.toLowerCase().includes("commission") ||
         response.toLowerCase().includes("zero"),
     ).toBe(true);
+  });
+
+  it("classifies intents and queries structured property filters", async () => {
+    const parsed = classifyAndExtractIntent("Find 2BHK in Madhapur under 30k with parking");
+    expect(parsed.intent).toBe("PROPERTY_SEARCH");
+    expect(parsed.locality).toBe("Madhapur");
+    expect(parsed.bhk).toBe(2);
+    expect(parsed.maxPrice).toBe(30000);
+    expect(parsed.amenities).toContain("Parking");
+
+    const res = await retrieveStructuredProperties(parsed);
+    expect(res.text).toBeDefined();
+    expect(res.text).not.toContain("owner_phone");
   });
 });
