@@ -251,10 +251,28 @@ export function AdminMfaSecurityModal({ isOpen, onClose, onVerified }: AdminMfaS
               <img src={qrCode} alt="TOTP QR Code" className="w-full h-full object-contain" />
             </div>
             {secretUri && (
-              <div className="space-y-1">
-                <span className="text-[11px] text-neutral-400">Manual setup secret:</span>
-                <p className="font-mono text-xs text-neutral-300 bg-neutral-900 py-1.5 px-2 rounded select-all break-all border border-neutral-800">
-                  {secretUri}
+              <div className="space-y-1.5 text-left">
+                <span className="text-[11px] text-neutral-400 font-medium">
+                  Manual setup secret key:
+                </span>
+                <div className="flex items-center gap-2">
+                  <p className="flex-1 font-mono text-xs text-neutral-200 bg-neutral-900 py-2 px-2.5 rounded-lg select-all break-all border border-neutral-800">
+                    {secretUri}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(secretUri);
+                      setSuccess("Secret key copied to clipboard!");
+                      setTimeout(() => setSuccess(null), 3000);
+                    }}
+                    className="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-semibold text-neutral-300 transition shrink-0 border border-neutral-700"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="text-[11px] text-neutral-500">
+                  Supported apps: Google Authenticator, Microsoft Authenticator, 1Password, Authy.
                 </p>
               </div>
             )}
