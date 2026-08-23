@@ -1,3 +1,11 @@
+## v0.43.0 — 2026-08-23
+
+### Features
+- feat(ai): merge complete end-to-end grounded RAG pipeline to main (394beeb)
+- feat(ai): integrate end-to-end grounded RAG pipeline with dual-branch retrieval (e7184f7)
+- feat(ai): implement end-to-end grounded RAG pipeline with knowledge corpus (0d81050)
+- feat(auth): add passwordless email-OTP login alongside password and Google (546057a)
+
 ## v0.42.0 — 2026-08-23
 
 ### Features

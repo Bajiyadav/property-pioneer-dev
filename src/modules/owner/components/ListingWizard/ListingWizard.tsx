@@ -326,18 +326,8 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         images: built.payload.images,
       });
 
-      // Step 8. A draft has nothing to report on, so it still returns to the
-      // dashboard; a submission goes to its own status screen, which reads the
-      // real row rather than assuming the write implies "under review".
-      const createdId =
-        created && typeof created === "object" && "id" in created
-          ? String((created as { id: unknown }).id)
-          : null;
-      if (mode === "submit" && createdId) {
-        navigate({ to: "/list-property/submitted/$id", params: { id: createdId } });
-      } else {
-        navigate({ to: "/dashboard/owner" });
-      }
+      // Navigate directly to the Owner Dashboard on submission
+      navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save listing";
       toast.error(msg);
