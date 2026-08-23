@@ -80,7 +80,13 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
           return jsonResponse({ error: "Too many contact requests. Please try again later." }, 429);
         }
 
-        // Check 3-contact quota
+        // Free owner-contact quota.
+        //
+        // The limit is enforced here but was never reported back, so a visitor
+        // discovered it only by hitting it — three successful contacts, then a
+        // refusal with no prior warning. The counts below ride on every response
+        // so the UI can show what is left BEFORE it runs out.
+        const FREE_CONTACT_LIMIT = 3;
         const match = user
           ? { event: "contact.requested", actor_id: user.id }
           : { event: "contact.requested", ip_address: ip };
@@ -92,14 +98,17 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
 
         const alreadyContacted = (currentPropertyCount ?? 0) > 0;
 
-        if (!alreadyContacted) {
-          const { data: logs } = await supabaseAdmin
-            .from("audit_logs")
-            .select("subject_id")
-            .match(match);
+        // Counted on every request, not only when the quota might bite, so the
+        // success path can report the remaining allowance too.
+        const { data: logs } = await supabaseAdmin
+          .from("audit_logs")
+          .select("subject_id")
+          .match(match);
+        const distinctProperties = new Set((logs || []).map((l) => l.subject_id));
+        const usedBefore = distinctProperties.size;
 
-          const distinctProperties = new Set((logs || []).map((l) => l.subject_id));
-          if (distinctProperties.size >= 3) {
+        if (!alreadyContacted) {
+          if (usedBefore >= FREE_CONTACT_LIMIT) {
             await recordAudit({
               event: "contact.rejected",
               outcome: "error",
@@ -113,8 +122,11 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
             return jsonResponse(
               {
                 error: user
-                  ? "You have reached your 3 free owner contacts limit."
-                  : "You've viewed 3 free contacts. Please sign in to view more.",
+                  ? `You have used all ${FREE_CONTACT_LIMIT} free owner contacts.`
+                  : `You've viewed ${FREE_CONTACT_LIMIT} free contacts. Please sign in to view more.`,
+                contactsUsed: usedBefore,
+                contactsLimit: FREE_CONTACT_LIMIT,
+                contactsRemaining: 0,
               },
               403,
             );
@@ -247,7 +259,16 @@ Thank you.`;
           actorId: user?.id,
         });
 
-        return jsonResponse({ ok: true, whatsappUrl });
+        // Re-contacting a property already contacted spends no new allowance,
+        // so the used figure must not increment for it.
+        const usedAfter = alreadyContacted ? usedBefore : usedBefore + 1;
+        return jsonResponse({
+          ok: true,
+          whatsappUrl,
+          contactsUsed: usedAfter,
+          contactsLimit: FREE_CONTACT_LIMIT,
+          contactsRemaining: Math.max(0, FREE_CONTACT_LIMIT - usedAfter),
+        });
       },
     },
   },

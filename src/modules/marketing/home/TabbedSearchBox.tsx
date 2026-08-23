@@ -20,17 +20,24 @@ export function TabbedSearchBox({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({
-      to: "/properties",
-      search: {
-        q: query,
-        city: city === "All Cities" ? "" : city,
-        listing: activeTab === "buy" ? "sale" : "rent",
-        minPrice: 0,
-        maxPrice: 0,
-        beds: 0,
-      },
-    });
+    // Three tabs, so a two-way ternary is wrong: `activeTab === "buy" ? "sale"
+    // : "rent"` sent the COMMERCIAL tab to listing=rent, meaning it searched
+    // rentals and never applied a commercial filter at all.
+    //
+    // Commercial is a property TYPE, not a listing type — a commercial unit can
+    // be for rent or for sale — so it maps to `type` and leaves `listing` open.
+    // Both params are already validated by properties.index.tsx.
+    const search: Record<string, string | number> = {
+      q: query,
+      city: city === "All Cities" ? "" : city,
+      listing: activeTab === "buy" ? "sale" : activeTab === "rent" ? "rent" : "",
+      minPrice: 0,
+      maxPrice: 0,
+      beds: 0,
+    };
+    if (activeTab === "commercial") search.type = "commercial";
+
+    navigate({ to: "/properties", search });
   };
 
   const handleLocate = () => {

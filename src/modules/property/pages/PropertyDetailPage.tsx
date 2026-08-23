@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { beginPropertyViewTimer } from "@/modules/analytics/services/tracking";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { BackLink } from "@/shared/components/navigation/BackLink";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -253,14 +254,19 @@ export function PropertyDetailPage() {
       <div className="sticky top-[60px] md:top-[72px] z-30 border-b border-border bg-card shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <Link
-              to="/properties"
-              className="group flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary/50 text-foreground hover:bg-secondary hover:text-primary transition-all shrink-0 shadow-xs"
-              title="Back to Listings"
-              aria-label="Back to Listings"
-            >
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            </Link>
+            {/*
+              Was a hard <Link to="/properties">, which dropped the visitor's
+              search. Someone browsing /properties?listing=sale&city=Hyderabad
+              returned to the UNFILTERED catalogue and had to re-enter filters.
+              BackLink pops history instead, returning to the exact URL they came
+              from, and falls back to /properties only when the page was opened
+              directly. The 40px box also missed the 44px touch target.
+            */}
+            <BackLink
+              fallbackTo="/properties"
+              ariaLabel="Back to listings"
+              className="justify-center rounded-xl border border-border bg-secondary/50 px-0 text-foreground shadow-xs shrink-0 min-w-[44px] hover:bg-secondary hover:text-primary"
+            />
             <div>
               <h1 className="text-base sm:text-lg font-bold text-foreground line-clamp-1">
                 {property.title}
