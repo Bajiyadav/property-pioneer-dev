@@ -51,3 +51,14 @@ test-results/
 # Supabase CLI cache (project ref, CLI version) — not source.
 supabase/.temp/
 .claude-code-history
+
+# Local audit / generated reports
+SEEDHA_ARTBOARD_IMPLEMENTATION_GAPS.md
+SEEDHA_FINAL_LAUNCH_PLAN.md
+SEEDHA_MASTER_AUDIT.md
+
+# Local authentication/debug artifacts
+auth-html.html
+auth-screenshot.png
+scratch-test.js
+scratch/
