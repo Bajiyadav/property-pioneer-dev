@@ -85,30 +85,50 @@ export function Step1PropertyDetails({ data, updateData }: StepProps) {
       {/* Purpose: Rent vs Sell */}
       <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-6 shadow-sm space-y-4">
         <Label className="text-sm font-bold text-foreground">Looking to Rent or Sell? *</Label>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div
+          className="grid grid-cols-2 gap-3 sm:gap-4"
+          role="radiogroup"
+          aria-label="Listing Intent"
+        >
           <button
             type="button"
+            role="radio"
+            aria-checked={data.listing_type !== "sale"}
             onClick={() => updateData({ listing_type: "rent" })}
-            className={`p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+            className={`p-4 sm:p-5 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer relative ${
               data.listing_type !== "sale"
-                ? "border-primary bg-primary/5 text-primary font-bold shadow-xs ring-1 ring-primary/20"
+                ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-2 ring-primary/20"
                 : "border-border/80 bg-background text-muted-foreground hover:border-border hover:bg-secondary/40 font-medium"
             }`}
           >
-            <span className="text-base font-bold">For Rent</span>
-            <span className="text-xs opacity-80">Monthly rental income</span>
+            {data.listing_type !== "sale" && (
+              <div className="absolute top-2.5 right-2.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                <Check className="w-3.5 h-3.5 stroke-[3]" />
+              </div>
+            )}
+            <span className="text-base sm:text-lg font-extrabold text-foreground">For Rent</span>
+            <span className="text-xs text-muted-foreground font-medium">Monthly rental income</span>
           </button>
           <button
             type="button"
+            role="radio"
+            aria-checked={data.listing_type === "sale"}
             onClick={() => updateData({ listing_type: "sale" })}
-            className={`p-4 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+            className={`p-4 sm:p-5 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer relative ${
               data.listing_type === "sale"
-                ? "border-primary bg-primary/5 text-primary font-bold shadow-xs ring-1 ring-primary/20"
+                ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-2 ring-primary/20"
                 : "border-border/80 bg-background text-muted-foreground hover:border-border hover:bg-secondary/40 font-medium"
             }`}
           >
-            <span className="text-base font-bold">For Sale</span>
-            <span className="text-xs opacity-80">Sell directly at 0% brokerage</span>
+            {data.listing_type === "sale" && (
+              <div className="absolute top-2.5 right-2.5 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                <Check className="w-3.5 h-3.5 stroke-[3]" />
+              </div>
+            )}
+            <span className="text-base sm:text-lg font-extrabold text-foreground">For Sale</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              Sell directly at 0% brokerage
+            </span>
           </button>
         </div>
       </div>
@@ -116,7 +136,11 @@ export function Step1PropertyDetails({ data, updateData }: StepProps) {
       {/* Property Category */}
       <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-6 shadow-sm space-y-4">
         <Label className="text-sm font-bold text-foreground">Property Category *</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5"
+          role="radiogroup"
+          aria-label="Property Category"
+        >
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isSelected = data.property_type === cat.value;
@@ -124,15 +148,17 @@ export function Step1PropertyDetails({ data, updateData }: StepProps) {
               <button
                 key={cat.value}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => updateData({ property_type: cat.value })}
-                className={`p-3.5 rounded-xl border transition-all text-left flex items-center gap-3 cursor-pointer ${
+                className={`p-3 sm:p-3.5 min-h-[56px] rounded-xl border transition-all text-left flex items-center gap-2.5 sm:gap-3 cursor-pointer relative ${
                   isSelected
-                    ? "border-primary bg-primary/10 text-primary font-bold shadow-xs ring-1 ring-primary/30"
+                    ? "border-primary bg-primary/10 text-primary font-bold shadow-xs ring-2 ring-primary/20"
                     : "border-border/80 bg-background text-foreground hover:bg-secondary/50 hover:border-border"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-lg shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-muted-foreground"
@@ -140,7 +166,10 @@ export function Step1PropertyDetails({ data, updateData }: StepProps) {
                 >
                   <Icon className="h-4 w-4" />
                 </div>
-                <span className="text-xs sm:text-sm font-semibold truncate">{cat.label}</span>
+                <span className="text-xs sm:text-sm font-semibold leading-snug break-words hyphens-none flex-1">
+                  {cat.label}
+                </span>
+                {isSelected && <Check className="h-4 w-4 text-primary shrink-0 stroke-[2.5]" />}
               </button>
             );
           })}

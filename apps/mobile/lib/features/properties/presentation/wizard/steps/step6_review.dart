@@ -145,7 +145,7 @@ class _Step6ReviewState extends ConsumerState<Step6Review> {
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Submit Listing'),
+                        : const Text('Submit for Moderation'),
                   ),
                 ),
               ],

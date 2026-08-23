@@ -129,20 +129,25 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
 
   return (
     <div
-      className={inline ? "w-full h-full flex flex-col relative" : "fixed bottom-6 right-6 z-50"}
+      className={
+        inline
+          ? "w-full h-full flex flex-col relative"
+          : "fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 pointer-events-auto"
+      }
     >
-      {/* Floating Trigger Button */}
+      {/* Floating Trigger Button (Calm, Secondary Assistance) */}
       {!isOpen && !inline && (
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 px-4 py-3.5 rounded-full bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-teal-300/40"
-          aria-label="Open Seedha AI Assistant"
+          className="group relative flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-full bg-card/95 backdrop-blur border border-teal-600/30 text-teal-700 dark:text-teal-300 shadow-md hover:shadow-lg hover:border-teal-500 active:scale-95 transition-all text-xs font-bold"
+          aria-label="Ask Seedha AI Assistant"
         >
-          <div className="relative">
-            <Sparkles className="h-5 w-5 text-amber-300 animate-pulse" />
-            <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-emerald-400" />
+          <div className="relative flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+            <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </div>
-          <span className="font-bold text-sm tracking-wide">Ask Seedha AI</span>
+          <span className="hidden sm:inline font-bold tracking-wide">Ask Seedha AI</span>
+          <span className="sm:hidden font-bold">AI</span>
         </button>
       )}
 

@@ -1,6 +1,4 @@
-import React from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 
 interface MobileListingNavProps {
   currentStep: number;
@@ -26,7 +24,12 @@ export function MobileListingNav({
   const isLastStep = currentStep === totalSteps;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/80 p-3 sm:p-4 shadow-2xl md:hidden">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-lg border-t border-border/80 px-3 pt-3 sm:px-4 sm:pt-4 shadow-2xl md:hidden"
+      // Respect the device safe area so the sticky bar clears the iPhone home
+      // indicator / gesture bar instead of sitting under it.
+      style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))" }}
+    >
       <div className="mx-auto flex max-w-lg items-center gap-3">
         {currentStep > 1 && (
           <button
@@ -45,18 +48,21 @@ export function MobileListingNav({
             type="button"
             onClick={onSaveSubmit}
             disabled={isSaving}
-            aria-label="Publish property listing"
+            // Label matches the desktop footer and the truth: submitting sends
+            // the listing to moderation; it is NOT published until an admin
+            // approves it. "Publish now" would over-promise.
+            aria-label="Submit listing for moderation"
             className="flex-1 flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-6 text-base font-bold text-white shadow-lg active:scale-95 transition-all hover:from-emerald-500 hover:to-teal-600 disabled:opacity-70"
           >
             {isSaving ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Publishing...</span>
+                <span>Submitting...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-5 w-5 text-emerald-200" />
-                <span>Publish Listing Now</span>
+                <Check className="h-5 w-5 text-emerald-200" />
+                <span>Submit for Moderation</span>
               </>
             )}
           </button>

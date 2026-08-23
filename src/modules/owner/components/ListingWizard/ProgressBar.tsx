@@ -5,29 +5,37 @@ interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
   steps: Array<{ id: number; name: string; desc: string; percent?: number }>;
+  percentage?: number;
   onStepClick?: (stepId: number) => void;
 }
 
-const STEP_PERCENTAGES = [0, 20, 40, 60, 75, 90, 100];
+const STEP_PERCENTAGES = [15, 30, 45, 60, 75, 90, 100];
 
 /**
- * Mobile-first modern Progress Bar showing step completion % and visual badges.
+ * Mobile-first modern Progress Bar showing dynamic step completion % and visual badges.
  */
-export function ProgressBar({ currentStep, totalSteps, steps, onStepClick }: ProgressBarProps) {
+export function ProgressBar({
+  currentStep,
+  totalSteps,
+  steps,
+  percentage,
+  onStepClick,
+}: ProgressBarProps) {
   const currentPct =
-    STEP_PERCENTAGES[currentStep - 1] ?? Math.round((currentStep / totalSteps) * 100);
-  const minutesRemaining = Math.max(1, 7 - currentStep);
+    percentage !== undefined
+      ? percentage
+      : (STEP_PERCENTAGES[currentStep - 1] ?? Math.round((currentStep / totalSteps) * 100));
 
   return (
     <div className="w-full mb-6 sm:mb-8 bg-card rounded-2xl border border-border/70 p-4 sm:p-5 shadow-xs">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3.5">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
-            {currentPct}% Completed
+            {`${currentPct}% Completed`}
           </span>
           <span className="text-muted-foreground font-normal text-xs">·</span>
           <span className="text-xs font-semibold text-foreground">
-            Step {currentStep} of {totalSteps}: {steps[currentStep - 1]?.name}
+            {`Step ${currentStep} of ${totalSteps}: ${steps[currentStep - 1]?.name || ""}`}
           </span>
         </div>
         <div className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
@@ -40,7 +48,7 @@ export function ProgressBar({ currentStep, totalSteps, steps, onStepClick }: Pro
       <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary mb-4">
         <div
           className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-500 transition-all duration-500 ease-out shadow-xs"
-          style={{ width: `${Math.max(8, currentPct)}%` }}
+          style={{ width: `${Math.max(10, currentPct)}%` }}
         />
       </div>
 
