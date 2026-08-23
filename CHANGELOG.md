@@ -1,3 +1,8 @@
+## v0.49.2 — 2026-08-23
+
+### Performance
+- perf(router): code-split HomeLoansView and modernize tsconfig path resolution (1e95443)
+
 ## v0.49.1 — 2026-08-23
 
 ### Fixes
