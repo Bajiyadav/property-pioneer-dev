@@ -1,3 +1,8 @@
+## v0.41.0 — 2026-08-23
+
+### Features
+- feat(search): add location-first property discovery flow (2c36efd)
+
 ## v0.40.3 — 2026-08-23
 
 ### Fixes
