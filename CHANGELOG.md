@@ -1,3 +1,8 @@
+## v0.51.0 — 2026-08-23
+
+### Features
+- feat(property): implement location-first property details access flow and server enforcement (63ecf9e)
+
 ## v0.50.0 — 2026-08-23
 
 ### Features
