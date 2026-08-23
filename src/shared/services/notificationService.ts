@@ -14,7 +14,7 @@
  *    echoed in a response, or written into the email.
  */
 import { sendTransactionalEmail, type EmailDeliveryResult } from "@/shared/services/emailService";
-import { APP_NAME } from "@/config/app";
+import { loginSecurityEmail } from "@/shared/services/email";
 
 export interface LoginSecurityEventContext {
   userId: string;
@@ -31,8 +31,6 @@ export interface NotificationDispatchResult {
   status: "sent" | "unconfigured" | "failed" | "skipped" | "pending";
   details?: string;
 }
-
-const SUPPORT_EMAIL = "support@seedhaproperties.com";
 
 /** Endpoint that performs the actual send. Server-only credentials live there. */
 export const LOGIN_NOTIFICATION_ENDPOINT = "/api/auth/login-notification";
@@ -62,73 +60,16 @@ export function buildLoginSecurityEmail(
     timeZoneName: "short",
   });
 
-  const subject = `New sign-in to your ${APP_NAME} account`;
-
-  const htmlBody = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
-      <div style="margin-bottom: 20px; border-bottom: 2px solid #3b82f6; padding-bottom: 12px;">
-        <h2 style="color: #0f172a; margin: 0; font-size: 20px;">${APP_NAME} Security Alert</h2>
-      </div>
-
-      <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
-        Hello <strong>${ctx.name}</strong>,
-      </p>
-
-      <p style="font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-        We detected a successful sign-in to your <strong>${APP_NAME}</strong> account.
-      </p>
-
-      <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 6px; margin-bottom: 24px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-          <tr>
-            <td style="color: #64748b; padding: 4px 0; width: 120px;"><strong>Account:</strong></td>
-            <td style="color: #0f172a; padding: 4px 0;">${ctx.email}</td>
-          </tr>
-          <tr>
-            <td style="color: #64748b; padding: 4px 0;"><strong>Date:</strong></td>
-            <td style="color: #0f172a; padding: 4px 0;">${formattedDate}</td>
-          </tr>
-          <tr>
-            <td style="color: #64748b; padding: 4px 0;"><strong>Time:</strong></td>
-            <td style="color: #0f172a; padding: 4px 0;">${formattedTime}</td>
-          </tr>
-          ${ctx.role ? `<tr><td style="color: #64748b; padding: 4px 0;"><strong>Access Level:</strong></td><td style="color: #0f172a; padding: 4px 0; text-transform: uppercase;">${ctx.role}</td></tr>` : ""}
-        </table>
-      </div>
-
-      <p style="font-size: 13px; line-height: 1.5; color: #475569; margin-bottom: 16px;">
-        If you initiated this sign-in, no further action is required.
-      </p>
-
-      <div style="background-color: #fff1f2; border: 1px solid #fecdd3; padding: 14px; border-radius: 8px; margin-bottom: 24px;">
-        <p style="font-size: 13px; color: #9f1239; margin: 0; font-weight: 600;">
-          If this wasn't you:
-        </p>
-        <p style="font-size: 12px; color: #be123c; margin: 6px 0 0 0;">
-          Please immediately reset your password and contact our trust &amp; security team at <a href="mailto:${SUPPORT_EMAIL}" style="color: #be123c; text-decoration: underline;">${SUPPORT_EMAIL}</a>.
-        </p>
-      </div>
-
-      <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 11px; color: #94a3b8; text-align: center;">
-        <p style="margin: 0;">This is an automated security notification regarding your ${APP_NAME} account.</p>
-        <p style="margin: 4px 0 0 0;">© ${now.getFullYear()} ${APP_NAME}. All rights reserved.</p>
-      </div>
-    </div>
-  `;
-
-  const textBody = `
-${APP_NAME} Security Alert: New Sign-in Detected
-
-Hello ${ctx.name},
-
-A new sign-in was detected for your account (${ctx.email}) on ${formattedDate} at ${formattedTime}.
-
-If you initiated this sign-in, you can safely disregard this message.
-
-If this was not you, please immediately change your password and contact ${SUPPORT_EMAIL}.
-  `.trim();
-
-  return { subject, htmlBody, textBody };
+  // Rendered through the centralized Seedha email template so this security
+  // notification carries the same branded design as every other email. The
+  // dispatch logic, dedup, and token handling below are unchanged.
+  return loginSecurityEmail({
+    userName: ctx.name,
+    email: ctx.email,
+    role: ctx.role,
+    date: formattedDate,
+    time: formattedTime,
+  });
 }
 
 /**

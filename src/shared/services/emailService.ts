@@ -87,7 +87,9 @@ export async function sendTransactionalEmail(payload: EmailPayload): Promise<Ema
         from: "Seedha Properties <notifications@seedhaproperties.com>",
         to: [payload.to],
         subject: payload.subject,
-        html: payload.htmlBody || `<p>${payload.textBody}</p>`,
+        html: payload.htmlBody || `<p>${payload.textBody ?? ""}</p>`,
+        // Always ship a plain-text fallback alongside the HTML (never HTML-only).
+        ...(payload.textBody ? { text: payload.textBody } : {}),
       }),
     });
 
