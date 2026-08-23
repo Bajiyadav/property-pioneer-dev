@@ -28,7 +28,12 @@ const PROMOTE_SRC = read("src/modules/owner/components/PromoteListing.tsx");
 const CHECKOUT_SRC = read("src/modules/owner/components/PromotionCheckout.tsx");
 const SERVER_SRC = read("src/modules/owner/services/promotion.server.ts");
 const FNS_SRC = read("src/modules/owner/services/promotionFunctions.ts");
-const MIGRATION = read("supabase/migrations/20260823120000_property_promotion_orders.sql");
+const migrationPath = fs.existsSync(
+  path.join(root, "supabase/migrations_quarantine/20260823120000_property_promotion_orders.sql"),
+)
+  ? "supabase/migrations_quarantine/20260823120000_property_promotion_orders.sql"
+  : "supabase/migrations/20260823120000_property_promotion_orders.sql";
+const MIGRATION = read(migrationPath);
 
 describe("visibility plans — the two offers", () => {
   it("1. offers a ₹299 plan", () => {
