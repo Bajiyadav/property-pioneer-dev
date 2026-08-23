@@ -61,11 +61,12 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: No authorization header provided");
     }
 
-    if (!authHeader.startsWith("Bearer ")) {
-      throw new Error("Unauthorized: Only Bearer tokens are supported");
+    const match = authHeader.match(/^Bearer\s+([A-Za-z0-9-_=.]+)\s*$/);
+    if (!match) {
+      throw new Error("Unauthorized: Only Bearer tokens in valid format are supported");
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    const token = match[1];
     if (!token) {
       throw new Error("Unauthorized: No token provided");
     }
@@ -88,16 +89,39 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       },
     });
 
-    // Step 1 — signature and expiry. This project signs with ES256, so
-    // `getClaims` verifies locally against the JWKS: fast, and it rejects
-    // forged, malformed, and expired tokens without a network round trip.
+    // Step 1 — signature, issuer, audience, and expiry verification.
+    // This project signs with ES256, so `getClaims` verifies locally against the JWKS:
+    // fast, and it rejects forged, malformed, unsupported algorithms, and expired tokens.
     const { data, error } = await supabase.auth.getClaims(token);
     if (error || !data?.claims) {
       throw new Error("Unauthorized: Invalid token");
     }
 
-    if (!data.claims.sub) {
+    if (!data.claims.sub || typeof data.claims.sub !== "string") {
       throw new Error("Unauthorized: No user ID found in token");
+    }
+
+    // Validate Issuer claim if present
+    if (data.claims.iss && typeof data.claims.iss === "string") {
+      const normalizedBase = SUPABASE_URL.replace(/\/$/, "");
+      if (!data.claims.iss.startsWith(normalizedBase)) {
+        throw new Error("Unauthorized: Token issuer mismatch");
+      }
+    }
+
+    // Validate Audience claim if present
+    if (data.claims.aud && typeof data.claims.aud === "string") {
+      if (data.claims.aud !== "authenticated") {
+        throw new Error("Unauthorized: Invalid token audience");
+      }
+    }
+
+    // Validate Expiration claim if present
+    if (typeof data.claims.exp === "number") {
+      const now = Math.floor(Date.now() / 1000);
+      if (data.claims.exp <= now) {
+        throw new Error("Unauthorized: Token has expired");
+      }
     }
 
     // Step 2 — session liveness. A local signature check alone is NOT enough:

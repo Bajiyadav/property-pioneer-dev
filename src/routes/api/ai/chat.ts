@@ -58,14 +58,17 @@ export const Route = createFileRoute("/api/ai/chat")({
         // Optional authenticated user identification
         const authHeader = request.headers.get("Authorization");
         let userId: string | null = null;
-        if (authHeader?.startsWith("Bearer ")) {
-          try {
-            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-            const token = authHeader.replace("Bearer ", "").trim();
-            const { data } = await supabaseAdmin.auth.getUser(token);
-            if (data?.user) userId = data.user.id;
-          } catch {
-            // Ignore malformed token
+        if (authHeader) {
+          const match = authHeader.match(/^Bearer\s+([A-Za-z0-9-_=.]+)\s*$/);
+          if (match) {
+            try {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              const token = match[1];
+              const { data } = await supabaseAdmin.auth.getUser(token);
+              if (data?.user) userId = data.user.id;
+            } catch {
+              // Ignore malformed token
+            }
           }
         }
 

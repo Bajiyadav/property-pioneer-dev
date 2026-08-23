@@ -59,9 +59,12 @@ export const Route = createFileRoute("/api/public/properties/$id/contact")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         if (authHeader) {
-          const token = authHeader.replace("Bearer ", "");
-          const { data: userData } = await supabaseAdmin.auth.getUser(token);
-          user = userData?.user;
+          const match = authHeader.match(/^Bearer\s+([A-Za-z0-9-_=.]+)\s*$/);
+          if (match) {
+            const token = match[1];
+            const { data: userData } = await supabaseAdmin.auth.getUser(token);
+            user = userData?.user ?? null;
+          }
         }
 
         // 1. Rate limiting & Quota check

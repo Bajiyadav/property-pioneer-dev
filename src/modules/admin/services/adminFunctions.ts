@@ -71,7 +71,54 @@ async function assertEmployee(context: AuthContext): Promise<EmployeeAccess> {
 export const checkEmployeeAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    return { access: await getEmployeeAccess(context as AuthContext), userId: context.userId };
+    const authCtx = context as AuthContext & { claims?: { aal?: string } };
+    const access = await getEmployeeAccess(authCtx);
+    const mfaLevel = authCtx.claims?.aal ?? "aal1";
+    return {
+      access,
+      userId: authCtx.userId,
+      mfa: {
+        required: Boolean(access),
+        verified: mfaLevel === "aal2",
+        level: mfaLevel,
+      },
+    };
+  });
+
+export const recordAdminMfaAudit = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({
+        event: z.enum([
+          "admin_mfa_enrollment_started",
+          "admin_mfa_enrollment_completed",
+          "admin_mfa_verification_success",
+          "admin_mfa_verification_failed",
+          "admin_mfa_recovery",
+          "privileged_access_denied_mfa",
+        ]),
+        factorType: z.string().max(20).default("totp"),
+        outcome: z.enum(["success", "rejected", "error"]).default("success"),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const authCtx = context as AuthContext;
+    const access = await assertEmployee(authCtx);
+    const { recordAudit } = await import("@/lib/security.server");
+    await recordAudit({
+      event: data.event,
+      actorId: authCtx.userId,
+      subjectType: "admin_mfa",
+      subjectId: authCtx.userId,
+      outcome: data.outcome,
+      details: {
+        role: access.role,
+        factorType: data.factorType,
+      },
+    });
+    return { ok: true };
   });
 
 export const getAdminOverview = createServerFn({ method: "GET" })

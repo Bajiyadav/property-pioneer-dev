@@ -18,6 +18,7 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { AdminMfaSecurityModal } from "@/modules/admin/components/AdminMfaSecurityModal";
 
 /**
  * Access is checked in the component, not in `beforeLoad`.
@@ -81,6 +82,8 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
     }
   }
 
+  const [mfaModalOpen, setMfaModalOpen] = useState(false);
+
   const regionsLabel =
     access.regions.length > 0
       ? access.regions.join(", ")
@@ -115,12 +118,32 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
             </button>
           </div>
 
-          <div className="p-4 border-b border-neutral-800 space-y-1">
-            <div className="text-xs text-neutral-400 uppercase font-semibold">Role</div>
-            <div className="text-sm font-medium capitalize text-emerald-400">{access.role}</div>
-            <div className="text-xs text-neutral-400 uppercase font-semibold mt-2">Scope</div>
-            <div className="text-sm font-medium text-neutral-300 truncate" title={regionsLabel}>
-              {regionsLabel}
+          <div className="p-4 border-b border-neutral-800 space-y-2">
+            <div>
+              <div className="text-xs text-neutral-400 uppercase font-semibold">Role</div>
+              <div className="text-sm font-medium capitalize text-emerald-400">{access.role}</div>
+            </div>
+            <div>
+              <div className="text-xs text-neutral-400 uppercase font-semibold">Scope</div>
+              <div className="text-sm font-medium text-neutral-300 truncate" title={regionsLabel}>
+                {regionsLabel}
+              </div>
+            </div>
+            <div className="pt-1">
+              <div className="text-xs text-neutral-400 uppercase font-semibold mb-1">
+                MFA Security
+              </div>
+              <button
+                type="button"
+                onClick={() => setMfaModalOpen(true)}
+                className="inline-flex w-full items-center justify-between px-2.5 py-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 transition"
+              >
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <Shield className="w-3.5 h-3.5" />
+                  MFA Configured
+                </span>
+                <span className="text-[10px] text-neutral-400">Manage</span>
+              </button>
             </div>
           </div>
 
@@ -183,6 +206,8 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
           </div>
         </main>
       </div>
+
+      <AdminMfaSecurityModal isOpen={mfaModalOpen} onClose={() => setMfaModalOpen(false)} />
     </div>
   );
 }
