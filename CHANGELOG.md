@@ -1,3 +1,8 @@
+## v0.50.0 — 2026-08-23
+
+### Features
+- feat(auth): add 6-digit email OTP tab and gate owner contact behind sign-in and 3-free-contact quota (33ea623)
+
 ## v0.49.2 — 2026-08-23
 
 ### Performance
