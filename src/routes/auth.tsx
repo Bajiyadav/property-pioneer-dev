@@ -8,6 +8,7 @@ import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
+import { EmailOtpForm } from "@/modules/authentication/components/EmailOtpForm";
 import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
 import { ShieldCheck } from "lucide-react";
 
@@ -47,6 +48,7 @@ type AuthMode = "signin" | "signup";
 function AuthPage() {
   const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<AuthMode>("signin");
+  const [method, setMethod] = useState<"password" | "otp">("password");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -141,7 +143,26 @@ function AuthPage() {
           </span>
         </div>
 
-        <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
+        {method === "password" ? (
+          <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
+        ) : (
+          <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />
+        )}
+
+        {/* Passwordless is an additional path, not a replacement. The toggle sits
+            below the primary form so the existing password/Google flows are the
+            unchanged default. */}
+        <div className="pt-1 text-center">
+          <button
+            type="button"
+            onClick={() => setMethod((m) => (m === "password" ? "otp" : "password"))}
+            className="text-xs font-semibold text-emerald-600 hover:underline"
+          >
+            {method === "password"
+              ? "Prefer no password? Sign in with an email code"
+              : "Use email & password instead"}
+          </button>
+        </div>
       </div>
 
       <Link to="/" className="mt-6 text-xs font-bold text-muted-foreground hover:text-foreground">

@@ -4,6 +4,7 @@ import {
   classifyAndExtractIntent,
   retrieveKnowledgeDocuments,
   retrieveStructuredProperties,
+  retrieveDynamicContext,
   askSeedhaAI,
 } from "@/modules/interactions/services/geminiService";
 
@@ -22,6 +23,14 @@ describe("Seedha Gemini AI Assistant (Structured RAG + Knowledge Grounding)", ()
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("includes 0% brokerage and direct-owner domain knowledge in system prompt", () => {
+    expect(SEEDHA_SYSTEM_PROMPT).toContain("0% Brokerage");
+    expect(SEEDHA_SYSTEM_PROMPT).toContain("Direct-Owner");
+    expect(SEEDHA_SYSTEM_PROMPT).toContain("Hyderabad");
+    expect(SEEDHA_SYSTEM_PROMPT).toContain("Bengaluru");
+    expect(SEEDHA_SYSTEM_PROMPT).toContain("Verified Owner");
   });
 
   describe("Intent Classification & Structured Filter Extraction", () => {
@@ -53,27 +62,22 @@ describe("Seedha Gemini AI Assistant (Structured RAG + Knowledge Grounding)", ()
   });
 
   describe("Knowledge Document Retrieval", () => {
-    it("retrieves Zero Brokerage policy document", () => {
-      const doc = retrieveKnowledgeDocuments("What is the fee or commission?");
-      expect(doc).toContain("ZERO BROKERAGE POLICY");
-      expect(doc).toContain("100% zero brokerage");
-    });
+    it("retrieves dynamic context snippets for listing and brokerage queries", () => {
+      const listingContext = retrieveDynamicContext("How to post my flat?");
+      expect(listingContext).toContain("Guided Listing Wizard");
 
-    it("retrieves Owner Listing guidelines", () => {
-      const doc = retrieveKnowledgeDocuments("How do I list my flat for rent?");
-      expect(doc).toContain("OWNER LISTING GUIDELINES");
-      expect(doc).toContain("6-stage listing wizard");
+      const doc = retrieveKnowledgeDocuments("What is the fee or commission?");
+      expect(doc).toContain("Zero Brokerage");
     });
 
     it("retrieves Trust & Verification policy", () => {
       const doc = retrieveKnowledgeDocuments("Tell me about verified owner badges");
-      expect(doc).toContain("TRUST & VERIFICATION POLICY");
-      expect(doc).toContain("Direct Owner");
+      expect(doc).toContain("Trust, Badging & Verification Framework");
     });
 
     it("retrieves Visit Scheduling rules", () => {
       const doc = retrieveKnowledgeDocuments("Can I schedule an in-person tour?");
-      expect(doc).toContain("VISIT SCHEDULING RULES");
+      expect(doc).toContain("Tenant Scheduling & Walkthrough Policy");
     });
   });
 

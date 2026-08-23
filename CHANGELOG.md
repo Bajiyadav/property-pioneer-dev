@@ -1,3 +1,8 @@
+## v0.42.0 — 2026-08-23
+
+### Features
+- feat(ai): implement structured property search and grounded hybrid RAG architecture (c5cd357)
+
 ## v0.41.1 — 2026-08-23
 
 ### Performance

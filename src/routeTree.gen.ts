@@ -58,6 +58,7 @@ import { Route as AuthenticatedDashboardOwnerRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardTenantProfileRouteImport } from './routes/_authenticated/dashboard/tenant-profile'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
+import { Route as ApiAuthRequestOtpRouteImport } from './routes/api/auth/request-otp'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
@@ -329,6 +330,11 @@ const ApiAuthLoginNotificationRoute =
     path: '/api/auth/login-notification',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAuthRequestOtpRoute = ApiAuthRequestOtpRouteImport.update({
+  id: '/api/auth/request-otp',
+  path: '/api/auth/request-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   id: '/api/public/enquiries',
   path: '/api/public/enquiries',
@@ -458,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
+  '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -519,6 +526,7 @@ export interface FileRoutesByTo {
   '/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
+  '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -586,6 +594,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/tenant-profile': typeof AuthenticatedDashboardTenantProfileRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
+  '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -653,6 +662,7 @@ export interface FileRouteTypes {
     | '/dashboard/tenant-profile'
     | '/api/ai/chat'
     | '/api/auth/login-notification'
+    | '/api/auth/request-otp'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -714,6 +724,7 @@ export interface FileRouteTypes {
     | '/dashboard/tenant-profile'
     | '/api/ai/chat'
     | '/api/auth/login-notification'
+    | '/api/auth/request-otp'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -780,6 +791,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/tenant-profile'
     | '/api/ai/chat'
     | '/api/auth/login-notification'
+    | '/api/auth/request-otp'
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -831,6 +843,7 @@ export interface RootRouteChildren {
   RentIndexRoute: typeof RentIndexRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
+  ApiAuthRequestOtpRoute: typeof ApiAuthRequestOtpRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
   CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
@@ -1190,6 +1203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthLoginNotificationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/request-otp': {
+      id: '/api/auth/request-otp'
+      path: '/api/auth/request-otp'
+      fullPath: '/api/auth/request-otp'
+      preLoaderRoute: typeof ApiAuthRequestOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/enquiries': {
       id: '/api/public/enquiries'
       path: '/api/public/enquiries'
@@ -1437,6 +1457,7 @@ const rootRouteChildren: RootRouteChildren = {
   RentIndexRoute: RentIndexRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
+  ApiAuthRequestOtpRoute: ApiAuthRequestOtpRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
   CommercialCityLocalityRoute: CommercialCityLocalityRoute,
