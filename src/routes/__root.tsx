@@ -157,7 +157,6 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
-import { NetworkStatusListener } from "@/shared/components/feedback/NetworkStatusListener";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -175,7 +174,6 @@ function RootComponent() {
           {!isWizardRoute && <SiteFooter />}
         </div>
         <SeedhaAIAssistant />
-        <NetworkStatusListener />
         <Toaster position="top-center" richColors />
         <ConsentBanner />
       </AuthProvider>

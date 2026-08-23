@@ -327,7 +327,7 @@ export async function retrieveStructuredProperties(
   } catch (err) {
     return {
       count: 0,
-      text: "[RETRIEVED SEEDHA PROPERTY DATA]:\nProperty database query completed with 0 results.",
+      text: "[RETRIEVED SEEDHA PROPERTY DATA]:\nNo matching live properties found in database for the specified criteria (query completed with 0 results).",
       properties: [],
     };
   }
