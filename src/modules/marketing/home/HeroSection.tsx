@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Zap, CheckCircle2, Sparkles } from "lucide-react";
+import { ShieldCheck, Zap, CheckCircle2, Sparkles, Building2, Home, Building } from "lucide-react";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
 
@@ -56,6 +56,76 @@ export function HeroSection({
         {/* Tabbed Search Box */}
         <div className="mt-8 w-full max-w-3xl">
           <TabbedSearchBox query={query} onQueryChange={onQueryChange} />
+        </div>
+
+        {/* 4 Quick Category Action Cards */}
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-3xl">
+          <Link
+            to="/properties"
+            search={{ listing: "sale", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+          >
+            <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="block text-xs font-extrabold text-foreground leading-tight">
+                Buy
+              </span>
+              <span className="block text-[10px] font-medium text-muted-foreground">
+                Properties
+              </span>
+            </div>
+          </Link>
+
+          <Link
+            to="/properties"
+            search={{ listing: "rent", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+          >
+            <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Home className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="block text-xs font-extrabold text-foreground leading-tight">
+                Rent
+              </span>
+              <span className="block text-[10px] font-medium text-muted-foreground">
+                Properties
+              </span>
+            </div>
+          </Link>
+
+          <Link
+            to="/properties"
+            search={{ type: "commercial", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Building className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="block text-xs font-extrabold text-foreground leading-tight">
+                Commercial
+              </span>
+              <span className="block text-[10px] font-medium text-muted-foreground">
+                Offices & Shops
+              </span>
+            </div>
+          </Link>
+
+          <Link
+            to="/list-property"
+            className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
+          >
+            <div className="h-10 w-10 rounded-xl bg-white/20 text-white flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Sparkles className="h-5 w-5 text-amber-300" />
+            </div>
+            <div>
+              <span className="block text-xs font-extrabold leading-tight">Post Property</span>
+              <span className="block text-[10px] font-bold text-emerald-100">Free Ad</span>
+            </div>
+          </Link>
         </div>
 
         {/* Trending Searches / Localities Chips */}

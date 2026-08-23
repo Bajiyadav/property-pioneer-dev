@@ -1,107 +1,90 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, MapPin, Heart, PlusCircle, User, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { getCurrentUserLocality } from "@/lib/geolocation";
-import { logLiveActivity } from "@/lib/leadRouting";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, Search, PlusCircle, Wrench, User } from "lucide-react";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function MobileBottomNav() {
-  const navigate = useNavigate();
-  const { status, role } = useAuthSession();
-  const [locating, setLocating] = useState(false);
+  const { status } = useAuthSession();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
 
-  const handleNearMe = async () => {
-    setLocating(true);
-    toast.info("Detecting your nearest locality...");
-
-    const res = await getCurrentUserLocality();
-    setLocating(false);
-
-    if (res.locality) {
-      toast.success(`Location detected: Near ${res.locality}!`);
-      // Log geolocation activity
-      await logLiveActivity({
-        activity_type: "search",
-        locality: res.locality,
-        latitude: res.latitude,
-        longitude: res.longitude,
-        search_query: `Near Me Geolocation Search (${res.locality})`,
-      });
-
-      navigate({
-        to: "/properties",
-        search: {
-          q: res.locality,
-          city: "Hyderabad",
-          listing: "rent",
-          minPrice: 0,
-          maxPrice: 0,
-          beds: 0,
-        },
-      });
-    } else {
-      toast.error(res.error || "Could not detect location. Showing default listings.");
-    }
+  const isActive = (path: string) => {
+    if (path === "/" && currentPath === "/") return true;
+    if (path !== "/" && currentPath.startsWith(path)) return true;
+    return false;
   };
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/80 bg-background/95 backdrop-blur-md px-3 py-2 shadow-2xl">
-      <div className="grid grid-cols-5 gap-1 text-center">
-        {/* Home */}
+    <nav
+      aria-label="Mobile navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1.5 shadow-2xl safe-area-pb"
+    >
+      <div className="grid grid-cols-5 items-center text-center">
+        {/* 1. Home */}
         <Link
           to="/"
-          className="flex flex-col items-center justify-center py-1 text-muted-foreground transition hover:text-primary active:scale-95"
-          activeProps={{ className: "text-primary font-bold" }}
+          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
+            isActive("/")
+              ? "text-emerald-600 font-bold"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
           <Home className="h-5 w-5" />
           <span className="text-[10px] mt-0.5 font-medium">Home</span>
         </Link>
 
-        {/* Near Me Geolocation */}
-        <button
-          type="button"
-          onClick={handleNearMe}
-          disabled={locating}
-          className="flex flex-col items-center justify-center py-1 text-emerald-600 transition hover:text-emerald-500 active:scale-95 cursor-pointer"
+        {/* 2. Properties / Search */}
+        <Link
+          to="/properties"
+          search={{ q: "", city: "", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
+            isActive("/properties")
+              ? "text-emerald-600 font-bold"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
-          {locating ? <Loader2 className="h-5 w-5 animate-spin" /> : <MapPin className="h-5 w-5" />}
-          <span className="text-[10px] mt-0.5 font-bold">Near Me</span>
-        </button>
+          <Search className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5 font-medium">Properties</span>
+        </Link>
 
-        {/* List Property CTA */}
+        {/* 3. Post Property (Featured Plus Action) */}
         <Link
           to="/list-property"
-          className="flex flex-col items-center justify-center py-1 text-primary transition hover:brightness-110 active:scale-95"
+          className="flex flex-col items-center justify-center py-0.5 text-white transition hover:brightness-110 active:scale-95"
         >
-          <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground shadow-md">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white shadow-md ring-2 ring-background">
             <PlusCircle className="h-5 w-5" />
           </div>
-          <span className="text-[9px] mt-0.5 font-black uppercase text-primary">List</span>
-        </Link>
-
-        {/* Saved */}
-        <Link
-          to="/favorites"
-          className="flex flex-col items-center justify-center py-1 text-muted-foreground transition hover:text-primary active:scale-95"
-          activeProps={{ className: "text-primary font-bold" }}
-        >
-          <Heart className="h-5 w-5" />
-          <span className="text-[10px] mt-0.5 font-medium">Saved</span>
-        </Link>
-
-        {/* Account / Dashboard */}
-        <Link
-          to={status === "authenticated" ? "/dashboard" : "/auth"}
-          className="flex flex-col items-center justify-center py-1 text-muted-foreground transition hover:text-primary active:scale-95"
-          activeProps={{ className: "text-primary font-bold" }}
-        >
-          <User className="h-5 w-5" />
-          <span className="text-[10px] mt-0.5 font-medium">
-            {status === "authenticated" ? (role ? role.toUpperCase() : "Portal") : "Sign In"}
+          <span className="text-[9px] mt-0.5 font-extrabold uppercase text-emerald-600">
+            Post Ad
           </span>
         </Link>
+
+        {/* 4. Home Services */}
+        <Link
+          to="/services"
+          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
+            isActive("/services")
+              ? "text-emerald-600 font-bold"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Wrench className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5 font-medium">Services</span>
+        </Link>
+
+        {/* 5. Profile */}
+        <Link
+          to={status === "authenticated" ? "/profile" : "/auth"}
+          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
+            isActive("/profile") || isActive("/auth")
+              ? "text-emerald-600 font-bold"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <User className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5 font-medium">Profile</span>
+        </Link>
       </div>
-    </div>
+    </nav>
   );
 }

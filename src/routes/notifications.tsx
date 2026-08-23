@@ -1,28 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Bell,
-  CheckCheck,
+  CheckCircle2,
   Building2,
   Heart,
   Calendar,
-  Settings,
-  ArrowRight,
-  Clock,
+  ShieldCheck,
+  CreditCard,
+  MessageSquare,
+  Sparkles,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 export const Route = createFileRoute("/notifications")({
   head: () => {
     const canonicalUrl = getCanonicalUrl("/notifications");
     const ogImage = getOgImageUrl();
-    const title = `Notifications — ${APP_NAME}`;
+    const title = `Notification Center — ${APP_NAME}`;
     return {
       meta: [
         { title },
         {
           name: "description",
-          content: `Stay updated with property alerts, visit confirmations, and market news on ${APP_NAME}.`,
+          content: `Stay updated with property alerts, visit confirmations, and inquiries on ${APP_NAME}.`,
         },
         { property: "og:title", content: title },
         { property: "og:url", content: canonicalUrl },
@@ -36,94 +37,192 @@ export const Route = createFileRoute("/notifications")({
   component: NotificationsPage,
 });
 
-const NOTIFICATION_TYPES = [
+interface NotificationItem {
+  id: string;
+  category: "property" | "enquiry" | "visit" | "payment" | "system";
+  title: string;
+  message: string;
+  time: string;
+  unread: boolean;
+  link?: string;
+}
+
+const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
   {
-    icon: Heart,
-    label: "Saved Property Alerts",
-    desc: "Get notified when prices change on your saved homes.",
-    color: "text-rose-500 bg-rose-500/10",
+    id: "notif-1",
+    category: "visit",
+    title: "Visit Confirmed by Owner",
+    message:
+      "Your in-person walkthrough request for 2 BHK Apartment in Madhapur was confirmed for tomorrow at 4:00 PM.",
+    time: "10 mins ago",
+    unread: true,
+    link: "/properties",
   },
   {
-    icon: Building2,
-    label: "New Listings",
-    desc: "Instant alerts when new properties match your search criteria.",
-    color: "text-blue-500 bg-blue-500/10",
+    id: "notif-2",
+    category: "property",
+    title: "New Match in Gachibowli",
+    message:
+      "A newly verified 3 BHK Standalone Villa matching your budget was just posted with 0% brokerage.",
+    time: "2 hours ago",
+    unread: true,
+    link: "/properties",
   },
   {
-    icon: Calendar,
-    label: "Visit Confirmations",
-    desc: "Booking confirmations, reminders, and owner responses.",
-    color: "text-emerald-500 bg-emerald-500/10",
+    id: "notif-3",
+    category: "enquiry",
+    title: "Direct Owner Message",
+    message:
+      "The property owner shared direct contact details for your scheduled visit in Kondapur.",
+    time: "Yesterday",
+    unread: false,
+    link: "/properties",
   },
   {
-    icon: Settings,
-    label: "Account & Legal",
-    desc: "Agreement updates, payment receipts, and security alerts.",
-    color: "text-amber-500 bg-amber-500/10",
+    id: "notif-4",
+    category: "system",
+    title: "Account Security Verified",
+    message:
+      "Your profile phone verification is active and eligible for 3 free direct owner contacts.",
+    time: "2 days ago",
+    unread: false,
   },
 ];
 
-function NotificationsPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Hero */}
-      <div className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-violet-900/20 via-background to-background px-6 py-20 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-800/10 to-transparent" />
-        <div className="relative mx-auto max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-violet-400">
-            <Bell className="h-3 w-3" /> Smart Notifications
-          </span>
-          <h1 className="mt-4 text-4xl font-black tracking-tight text-foreground sm:text-5xl">
-            Never Miss an <span className="text-violet-400">Opportunity</span>
-          </h1>
-          <p className="mt-4 text-sm text-muted-foreground max-w-lg mx-auto">
-            Real-time alerts for price changes, new listings, visit confirmations, and more —
-            delivered to your device instantly.
-          </p>
-        </div>
-      </div>
+export function NotificationsPage() {
+  const [filter, setFilter] = useState<string>("all");
+  const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
 
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        {/* Sign in prompt */}
-        <div className="mb-10 rounded-3xl border border-violet-500/20 bg-violet-500/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  };
+
+  const filtered =
+    filter === "all" ? notifications : notifications.filter((n) => n.category === filter);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6">
+      <div className="mx-auto max-w-3xl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-border/70">
           <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-400 mb-2">
-              <Clock className="h-3 w-3" /> Coming Soon
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight font-[family-name:var(--font-display)]">
+                Notifications
+              </h1>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-0.5">
+                  {unreadCount} new
+                </span>
+              )}
             </div>
-            <h2 className="text-sm font-extrabold text-foreground">Notification Centre</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Sign in to manage your notification preferences and view all alerts.
+            <p className="text-xs text-muted-foreground mt-1">
+              Real-time property updates, visit confirmations, and enquiry alerts
             </p>
           </div>
-          <Link
-            to="/auth"
-            className="flex-none rounded-xl bg-violet-600 px-5 py-2.5 text-xs font-bold text-white shadow hover:bg-violet-500 transition flex items-center gap-1.5"
-          >
-            Sign In <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={markAllRead}
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition cursor-pointer"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
 
-        {/* Notification type cards */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          {NOTIFICATION_TYPES.map((n) => (
-            <div key={n.label} className="rounded-2xl border border-border/60 bg-card p-5">
-              <div
-                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${n.color}`}
-              >
-                <n.icon className="h-4 w-4" />
-              </div>
-              <h3 className="mt-2 text-xs font-extrabold text-foreground">{n.label}</h3>
-              <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">{n.desc}</p>
-            </div>
+        {/* Category Filter Chips */}
+        <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+          {[
+            { id: "all", label: "All Alerts" },
+            { id: "visit", label: "Visit Reminders" },
+            { id: "property", label: "Property Updates" },
+            { id: "enquiry", label: "Enquiries" },
+            { id: "system", label: "System Alerts" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setFilter(tab.id)}
+              className={`rounded-xl px-4 py-2 text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                filter === tab.id
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
 
-        <div className="mt-10 flex items-center justify-center">
-          <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-            <CheckCheck className="h-4 w-4" /> All notifications are end-to-end encrypted
-          </div>
+        {/* Notification List */}
+        <div className="space-y-3 mt-4">
+          {filtered.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-border/80 p-12 text-center bg-card/40">
+              <Bell className="mx-auto h-8 w-8 text-muted-foreground/60" />
+              <p className="mt-3 text-base font-bold text-foreground">
+                No notifications in this category
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                You're all caught up with your real estate updates.
+              </p>
+            </div>
+          ) : (
+            filtered.map((item) => (
+              <div
+                key={item.id}
+                className={`p-4 rounded-2xl border transition-all flex items-start gap-3.5 ${
+                  item.unread
+                    ? "border-emerald-500/40 bg-emerald-500/5 shadow-xs"
+                    : "border-border/60 bg-card"
+                }`}
+              >
+                <div
+                  className={`h-10 w-10 rounded-xl flex items-center justify-center flex-none ${
+                    item.category === "visit"
+                      ? "bg-rose-100 text-rose-600 dark:bg-rose-950/50"
+                      : item.category === "property"
+                        ? "bg-blue-100 text-blue-600 dark:bg-blue-950/50"
+                        : item.category === "enquiry"
+                          ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50"
+                          : "bg-amber-100 text-amber-600 dark:bg-amber-950/50"
+                  }`}
+                >
+                  {item.category === "visit" && <Calendar className="h-5 w-5" />}
+                  {item.category === "property" && <Building2 className="h-5 w-5" />}
+                  {item.category === "enquiry" && <MessageSquare className="h-5 w-5" />}
+                  {item.category === "system" && <ShieldCheck className="h-5 w-5" />}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-foreground">
+                      {item.title}
+                    </h3>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {item.time}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/80 mt-1 leading-relaxed">{item.message}</p>
+                  {item.link && (
+                    <Link
+                      to={item.link}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 mt-2"
+                    >
+                      <span>View Details →</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default NotificationsPage;

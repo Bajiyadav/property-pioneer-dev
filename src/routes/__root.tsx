@@ -157,6 +157,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
+import { MobileBottomNav } from "@/app/layouts/MobileBottomNav";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -166,12 +167,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col pb-16 md:pb-0">
           {!isWizardRoute && <SiteHeader />}
           <main className="flex-1">
             <Outlet />
           </main>
           {!isWizardRoute && <SiteFooter />}
+          {!isWizardRoute && <MobileBottomNav />}
         </div>
         <SeedhaAIAssistant />
         <Toaster position="top-center" richColors />

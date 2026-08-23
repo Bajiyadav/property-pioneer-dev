@@ -53,18 +53,23 @@ function FavoritesPage() {
 
       <div className="mt-8">
         {saved.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-            <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 text-lg font-semibold text-foreground">Nothing saved yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tap the heart on any listing to save it.
+          <div className="rounded-3xl border border-dashed border-border/80 p-12 text-center bg-card/50">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-rose-500/10 text-rose-500">
+              <Heart className="h-7 w-7" />
+            </div>
+            <p className="mt-4 text-lg font-extrabold text-foreground">
+              You haven't saved any properties yet.
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+              Tap the heart icon on any property card to save your favorite homes and compare them
+              easily.
             </p>
             <Link
               to="/properties"
               search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-              className="mt-5 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:brightness-110"
+              className="mt-6 inline-flex items-center rounded-xl bg-emerald-600 px-6 py-3 text-xs font-extrabold text-white shadow-md transition hover:bg-emerald-700 active:scale-95"
             >
-              Browse homes
+              Explore Properties
             </Link>
           </div>
         ) : (

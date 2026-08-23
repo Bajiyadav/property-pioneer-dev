@@ -894,6 +894,31 @@ export function PropertyDetailPage() {
               onClose={() => setScheduleOpen(false)}
             />
           </main>
+
+          {/* Sticky Mobile Bottom CTA Bar */}
+          <div className="lg:hidden fixed bottom-14 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border p-3 shadow-xl flex items-center gap-3">
+            <WhatsAppButton
+              propertyId={property.id}
+              className="flex-1 h-11"
+              onRequireAuth={() => setAuthGateOpen(true)}
+              onRequireSubscription={() => setCustomerPlansOpen(true)}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  setAuthGateOpen(true);
+                  toast.info("Sign in to unlock direct owner contact without brokerage");
+                  return;
+                }
+                if (hasAccess) setScheduleOpen(true);
+                else setCustomerPlansOpen(true);
+              }}
+              className="flex-1 h-11 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+            >
+              Schedule Visit
+            </button>
+          </div>
         </>
       )}
 

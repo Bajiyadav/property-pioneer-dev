@@ -5,6 +5,15 @@
  * Implements the complete hybrid retrieval augmented generation lifecycle:
  * Query Classification -> Dual-Branch Retrieval (PostgreSQL + Knowledge Corpus) ->
  * Context Grounding -> Gemini Synthesis / Fallback Engine.
+ *
+ * LATENCY NOTES (see stage instrumentation below):
+ *  - Intent classification and semantic knowledge retrieval are synchronous,
+ *    local operations. The only network round-trip in retrieval is the Supabase
+ *    property query, so the two retrieval branches are run concurrently and the
+ *    knowledge computation overlaps the in-flight property query.
+ *  - Deterministic responses (greeting / incomplete search) are answered locally
+ *    BEFORE any retrieval or Gemini call, so no work is wasted on them.
+ *  - Grounding, ID validation, and sanitisation are unchanged.
  */
 
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +23,16 @@ import {
   classifyAndExtractIntent,
 } from "./geminiService";
 import { type KnowledgeChunk, retrieveSemanticKnowledge } from "./knowledgeCorpus";
+
+/** Per-stage latencies, in ms. Numbers only — never any query/PII content. */
+export interface RAGStageLatencies {
+  intentMs: number;
+  propertiesMs: number;
+  knowledgeMs: number;
+  contextMs: number;
+  geminiMs?: number;
+  totalMs?: number;
+}
 
 export interface RAGRetrievalResult {
   intent: AIIntent;
@@ -31,6 +50,7 @@ export interface RAGRetrievalResult {
   knowledgeDocs: KnowledgeChunk[];
   groundedContextText: string;
   queryLatencyMs: number;
+  stageLatenciesMs?: RAGStageLatencies;
 }
 
 export interface RAGResponse {
@@ -41,78 +61,133 @@ export interface RAGResponse {
   totalLatencyMs: number;
 }
 
+type RetrievedProperty = RAGRetrievalResult["properties"][number];
+
 /**
- * Executes dual-branch retrieval for structured properties and semantic knowledge.
+ * Lightweight stage timing diagnostic. Emits ONLY numeric latencies — no query
+ * text, no property data, no user/owner PII, no tokens/keys. Reuses the standard
+ * console (there is no separate Sentry logger in this path); Sentry stays the
+ * channel for errors, this is a perf breadcrumb.
+ *
+ * Example: [RAG] intent=1ms properties=180ms knowledge=2ms context=0ms gemini=1450ms total=1633ms
  */
-export async function executeRAGRetrieval(userQuery: string): Promise<RAGRetrievalResult> {
-  const start = performance.now();
-  const filters = classifyAndExtractIntent(userQuery);
+function logRagStageTimings(t: RAGStageLatencies): void {
+  const parts = [
+    `intent=${t.intentMs}ms`,
+    `properties=${t.propertiesMs}ms`,
+    `knowledge=${t.knowledgeMs}ms`,
+    `context=${t.contextMs}ms`,
+    t.geminiMs !== undefined ? `gemini=${t.geminiMs}ms` : `gemini=skipped`,
+    t.totalMs !== undefined ? `total=${t.totalMs}ms` : "",
+  ].filter(Boolean);
+  console.info(`[RAG] ${parts.join(" ")}`);
+}
 
-  let properties: Array<{
-    id: string;
-    title: string;
-    locality?: string;
-    city?: string;
-    price?: number;
-    bedrooms?: number;
-    property_type?: string;
-    image_urls?: string[];
-  }> = [];
-
-  // Branch A: Structured PostgreSQL Property Retrieval
-  if (
+/**
+ * Whether a query implies structured property retrieval. Unchanged semantics:
+ * an explicit search/mixed intent, or the presence of a locality/city.
+ */
+function impliesPropertySearch(filters: ExtractedPropertyFilters): boolean {
+  return (
     filters.intent === "PROPERTY_SEARCH" ||
     filters.intent === "MIXED" ||
-    filters.locality ||
-    filters.city
-  ) {
-    try {
-      let query = (supabase.from as any)("properties")
-        .select(
-          "id, title, locality, city, price, rent_amount, bedrooms, property_type, image_urls",
-        )
-        .limit(5);
+    Boolean(filters.locality) ||
+    Boolean(filters.city)
+  );
+}
 
-      if (filters.city) {
-        query = query.ilike("city", `%${filters.city}%`);
-      }
-      if (filters.locality) {
-        query = query.or(
-          `locality.ilike.%${filters.locality}%,address.ilike.%${filters.locality}%`,
-        );
-      }
-      if (filters.bhk) {
-        query = query.eq("bedrooms", filters.bhk);
-      }
-      if (filters.maxPrice) {
-        query = query.lte("price", filters.maxPrice);
-      }
-      if (filters.listingType) {
-        query = query.eq("listing_type", filters.listingType);
-      }
+/**
+ * Branch A: Structured PostgreSQL Property Retrieval.
+ *
+ * Filtering semantics are IDENTICAL to before (city, locality+address, bhk,
+ * maxPrice, listingType, limit 5) and it degrades gracefully to an empty list on
+ * any error — the caller must never crash or fabricate on a retrieval failure.
+ */
+async function retrievePropertiesForFilters(
+  filters: ExtractedPropertyFilters,
+): Promise<RetrievedProperty[]> {
+  try {
+    let query = (supabase.from as any)("properties")
+      .select("id, title, locality, city, price, rent_amount, bedrooms, property_type, image_urls")
+      .limit(5);
 
-      const { data } = await query;
-      if (data && Array.isArray(data)) {
-        properties = data.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          locality: p.locality,
-          city: p.city,
-          price: p.rent_amount || p.price || 0,
-          bedrooms: p.bedrooms || 2,
-          property_type: p.property_type || "Apartment",
-          image_urls: p.image_urls || [],
-        }));
-      }
-    } catch {
-      // Graceful fallback to empty
+    if (filters.city) {
+      query = query.ilike("city", `%${filters.city}%`);
     }
+    if (filters.locality) {
+      query = query.or(`locality.ilike.%${filters.locality}%,address.ilike.%${filters.locality}%`);
+    }
+    if (filters.bhk) {
+      query = query.eq("bedrooms", filters.bhk);
+    }
+    if (filters.maxPrice) {
+      query = query.lte("price", filters.maxPrice);
+    }
+    if (filters.listingType) {
+      query = query.eq("listing_type", filters.listingType);
+    }
+
+    const { data } = await query;
+    if (data && Array.isArray(data)) {
+      return data.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        locality: p.locality,
+        city: p.city,
+        price: p.rent_amount || p.price || 0,
+        bedrooms: p.bedrooms || 2,
+        property_type: p.property_type || "Apartment",
+        image_urls: p.image_urls || [],
+      }));
+    }
+    return [];
+  } catch {
+    // Graceful fallback to empty — never crash, never fabricate.
+    return [];
   }
+}
 
-  // Branch B: Semantic Knowledge Retrieval
-  const knowledgeDocs = retrieveSemanticKnowledge(userQuery, 3);
+/**
+ * Executes dual-branch retrieval for structured properties and semantic knowledge.
+ *
+ * `preFilters` lets the caller pass an already-computed classification so intent
+ * is classified exactly once per request. The two branches run concurrently: the
+ * property query is a network round-trip, and the synchronous knowledge lookup
+ * overlaps it instead of waiting for it to finish.
+ */
+export async function executeRAGRetrieval(
+  userQuery: string,
+  preFilters?: ExtractedPropertyFilters,
+): Promise<RAGRetrievalResult> {
+  const start = performance.now();
 
-  // Construct Grounded Context Text
+  const tIntent = performance.now();
+  const filters = preFilters ?? classifyAndExtractIntent(userQuery);
+  const intentMs = Math.round(performance.now() - tIntent);
+
+  // Branch A (async, network) and Branch B (sync, local) run concurrently.
+  let propertiesMs = 0;
+  let knowledgeMs = 0;
+
+  const tProp = performance.now();
+  const propertiesPromise: Promise<RetrievedProperty[]> = (
+    impliesPropertySearch(filters) ? retrievePropertiesForFilters(filters) : Promise.resolve([])
+  ).then((result) => {
+    propertiesMs = Math.round(performance.now() - tProp);
+    return result;
+  });
+
+  const tKnow = performance.now();
+  const knowledgePromise: Promise<KnowledgeChunk[]> = Promise.resolve().then(() => {
+    const docs = retrieveSemanticKnowledge(userQuery, 3);
+    knowledgeMs = Math.round(performance.now() - tKnow);
+    return docs;
+  });
+
+  const [properties, knowledgeDocs] = await Promise.all([propertiesPromise, knowledgePromise]);
+
+  // Construct Grounded Context Text (unchanged formatting).
+  const tContext = performance.now();
   let propertySection =
     "[RETRIEVED PROPERTY DATABASE RESULTS]:\nNo matching properties found for the specified criteria.";
   if (properties.length > 0) {
@@ -130,6 +205,7 @@ export async function executeRAGRetrieval(userQuery: string): Promise<RAGRetriev
       .join("\n\n");
 
   const groundedContextText = `${propertySection}\n\n${knowledgeSection}`;
+  const contextMs = Math.round(performance.now() - tContext);
   const queryLatencyMs = Math.round(performance.now() - start);
 
   return {
@@ -139,6 +215,7 @@ export async function executeRAGRetrieval(userQuery: string): Promise<RAGRetriev
     knowledgeDocs,
     groundedContextText,
     queryLatencyMs,
+    stageLatenciesMs: { intentMs, propertiesMs, knowledgeMs, contextMs },
   };
 }
 
@@ -152,10 +229,23 @@ export async function runRAGPipeline(
   ) => Promise<string | null>,
 ): Promise<RAGResponse> {
   const start = performance.now();
-  const retrieval = await executeRAGRetrieval(userQuery);
 
-  if (retrieval.intent === "GREETING") {
+  // Classify ONCE. Deterministic responses are served locally, before any
+  // retrieval or Gemini call, so nothing is wasted on greetings / incomplete
+  // searches (this previously ran a property query whose results were discarded).
+  const tIntent = performance.now();
+  const filters = classifyAndExtractIntent(userQuery);
+  const intentMs = Math.round(performance.now() - tIntent);
+
+  if (filters.intent === "GREETING") {
     const greetingText = `**Namaste! 🙏 I'm Seedha AI, your 24/7 Real Estate Concierge.**\n\nI can help you find verified direct-owner homes with **0% brokerage**, explore top localities, or list your property.\n\nWhat are you looking for today?\n• 🔍 **Find a Home for Rent** (e.g. *"2BHK in Madhapur under 30k"*)\n• 🏡 **Find a Home to Buy**\n• 📍 **Search Properties by Location**\n• 💰 **Search by Budget**\n• 📝 **List My Property (100% Free)**\n• 💯 **How 0% Brokerage Works**`;
+    logRagStageTimings({
+      intentMs,
+      propertiesMs: 0,
+      knowledgeMs: 0,
+      contextMs: 0,
+      totalMs: Math.round(performance.now() - start),
+    });
     return {
       answer: greetingText,
       sourceCitations: ["Seedha Properties Concierge"],
@@ -166,13 +256,20 @@ export async function runRAGPipeline(
   }
 
   if (
-    retrieval.intent === "PROPERTY_SEARCH" &&
-    !retrieval.filters.locality &&
-    !retrieval.filters.city &&
-    !retrieval.filters.bhk &&
-    !retrieval.filters.maxPrice
+    filters.intent === "PROPERTY_SEARCH" &&
+    !filters.locality &&
+    !filters.city &&
+    !filters.bhk &&
+    !filters.maxPrice
   ) {
     const promptText = `**Great! 🏠 Are you looking to Rent or Buy?**\n\nTell me which **City** (Hyderabad, Bengaluru, Mumbai, Pune) and **Locality** you prefer to see live verified 0% brokerage properties!`;
+    logRagStageTimings({
+      intentMs,
+      propertiesMs: 0,
+      knowledgeMs: 0,
+      contextMs: 0,
+      totalMs: Math.round(performance.now() - start),
+    });
     return {
       answer: promptText,
       sourceCitations: ["Seedha Properties Search Guide"],
@@ -181,6 +278,9 @@ export async function runRAGPipeline(
       totalLatencyMs: Math.round(performance.now() - start),
     };
   }
+
+  // Real query: reuse the classification we already computed (no re-classify).
+  const retrieval = await executeRAGRetrieval(userQuery, filters);
 
   const citations: string[] = [];
   for (const doc of retrieval.knowledgeDocs) {
@@ -214,7 +314,9 @@ STRICT GROUNDING & ANTI-HALLUCINATION RULES:
     },
   ];
 
+  const tGemini = performance.now();
   let answer = await callProxyFn(contents);
+  const geminiMs = Math.round(performance.now() - tGemini);
 
   const validIds = new Set(retrieval.properties.map((p) => p.id));
 
@@ -239,6 +341,14 @@ STRICT GROUNDING & ANTI-HALLUCINATION RULES:
   }
 
   const totalLatencyMs = Math.round(performance.now() - start);
+  logRagStageTimings({
+    intentMs,
+    propertiesMs: retrieval.stageLatenciesMs?.propertiesMs ?? 0,
+    knowledgeMs: retrieval.stageLatenciesMs?.knowledgeMs ?? 0,
+    contextMs: retrieval.stageLatenciesMs?.contextMs ?? 0,
+    geminiMs,
+    totalMs: totalLatencyMs,
+  });
 
   return {
     answer,

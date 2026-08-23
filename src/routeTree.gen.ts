@@ -29,6 +29,7 @@ import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PropertiesRouteImport } from './routes/properties'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as WhyUsRouteImport } from './routes/why-us'
@@ -177,6 +178,11 @@ const PropertiesRoute = PropertiesRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -469,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
+  '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -538,6 +545,7 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
+  '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -609,6 +617,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
+  '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -682,6 +691,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/properties'
     | '/refund-policy'
+    | '/services'
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/why-us'
@@ -751,6 +761,7 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/profile'
     | '/refund-policy'
+    | '/services'
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/why-us'
@@ -821,6 +832,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/properties'
     | '/refund-policy'
+    | '/services'
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/why-us'
@@ -894,6 +906,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RefundPolicyRoute: typeof RefundPolicyRoute
+  ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   WhyUsRoute: typeof WhyUsRoute
@@ -1065,6 +1078,13 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -1548,6 +1568,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   RefundPolicyRoute: RefundPolicyRoute,
+  ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   WhyUsRoute: WhyUsRoute,
