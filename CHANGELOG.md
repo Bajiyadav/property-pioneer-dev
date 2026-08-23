@@ -1,3 +1,8 @@
+## v0.45.0 — 2026-08-23
+
+### Features
+- feat(core): integrate contact monetization, AI grounding, IDOR security, and production monitoring (763ca93)
+
 ## v0.44.0 — 2026-08-23
 
 ### Features
