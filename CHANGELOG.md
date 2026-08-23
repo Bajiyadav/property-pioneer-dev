@@ -1,3 +1,11 @@
+## v0.47.0 — 2026-08-23
+
+### Features
+- feat(owner): merge listing wizard UX polish to main (05f603e)
+- feat(owner): polish mobile wizard nav and moderation labels (eddadbd)
+- feat(owner): polish listing wizard UX (0faa8ed)
+- feat(ux): mount global NetworkStatusListener for offline detection and recovery (be6c15f)
+
 ## v0.46.0 — 2026-08-23
 
 ### Features
