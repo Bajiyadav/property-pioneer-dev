@@ -1,3 +1,29 @@
+## v0.40.0 — 2026-08-23
+
+### Features
+- feat(owner): add listing promotion checkout, submission status, and visibility plans (f67482a)
+- feat(navigation): enhance tabbed search filters, back navigation, and contact quota reporting (0c326ed)
+- feat(mobile): add visibility promotion screens, routes, and tests (97f1a0d)
+- feat(admin): enhance listing moderation with 8-point verification checklist (4b62538)
+- feat(owner): implement 7-step zero-brokerage owner listing workflow (02625d2)
+
+### Fixes
+- fix(admin): refine property update mutation typing in moderation queue (88fe73a)
+- fix(owner): refine explicit type safety in listing wizard steps (1a38405)
+- fix(badges): require strict boolean check for zero brokerage badges (fb8260a)
+- fix(security): enforce strict RLS and caller role check on live activities (770305e)
+- fix(security): quarantine destructive cleanup migration and strengthen CI guard (a8b9bc6)
+- fix: persist extended owner listing fields (a7bad9f)
+
+### Documentation
+- docs: update README with 7-step owner workflow, PostGIS privacy mapping, and test metrics (61ca554)
+
+### Migration notes
+- supabase/migrations/20260822144459_contact_quotas_and_cleanup.sql
+- supabase/migrations/20260823000000_secure_live_activities_rls.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.39.0 — 2026-08-22
 
 ### Features
