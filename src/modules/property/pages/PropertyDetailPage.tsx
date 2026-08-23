@@ -519,31 +519,32 @@ export function PropertyDetailPage() {
             </div>
 
             {/* Nearby Tags */}
-            <div className="flex items-center gap-2 flex-wrap text-sm border border-border/60 p-3 rounded-sm bg-card shadow-sm">
-              <span className="font-semibold text-muted-foreground mr-1 text-xs">Nearby:</span>
-              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
-                Sundar Nagar Colony
+            <div className="flex items-center gap-2 flex-wrap text-sm border border-border/60 p-3 sm:p-3.5 rounded-xl bg-card shadow-sm">
+              <span className="font-semibold text-muted-foreground mr-1 text-xs shrink-0">
+                Nearby:
               </span>
-              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
-                Kondapur
-              </span>
-              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
-                Red Fox Hotel
-              </span>
-              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
-                Yashoda Hospitals
-              </span>
-              <span className="bg-secondary px-2.5 py-1 rounded text-xs text-foreground border border-border/50">
-                JNTU College
-              </span>
+              {[
+                "Sundar Nagar Colony",
+                "Kondapur",
+                "Red Fox Hotel",
+                "Yashoda Hospitals",
+                "JNTU College",
+              ].map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-secondary/80 px-2.5 py-1 rounded-md text-xs font-medium text-foreground border border-border/50 whitespace-nowrap"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
 
             {/* Overview */}
-            <div className="border border-border/60 rounded-sm bg-card p-6 shadow-sm">
-              <h2 className="text-lg font-bold border-b-2 border-rose-500 pb-2 inline-block mb-4">
+            <div className="border border-border/60 rounded-xl bg-card p-5 sm:p-6 shadow-sm">
+              <h2 className="text-base sm:text-lg font-bold border-b-2 border-rose-500 pb-2 inline-block mb-4">
                 Overview
               </h2>
-              <p className="whitespace-pre-line text-sm text-foreground/80 leading-relaxed">
+              <p className="whitespace-pre-line text-xs sm:text-sm text-foreground/80 leading-relaxed break-words">
                 {property.description}
               </p>
             </div>
@@ -602,67 +603,97 @@ export function PropertyDetailPage() {
 
           {/* RIGHT COLUMN: Details Grid & CTAs */}
           <div className="w-full lg:w-1/3 flex flex-col gap-6">
-            <div className="border border-border/60 rounded-sm bg-card shadow-sm">
+            <div className="border border-border/60 rounded-xl bg-card shadow-sm overflow-hidden">
               <div className="grid grid-cols-2">
-                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
-                  <BedDouble className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{property.bedrooms} BHK</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Room Type</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-r border-border/60 min-w-0">
+                  <BedDouble className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      {property.bedrooms ? `${property.bedrooms} BHK` : "1 BHK"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Room Type
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-b border-border/60">
-                  <Building2 className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{property.property_type}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Property Type</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-border/60 min-w-0">
+                  <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground capitalize truncate">
+                      {property.property_type || "Apartment"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Property Type
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
-                  <User className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Any</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Preferred Tenant</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-r border-border/60 min-w-0">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">Any</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Preferred Tenant
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-b border-border/60">
-                  <CheckCircle2 className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Immediately</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Possession</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-border/60 min-w-0">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      Immediately
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Possession
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-b border-r border-border/60">
-                  <Car className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Available</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Parking</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-r border-border/60 min-w-0">
+                  <Car className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      {property.parking_covered || property.parking_open
+                        ? "Available"
+                        : "Available"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Parking
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-b border-border/60">
-                  <Calendar className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">1-3 Years</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Age of Building</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-b border-border/60 min-w-0">
+                  <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      {property.property_age ? `${property.property_age} Years` : "1-3 Years"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Age of Building
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-r border-border/60">
-                  <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Yes</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Balcony</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-r border-border/60 min-w-0">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      {property.balconies && property.balconies > 0 ? "Yes" : "Yes"}
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Balcony
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 border-border/60">
-                  <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-foreground">Today</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">Posted On</p>
+                <div className="flex items-start gap-2.5 sm:gap-3 p-3.5 sm:p-4 border-border/60 min-w-0">
+                  <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-bold text-foreground truncate">Today</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                      Posted On
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 flex gap-3 border-t border-border/60 border-dashed bg-secondary/5">
+              <div className="p-3.5 sm:p-4 flex gap-2.5 sm:gap-3 border-t border-border/60 border-dashed bg-secondary/5">
                 <button
                   onClick={() => {
                     if (!user) {
@@ -673,7 +704,7 @@ export function PropertyDetailPage() {
                     if (hasAccess) setEnquiryOpen(true);
                     else setCustomerPlansOpen(true);
                   }}
-                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
+                  className="flex-1 min-w-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 sm:py-3 text-xs sm:text-sm rounded-lg shadow-sm transition active:scale-95 truncate"
                 >
                   Contact Owner
                 </button>
@@ -687,13 +718,13 @@ export function PropertyDetailPage() {
                     if (hasAccess) setScheduleOpen(true);
                     else setCustomerPlansOpen(true);
                   }}
-                  className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 text-sm rounded shadow transition"
+                  className="flex-1 min-w-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 sm:py-3 text-xs sm:text-sm rounded-lg shadow-sm transition active:scale-95 truncate"
                 >
                   Schedule Visit
                 </button>
               </div>
 
-              <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-t border-border/60">
+              <div className="p-3.5 sm:p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-t border-border/60">
                 <div className="flex items-start gap-2 mb-3">
                   <Shield className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
                   <p className="text-xs font-medium text-emerald-900 dark:text-emerald-100 leading-tight">
@@ -703,13 +734,13 @@ export function PropertyDetailPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setReportOpen(true)}
-                    className="flex-1 text-xs font-semibold bg-background border border-border px-3 py-2 rounded hover:bg-secondary transition"
+                    className="flex-1 min-w-0 text-xs font-semibold bg-background border border-border px-2.5 py-1.5 sm:py-2 rounded-lg hover:bg-secondary transition truncate"
                   >
                     Listed by Broker
                   </button>
                   <button
                     onClick={() => setReportOpen(true)}
-                    className="flex-1 text-xs font-semibold bg-background border border-border px-3 py-2 rounded hover:bg-secondary transition"
+                    className="flex-1 min-w-0 text-xs font-semibold bg-background border border-border px-2.5 py-1.5 sm:py-2 rounded-lg hover:bg-secondary transition truncate"
                   >
                     Rented Out
                   </button>
