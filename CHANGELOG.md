@@ -1,3 +1,8 @@
+## v0.49.0 — 2026-08-23
+
+### Features
+- feat(admin): polish MFA copy secret button and authenticator helper UX (81fd352)
+
 ## v0.48.0 — 2026-08-23
 
 ### Features
