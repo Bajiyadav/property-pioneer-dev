@@ -1,3 +1,9 @@
+## v0.40.2 — 2026-08-23
+
+### Fixes
+- fix(ui): ensure exact box sizing and text containment on property detail page (30a2577)
+- fix(ui): ensure exact box sizing and text containment on property detail page (b3eecef)
+
 ## v0.40.1 — 2026-08-23
 
 ### Fixes
