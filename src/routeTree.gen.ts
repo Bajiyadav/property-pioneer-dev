@@ -63,8 +63,11 @@ import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
 import { Route as CommercialCityIndexRouteImport } from './routes/commercial.$city.index'
 import { Route as CommercialCityLocalityRouteImport } from './routes/commercial.$city.$locality'
+import { Route as ListPropertyPromoteIdRouteImport } from './routes/list-property.promote.$id'
+import { Route as ListPropertySubmittedIdRouteImport } from './routes/list-property.submitted.$id'
 import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
+import { Route as ListPropertyPromoteIdCheckoutRouteImport } from './routes/list-property.promote.$id.checkout'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
 import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
 import { Route as ApiPublicPropertiesIdSaveRouteImport } from './routes/api/public/properties.$id.save'
@@ -351,6 +354,16 @@ const CommercialCityLocalityRoute = CommercialCityLocalityRouteImport.update({
   path: '/commercial/$city/$locality',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListPropertyPromoteIdRoute = ListPropertyPromoteIdRouteImport.update({
+  id: '/promote/$id',
+  path: '/promote/$id',
+  getParentRoute: () => ListPropertyRoute,
+} as any)
+const ListPropertySubmittedIdRoute = ListPropertySubmittedIdRouteImport.update({
+  id: '/submitted/$id',
+  path: '/submitted/$id',
+  getParentRoute: () => ListPropertyRoute,
+} as any)
 const RentCityIndexRoute = RentCityIndexRouteImport.update({
   id: '/rent/$city/',
   path: '/rent/$city/',
@@ -361,6 +374,12 @@ const RentCityLocalityRoute = RentCityLocalityRouteImport.update({
   path: '/rent/$city/$locality',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListPropertyPromoteIdCheckoutRoute =
+  ListPropertyPromoteIdCheckoutRouteImport.update({
+    id: '/checkout',
+    path: '/checkout',
+    getParentRoute: () => ListPropertyPromoteIdRoute,
+  } as any)
 const ApiPublicPropertiesIdContactRoute =
   ApiPublicPropertiesIdContactRouteImport.update({
     id: '/api/public/properties/$id/contact',
@@ -442,12 +461,15 @@ export interface FileRoutesByFullPath {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
+  '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
+  '/list-property/submitted/$id': typeof ListPropertySubmittedIdRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -500,12 +522,15 @@ export interface FileRoutesByTo {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
+  '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
+  '/list-property/submitted/$id': typeof ListPropertySubmittedIdRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/buy/$city': typeof BuyCityIndexRoute
   '/commercial/$city': typeof CommercialCityIndexRoute
   '/rent/$city': typeof RentCityIndexRoute
+  '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -564,12 +589,15 @@ export interface FileRoutesById {
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
+  '/list-property/promote/$id': typeof ListPropertyPromoteIdRouteWithChildren
+  '/list-property/submitted/$id': typeof ListPropertySubmittedIdRoute
   '/rent/$city/$locality': typeof RentCityLocalityRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -628,12 +656,15 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
+    | '/list-property/promote/$id'
+    | '/list-property/submitted/$id'
     | '/rent/$city/$locality'
     | '/admin/'
     | '/dashboard/'
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -686,12 +717,15 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
+    | '/list-property/promote/$id'
+    | '/list-property/submitted/$id'
     | '/rent/$city/$locality'
     | '/admin'
     | '/dashboard'
     | '/buy/$city'
     | '/commercial/$city'
     | '/rent/$city'
+    | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -749,12 +783,15 @@ export interface FileRouteTypes {
     | '/api/public/enquiries'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
+    | '/list-property/promote/$id'
+    | '/list-property/submitted/$id'
     | '/rent/$city/$locality'
     | '/_authenticated/admin/'
     | '/_authenticated/dashboard/'
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -1188,6 +1225,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommercialCityLocalityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/list-property/promote/$id': {
+      id: '/list-property/promote/$id'
+      path: '/promote/$id'
+      fullPath: '/list-property/promote/$id'
+      preLoaderRoute: typeof ListPropertyPromoteIdRouteImport
+      parentRoute: typeof ListPropertyRoute
+    }
+    '/list-property/submitted/$id': {
+      id: '/list-property/submitted/$id'
+      path: '/submitted/$id'
+      fullPath: '/list-property/submitted/$id'
+      preLoaderRoute: typeof ListPropertySubmittedIdRouteImport
+      parentRoute: typeof ListPropertyRoute
+    }
     '/rent/$city/': {
       id: '/rent/$city/'
       path: '/rent/$city'
@@ -1201,6 +1252,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/rent/$city/$locality'
       preLoaderRoute: typeof RentCityLocalityRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/list-property/promote/$id/checkout': {
+      id: '/list-property/promote/$id/checkout'
+      path: '/checkout'
+      fullPath: '/list-property/promote/$id/checkout'
+      preLoaderRoute: typeof ListPropertyPromoteIdCheckoutRouteImport
+      parentRoute: typeof ListPropertyPromoteIdRoute
     }
     '/api/public/properties/$id/contact': {
       id: '/api/public/properties/$id/contact'
@@ -1302,14 +1360,31 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ListPropertyPromoteIdRouteChildren {
+  ListPropertyPromoteIdCheckoutRoute: typeof ListPropertyPromoteIdCheckoutRoute
+}
+
+const ListPropertyPromoteIdRouteChildren: ListPropertyPromoteIdRouteChildren = {
+  ListPropertyPromoteIdCheckoutRoute: ListPropertyPromoteIdCheckoutRoute,
+}
+
+const ListPropertyPromoteIdRouteWithChildren =
+  ListPropertyPromoteIdRoute._addFileChildren(
+    ListPropertyPromoteIdRouteChildren,
+  )
+
 interface ListPropertyRouteChildren {
   ListPropertyWizardRoute: typeof ListPropertyWizardRoute
   ListPropertyIndexRoute: typeof ListPropertyIndexRoute
+  ListPropertyPromoteIdRoute: typeof ListPropertyPromoteIdRouteWithChildren
+  ListPropertySubmittedIdRoute: typeof ListPropertySubmittedIdRoute
 }
 
 const ListPropertyRouteChildren: ListPropertyRouteChildren = {
   ListPropertyWizardRoute: ListPropertyWizardRoute,
   ListPropertyIndexRoute: ListPropertyIndexRoute,
+  ListPropertyPromoteIdRoute: ListPropertyPromoteIdRouteWithChildren,
+  ListPropertySubmittedIdRoute: ListPropertySubmittedIdRoute,
 }
 
 const ListPropertyRouteWithChildren = ListPropertyRoute._addFileChildren(

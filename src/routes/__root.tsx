@@ -238,23 +238,19 @@ function SiteHeader() {
             </Link>
 
             <Link
-              to="/buy"
+              to="/properties"
+              search={{ listing: "sale" }}
               className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Buy
-              <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
-                New
-              </span>
             </Link>
 
             <Link
-              to="/commercial"
+              to="/properties"
+              search={{ type: "commercial" }}
               className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Commercial
-              <span className="rounded-full bg-emerald-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-emerald-700 dark:text-emerald-400">
-                New
-              </span>
             </Link>
 
             <Link
@@ -262,9 +258,6 @@ function SiteHeader() {
               className="relative inline-flex items-center gap-1 rounded-full px-2 xl:px-3.5 py-1.5 text-foreground/80 transition-all hover:bg-background hover:text-foreground hover:shadow-xs active:scale-95"
             >
               Home Loans
-              <span className="rounded-full bg-blue-600/15 px-1.5 py-0.2 text-[9px] font-extrabold uppercase text-blue-700 dark:text-blue-400">
-                New
-              </span>
             </Link>
 
             <Link
@@ -376,12 +369,20 @@ function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/buy" className="hover:text-foreground transition">
+                <Link
+                  to="/properties"
+                  search={{ listing: "sale" }}
+                  className="hover:text-foreground transition"
+                >
                   Buy Homes
                 </Link>
               </li>
               <li>
-                <Link to="/commercial" className="hover:text-foreground transition">
+                <Link
+                  to="/properties"
+                  search={{ type: "commercial" }}
+                  className="hover:text-foreground transition"
+                >
                   Commercial Spaces
                 </Link>
               </li>

@@ -30,6 +30,7 @@ import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
 import { OwnerSmartAuthModal } from "@/shared/components/auth/OwnerSmartAuthModal";
 import { resolveInitialStep } from "./resolveInitialStep";
+import { validateStep } from "./stepValidation";
 
 interface ListingWizardProps {
   initialData?: {
@@ -241,6 +242,15 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
       }
     }
 
+    // Supplementary gate. The per-step checks above stay authoritative for what
+    // they cover (step 2 also opens the sign-in modal); this adds the steps that
+    // had no gate at all and the cross-field rules a single field cannot catch.
+    const issues = validateStep(currentStep, formData);
+    if (issues.length > 0) {
+      toast.error(issues[0].message);
+      return;
+    }
+
     if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -279,7 +289,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
 
     setIsSaving(true);
     try {
-      await create({ data: built.payload });
+      const created = await create({ data: built.payload });
 
       clearDraft();
 
@@ -311,10 +321,23 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         area_sqft: built.payload.area_sqft,
         is_approved: false,
         is_featured: false,
-        images: built.payload.images.length > 0 ? built.payload.images : ["/placeholder.svg"],
+        // No placeholder substitution: a listing with no photos must LOOK like a
+        // listing with no photos, here and everywhere else.
+        images: built.payload.images,
       });
 
-      navigate({ to: "/dashboard/owner" });
+      // Step 8. A draft has nothing to report on, so it still returns to the
+      // dashboard; a submission goes to its own status screen, which reads the
+      // real row rather than assuming the write implies "under review".
+      const createdId =
+        created && typeof created === "object" && "id" in created
+          ? String((created as { id: unknown }).id)
+          : null;
+      if (mode === "submit" && createdId) {
+        navigate({ to: "/list-property/submitted/$id", params: { id: createdId } });
+      } else {
+        navigate({ to: "/dashboard/owner" });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save listing";
       toast.error(msg);
