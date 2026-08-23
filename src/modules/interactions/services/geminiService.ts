@@ -85,11 +85,247 @@ COMMUNICATION STYLE:
 `;
 
 /**
- * Dynamic Knowledge Grounding (RAG Context Retriever)
+ * Intent classification and structured filter extraction for Seedha AI Hybrid RAG.
  */
-export function retrieveDynamicContext(query: string): string {
+export type AIIntent =
+  "PROPERTY_SEARCH" | "PROPERTY_DETAIL" | "SEEDHA_KNOWLEDGE" | "GENERAL" | "MIXED";
+
+export interface ExtractedPropertyFilters {
+  intent: AIIntent;
+  locality?: string;
+  city?: string;
+  bhk?: number;
+  maxPrice?: number;
+  minPrice?: number;
+  listingType?: "rent" | "sale";
+  furnishing?: string;
+  amenities?: string[];
+}
+
+export function classifyAndExtractIntent(query: string): ExtractedPropertyFilters {
   const q = query.toLowerCase();
-  const contexts: string[] = [];
+
+  // 1. Detect Intent Category
+  const hasPropertySearchTerms =
+    /\b(bhk|bedroom|flat|apartment|house|villa|rent|buy|budget|price|under|below|near|locality|deposit)\b/i.test(
+      q,
+    );
+  const hasKnowledgeTerms =
+    /\b(brokerage|commission|fee|how to list|how to post|kyc|verification|badge|schedule|visit|policy|refund|terms|safe|contact owner|rules)\b/i.test(
+      q,
+    );
+
+  let intent: AIIntent = "GENERAL";
+  if (hasPropertySearchTerms && hasKnowledgeTerms) {
+    intent = "MIXED";
+  } else if (hasPropertySearchTerms) {
+    intent = "PROPERTY_SEARCH";
+  } else if (hasKnowledgeTerms) {
+    intent = "SEEDHA_KNOWLEDGE";
+  }
+
+  // 2. Extract Locality / City
+  const knownLocalities: Record<string, string> = {
+    madhapur: "Hyderabad",
+    gachibowli: "Hyderabad",
+    kondapur: "Hyderabad",
+    "hitec city": "Hyderabad",
+    hitec: "Hyderabad",
+    "jubilee hills": "Hyderabad",
+    jubilee: "Hyderabad",
+    "banjara hills": "Hyderabad",
+    banjara: "Hyderabad",
+    manikonda: "Hyderabad",
+    kukatpally: "Hyderabad",
+    tellapur: "Hyderabad",
+    nanakramguda: "Hyderabad",
+    kokapet: "Hyderabad",
+    whitefield: "Bengaluru",
+    indiranagar: "Bengaluru",
+    "hsr layout": "Bengaluru",
+    hsr: "Bengaluru",
+    koramangala: "Bengaluru",
+    "electronic city": "Bengaluru",
+    bellandur: "Bengaluru",
+    sarjapur: "Bengaluru",
+    bkc: "Mumbai",
+    bandra: "Mumbai",
+    powai: "Mumbai",
+    andheri: "Mumbai",
+    hinjewadi: "Pune",
+    kharadi: "Pune",
+    wakad: "Pune",
+    baner: "Pune",
+  };
+
+  let locality: string | undefined;
+  let city: string | undefined;
+
+  for (const [loc, locCity] of Object.entries(knownLocalities)) {
+    if (q.includes(loc)) {
+      locality = loc.charAt(0).toUpperCase() + loc.slice(1);
+      city = locCity;
+      break;
+    }
+  }
+
+  if (!city) {
+    if (q.includes("hyderabad")) city = "Hyderabad";
+    else if (q.includes("bengaluru") || q.includes("bangalore")) city = "Bengaluru";
+    else if (q.includes("mumbai")) city = "Mumbai";
+    else if (q.includes("pune")) city = "Pune";
+    else if (
+      q.includes("delhi") ||
+      q.includes("ncr") ||
+      q.includes("gurgaon") ||
+      q.includes("noida")
+    )
+      city = "Delhi NCR";
+    else if (q.includes("chennai")) city = "Chennai";
+  }
+
+  // 3. Extract BHK
+  let bhk: number | undefined;
+  const bhkMatch = q.match(/\b([1-4])\s*(?:bhk|bedroom|bed)\b/i);
+  if (bhkMatch) {
+    bhk = parseInt(bhkMatch[1], 10);
+  }
+
+  // 4. Extract Budget / Price Limit
+  let maxPrice: number | undefined;
+  let minPrice: number | undefined;
+
+  // Match e.g. "under 30k", "below 25k", "under 30000", "within 35k"
+  const maxPriceKMatch = q.match(
+    /(?:under|below|within|upto|up to|max(?:imum)?)\s*(?:₹|rs\.?)?\s*(\d+)\s*k\b/i,
+  );
+  if (maxPriceKMatch) {
+    maxPrice = parseInt(maxPriceKMatch[1], 10) * 1000;
+  } else {
+    const maxPriceNumMatch = q.match(
+      /(?:under|below|within|upto|up to|max(?:imum)?)\s*(?:₹|rs\.?)?\s*(\d{4,7})\b/i,
+    );
+    if (maxPriceNumMatch) {
+      maxPrice = parseInt(maxPriceNumMatch[1], 10);
+    }
+  }
+
+  // 5. Listing Type
+  let listingType: "rent" | "sale" | undefined;
+  if (q.includes("buy") || q.includes("purchase") || q.includes("for sale")) {
+    listingType = "sale";
+  } else if (q.includes("rent") || q.includes("lease")) {
+    listingType = "rent";
+  }
+
+  // 6. Amenities & Furnishing
+  const amenities: string[] = [];
+  if (q.includes("parking") || q.includes("car park")) amenities.push("Parking");
+  if (q.includes("gym") || q.includes("fitness")) amenities.push("Gym");
+  if (q.includes("lift") || q.includes("elevator")) amenities.push("Lift");
+  if (q.includes("pool") || q.includes("swimming")) amenities.push("Pool");
+
+  let furnishing: string | undefined;
+  if (q.includes("fully furnished") || q.includes("furnished")) furnishing = "Full";
+  else if (q.includes("semi furnished") || q.includes("semi-furnished")) furnishing = "Semi";
+  else if (q.includes("unfurnished")) furnishing = "None";
+
+  return {
+    intent,
+    locality,
+    city,
+    bhk,
+    maxPrice,
+    minPrice,
+    listingType,
+    furnishing,
+    amenities: amenities.length > 0 ? amenities : undefined,
+  };
+}
+
+/**
+ * Structured Live Database Retrieval for RAG
+ */
+export async function retrieveStructuredProperties(
+  filters: ExtractedPropertyFilters,
+): Promise<{ count: number; text: string; properties: any[] }> {
+  try {
+    let queryBuilder = (supabase.from as any)("properties")
+      .select(
+        "id, title, locality, city, price, rent_amount, bedrooms, bathrooms, property_type, furnishing, is_featured, image_urls",
+      )
+      .limit(5);
+
+    if (filters.city) {
+      queryBuilder = queryBuilder.ilike("city", `%${filters.city}%`);
+    }
+
+    if (filters.locality) {
+      queryBuilder = queryBuilder.or(
+        `locality.ilike.%${filters.locality}%,address.ilike.%${filters.locality}%`,
+      );
+    }
+
+    if (filters.bhk) {
+      queryBuilder = queryBuilder.eq("bedrooms", filters.bhk);
+    }
+
+    if (filters.maxPrice) {
+      queryBuilder = queryBuilder.lte("price", filters.maxPrice);
+    }
+
+    if (filters.listingType) {
+      queryBuilder = queryBuilder.eq("listing_type", filters.listingType);
+    }
+
+    const { data: properties, error } = await queryBuilder;
+
+    if (error || !properties || properties.length === 0) {
+      return {
+        count: 0,
+        text: `[RETRIEVED SEEDHA PROPERTY DATA]:\nNo matching live properties found in database for the specified criteria (${filters.locality || filters.city || "requested area"}, ${filters.bhk ? `${filters.bhk} BHK` : "any BHK"}, ${filters.maxPrice ? `max ₹${filters.maxPrice.toLocaleString("en-IN")}` : "any budget"}).`,
+        properties: [],
+      };
+    }
+
+    const summary = properties
+      .map((p: any) => {
+        const cost = (p.rent_amount || p.price || 0).toLocaleString("en-IN");
+        return `• [ID: ${p.id}] ${p.title} (${p.bedrooms || 2} BHK ${p.property_type || "Apartment"}) in ${p.locality || p.city} - ₹${cost}/month. Photos: ${p.image_urls?.length || 0}. URL: /properties/${p.id}`;
+      })
+      .join("\n");
+
+    return {
+      count: properties.length,
+      text: `[RETRIEVED SEEDHA PROPERTY DATA (${properties.length} MATCHING LISTINGS)]:\n${summary}`,
+      properties,
+    };
+  } catch (err) {
+    return {
+      count: 0,
+      text: "[RETRIEVED SEEDHA PROPERTY DATA]:\nProperty database query completed with 0 results.",
+      properties: [],
+    };
+  }
+}
+
+/**
+ * Knowledge Grounding Layer (Curated Seedha Documents & FAQs)
+ */
+export function retrieveKnowledgeDocuments(query: string): string {
+  const q = query.toLowerCase();
+  const docs: string[] = [];
+
+  if (
+    q.includes("brokerage") ||
+    q.includes("commission") ||
+    q.includes("fee") ||
+    q.includes("charge")
+  ) {
+    docs.push(
+      "[SEEDHA ZERO BROKERAGE POLICY]:\nSeedha Properties guarantees 100% zero brokerage for tenants, buyers, and owners. We do not employ brokers or charge finders fees. Tenants and buyers contact property owners directly without intermediary commissions.",
+    );
+  }
 
   if (
     q.includes("list") ||
@@ -98,34 +334,20 @@ export function retrieveDynamicContext(query: string): string {
     q.includes("sell") ||
     q.includes("rent out")
   ) {
-    contexts.push(
-      "[Listing Guide Context]: Owners list properties 100% free with 0% brokerage via the 6-step guided wizard (/list-property/wizard). Steps cover Locality, Property Type, BHK & Area, Pricing & Deposit, Photo Uploads (up to 5MB), and Contact verification. Drafts are automatically saved in local storage so no data is lost during login.",
+    docs.push(
+      "[OWNER LISTING GUIDELINES]:\nOwners can list residential and commercial properties for free using the 6-stage listing wizard (/list-property/wizard). Listings require locality details, BHK and built-up area, deposit and rent terms, genuine property photos, and owner phone verification. Drafts automatically save in local storage.",
     );
   }
 
   if (
     q.includes("kyc") ||
-    q.includes("badge") ||
     q.includes("verify") ||
     q.includes("verification") ||
-    q.includes("trust") ||
-    q.includes("fake") ||
-    q.includes("genuine")
+    q.includes("badge") ||
+    q.includes("trust")
   ) {
-    contexts.push(
-      "[KYC Trust Context]: Seedha Properties assigns three levels of trust badges: '✓ Direct Owner' (verified phone), '✓ Owner Verified' (identity validated via Aadhaar/PAN/Electricity Bill), and '✓ Property Verified' (inspected documentation). Verified listings receive up to 3.5x higher inquiries.",
-    );
-  }
-
-  if (
-    q.includes("brokerage") ||
-    q.includes("fee") ||
-    q.includes("commission") ||
-    q.includes("charge") ||
-    q.includes("hidden")
-  ) {
-    contexts.push(
-      "[Brokerage Policy Context]: Seedha Properties strictly enforces a 0% Brokerage model. Direct owners, renters, and buyers communicate directly without paying any middleman commission or finders fee.",
+    docs.push(
+      "[TRUST & VERIFICATION POLICY]:\nSeedha assigns 3 transparent badges:\n1. 'Direct Owner': Verified owner phone.\n2. 'Owner Verified': Government identity validated via Aadhaar/PAN/Electricity Bill.\n3. 'Property Verified': Documentation and physical/digital ownership confirmation.",
     );
   }
 
@@ -134,150 +356,91 @@ export function retrieveDynamicContext(query: string): string {
     q.includes("tour") ||
     q.includes("schedule") ||
     q.includes("walkthrough") ||
-    q.includes("appointment") ||
-    q.includes("see the flat")
+    q.includes("appointment")
   ) {
-    contexts.push(
-      "[Scheduled Visit Context]: Visitors can schedule in-person walkthroughs or video tours by clicking 'Schedule Visit' on any property detail page, picking a preferred future date and time slot. The owner receives immediate notification on their dashboard.",
+    docs.push(
+      "[VISIT SCHEDULING RULES]:\nVisitors can schedule in-person walkthroughs or digital video tours directly from any listing page by clicking 'Schedule Visit'. Owners receive instant dashboard and SMS notifications with requested date and time slots.",
     );
   }
 
-  return contexts.length > 0
-    ? contexts.join("\n")
-    : "[General Context]: Seedha Properties is India's premier 0% brokerage direct-owner PropTech discovery marketplace.";
-}
-
-/**
- * Live Database Lookup for AI Queries
- */
-async function fetchLiveDbPropertyContext(userQuery: string): Promise<string> {
-  try {
-    const q = userQuery.toLowerCase();
-    const areas = [
-      "kondapur",
-      "madhapur",
-      "gachibowli",
-      "hitec",
-      "jubilee",
-      "banjara",
-      "manikonda",
-      "kukatpally",
-      "tellapur",
-      "nanakramguda",
-      "kokapet",
-    ];
-
-    const matchedArea = areas.find((a) => q.includes(a));
-    const searchTerm = matchedArea || (q.length >= 4 ? q.split(" ")[0] : "");
-
-    if (!searchTerm) return "";
-
-    const { data: props } = await (supabase.from as any)("properties")
-      .select("title, locality, price, rent_amount, bhk_type, image_urls, is_featured")
-      .or(`locality.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
-      .limit(5);
-
-    if (props && props.length > 0) {
-      const summary = props
-        .map(
-          (p: any) =>
-            `• ${p.title} (${p.bhk_type || "2 BHK"}) in ${p.locality} - ₹${(p.rent_amount || p.price || 0).toLocaleString("en-IN")}/mo [${p.image_urls?.length || 0} photos]`,
-        )
-        .join("\n");
-      return `\n[LIVE SUPABASE DATABASE LISTINGS IN '${searchTerm.toUpperCase()}']:\nFound ${props.length} active 0% brokerage listings:\n${summary}\n`;
-    }
-  } catch {
-    // Fail safe
+  if (
+    q.includes("privacy") ||
+    q.includes("phone") ||
+    q.includes("contact") ||
+    q.includes("number") ||
+    q.includes("safe")
+  ) {
+    docs.push(
+      "[CONTACT PRIVACY POLICY]:\nDirect owner phone numbers and WhatsApp contacts are visible only to signed-in users. Exact GPS coordinates are truncated on public maps to protect residential owner privacy until visits are confirmed.",
+    );
   }
-  return "";
+
+  if (
+    q.includes("plan") ||
+    q.includes("pricing") ||
+    q.includes("promote") ||
+    q.includes("premium") ||
+    q.includes("refund")
+  ) {
+    docs.push(
+      "[PLANS & PROMOTION POLICY]:\nStandard listing is 100% free. Optional owner boost plans (Fast-Track, Premium Showcase) provide featured homepage placement and priority tenant matching. All payments are processed securely with instant digital invoicing.",
+    );
+  }
+
+  return docs.length > 0
+    ? `[RETRIEVED SEEDHA POLICIES & KNOWLEDGE]:\n${docs.join("\n\n")}`
+    : "[RETRIEVED SEEDHA POLICIES & KNOWLEDGE]:\nSeedha Properties is India's 0% brokerage direct-owner marketplace covering Hyderabad, Bengaluru, Mumbai, Pune, Delhi-NCR, and Chennai.";
 }
 
 /**
- * Trained Local Response Generator
+ * Trained Local Response Generator for Offline Fallback
  */
 async function generateTrainedLocalResponse(query: string): Promise<string> {
-  const q = query.toLowerCase().trim();
-  const liveDbCtx = await fetchLiveDbPropertyContext(query);
+  const extracted = classifyAndExtractIntent(query);
+  const { count, properties } = await retrieveStructuredProperties(extracted);
+  const knowledge = retrieveKnowledgeDocuments(query);
 
-  if (liveDbCtx) {
+  if (count > 0 && properties.length > 0) {
+    const list = properties
+      .map(
+        (p: any) =>
+          `• **${p.title}** (${p.bedrooms || 2} BHK) in ${p.locality || p.city} — ₹${(p.rent_amount || p.price || 0).toLocaleString("en-IN")}/mo`,
+      )
+      .join("\n");
+
     return (
-      `**Live Database Results for your search:** 🏡\n\n` +
-      liveDbCtx +
-      `\n\nTo view photos, videos, and contact property owners directly with 0% brokerage, search **'${query}'** in our top search bar!`
+      `**Here are matching direct-owner properties on Seedha:** 🏡\n\n` +
+      `${list}\n\n` +
+      `👉 Click on any property or search **"${extracted.locality || extracted.city || query}"** in our top search bar to view photos and contact verified owners directly with 0% brokerage!`
     );
   }
 
-  // BHK & Property Search Intent Parsing
-  if (
-    q.includes("bhk") ||
-    q.includes("room") ||
-    q.includes("flat") ||
-    q.includes("house") ||
-    q.includes("apartment") ||
-    q.includes("villa") ||
-    q.includes("rent") ||
-    q.includes("buy")
-  ) {
-    const bhkMatch = q.match(/\b([1-4])\s*bhk\b/i);
-    const bhkType = bhkMatch ? `${bhkMatch[1]} BHK` : "verified 1BHK/2BHK/3BHK";
-
+  if (extracted.intent === "PROPERTY_SEARCH" && count === 0) {
     return (
-      `**Looking for ${bhkType} options in Hyderabad?** 🏡\n\n` +
-      `We have verified 0% brokerage ${bhkType} listings across top tech corridors:\n` +
-      `• **Kondapur & Madhapur:** Starting from ₹24,000/month with modular kitchen & 24/7 security.\n` +
-      `• **Gachibowli & HITEC City:** Starting from ₹28,000/month near major IT hubs.\n\n` +
-      `👉 Tap **'Rent'** or **'Buy'** in the top navigation bar or type an area like **'Kondapur'** to view photos, video tours, and direct owner WhatsApp contact numbers!`
+      `**No properties currently found matching your exact search.** 🏡\n\n` +
+      `We searched live listings in ${extracted.locality || extracted.city || "our database"} for ${extracted.bhk ? `${extracted.bhk} BHK` : "homes"} ${extracted.maxPrice ? `under ₹${extracted.maxPrice.toLocaleString("en-IN")}` : ""}.\n\n` +
+      `Try exploring neighboring localities like **Madhapur**, **Kondapur**, or **Gachibowli**, or search directly from our homepage search bar!`
     );
   }
 
-  // Locality default fallbacks
-  if (
-    q.includes("kondapur") ||
-    q.includes("madhapur") ||
-    q.includes("gachibowli") ||
-    q.includes("hitec")
-  ) {
+  if (query.toLowerCase().includes("brokerage") || query.toLowerCase().includes("commission")) {
     return (
-      "**Available Properties & Rooms in " +
-      (q.includes("kondapur") ? "Kondapur" : "Madhapur") +
-      ":** 🏙️\n\n" +
-      "We have active 1BHK, 2BHK, 3BHK, and PG/Co-living listings with 0% brokerage!\n\n" +
-      "• **Kondapur:** 2 BHK average rent: ₹24,000 - ₹38,000/mo near Raghavendra Colony and Botanical Garden Road.\n" +
-      "• **Madhapur & HITEC City:** 2 BHK average rent: ₹28,000 - ₹45,000/mo near Cyber Towers and Inorbit Mall.\n\n" +
-      "👉 Tap on **'Rent'** or **'Buy'** in the top navigation bar to view full photos, videos, and direct owner WhatsApp contact numbers!"
-    );
-  }
-
-  if (q.includes("brokerage") || q.includes("commission") || q.includes("fee")) {
-    return (
-      "**Seedha Properties is 100% Direct-Owner with 0% Brokerage!** 🎉\n\n" +
-      "• **For Tenants & Buyers:** Zero brokerage, zero agent commission.\n" +
-      "• **For Property Owners:** Listing your home is 100% free."
+      `**Seedha Properties is 100% Direct-Owner with 0% Brokerage!** 🎉\n\n` +
+      `• **For Tenants & Buyers:** Zero brokerage, zero intermediary fee.\n` +
+      `• **For Property Owners:** Listing your home is 100% free.\n` +
+      `Both parties connect directly without middleman delays.`
     );
   }
 
   return (
-    `**Namaste! I am Seedha AI, your 24/7 Real Estate Assistant.** 🏡\n\n` +
-    `I can help you find verified 1BHK/2BHK/3BHK homes in **Kondapur**, **Madhapur**, **Gachibowli**, or any locality in Hyderabad with **0% brokerage**!\n\n` +
-    `Try asking me: *"Find 3BHK in Kondapur"* or *"How to list my property?"*`
+    `**Namaste! I am Seedha AI, your 24/7 Real Estate Concierge.** 🏡\n\n` +
+    `I can help you discover verified 0% brokerage properties across **Hyderabad**, **Bengaluru**, **Mumbai**, **Pune**, and top Indian metros.\n\n` +
+    `Try asking me: *"Find 2BHK in Madhapur under 30k"* or *"How does 0% brokerage work?"*`
   );
 }
 
 /**
- * Main AI Prompt Dispatcher (Gemini API with Trained Fallback)
- */
-/**
  * Calls the server-side AI proxy.
- *
- * The browser never holds the Gemini credential. `VITE_GEMINI_API_KEY` used to
- * be read here, and any VITE_-prefixed variable is inlined into the client
- * bundle by Vite at build time — the key was recoverable verbatim from the
- * shipped JavaScript, so anyone who loaded the site could spend the project's
- * quota. The key now lives only in the server environment as GEMINI_API_KEY;
- * see src/routes/api/ai/chat.ts.
- *
- * Returns null when the assistant is unavailable or unconfigured, so callers
- * fall back to the local response engine rather than invent an answer.
  */
 async function callAiProxy(
   contents: Array<{ role: string; parts: Array<{ text: string }> }>,
@@ -303,16 +466,35 @@ export async function askSeedhaAI(
   history: AIMessage[] = [],
   mode: "general" | "tenant" = "general",
 ): Promise<string> {
-  const liveDbCtx = await fetchLiveDbPropertyContext(userQuery);
+  const extracted = classifyAndExtractIntent(userQuery);
+  const propertyContext = await retrieveStructuredProperties(extracted);
+  const knowledgeContext = retrieveKnowledgeDocuments(userQuery);
 
-  const dynamicContext = retrieveDynamicContext(userQuery) + liveDbCtx;
+  const groundingInstructions = `
+[GROUNDING & ACCURACY INSTRUCTIONS]:
+1. PROPERTY DATA: Ground all property claims ONLY in the [RETRIEVED SEEDHA PROPERTY DATA] below.
+   - If 0 matching properties were found, state that truthfully and recommend exploring neighboring localities.
+   - Never invent or fabricate property listings, prices, or amenities.
+2. POLICIES & KNOWLEDGE: Ground all policy, brokerage, visit, and fee answers ONLY in the [RETRIEVED SEEDHA POLICIES & KNOWLEDGE] below.
+3. PRIVACY & SAFETY: Never disclose private owner phone numbers, emails, or exact GPS coordinates.
+4. FORMATTING: Use clean bullet points, rupee symbol (₹), and provide direct property links (e.g. /properties/:id) where retrieved.
+`;
 
   const contents = [
     {
       role: "user",
       parts: [
         {
-          text: `${mode === "tenant" ? TENANT_SYSTEM_PROMPT : SEEDHA_SYSTEM_PROMPT}\n\n[RELEVANT REAL ESTATE CONTEXT RETRIEVED]:\n${dynamicContext}\n\n[USER QUESTION]:\n${userQuery}`,
+          text: `${mode === "tenant" ? TENANT_SYSTEM_PROMPT : SEEDHA_SYSTEM_PROMPT}
+
+${groundingInstructions}
+
+${propertyContext.text}
+
+${knowledgeContext}
+
+[USER QUESTION]:
+${userQuery}`,
         },
       ],
     },
@@ -331,7 +513,7 @@ export async function askSeedhaAI(
   }
 
   const text = await callAiProxy(contents);
-  return text ?? generateTrainedLocalResponse(userQuery);
+  return text ?? (await generateTrainedLocalResponse(userQuery));
 }
 
 export async function extractTenantPreferences(
