@@ -336,6 +336,24 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     }
   };
 
+  function calculateDynamicProgress(currentStep: number, data: ListingFormData): number {
+    let score = 0;
+    const total = 9;
+
+    if (data.listing_type) score += 1;
+    if (data.property_type) score += 1.5;
+    if (data.area_sqft && data.area_sqft >= 50) score += 1;
+    if (data.locality?.trim() || data.address?.trim()) score += 1.5;
+    if (data.owner_name?.trim() && data.owner_phone?.trim()) score += 1;
+    if (data.price && data.price > 0) score += 1.5;
+    if (data.images && data.images.length > 0) score += 1;
+    if (data.owner_declaration) score += 0.5;
+
+    const dataPct = Math.round((score / total) * 100);
+    const minStepPct = Math.min(100, Math.max(14, currentStep * 14));
+    return Math.min(100, Math.max(minStepPct, dataPct));
+  }
+
   return (
     <div className="min-h-screen bg-background pb-28 md:pb-16">
       {/* Top Header */}
@@ -372,6 +390,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
           currentStep={currentStep}
           totalSteps={7}
           steps={steps}
+          percentage={calculateDynamicProgress(currentStep, formData)}
           onStepClick={(id) => {
             if (id < currentStep) setCurrentStep(id);
           }}
