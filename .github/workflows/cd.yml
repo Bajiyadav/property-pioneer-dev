@@ -36,6 +36,16 @@ jobs:
     name: 2. Verify & apply database migrations
     runs-on: ubuntu-latest
     needs: gate
+    # Binds `supabase db push` to the production environment's protection rules
+    # so a green CI run can never silently become permission to migrate. Without
+    # this, the only thing standing between a passing test suite and an
+    # unreviewed production migration was the build happening to fail.
+    #
+    # NOTE: this is the workflow half of the gate. It is INERT until the
+    # `production` environment has required reviewers configured in
+    # Settings > Environments — an environment with no protection rules
+    # approves instantly.
+    environment: production
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
