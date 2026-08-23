@@ -14,6 +14,7 @@ import '../features/customer/presentation/customer_dashboard_screen.dart';
 import '../features/owner/presentation/owner_dashboard_screen.dart';
 import '../features/properties/presentation/wizard/listing_wizard_screen.dart';
 import '../features/owner/presentation/kyc_upload_screen.dart';
+import '../features/owner/presentation/promote_listing_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
@@ -123,6 +124,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/owner-dashboard/list-property',
       builder: (context, state) => const ListingWizardScreen(),
+    ),
+    GoRoute(
+      path: '/owner-dashboard/promote',
+      builder: (context, state) =>
+          PromoteListingScreen(propertyId: state.uri.queryParameters['id']),
     ),
     GoRoute(
       path: '/owner-dashboard/kyc',

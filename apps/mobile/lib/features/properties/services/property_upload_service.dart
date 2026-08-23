@@ -52,7 +52,10 @@ class PropertyUploadService {
     return uploadedUrls;
   }
 
-  Future<void> submitListing(ListingFormData data) async {
+  /// Returns the new property's id so the caller can offer promotion for it.
+  /// The insert payload is unchanged — only the created row's id is read back,
+  /// in the same request, so submission stays a single atomic operation.
+  Future<String?> submitListing(ListingFormData data) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
       throw Exception('User must be logged in to submit a listing.');
@@ -68,7 +71,9 @@ class PropertyUploadService {
       map['owner_id'] = user.id;
       map['status'] = 'unapproved'; // Initial status
 
-      await _supabase.from('properties').insert(map);
+      final inserted = await _supabase.from('properties').insert(map).select('id');
+      if (inserted.isEmpty) return null;
+      return inserted.first['id'] as String?;
     } catch (e) {
       rethrow;
     }
