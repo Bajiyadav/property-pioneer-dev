@@ -149,7 +149,7 @@ export function TabbedSearchBox({
               type="text"
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="Search upto 3 localities or landmarks"
+              placeholder="Search by locality, area, or landmark (e.g. Madhapur, HSR Layout, Bandra)"
               // A placeholder is not an accessible name — it disappears on input.
               aria-label="Search localities or landmarks"
               className="w-full bg-transparent text-sm py-2 sm:py-3 outline-none placeholder:text-muted-foreground text-foreground"
@@ -171,7 +171,7 @@ export function TabbedSearchBox({
             className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-7 sm:px-9 py-3 sm:py-0 font-bold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base active:scale-[0.99]"
           >
             <Search className="h-4 w-4" />
-            Search
+            Search Homes
           </button>
         </form>
       </div>

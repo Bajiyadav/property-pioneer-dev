@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Zap, CheckCircle2, Sparkles } from "lucide-react";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
 
@@ -39,13 +39,18 @@ export function HeroSection({
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold leading-tight text-white sm:text-5xl tracking-tight max-w-3xl [text-shadow:0_2px_12px_rgb(2_6_23_/_0.75)]">
-          Rent and buy properties direct from owners
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold mb-4 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>Direct Owner Marketplace Across India · 0% Brokerage</span>
+        </div>
+
+        <h1 className="text-3xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]">
+          Where do you want to find a home?
         </h1>
 
-        <p className="mt-4 text-base text-white sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
-          Direct owner contact, zero brokerage, and verified listings. Find your next home or
-          commercial space without paying months of rent as commission.
+        <p className="mt-4 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
+          Enter any locality, landmark, or city to instantly explore verified direct-owner rentals
+          and properties for sale. No middleman, zero commission.
         </p>
 
         {/* Tabbed Search Box */}
@@ -53,32 +58,33 @@ export function HeroSection({
           <TabbedSearchBox query={query} onQueryChange={onQueryChange} />
         </div>
 
-        {/* Trending Searches Chips */}
+        {/* Trending Searches / Localities Chips */}
         <div className="mt-6 flex flex-wrap justify-center items-center gap-2 text-xs">
           <span className="font-semibold text-white [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-            Explore Cities:
+            Popular Localities:
           </span>
           {[
-            { name: "Bengaluru", query: "Bengaluru", isCity: true },
-            { name: "Mumbai", query: "Mumbai", isCity: true },
-            { name: "Delhi NCR", query: "Delhi NCR", isCity: true },
-            { name: "Hyderabad", query: "Hyderabad", isCity: true },
-            { name: "Madhapur", query: "Madhapur", isCity: false },
-            { name: "Pune", query: "Pune", isCity: true },
-            { name: "Chennai", query: "Chennai", isCity: true },
+            { name: "Madhapur", query: "Madhapur", isCity: false, city: "Hyderabad" },
+            { name: "Gachibowli", query: "Gachibowli", isCity: false, city: "Hyderabad" },
+            { name: "Kondapur", query: "Kondapur", isCity: false, city: "Hyderabad" },
+            { name: "Jubilee Hills", query: "Jubilee Hills", isCity: false, city: "Hyderabad" },
+            { name: "Bengaluru", query: "Bengaluru", isCity: true, city: "Bengaluru" },
+            { name: "Mumbai", query: "Mumbai", isCity: true, city: "Mumbai" },
+            { name: "Pune", query: "Pune", isCity: true, city: "Pune" },
+            { name: "Chennai", query: "Chennai", isCity: true, city: "Chennai" },
           ].map((item) => (
             <Link
               key={item.name}
               to="/properties"
               search={{
                 q: item.isCity ? "" : item.query,
-                city: item.isCity ? item.query : "",
+                city: item.city || "",
                 listing: "rent",
                 minPrice: 0,
                 maxPrice: 0,
                 beds: 0,
               }}
-              className="rounded-full bg-white/15 border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:border-white/40 hover:bg-white/30 shadow-sm backdrop-blur-xs"
+              className="rounded-full bg-white/15 border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:border-white/40 hover:bg-white/30 shadow-sm backdrop-blur-xs active:scale-95"
             >
               {item.name}
             </Link>

@@ -76,14 +76,27 @@ function PropertiesPage() {
     navigate({ search: (prev) => ({ ...prev, ...patch }) as PropertySearchParams });
   };
 
+  const locationLabel = search.locality || search.q;
+  const pageTitle = locationLabel
+    ? `Properties in ${locationLabel}${search.city && search.city !== locationLabel ? `, ${search.city}` : ""}`
+    : search.city
+      ? `Properties in ${search.city}`
+      : "All Properties";
+
+  const pageSubtitle = locationLabel
+    ? `Showing verified 0% brokerage listings matching "${locationLabel}".`
+    : search.city
+      ? `Discover direct-owner homes across ${search.city}.`
+      : "Discover homes across all our active cities.";
+
   return (
     <SearchUI
       properties={all}
       isLoading={isLoading}
       search={search}
       onSearchChange={onSearchChange}
-      title="All Properties"
-      subtitle="Discover homes across all our active cities."
+      title={pageTitle}
+      subtitle={pageSubtitle}
       baseUrl="/properties"
     />
   );
