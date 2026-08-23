@@ -1,3 +1,8 @@
+## v0.49.1 — 2026-08-23
+
+### Fixes
+- fix(ui): remove offline cached results banner and harden hermetic AI test fallback (0489795)
+
 ## v0.49.0 — 2026-08-23
 
 ### Features
