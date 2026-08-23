@@ -704,21 +704,13 @@ export function PropertyDetailPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-4 sm:p-5 flex gap-3 border-t border-border/70 bg-secondary/10">
-                <button
-                  onClick={() => {
-                    if (!user) {
-                      setAuthGateOpen(true);
-                      toast.info("Sign in to unlock direct owner contact without brokerage");
-                      return;
-                    }
-                    if (hasAccess) setEnquiryOpen(true);
-                    else setCustomerPlansOpen(true);
-                  }}
-                  className="flex-1 h-12 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm sm:text-base rounded-xl shadow-md transition-all active:scale-98 flex items-center justify-center"
-                >
-                  Contact Owner
-                </button>
+              <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-3 border-t border-border/70 bg-secondary/10">
+                <WhatsAppButton
+                  propertyId={property.id}
+                  className="flex-1 h-12"
+                  onRequireAuth={() => setAuthGateOpen(true)}
+                  onRequireSubscription={() => setCustomerPlansOpen(true)}
+                />
                 <button
                   onClick={() => {
                     if (!user) {

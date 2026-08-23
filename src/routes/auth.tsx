@@ -144,26 +144,36 @@ function AuthPage() {
           </span>
         </div>
 
+        <div className="flex rounded-xl bg-secondary/50 p-1 border border-border/60">
+          <button
+            type="button"
+            onClick={() => setMethod("otp")}
+            className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
+              method === "otp"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            ✉️ 6-Digit Email Code
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod("password")}
+            className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
+              method === "password"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            🔑 Password
+          </button>
+        </div>
+
         {method === "password" ? (
           <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
         ) : (
           <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />
         )}
-
-        {/* Passwordless is an additional path, not a replacement. The toggle sits
-            below the primary form so the existing password/Google flows are the
-            unchanged default. */}
-        <div className="pt-1 text-center">
-          <button
-            type="button"
-            onClick={() => setMethod((m) => (m === "password" ? "otp" : "password"))}
-            className="text-xs font-semibold text-emerald-600 hover:underline"
-          >
-            {method === "password"
-              ? "Prefer no password? Sign in with an email code"
-              : "Use email & password instead"}
-          </button>
-        </div>
       </div>
 
       <Link to="/" className="mt-6 text-xs font-bold text-muted-foreground hover:text-foreground">
