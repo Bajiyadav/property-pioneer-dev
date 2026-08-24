@@ -111,7 +111,7 @@ export function scrubSensitiveData<T>(input: T): T {
         .replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+=*/gi, "Bearer [REDACTED]")
         .replace(/(?:sk_live_|sk_test_|whsec_)[A-Za-z0-9_]+/gi, "[REDACTED_STRIPE_KEY]")
         .replace(/(?:eyJ)[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/gi, "[REDACTED_JWT]")
-        .replace(/\b\d{6}\b/g, "[REDACTED_OTP]") as unknown as T;
+        .replace(/\b\d{6,8}\b/g, "[REDACTED_OTP]") as unknown as T;
     }
     return input;
   }
