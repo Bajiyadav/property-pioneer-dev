@@ -1,3 +1,8 @@
+## v0.53.0 — 2026-08-24
+
+### Features
+- feat(owner): implement Step 0 authentication gate and seamless profile-driven listing flow (fddfa39)
+
 ## v0.52.0 — 2026-08-23
 
 ### Features
