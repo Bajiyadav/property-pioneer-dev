@@ -561,9 +561,7 @@ export function EnterprisePasswordForm({
           {mode === "signup" && (
             <>
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1">
-                  Full Legal Name *
-                </label>
+                <label className="block text-xs font-bold text-foreground mb-1">Full Name *</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <input
@@ -614,22 +612,6 @@ export function EnterprisePasswordForm({
                   />
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1">
-                  City / Address
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. Kondapur, Hyderabad"
-                    className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
             </>
           )}
 
@@ -672,33 +654,16 @@ export function EnterprisePasswordForm({
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setConfirmPassword(e.target.value);
+                }}
+                placeholder="Min 6 characters"
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
-
-          {mode === "signup" && (
-            <div>
-              <label className="block text-xs font-bold text-foreground mb-1">
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter password"
-                  autoComplete="new-password"
-                  className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-            </div>
-          )}
 
           <button
             type="submit"
@@ -713,7 +678,7 @@ export function EnterprisePasswordForm({
                 <Loader2 className="h-4 w-4 animate-spin" /> Processing…
               </>
             ) : mode === "signup" ? (
-              "Create Secure Account"
+              "Create Account"
             ) : (
               "Sign In to Seedha Properties"
             )}
