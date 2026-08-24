@@ -55,7 +55,7 @@ export function MobileBottomNav() {
             <PlusCircle className="h-5 w-5" />
           </div>
           <span className="text-[9px] mt-0.5 font-extrabold uppercase text-emerald-600">
-            Post Ad
+            Post Property
           </span>
         </Link>
 

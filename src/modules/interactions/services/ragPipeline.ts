@@ -238,7 +238,7 @@ export async function runRAGPipeline(
   const intentMs = Math.round(performance.now() - tIntent);
 
   if (filters.intent === "GREETING") {
-    const greetingText = `**Namaste! 🙏 I'm Seedha AI, your 24/7 Real Estate Concierge.**\n\nI can help you find verified direct-owner homes with **0% brokerage**, explore top localities, or list your property.\n\nWhat are you looking for today?\n• 🔍 **Find a Home for Rent** (e.g. *"2BHK in Madhapur under 30k"*)\n• 🏡 **Find a Home to Buy**\n• 📍 **Search Properties by Location**\n• 💰 **Search by Budget**\n• 📝 **List My Property (100% Free)**\n• 💯 **How 0% Brokerage Works**`;
+    const greetingText = `**Namaste! 🙏 I'm Seedha AI, your 24/7 Real Estate Concierge.**\n\nI can help you find verified direct-owner homes with **0% brokerage**, explore top localities, or post your property.\n\nWhat are you looking for today?\n• 🔍 **Find a Home for Rent** (e.g. *"2BHK in Madhapur under 30k"*)\n• 🏡 **Find a Home to Buy**\n• 📍 **Search Properties by Location**\n• 💰 **Search by Budget**\n• 📝 **Post My Property (100% Free)**\n• 💯 **How 0% Brokerage Works**`;
     logRagStageTimings({
       intentMs,
       propertiesMs: 0,

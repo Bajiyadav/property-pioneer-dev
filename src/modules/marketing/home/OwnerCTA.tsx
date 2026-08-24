@@ -12,7 +12,7 @@ export function OwnerCTA({ onOpenWizard }: { onOpenWizard?: () => void }) {
           </div>
 
           <h2 className="mt-4 font-[family-name:var(--font-display)] text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
-            List Your Property Free in Under 2 Minutes
+            Post Your Property Free in Under 2 Minutes
           </h2>
 
           <p className="mt-3.5 text-sm sm:text-base text-emerald-100/90 leading-relaxed max-w-xl">

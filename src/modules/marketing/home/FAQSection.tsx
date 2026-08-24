@@ -19,8 +19,8 @@ const FAQS = [
     a: "Hyderabad is our live market, with listings concentrated in Gachibowli, Madhapur, Kondapur, Hitech City, Miyapur, Financial District, Jubilee Hills, Kokapet and Raidurg. Search shows exactly what is available in each area.",
   },
   {
-    q: "How can property owners list their homes for free?",
-    a: "Owners simply click 'List Property FREE', upload property photos, address details, and rent price in under 2 minutes to start receiving direct tenant inquiries.",
+    q: "How can property owners post their homes for free?",
+    a: "Owners simply click 'Post Property FREE', upload property photos, address details, and rent price in under 2 minutes to start receiving direct tenant inquiries.",
   },
 ];
 

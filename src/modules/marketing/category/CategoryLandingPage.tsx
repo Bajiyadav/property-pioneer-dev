@@ -280,7 +280,7 @@ export function CategoryLandingPage({
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow hover:brightness-110 transition cursor-pointer"
                 >
                   <PlusCircle className="h-4 w-4" />
-                  List Your Property FREE
+                  Post Your Property FREE
                 </button>
                 <Link
                   to="/properties"

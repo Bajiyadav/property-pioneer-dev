@@ -43,8 +43,8 @@ const FAQS = [
     category: "Getting Started",
     items: [
       {
-        q: "How do I list my property on Seedha Properties?",
-        a: "Click 'List Property FREE' in the navigation bar, complete a quick registration, and follow the onboarding wizard to add your property details, photos, and pricing. Your listing is then submitted for moderation and becomes publicly visible once an admin approves it.",
+        q: "How do I post my property on Seedha Properties?",
+        a: "Click 'Post Property FREE' in the navigation bar, complete a quick registration, and follow the onboarding wizard to add your property details, photos, and pricing. Your listing is then submitted for moderation and becomes publicly visible once an admin approves it.",
       },
       {
         q: "Does Seedha Properties charge brokerage?",

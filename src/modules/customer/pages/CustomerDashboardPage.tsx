@@ -272,7 +272,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
                 },
                 {
                   id: "list",
-                  label: "List property",
+                  label: "Post property",
                   hint: "Free for owners",
                   icon: <Building2 className="h-4 w-4" />,
                   onClick: () => navigate({ to: "/list-property" }),

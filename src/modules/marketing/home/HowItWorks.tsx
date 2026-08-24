@@ -198,7 +198,7 @@ export function HowItWorks() {
             to="/list-property"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            <UserPlus className="h-4 w-4" /> List your property free
+            <UserPlus className="h-4 w-4" /> Post your property free
           </Link>
         )}
       </div>
