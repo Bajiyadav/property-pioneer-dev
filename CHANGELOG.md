@@ -1,3 +1,8 @@
+## v0.60.0 — 2026-08-24
+
+### Features
+- feat: migrate to email OTP and clean up auth (03683a5)
+
 ## v0.59.0 — 2026-08-24
 
 ### Features
