@@ -1,3 +1,8 @@
+## v0.60.1 — 2026-08-24
+
+### Fixes
+- fix: un-disable sign-up button to show password validation errors (ae5fb52)
+
 ## v0.60.0 — 2026-08-24
 
 ### Features
