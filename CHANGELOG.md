@@ -1,3 +1,8 @@
+## v0.55.2 — 2026-08-24
+
+### Fixes
+- fix(ui): adjust hero top spacing and search input padding (e5300fc)
+
 ## v0.55.1 — 2026-08-24
 
 ### Features
