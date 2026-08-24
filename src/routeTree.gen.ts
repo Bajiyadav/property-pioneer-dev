@@ -72,6 +72,7 @@ import { Route as ListPropertyPromoteIdRouteImport } from './routes/list-propert
 import { Route as ListPropertySubmittedIdRouteImport } from './routes/list-property.submitted.$id'
 import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
+import { Route as ApiDevEmailPreviewTypeRouteImport } from './routes/api/dev/email-preview.$type'
 import { Route as ApiPublicPropertiesLocationAccessRouteImport } from './routes/api/public/properties.location-access'
 import { Route as ListPropertyPromoteIdCheckoutRouteImport } from './routes/list-property.promote.$id.checkout'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
@@ -406,6 +407,11 @@ const RentCityLocalityRoute = RentCityLocalityRouteImport.update({
   path: '/rent/$city/$locality',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDevEmailPreviewTypeRoute = ApiDevEmailPreviewTypeRouteImport.update({
+  id: '/api/dev/email-preview/$type',
+  path: '/api/dev/email-preview/$type',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPropertiesLocationAccessRoute =
   ApiPublicPropertiesLocationAccessRouteImport.update({
     id: '/api/public/properties/location-access',
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -579,6 +586,7 @@ export interface FileRoutesByTo {
   '/buy/$city': typeof BuyCityIndexRoute
   '/commercial/$city': typeof CommercialCityIndexRoute
   '/rent/$city': typeof RentCityIndexRoute
+  '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -652,6 +660,7 @@ export interface FileRoutesById {
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -725,6 +734,7 @@ export interface FileRouteTypes {
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -792,6 +802,7 @@ export interface FileRouteTypes {
     | '/buy/$city'
     | '/commercial/$city'
     | '/rent/$city'
+    | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -864,6 +875,7 @@ export interface FileRouteTypes {
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -917,6 +929,7 @@ export interface RootRouteChildren {
   BuyCityIndexRoute: typeof BuyCityIndexRoute
   CommercialCityIndexRoute: typeof CommercialCityIndexRoute
   RentCityIndexRoute: typeof RentCityIndexRoute
+  ApiDevEmailPreviewTypeRoute: typeof ApiDevEmailPreviewTypeRoute
   ApiPublicPropertiesLocationAccessRoute: typeof ApiPublicPropertiesLocationAccessRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
@@ -1368,6 +1381,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentCityLocalityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dev/email-preview/$type': {
+      id: '/api/dev/email-preview/$type'
+      path: '/api/dev/email-preview/$type'
+      fullPath: '/api/dev/email-preview/$type'
+      preLoaderRoute: typeof ApiDevEmailPreviewTypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/properties/location-access': {
       id: '/api/public/properties/location-access'
       path: '/api/public/properties/location-access'
@@ -1571,6 +1591,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuyCityIndexRoute: BuyCityIndexRoute,
   CommercialCityIndexRoute: CommercialCityIndexRoute,
   RentCityIndexRoute: RentCityIndexRoute,
+  ApiDevEmailPreviewTypeRoute: ApiDevEmailPreviewTypeRoute,
   ApiPublicPropertiesLocationAccessRoute:
     ApiPublicPropertiesLocationAccessRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
