@@ -1,3 +1,20 @@
+## v0.55.1 — 2026-08-24
+
+### Features
+- feat(property): replace hard location-wall with sensitive-data reveal gate (#24) (80b2779)
+- feat(analytics): time-ranged, real-time, visual activity analytics (#22) (a555941)
+
+### Fixes
+- fix(search): fill search-results width with a responsive auto-fit card grid (#21) (837b74e)
+
+### Refactoring
+- refactor(email): centralized branded transactional email templates (#23) (8e775ce)
+
+## v0.54.0 — 2026-08-24
+
+### Features
+- feat(ui): update navigation and CTA terminology from List Property to Post Property (b0b9d86)
+
 ## v0.53.0 — 2026-08-24
 
 ### Features

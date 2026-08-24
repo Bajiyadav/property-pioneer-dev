@@ -36,7 +36,8 @@ export function PropertyMapView({ properties }: { properties: Property[] }) {
     > = {};
 
     properties.forEach((p) => {
-      const loc = p.locality || p.address || "Hyderabad";
+      // Coarse location only — exact address is gated out of the public payload.
+      const loc = p.locality || "Hyderabad";
       if (!counts[loc]) {
         counts[loc] = {
           count: 0,

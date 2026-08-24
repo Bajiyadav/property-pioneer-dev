@@ -123,7 +123,7 @@ describe("Login security notification", () => {
     // The advisory copy is still present, and nothing but it mentions passwords.
     expect(textBody).toContain("change your password");
     expect(htmlBody).toContain("owner.qa@urbanproperties.in");
-    expect(textBody).toContain("New Sign-in Detected");
+    expect(body).toContain("new sign-in detected");
   });
 
   it("reports an unconfigured provider honestly instead of faking delivery", async () => {
