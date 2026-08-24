@@ -14,7 +14,6 @@ import { HeroSection } from "@/modules/marketing/home/HeroSection";
 import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
 import { PropertyCategories } from "@/modules/marketing/home/PropertyCategories";
 import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
-import { HomeServicesSection } from "@/modules/marketing/home/HomeServicesSection";
 import { PaymentsAndRewardsBanner } from "@/modules/marketing/home/PaymentsAndRewardsBanner";
 import { PopularCities } from "@/modules/marketing/home/PopularCities";
 import { WhySeedhaProperties } from "@/modules/marketing/home/WhySeedhaProperties";
@@ -95,9 +94,6 @@ function Index() {
         properties={featured.length > 0 ? featured : properties}
         isLoading={isLoading}
       />
-
-      {/* 5. Home Services (Packers, Cleaning, Electrician, Plumber, Painting) */}
-      <HomeServicesSection />
 
       {/* 6. Payments & Rent Rewards Banner */}
       <PaymentsAndRewardsBanner />

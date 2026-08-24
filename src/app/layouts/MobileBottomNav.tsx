@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, PlusCircle, Wrench, User } from "lucide-react";
+import { Home, Search, PlusCircle, User } from "lucide-react";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function MobileBottomNav() {
@@ -18,7 +18,7 @@ export function MobileBottomNav() {
       aria-label="Mobile navigation"
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/80 bg-background/95 backdrop-blur-md px-2 py-1.5 shadow-2xl safe-area-pb"
     >
-      <div className="grid grid-cols-5 items-center text-center">
+      <div className="grid grid-cols-4 items-center text-center">
         {/* 1. Home */}
         <Link
           to="/"
@@ -59,20 +59,7 @@ export function MobileBottomNav() {
           </span>
         </Link>
 
-        {/* 4. Home Services */}
-        <Link
-          to="/services"
-          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
-            isActive("/services")
-              ? "text-emerald-600 font-bold"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Wrench className="h-5 w-5" />
-          <span className="text-[10px] mt-0.5 font-medium">Services</span>
-        </Link>
-
-        {/* 5. Profile */}
+        {/* 4. Profile */}
         <Link
           to={status === "authenticated" ? "/profile" : "/auth"}
           className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
