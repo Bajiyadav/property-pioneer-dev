@@ -14,7 +14,7 @@
  *    echoed in a response, or written into the email.
  */
 import { sendTransactionalEmail, type EmailDeliveryResult } from "@/shared/services/emailService";
-import { loginSecurityEmail } from "@/shared/services/email";
+import { loginSecurityEmail } from "@/shared/services/email/templates";
 
 export interface LoginSecurityEventContext {
   userId: string;

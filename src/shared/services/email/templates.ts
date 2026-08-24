@@ -301,67 +301,75 @@ export type EmailTemplateKey =
 /**
  * Sample renders for local preview + tests. All data is fictional (the OTP is a
  * placeholder, never a real code) so nothing sensitive is ever produced here.
+ *
+ * A FUNCTION, not a top-level const, on purpose: an eager const referencing every
+ * template would be evaluated whenever any template is imported, dragging all
+ * templates + this sample data into the client bundle (notificationService is
+ * imported client-side). As a lazy function it is tree-shaken out of the client
+ * and only runs where it is actually called — the dev preview route and tests.
  */
-export const EMAIL_PREVIEWS: Record<EmailTemplateKey, RenderedEmail> = {
-  otp: otpEmail({ userName: "Aarav", otp: "482913", expiry: "5 minutes" }),
-  welcome: welcomeEmail({ userName: "Aarav" }),
-  listing_submitted: listingSubmittedEmail({
-    userName: "Aarav",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    locality: "Madhapur",
-    city: "Hyderabad",
-    listingId: "SP-24812",
-    status: "Under review",
-    requiresVerification: true,
-  }),
-  property_approved: propertyApprovedEmail({
-    userName: "Aarav",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    location: "Madhapur, Hyderabad",
-    listingId: "SP-24812",
-  }),
-  property_enquiry: propertyEnquiryEmail({
-    ownerName: "Aarav",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    location: "Madhapur, Hyderabad",
-    enquirerName: "Priya",
-    message: "Hi, is this available for an early-October move-in?",
-  }),
-  visit_scheduled: visitScheduledEmail({
-    userName: "Aarav",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    date: "Saturday, 30 August 2026",
-    time: "11:00 AM IST",
-    location: "Madhapur, Hyderabad",
-    visitorName: "Priya",
-  }),
-  payment_success: paymentSuccessEmail({
-    userName: "Aarav",
-    planName: "Featured Listing – 30 days",
-    amount: "₹499",
-    transactionId: "pay_SAMPLE1234",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    date: "24 August 2026",
-  }),
-  plan_active: planActiveEmail({
-    userName: "Aarav",
-    planName: "Featured Listing – 30 days",
-    propertyTitle: "2 BHK Semi-Furnished Apartment",
-    startDate: "24 August 2026",
-    endDate: "23 September 2026",
-    features: ["Top of search", "Featured badge", "Priority support"],
-  }),
-  login_security: loginSecurityEmail({
-    userName: "Aarav",
-    email: "aarav@example.com",
-    role: "owner",
-    date: "Sunday, 24 August 2026",
-    time: "09:32 AM IST",
-  }),
-  security_notice: securityNoticeEmail({
-    userName: "Aarav",
-    action: "Your password was changed",
-    date: "24 August 2026",
-    time: "09:32 AM IST",
-  }),
-};
+export function getEmailPreviews(): Record<EmailTemplateKey, RenderedEmail> {
+  return {
+    otp: otpEmail({ userName: "Aarav", otp: "482913", expiry: "5 minutes" }),
+    welcome: welcomeEmail({ userName: "Aarav" }),
+    listing_submitted: listingSubmittedEmail({
+      userName: "Aarav",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      locality: "Madhapur",
+      city: "Hyderabad",
+      listingId: "SP-24812",
+      status: "Under review",
+      requiresVerification: true,
+    }),
+    property_approved: propertyApprovedEmail({
+      userName: "Aarav",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      location: "Madhapur, Hyderabad",
+      listingId: "SP-24812",
+    }),
+    property_enquiry: propertyEnquiryEmail({
+      ownerName: "Aarav",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      location: "Madhapur, Hyderabad",
+      enquirerName: "Priya",
+      message: "Hi, is this available for an early-October move-in?",
+    }),
+    visit_scheduled: visitScheduledEmail({
+      userName: "Aarav",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      date: "Saturday, 30 August 2026",
+      time: "11:00 AM IST",
+      location: "Madhapur, Hyderabad",
+      visitorName: "Priya",
+    }),
+    payment_success: paymentSuccessEmail({
+      userName: "Aarav",
+      planName: "Featured Listing – 30 days",
+      amount: "₹499",
+      transactionId: "pay_SAMPLE1234",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      date: "24 August 2026",
+    }),
+    plan_active: planActiveEmail({
+      userName: "Aarav",
+      planName: "Featured Listing – 30 days",
+      propertyTitle: "2 BHK Semi-Furnished Apartment",
+      startDate: "24 August 2026",
+      endDate: "23 September 2026",
+      features: ["Top of search", "Featured badge", "Priority support"],
+    }),
+    login_security: loginSecurityEmail({
+      userName: "Aarav",
+      email: "aarav@example.com",
+      role: "owner",
+      date: "Sunday, 24 August 2026",
+      time: "09:32 AM IST",
+    }),
+    security_notice: securityNoticeEmail({
+      userName: "Aarav",
+      action: "Your password was changed",
+      date: "24 August 2026",
+      time: "09:32 AM IST",
+    }),
+  };
+}

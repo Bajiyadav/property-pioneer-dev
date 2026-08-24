@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { EMAIL_PREVIEWS, type EmailTemplateKey } from "@/shared/services/email";
+import { getEmailPreviews, type EmailTemplateKey } from "@/shared/services/email/templates";
 
 /**
  * Local email template preview. Renders a template's HTML with SAMPLE data (no
@@ -16,9 +16,10 @@ export const Route = createFileRoute("/api/dev/email-preview/$type")({
         if (process.env.NODE_ENV === "production") {
           return new Response("Not found", { status: 404 });
         }
-        const preview = EMAIL_PREVIEWS[params.type as EmailTemplateKey];
+        const previews = getEmailPreviews();
+        const preview = previews[params.type as EmailTemplateKey];
         if (!preview) {
-          const list = Object.keys(EMAIL_PREVIEWS)
+          const list = Object.keys(previews)
             .map((k) => `<li><a href="/api/dev/email-preview/${k}">${k}</a></li>`)
             .join("");
           return new Response(

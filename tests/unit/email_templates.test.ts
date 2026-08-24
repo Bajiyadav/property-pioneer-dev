@@ -1,11 +1,13 @@
 import { describe, it, expect } from "vitest";
+import { renderEmail } from "@/shared/services/email/renderEmail";
 import {
-  renderEmail,
   otpEmail,
   welcomeEmail,
-  EMAIL_PREVIEWS,
+  getEmailPreviews,
   type EmailTemplateKey,
-} from "@/shared/services/email";
+} from "@/shared/services/email/templates";
+
+const EMAIL_PREVIEWS = getEmailPreviews();
 
 /**
  * Centralized email template suite. Verifies branding, HTML+text parity, name
