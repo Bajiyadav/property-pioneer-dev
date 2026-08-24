@@ -128,39 +128,6 @@ export function HeroSection({
           </Link>
         </div>
 
-        {/* Trending Searches / Localities Chips */}
-        <div className="mt-6 flex flex-wrap justify-center items-center gap-2 text-xs">
-          <span className="font-semibold text-white [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-            Popular Localities:
-          </span>
-          {[
-            { name: "Madhapur", query: "Madhapur", isCity: false, city: "Hyderabad" },
-            { name: "Gachibowli", query: "Gachibowli", isCity: false, city: "Hyderabad" },
-            { name: "Kondapur", query: "Kondapur", isCity: false, city: "Hyderabad" },
-            { name: "Jubilee Hills", query: "Jubilee Hills", isCity: false, city: "Hyderabad" },
-            { name: "Bengaluru", query: "Bengaluru", isCity: true, city: "Bengaluru" },
-            { name: "Mumbai", query: "Mumbai", isCity: true, city: "Mumbai" },
-            { name: "Pune", query: "Pune", isCity: true, city: "Pune" },
-            { name: "Chennai", query: "Chennai", isCity: true, city: "Chennai" },
-          ].map((item) => (
-            <Link
-              key={item.name}
-              to="/properties"
-              search={{
-                q: item.isCity ? "" : item.query,
-                city: item.city || "",
-                listing: "rent",
-                minPrice: 0,
-                maxPrice: 0,
-                beds: 0,
-              }}
-              className="rounded-full bg-white/15 border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:border-white/40 hover:bg-white/30 shadow-sm backdrop-blur-xs active:scale-95"
-            >
-              {item.name}
-            </Link>
-          ))}
-        </div>
-
         {/* Trust Assurances Row */}
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-12 pt-8 border-t border-white/10 w-full max-w-4xl">
           <div className="flex flex-col items-center text-center gap-2">
