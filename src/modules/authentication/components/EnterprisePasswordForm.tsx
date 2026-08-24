@@ -80,7 +80,25 @@ export function EnterprisePasswordForm({
 
     if (mode === "signup") {
       // 1. Validate Form Inputs
-      if (!isValidName || !isValidPhone || !rules.isCompliant) {
+      if (!isValidName) {
+        toast.error("Please enter a valid full name.");
+        setLoading(false);
+        return;
+      }
+      if (!isValidPhone) {
+        toast.error("Please enter a valid 10-digit mobile number.");
+        setLoading(false);
+        return;
+      }
+      if (!rules.hasMinLength) {
+        toast.error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+        setLoading(false);
+        return;
+      }
+      if (!rules.isCompliant) {
+        toast.error(
+          "Password is too weak or contains personal information. Please choose a stronger password.",
+        );
         setLoading(false);
         return;
       }
@@ -448,7 +466,7 @@ export function EnterprisePasswordForm({
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Min 6 characters"
+                    placeholder={`Min ${MIN_PASSWORD_LENGTH} characters`}
                     className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
@@ -655,7 +673,7 @@ export function EnterprisePasswordForm({
                   setPassword(e.target.value);
                   setConfirmPassword(e.target.value);
                 }}
-                placeholder="Min 6 characters"
+                placeholder={`Min ${MIN_PASSWORD_LENGTH} characters`}
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
               />
@@ -664,10 +682,7 @@ export function EnterprisePasswordForm({
 
           <button
             type="submit"
-            disabled={
-              loading ||
-              (mode === "signup" && (!rules.isCompliant || !isValidName || !isValidPhone))
-            }
+            disabled={loading}
             className="w-full rounded-2xl bg-[#0F766E] hover:bg-[#115E59] py-3.5 text-xs font-black text-white shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? (
