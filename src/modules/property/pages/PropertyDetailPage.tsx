@@ -69,8 +69,6 @@ import { SimilarProperties } from "@/modules/property/components/SimilarProperti
 import { APP_NAME, extractIdFromSlug } from "@/config/app";
 import { checkCustomerAccess } from "@/modules/billing/services/billingFunctions";
 import { useServerFn } from "@tanstack/react-start";
-import { LocationFirstAccessGate } from "@/modules/property/components/LocationFirstAccessGate";
-import type { LocationValidationResult } from "@/modules/property/services/locationDetailsService";
 import { CustomerPlans } from "@/modules/billing/components/CustomerPlans";
 import {
   Dialog,
@@ -86,10 +84,6 @@ export function PropertyDetailPage() {
   const { has, toggle } = useFavorites();
   const { user } = useAuthSession();
   const tenantId = user?.id || "anonymous-tenant";
-
-  // Non-blocking reveal: the page always renders (public + SEO). This only holds
-  // the exact-address reveal result once the visitor confirms their location.
-  const [locationAccess, setLocationAccess] = useState<LocationValidationResult | null>(null);
 
   // One view row per visit, filed on the way out so `time_spent` is measured
   // rather than guessed. No-ops entirely without analytics consent.
@@ -410,39 +404,27 @@ export function PropertyDetailPage() {
         </div>
       </div>
 
-      {/* EXACT-LOCATION REVEAL — the page stays public for SEO and browsing; the
-          exact street address is gated and shown only after the visitor confirms a
-          matching city + locality (validated and revealed server-side). */}
+      {/* Property Location Banner */}
       <main className="mx-auto max-w-7xl px-4 sm:px-6 mt-2">
-        <div className="mb-4">
-          {locationAccess?.revealedLocation?.address ? (
-            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 sm:px-5">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                    Exact location
-                  </p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {locationAccess.revealedLocation.address}
-                  </p>
-                  {locationAccess.revealedLocation.landmark && (
-                    <p className="text-xs text-muted-foreground">
-                      Landmark: {locationAccess.revealedLocation.landmark}
-                    </p>
-                  )}
-                </div>
+        {(property.address || property.locality || property.city) && (
+          <div className="mb-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 sm:px-5">
+            <div className="flex items-start gap-2.5">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  Location
+                </p>
+                <p className="text-sm font-semibold text-foreground">
+                  {property.address ||
+                    [property.locality, property.city].filter(Boolean).join(", ")}
+                </p>
+                {property.landmark && (
+                  <p className="text-xs text-muted-foreground">Landmark: {property.landmark}</p>
+                )}
               </div>
             </div>
-          ) : (
-            <LocationFirstAccessGate
-              propertyId={id}
-              initialCity={property.city}
-              initialLocality={property.locality || ""}
-              onLocationValidated={(result) => setLocationAccess(result)}
-            />
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* LEFT COLUMN: Gallery & Overview */}
