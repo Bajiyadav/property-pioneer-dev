@@ -1,3 +1,8 @@
+## v0.59.0 — 2026-08-24
+
+### Features
+- feat(auth): streamline create account to 4 simple fields (5575e10)
+
 ## v0.58.0 — 2026-08-24
 
 ### Features
