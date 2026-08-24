@@ -24,9 +24,10 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { LocationSelector } from "@/shared/components/listing/LocationSelector";
 import type { TenantProfile } from "../types";
-import { saveTenantProfile } from "../services/tenantFunctions";
+import { saveTenantProfile, sendWelcomeMMS } from "../services/tenantFunctions";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const BHK_OPTIONS = ["1 RK", "1 BHK", "2 BHK", "3 BHK", "4+ BHK"];
 const FURNISHING_OPTIONS = [
@@ -59,6 +60,7 @@ export function TenantSignUpFlow({
   const navigate = useNavigate();
   const { user } = useAuth();
   const saveProfileFn = useServerFn(saveTenantProfile);
+  const sendWelcomeMMSFn = useServerFn(sendWelcomeMMS);
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,27 +98,54 @@ export function TenantSignUpFlow({
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  // Step 1: Phone OTP Handlers
-  const handleSendOtp = () => {
-    if (!/^[6-9]\d{9}$/.test(formData.phone_number.replace(/\D/g, ""))) {
-      toast.error("Please enter a valid 10-digit Indian phone number.");
+  // Step 1: Email OTP Handlers
+  const handleSendOtp = async () => {
+    if (!formData.email.trim() || !formData.email.includes("@")) {
+      toast.error("Please enter a valid email address.");
       return;
     }
-    setOtpSent(true);
-    setOtpCode("123456"); // Demo pre-fill for seamless user testing
-    toast.success("OTP sent to " + formData.phone_number, {
-      description: "Use demo code 123456 to verify.",
-    });
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: formData.email.trim(),
+      });
+
+      if (error) throw error;
+
+      setOtpSent(true);
+      toast.success("OTP sent to " + formData.email);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyOtp = () => {
-    if (otpCode.trim() !== "123456" && otpCode.trim().length !== 6) {
-      toast.error("Invalid verification code. Please enter 123456.");
+  const handleVerifyOtp = async () => {
+    if (otpCode.trim().length !== 6) {
+      toast.error("Please enter the 6-digit verification code.");
       return;
     }
-    setPhoneVerified(true);
-    toast.success("Phone number verified successfully!");
-    setStep(2);
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: formData.email.trim(),
+        token: otpCode.trim(),
+        type: "email",
+      });
+
+      if (error) throw error;
+
+      setPhoneVerified(true);
+      toast.success("Email verified successfully!");
+      setStep(2);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Invalid verification code.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Step 2: Basic Profile Validation
@@ -191,14 +220,13 @@ export function TenantSignUpFlow({
           <Sparkles className="h-3.5 w-3.5" /> Tenant Match Profile · Step {step} of 4
         </span>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground mt-2">
-          {step === 1 && "Verify Your Mobile Number"}
+          {step === 1 && "Verify Your Email Address"}
           {step === 2 && "Tell Us About Yourself"}
           {step === 3 && "Where Do You Want to Rent?"}
           {step === 4 && "Fine-Tune Your Rental Preferences"}
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-          {step === 1 &&
-            "Direct owner connect requires a verified phone number for WhatsApp and visit scheduling."}
+          {step === 1 && "We use a secure email login to keep your account safe and spam-free."}
           {step === 2 && "Professional details help owners pre-approve your visit faster."}
           {step === 3 &&
             "Mandatory location setup helps our AI match properties with accurate commute times."}
@@ -221,18 +249,15 @@ export function TenantSignUpFlow({
         {step === 1 && (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-foreground">Mobile Number *</Label>
+              <Label className="text-sm font-semibold text-foreground">Email Address *</Label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-muted-foreground font-bold text-sm">
-                  +91
-                </div>
+                <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="tel"
-                  maxLength={10}
-                  value={formData.phone_number}
-                  onChange={(e) => updateForm({ phone_number: e.target.value.replace(/\D/g, "") })}
-                  placeholder="98765 43210"
-                  className="pl-14 text-base font-semibold"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => updateForm({ email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="pl-10 text-base font-semibold"
                 />
               </div>
             </div>
@@ -240,10 +265,12 @@ export function TenantSignUpFlow({
             {!otpSent ? (
               <Button
                 type="button"
+                disabled={isLoading}
                 onClick={handleSendOtp}
                 className="w-full bg-primary text-primary-foreground font-bold py-3.5 rounded-xl shadow-md hover:bg-primary/90"
               >
-                Send Verification OTP <ArrowRight className="ml-2 h-4 w-4" />
+                {isLoading ? "Sending OTP..." : "Send Verification OTP"}{" "}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             ) : (
               <div className="space-y-4 animate-in fade-in duration-200">
@@ -260,7 +287,7 @@ export function TenantSignUpFlow({
                     className="text-center tracking-widest text-lg font-mono font-bold"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Demo OTP is <strong className="text-primary font-bold">123456</strong>
+                    Check your email inbox for the verification code.
                   </p>
                 </div>
 
@@ -271,14 +298,16 @@ export function TenantSignUpFlow({
                     onClick={() => setOtpSent(false)}
                     className="flex-1"
                   >
-                    Change Number
+                    Change Email
                   </Button>
                   <Button
                     type="button"
+                    disabled={isLoading}
                     onClick={handleVerifyOtp}
                     className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                   >
-                    Verify & Continue <CheckCircle2 className="ml-2 h-4 w-4" />
+                    {isLoading ? "Verifying..." : "Verify & Continue"}{" "}
+                    <CheckCircle2 className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -305,14 +334,19 @@ export function TenantSignUpFlow({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">Email Address *</Label>
+                <Label className="text-sm font-semibold text-foreground">
+                  Mobile Number (Optional)
+                </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                  <Phone className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => updateForm({ email: e.target.value })}
-                    placeholder="rahul.sharma@example.com"
+                    type="tel"
+                    maxLength={10}
+                    value={formData.phone_number}
+                    onChange={(e) =>
+                      updateForm({ phone_number: e.target.value.replace(/\D/g, "") })
+                    }
+                    placeholder="9876543210"
                     className="pl-10"
                   />
                 </div>

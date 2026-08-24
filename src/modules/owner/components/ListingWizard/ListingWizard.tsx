@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, Navigate } from "@tanstack/react-router";
 import {
   Check,
   ChevronRight,
@@ -9,7 +9,6 @@ import {
   Building2,
   ShieldCheck,
 } from "lucide-react";
-import { Step0AuthGate } from "./Step0AuthGate";
 import { Step1PropertyDetails } from "./steps/Step1PropertyDetails";
 import { Step2Locality } from "./steps/Step2Locality";
 import { Step3Pricing } from "./steps/Step3Pricing";
@@ -386,39 +385,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
 
   // STEP 0: Authentication Gate before wizard starts
   if (status !== "loading" && status !== "authenticated") {
-    return (
-      <div className="min-h-screen bg-background pb-16">
-        <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border/80 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link to="/" className="flex items-center gap-2">
-                <BrandMark size="sm" />
-              </Link>
-              <span className="text-border">/</span>
-              <span className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Owner Sign In</span>
-              </span>
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-3xl mx-auto px-4 pt-6">
-          <Step0AuthGate
-            onSuccess={async (profile) => {
-              setFormData((prev) => ({
-                ...prev,
-                owner_name: profile.name || prev.owner_name,
-                owner_email: profile.email || prev.owner_email,
-                owner_phone: profile.phone || prev.owner_phone,
-              }));
-              await refreshSession();
-              setCurrentStep(1);
-            }}
-          />
-        </main>
-      </div>
-    );
+    return <Navigate to="/auth" search={{ redirect: "/list-property/wizard" }} />;
   }
 
   return (

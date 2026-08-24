@@ -229,3 +229,58 @@ export const getMatchedPropertiesForTenant = createServerFn({ method: "POST" })
 
     return rankPropertiesForTenant(tenantProfileInstance, properties);
   });
+
+/**
+ * Server function to send a welcome MMS via Twilio
+ */
+export const sendWelcomeMMS = createServerFn({ method: "POST" })
+  .validator((d: { toPhone: string }) => d)
+  .handler(async ({ data: { toPhone } }) => {
+    try {
+      const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      const authToken = process.env.TWILIO_AUTH_TOKEN;
+      const fromPhone = process.env.TWILIO_PHONE_NUMBER;
+
+      if (!accountSid || !authToken || !fromPhone) {
+        throw new Error("Missing Twilio credentials in environment");
+      }
+
+      const formattedToPhone = toPhone.startsWith("+91")
+        ? toPhone
+        : `+91${toPhone.replace(/\D/g, "")}`;
+
+      const params = new URLSearchParams();
+      params.append("To", formattedToPhone);
+      params.append("From", fromPhone);
+      params.append(
+        "Body",
+        '"A home is more than a place; it is where meaningful moments begin."\n\nThank you for choosing Seedha Properties.',
+      );
+      params.append(
+        "MediaUrl",
+        "https://iyttetfaavokzyexvqam.supabase.co/storage/v1/object/public/property-images/welcome_quote.jpg",
+      ); // A placeholder public URL that should be updated to actual image URL
+
+      const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+
+      const response = await fetch(twilioUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
+        },
+        body: params,
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("Twilio MMS failed:", errText);
+        throw new Error("Failed to send welcome message");
+      }
+
+      return { success: true };
+    } catch (e) {
+      console.error("sendWelcomeMMS error:", e);
+      return { success: false, error: (e as Error).message };
+    }
+  });

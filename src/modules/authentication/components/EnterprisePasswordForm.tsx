@@ -594,21 +594,18 @@ export function EnterprisePasswordForm({
 
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1">
-                  Mobile Number (+91 India) *
+                  Mobile Number *
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <span className="absolute left-9 top-2.5 text-xs font-semibold text-muted-foreground">
-                    +91
-                  </span>
                   <input
                     type="tel"
                     required
                     maxLength={10}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
-                    placeholder="9876543210"
-                    className="w-full rounded-xl border border-border bg-background pl-18 pr-4 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Mobile Number"
+                    className="w-full rounded-xl border border-border bg-background pl-9 pr-3.5 py-2.5 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>

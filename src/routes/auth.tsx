@@ -29,7 +29,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: `Sign in — ${APP_NAME}` },
-      { name: "description", content: `Enterprise authentication & secure login for ${APP_NAME}.` },
+      { name: "description", content: `Secure sign in for ${APP_NAME}.` },
       { property: "og:title", content: `Sign in — ${APP_NAME}` },
       { property: "og:type", content: "website" },
       {
@@ -43,12 +43,23 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type AuthMode = "signin" | "signup";
+/**
+ * The single sign-in surface. Every "sign in required" flow — including the
+ * owner listing wizard — routes here, so all three methods live in one place:
+ * passwordless Email-OTP (the default fast path), password, and a New Account
+ * form, with Google available alongside all of them.
+ */
+type AuthMethod = "otp" | "password" | "signup";
+
+const TABS: { id: AuthMethod; label: string }[] = [
+  { id: "otp", label: "Email OTP (Code)" },
+  { id: "password", label: "Password Sign In" },
+  { id: "signup", label: "New Account" },
+];
 
 function AuthPage() {
   const { redirect } = Route.useSearch();
-  const [mode, setMode] = useState<AuthMode>("signin");
-  const [method, setMethod] = useState<"password" | "otp">("password");
+  const [method, setMethod] = useState<AuthMethod>("otp");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -75,98 +86,53 @@ function AuthPage() {
 
       <div className="mt-4 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-          <ShieldCheck className="h-3.5 w-3.5" /> Encrypted & Secure Authentication
+          <ShieldCheck className="h-3.5 w-3.5" /> Encrypted &amp; Secure Authentication
         </span>
         <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl">
-          {mode === "signin" ? "Sign In to Seedha Properties" : "Create Account"}
+          {method === "signup" ? "Create Account" : "Sign In to Seedha Properties"}
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {mode === "signin"
-            ? "Enter your credentials to access your saved homes & dashboards."
-            : "Create an account to save homes, send enquiries, or list a property."}
+          {method === "otp"
+            ? "No password needed — we'll email you a 6-digit sign-in code."
+            : method === "password"
+              ? "Enter your credentials to access your saved homes & dashboards."
+              : "Create an account to save homes, send enquiries, or list a property."}
         </p>
       </div>
 
-      {/* Auth Mode Tabs */}
-      <div className="mt-6 flex w-full max-w-sm gap-1 rounded-2xl border border-border/60 bg-secondary/40 p-1">
-        <button
-          onClick={() => {
-            setMode("signin");
-            setMethod("password");
-          }}
-          className={`flex-1 rounded-xl py-2 text-xs font-extrabold transition ${
-            mode === "signin"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Sign In
-        </button>
-        <button
-          onClick={() => {
-            setMode("signup");
-            setMethod("password");
-          }}
-          className={`flex-1 rounded-xl py-2 text-xs font-extrabold transition ${
-            mode === "signup"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Create Account
-        </button>
+      {/* Auth method tabs — OTP · Password · New Account */}
+      <div className="mt-6 flex w-full max-w-md gap-1 rounded-2xl border border-border/60 bg-secondary/40 p-1">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setMethod(t.id)}
+            className={`flex-1 rounded-xl py-2 text-[11px] font-extrabold transition sm:text-xs ${
+              method === t.id
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {mode === "signup" && (
-        <p className="mt-4 w-full text-center text-[11px] leading-relaxed text-muted-foreground">
-          Creating an account sets up your{" "}
-          <strong className="text-foreground">Tenant &amp; Buyer</strong> profile. Owner and partner
-          listings can be activated seamlessly anytime.
-        </p>
-      )}
-
-      {/* Form & Real-time Validation */}
+      {/* Form card — the selected method, with Google alongside all of them */}
       <div className="mt-6 w-full rounded-3xl border border-border/60 bg-card p-6 shadow-xl space-y-5">
-        {/* 1-Click Fast Sign-In */}
-        <GoogleSignInButton
-          redirect={redirect}
-          label={mode === "signin" ? "Sign in with Google" : "Continue with Google (1-Click)"}
-        />
-
-        <div className="relative flex items-center justify-center">
-          <div className="w-full border-t border-border/60" />
-          <span className="absolute bg-card px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            or with email
-          </span>
-        </div>
-
-        {method === "password" ? (
-          <>
-            <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => setMethod("otp")}
-                className="text-xs font-medium text-muted-foreground hover:text-primary transition underline underline-offset-4 cursor-pointer"
-              >
-                Prefer instant email code? Sign in with 6-digit OTP
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => setMethod("password")}
-                className="text-xs font-medium text-muted-foreground hover:text-primary transition underline underline-offset-4 cursor-pointer"
-              >
-                Use traditional password instead
-              </button>
-            </div>
-          </>
+        {method === "otp" && <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />}
+        {method === "password" && (
+          <EnterprisePasswordForm mode="signin" onSuccess={handleSuccess} />
         )}
+        {method === "signup" && <EnterprisePasswordForm mode="signup" onSuccess={handleSuccess} />}
+
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-border"></span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            or continue with
+          </span>
+          <span className="h-px flex-1 bg-border"></span>
+        </div>
+        <GoogleSignInButton redirect={redirect} />
       </div>
 
       <Link to="/" className="mt-6 text-xs font-bold text-muted-foreground hover:text-foreground">
