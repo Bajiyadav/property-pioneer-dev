@@ -4,6 +4,7 @@ import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
 import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
 import { CheckCircle2, MessageSquare, Send } from "lucide-react";
 import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function EnquiryForm({
   propertyId,
@@ -16,9 +17,19 @@ export function EnquiryForm({
   tenantId: string;
   onSent: () => void;
 }) {
+  // We already hold the signed-in user's name/phone in their profile — reuse it
+  // and NEVER ask for the name again (no duplicate collection).
+  const { user } = useAuthSession();
+  const knownName =
+    (typeof user?.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+    (typeof user?.user_metadata?.name === "string" && user.user_metadata.name) ||
+    "";
+  const knownPhone =
+    (typeof user?.user_metadata?.phone === "string" && user.user_metadata.phone) || "";
+
   const mountedAt = useRef<number>(Date.now());
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(knownName);
+  const [phone, setPhone] = useState(knownPhone);
   const [message, setMessage] = useState("");
   const [company, setCompany] = useState(""); // honeypot
   const [token, setToken] = useState<string | undefined>(undefined);
@@ -28,6 +39,13 @@ export function EnquiryForm({
   useEffect(() => {
     mountedAt.current = Date.now();
   }, [propertyId]);
+
+  // The session can resolve after mount — populate name/phone from the profile
+  // when it does, so we never present an empty field for data we already hold.
+  useEffect(() => {
+    if (knownName) setName(knownName);
+    if (knownPhone) setPhone(knownPhone);
+  }, [knownName, knownPhone]);
 
   if (sentWhatsappUrl) {
     return (
@@ -120,14 +138,21 @@ export function EnquiryForm({
         onChange={(e) => setCompany(e.target.value)}
         className="absolute left-[-9999px] h-0 w-0 opacity-0"
       />
-      <input
-        required
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        maxLength={100}
-        placeholder="Your full name"
-        className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-      />
+      {/* We already have the signed-in user's name — show it, never re-ask. */}
+      {knownName ? (
+        <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          Enquiring as <span className="font-semibold text-foreground">{knownName}</span>
+        </p>
+      ) : (
+        <input
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={100}
+          placeholder="Your full name"
+          className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+      )}
       <input
         required
         type="tel"

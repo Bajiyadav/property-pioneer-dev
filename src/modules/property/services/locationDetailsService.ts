@@ -1,4 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
 import { LIVE_CITIES } from "@/config/platform";
 import {
   INDEXED_LOCALITIES_MASTER,
@@ -28,6 +27,16 @@ export interface LocationValidationResult {
     city: string;
     locality: string;
     place?: string;
+  };
+  /**
+   * Exact street address + landmark. SENSITIVE — released ONLY by the server
+   * route (via the service-role client) after a valid city+locality match, and
+   * absent from the public property payload. The client renders it only when
+   * present, so a scraper that never matches a location never receives it.
+   */
+  revealedLocation?: {
+    address?: string | null;
+    landmark?: string | null;
   };
 }
 
@@ -72,29 +81,11 @@ export async function fetchPlacesForLocality(city: string, locality: string): Pr
     }
   }
 
-  // 2. From database property landmarks
-  try {
-    const { data } = await supabase
-      .from("properties")
-      .select("landmark, address")
-      .ilike("city", `%${city.trim()}%`)
-      .ilike("locality", `%${locality.trim()}%`)
-      .eq("is_approved", true)
-      .limit(15);
-
-    if (data && Array.isArray(data)) {
-      for (const row of data) {
-        if (row.landmark && row.landmark.trim()) {
-          placesSet.add(row.landmark.trim());
-        }
-        if (row.address && row.address.trim() && !row.address.includes(",")) {
-          placesSet.add(row.address.trim());
-        }
-      }
-    }
-  } catch {
-    // Non-fatal; fallback to master data
-  }
+  // Deliberately NOT reading property `landmark`/`address` from the database
+  // here. Both are gated out of the public column grant (see BASE/EXTENDED_
+  // PROPERTY_COLUMNS), and surfacing them in a public "place" dropdown would
+  // itself leak exact-location hints. Places come from the indexed master
+  // corridors above.
 
   if (placesSet.size === 0) {
     placesSet.add("Main Road / Central Corridor");

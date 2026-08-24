@@ -119,11 +119,11 @@ export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = (
           <MapPin className="h-6 w-6" />
         </div>
         <h2 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl font-extrabold text-foreground">
-          Select your location to continue
+          Reveal the exact location
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Choose the verified city, locality, and place to view complete property details and direct
-          owner connectivity.
+          Confirm the city and locality to unlock this property's exact street address and
+          directions. Browsing stays open — this only reveals the precise location.
         </p>
 
         {user && (
