@@ -824,7 +824,7 @@ export function PropertyDetailPage() {
                 search={{ redirect: `/properties/${slugOrId}` }}
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-md hover:bg-primary/90 transition-all"
               >
-                Sign In / Register Account
+                Sign In / Create Account
               </Link>
             </div>
           </DialogContent>

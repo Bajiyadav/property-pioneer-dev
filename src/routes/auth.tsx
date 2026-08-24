@@ -90,7 +90,10 @@ function AuthPage() {
       {/* Auth Mode Tabs */}
       <div className="mt-6 flex w-full max-w-sm gap-1 rounded-2xl border border-border/60 bg-secondary/40 p-1">
         <button
-          onClick={() => setMode("signin")}
+          onClick={() => {
+            setMode("signin");
+            setMethod("password");
+          }}
           className={`flex-1 rounded-xl py-2 text-xs font-extrabold transition ${
             mode === "signin"
               ? "bg-card text-foreground shadow-sm"
@@ -100,32 +103,25 @@ function AuthPage() {
           Sign In
         </button>
         <button
-          onClick={() => setMode("signup")}
+          onClick={() => {
+            setMode("signup");
+            setMethod("password");
+          }}
           className={`flex-1 rounded-xl py-2 text-xs font-extrabold transition ${
             mode === "signup"
               ? "bg-card text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Register Account
+          Create Account
         </button>
       </div>
 
-      {/*
-        No persona picker.
-
-        Registering here always creates a tenant/buyer account. The picker that
-        used to sit at this spot fed its value straight into `auth.signUp`'s
-        user_metadata, and the database trigger wrote that value into
-        `user_roles` verbatim — so the choice was not a preference, it was a
-        self-issued grant. Owner and agent access is granted deliberately, by an
-        admin, to an account that already exists.
-      */}
       {mode === "signup" && (
         <p className="mt-4 w-full text-center text-[11px] leading-relaxed text-muted-foreground">
-          Registering creates a <strong className="text-foreground">Tenant &amp; Buyer</strong>{" "}
-          account. Listing a property or joining as a partner agent is arranged with our team after
-          your account is verified.
+          Creating an account sets up your{" "}
+          <strong className="text-foreground">Tenant &amp; Buyer</strong> profile. Owner and partner
+          listings can be activated seamlessly anytime.
         </p>
       )}
 
@@ -144,35 +140,32 @@ function AuthPage() {
           </span>
         </div>
 
-        <div className="flex rounded-xl bg-secondary/50 p-1 border border-border/60">
-          <button
-            type="button"
-            onClick={() => setMethod("otp")}
-            className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
-              method === "otp"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            ✉️ 6-Digit Email Code
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("password")}
-            className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${
-              method === "password"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            🔑 Password
-          </button>
-        </div>
-
         {method === "password" ? (
-          <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
+          <>
+            <EnterprisePasswordForm mode={mode} onSuccess={handleSuccess} />
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setMethod("otp")}
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition underline underline-offset-4 cursor-pointer"
+              >
+                Prefer instant email code? Sign in with 6-digit OTP
+              </button>
+            </div>
+          </>
         ) : (
-          <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />
+          <>
+            <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setMethod("password")}
+                className="text-xs font-medium text-muted-foreground hover:text-primary transition underline underline-offset-4 cursor-pointer"
+              >
+                Use traditional password instead
+              </button>
+            </div>
+          </>
         )}
       </div>
 
