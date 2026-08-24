@@ -1,3 +1,8 @@
+## v0.56.0 — 2026-08-24
+
+### Features
+- feat(home): remove popular cities chips from hero section (1d37013)
+
 ## v0.55.2 — 2026-08-24
 
 ### Fixes
