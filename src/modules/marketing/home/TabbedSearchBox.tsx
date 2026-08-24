@@ -151,9 +151,8 @@ export function TabbedSearchBox({
               value={query}
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Search by locality, area, or landmark (e.g. Madhapur, HSR Layout, Bandra)"
-              // A placeholder is not an accessible name — it disappears on input.
               aria-label="Search localities or landmarks"
-              className="w-full bg-transparent text-sm py-2 sm:py-3 outline-none placeholder:text-muted-foreground text-foreground"
+              className="w-full bg-transparent text-sm py-2 sm:py-3 pr-24 outline-none placeholder:text-muted-foreground text-foreground"
             />
             <button
               type="button"

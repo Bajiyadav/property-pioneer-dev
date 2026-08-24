@@ -38,8 +38,8 @@ export function HeroSection({
         <div className="absolute inset-0 bg-gradient-to-b from-stone-950/55 via-stone-900/25 to-stone-950/60" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold mb-4 shadow-sm">
+      <div className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6 sm:pb-24 sm:pt-28 lg:pt-32 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-semibold mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-amber-300" />
           <span>Direct Owner Marketplace Across India · 0% Brokerage</span>
         </div>
