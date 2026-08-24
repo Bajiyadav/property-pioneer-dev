@@ -1,3 +1,8 @@
+## v0.57.0 — 2026-08-24
+
+### Features
+- feat(property): remove location reveal gate and display location directly (f703d16)
+
 ## v0.56.0 — 2026-08-24
 
 ### Features
