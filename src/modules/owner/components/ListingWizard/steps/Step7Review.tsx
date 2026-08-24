@@ -19,16 +19,17 @@ import type { ListingFormData } from "../types";
 export function Step7Review({
   data,
   updateData,
+  onEditStep,
 }: {
   data: ListingFormData;
   updateData?: (data: Partial<ListingFormData>) => void;
+  onEditStep?: (step: number) => void;
 }) {
   const isSale = data.listing_type === "sale";
   const isComplete =
     data.city && (data.locality || data.address) && data.price > 0 && data.area_sqft > 0;
 
   const images = data.images || [];
-  const coverImage = images[data.cover_image_index ?? 0] || images[0];
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out">
@@ -76,9 +77,20 @@ export function Step7Review({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 1. Property Details */}
         <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3.5 shadow-sm">
-          <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
-            <Building2 className="h-4 w-4 text-primary" />
-            <span>Property Specifications</span>
+          <div className="flex items-center justify-between text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              <span>Property Specifications</span>
+            </div>
+            {onEditStep && (
+              <button
+                type="button"
+                onClick={() => onEditStep(1)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
@@ -134,17 +146,35 @@ export function Step7Review({
 
         {/* 2. Location */}
         <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3.5 shadow-sm">
-          <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span>Location & Locality</span>
+          <div className="flex items-center justify-between text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              <span>Location & Locality</span>
+            </div>
+            {onEditStep && (
+              <button
+                type="button"
+                onClick={() => onEditStep(2)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            )}
           </div>
           <div className="text-xs space-y-2">
             <div>
               <span className="text-muted-foreground">City & Locality:</span>
               <p className="font-bold text-foreground text-sm mt-0.5">
                 {data.locality || "Locality not specified"}, {data.city || "Hyderabad"}
+                {data.pincode ? ` - ${data.pincode}` : ""}
               </p>
             </div>
+            {data.address && (
+              <div>
+                <span className="text-muted-foreground">Street Address:</span>
+                <p className="font-medium text-foreground mt-0.5">{data.address}</p>
+              </div>
+            )}
             {data.project_name && (
               <div>
                 <span className="text-muted-foreground">Society / Project:</span>
@@ -157,21 +187,25 @@ export function Step7Review({
                 <p className="font-medium text-foreground mt-0.5">{data.landmark}</p>
               </div>
             )}
-            <div>
-              <span className="text-muted-foreground">Privacy Protection:</span>
-              <p className="text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                Approximate ~500m radius circle displayed publicly
-              </p>
-            </div>
           </div>
         </div>
 
         {/* 3. Pricing */}
         <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3.5 shadow-sm">
-          <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
-            <IndianRupee className="h-4 w-4 text-primary" />
-            <span>Pricing & Financials</span>
+          <div className="flex items-center justify-between text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
+            <div className="flex items-center gap-2">
+              <IndianRupee className="h-4 w-4 text-primary" />
+              <span>Pricing & Financials</span>
+            </div>
+            {onEditStep && (
+              <button
+                type="button"
+                onClick={() => onEditStep(3)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
@@ -208,31 +242,49 @@ export function Step7Review({
           </div>
         </div>
 
-        {/* 4. Photos & Schedule */}
+        {/* 4. Owner & Contact Information */}
         <div className="rounded-2xl border border-border/80 bg-card p-5 space-y-3.5 shadow-sm">
-          <div className="flex items-center gap-2 text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
-            <Calendar className="h-4 w-4 text-primary" />
-            <span>Photos & Visit Schedule</span>
+          <div className="flex items-center justify-between text-foreground font-bold text-sm border-b border-border/40 pb-2.5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>Owner & Contact Details</span>
+            </div>
+            {onEditStep && (
+              <button
+                type="button"
+                onClick={() => onEditStep(6)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
+              <span className="text-muted-foreground">Owner Name:</span>
+              <p className="font-bold text-foreground mt-0.5">
+                {data.owner_name || "Verified Owner"}
+              </p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Contact WhatsApp:</span>
+              <p className="font-bold text-foreground mt-0.5">
+                {data.owner_phone
+                  ? `+91 ${data.owner_phone.replace(/\D/g, "").slice(-10)}`
+                  : "Not provided"}
+              </p>
+            </div>
+            <div>
               <span className="text-muted-foreground">Real Photos:</span>
-              <p className="font-bold text-foreground mt-0.5 flex items-center gap-1">
+              <p className="font-semibold text-foreground mt-0.5 flex items-center gap-1">
                 <ImageIcon className="w-3.5 h-3.5 text-primary" />
                 {images.length} photo(s) uploaded
               </p>
             </div>
             <div>
-              <span className="text-muted-foreground">Availability:</span>
-              <p className="font-bold text-foreground mt-0.5">
-                {data.visit_availability || "Immediate"}
-              </p>
-            </div>
-            <div className="col-span-2">
-              <span className="text-muted-foreground">Visit Days & Slots:</span>
+              <span className="text-muted-foreground">Visit Availability:</span>
               <p className="font-semibold text-foreground mt-0.5">
-                {(data.visit_days || ["All Days"]).join(", ")} ·{" "}
-                {(data.visit_time_slots || ["Morning", "Evening"]).join(", ")}
+                {data.visit_availability || "Immediate"}
               </p>
             </div>
           </div>

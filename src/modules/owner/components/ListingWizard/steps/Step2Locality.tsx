@@ -77,64 +77,14 @@ export function Step2Locality({ data, updateData }: StepProps) {
         </p>
       </div>
 
-      {/* Owner Contact Card */}
-      <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-7 shadow-sm space-y-6">
-        <h3 className="text-base font-bold text-foreground border-b border-border/40 pb-3 flex items-center justify-between">
-          <span>Owner Information</span>
-          <span className="text-[10px] tracking-wider uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1">
-            <Shield className="w-3 h-3" />
-            0% Brokerage · Direct Owner
-          </span>
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-          <div className="space-y-2.5">
-            <Label htmlFor="owner_name" className="text-sm font-semibold text-foreground">
-              Your Full Name *
-            </Label>
-            <Input
-              id="owner_name"
-              placeholder="e.g. Ramesh Reddy"
-              className="h-11 rounded-xl bg-background border-border/80 text-sm focus:ring-2 focus:ring-primary/20 transition-all"
-              value={data.owner_name || ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                updateData({ owner_name: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2.5">
-            <Label htmlFor="owner_phone" className="text-sm font-semibold text-foreground">
-              WhatsApp / Phone Number *
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                +91
-              </span>
-              <Input
-                id="owner_phone"
-                type="tel"
-                maxLength={10}
-                placeholder="10-digit mobile number"
-                className="h-11 pl-12 rounded-xl bg-background border-border/80 text-sm font-medium tracking-wide focus:ring-2 focus:ring-primary/20 transition-all"
-                value={(data.owner_phone || "").replace(/^\+?91/, "")}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const cleaned = e.target.value.replace(/\D/g, "");
-                  updateData({ owner_phone: cleaned });
-                }}
-              />
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Buyer/tenant visit requests & enquiries are routed directly to this verified number.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* City & Locality Selector */}
       <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-7 shadow-sm space-y-6">
-        <h3 className="text-base font-bold text-foreground border-b border-border/40 pb-3">
-          City & Locality
+        <h3 className="text-base font-bold text-foreground border-b border-border/40 pb-3 flex items-center justify-between">
+          <span>City & Locality</span>
+          <span className="text-[10px] tracking-wider uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <Shield className="w-3 h-3" />
+            Verified Market Search
+          </span>
         </h3>
 
         {/* City Selector */}
@@ -239,19 +189,37 @@ export function Step2Locality({ data, updateData }: StepProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address" className="text-sm font-semibold text-foreground">
-            Street Address *
-          </Label>
-          <Input
-            id="address"
-            placeholder="e.g. Flat 302, Block A, Main Road"
-            className="h-11 rounded-xl bg-background border-border/80 text-sm"
-            value={data.address || ""}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              updateData({ address: e.target.value })
-            }
-          />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="md:col-span-2 space-y-2">
+            <Label htmlFor="address" className="text-sm font-semibold text-foreground">
+              Street Address *
+            </Label>
+            <Input
+              id="address"
+              placeholder="e.g. Flat 302, Block A, Main Road"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm"
+              value={data.address || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ address: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pincode" className="text-sm font-semibold text-foreground">
+              PIN Code <span className="text-xs text-muted-foreground font-normal">(6 Digits)</span>
+            </Label>
+            <Input
+              id="pincode"
+              maxLength={6}
+              placeholder="e.g. 500081"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm"
+              value={data.pincode || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                updateData({ pincode: e.target.value.replace(/\D/g, "") })
+              }
+            />
+          </div>
         </div>
       </div>
 

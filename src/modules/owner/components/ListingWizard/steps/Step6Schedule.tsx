@@ -231,6 +231,73 @@ export function Step6Schedule({ data, updateData }: StepProps) {
           })}
         </div>
       </div>
+
+      {/* Verified Owner Contact Details (Step 5 of flow) */}
+      <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-7 shadow-sm space-y-5">
+        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <div className="space-y-0.5">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <span>Owner & Contact Details</span>
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Automatically linked to your verified Seedha Properties account.
+            </p>
+          </div>
+          <span className="text-[10px] tracking-wider uppercase font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+            0% Brokerage
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="owner_name" className="text-xs font-semibold text-foreground">
+              Owner Full Name *
+            </Label>
+            <Input
+              id="owner_name"
+              placeholder="e.g. Ramesh Reddy"
+              className="h-11 rounded-xl bg-background border-border/80 text-sm"
+              value={data.owner_name || ""}
+              onChange={(e) => updateData({ owner_name: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="owner_phone" className="text-xs font-semibold text-foreground">
+                WhatsApp Contact Number *
+              </Label>
+              {/^[6-9]\d{9}$/.test((data.owner_phone || "").replace(/\D/g, "")) && (
+                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Valid WhatsApp
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
+                +91
+              </span>
+              <Input
+                id="owner_phone"
+                type="tel"
+                maxLength={10}
+                placeholder="10-digit mobile number"
+                className="h-11 pl-12 rounded-xl bg-background border-border/80 text-sm font-medium"
+                value={(data.owner_phone || "").replace(/^\+?91/, "")}
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(/\D/g, "");
+                  updateData({ owner_phone: cleaned });
+                }}
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Genuine tenant and buyer enquiries and visit notifications will be sent directly to
+              this number.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

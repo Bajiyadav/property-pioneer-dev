@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Check,
@@ -9,6 +9,7 @@ import {
   Building2,
   ShieldCheck,
 } from "lucide-react";
+import { Step0AuthGate } from "./Step0AuthGate";
 import { Step1PropertyDetails } from "./steps/Step1PropertyDetails";
 import { Step2Locality } from "./steps/Step2Locality";
 import { Step3Pricing } from "./steps/Step3Pricing";
@@ -28,7 +29,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { createListing } from "@/modules/owner/services/ownerFunctions";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
-import { OwnerSmartAuthModal } from "@/shared/components/auth/OwnerSmartAuthModal";
 import { resolveInitialStep } from "./resolveInitialStep";
 import { validateStep } from "./stepValidation";
 
@@ -69,6 +69,7 @@ function saveDraft(data: ListingFormData): void {
 function clearDraft(): void {
   try {
     window.localStorage.removeItem(LISTING_DRAFT_KEY);
+    window.localStorage.removeItem("listing_draft");
     window.localStorage.removeItem("listing_prefill");
   } catch {
     /* nothing to recover */
@@ -133,7 +134,7 @@ const steps = [
   { id: 3, name: "Pricing", desc: "Rent/Sale & Terms", percent: 40 },
   { id: 4, name: "Amenities", desc: "Features & Facilities", percent: 60 },
   { id: 5, name: "Gallery", desc: "Real Photos", percent: 75 },
-  { id: 6, name: "Schedule", desc: "Visit Slots & Days", percent: 90 },
+  { id: 6, name: "Schedule", desc: "Visit Slots & Contact", percent: 90 },
   { id: 7, name: "Review", desc: "Verify & Submit", percent: 100 },
 ];
 
@@ -144,14 +145,23 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
   const initialStep = resolveInitialStep(initialData);
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
-  const [showOwnerAuthModal, setShowOwnerAuthModal] = useState(false);
-  const { status, refreshSession } = useAuth();
+  const { status, user, refreshSession } = useAuth();
   const create = useServerFn(createListing);
   const addProperty = useAdminPropertyStore((state) => state.addProperty);
 
   const [formData, setFormData] = useState<ListingFormData>({
-    owner_name: "",
-    owner_phone: readStashedPhone(),
+    owner_name:
+      (user?.user_metadata?.full_name as string) ||
+      (user?.user_metadata?.name as string) ||
+      stashedDraft?.owner_name ||
+      "",
+    owner_phone:
+      (user?.user_metadata?.phone as string) ||
+      (user?.phone as string) ||
+      readStashedPhone() ||
+      stashedDraft?.owner_phone ||
+      "",
+    owner_email: user?.email || stashedDraft?.owner_email || "",
     project_name: "",
     city: initialData?.city || stashedDraft?.city || "Hyderabad",
     locality: initialData?.locality || stashedDraft?.locality || "",
@@ -197,8 +207,29 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     ...(stashedDraft ?? {}),
   });
 
+  // Automatically populate owner contact from user profile whenever auth state settles
+  useEffect(() => {
+    if (status === "authenticated" && user) {
+      setFormData((prev) => ({
+        ...prev,
+        owner_name:
+          prev.owner_name ||
+          (user.user_metadata?.full_name as string) ||
+          (user.user_metadata?.name as string) ||
+          "",
+        owner_phone:
+          prev.owner_phone || (user.user_metadata?.phone as string) || (user.phone as string) || "",
+        owner_email: prev.owner_email || user.email || "",
+      }));
+    }
+  }, [status, user]);
+
   const updateFormData = (data: Partial<ListingFormData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData((prev) => {
+      const next = { ...prev, ...data };
+      saveDraft(next);
+      return next;
+    });
   };
 
   const handleNext = () => {
@@ -215,22 +246,8 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     }
 
     if (currentStep === 2) {
-      if (!formData.owner_name?.trim()) {
-        toast.error("Please enter your name to proceed.");
-        return;
-      }
-      if (!/^[6-9]\d{9}$/.test((formData.owner_phone ?? "").replace(/\D/g, ""))) {
-        toast.error("Enter a valid 10-digit mobile number so buyers/tenants can reach you.");
-        return;
-      }
       if (!formData.locality.trim() && !formData.address.trim()) {
         toast.error("Please enter a locality or street address to proceed.");
-        return;
-      }
-
-      if (status !== "authenticated") {
-        saveDraft(formData);
-        setShowOwnerAuthModal(true);
         return;
       }
     }
@@ -242,9 +259,14 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
       }
     }
 
-    // Supplementary gate. The per-step checks above stay authoritative for what
-    // they cover (step 2 also opens the sign-in modal); this adds the steps that
-    // had no gate at all and the cross-field rules a single field cannot catch.
+    if (currentStep === 6) {
+      const phoneDigits = (formData.owner_phone ?? "").replace(/\D/g, "").replace(/^91/, "");
+      if (!/^[6-9]\d{9}$/.test(phoneDigits)) {
+        toast.error("Enter a valid 10-digit mobile number so buyers/tenants can reach you.");
+        return;
+      }
+    }
+
     const issues = validateStep(currentStep, formData);
     if (issues.length > 0) {
       toast.error(issues[0].message);
@@ -321,13 +343,21 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         area_sqft: built.payload.area_sqft,
         is_approved: false,
         is_featured: false,
-        // No placeholder substitution: a listing with no photos must LOOK like a
-        // listing with no photos, here and everywhere else.
         images: built.payload.images,
       });
 
-      // Navigate directly to the Owner Dashboard on submission
-      navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
+      // Navigate to dedicated submitted status page with reference ID
+      const resultObj = created as { id?: string } | undefined | null;
+      const propertyId = resultObj?.id && typeof resultObj.id === "string" ? resultObj.id : null;
+
+      if (propertyId) {
+        navigate({
+          to: "/list-property/submitted/$id",
+          params: { id: propertyId },
+        });
+      } else {
+        navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save listing";
       toast.error(msg);
@@ -354,6 +384,43 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
     return Math.min(100, Math.max(minStepPct, dataPct));
   }
 
+  // STEP 0: Authentication Gate before wizard starts
+  if (status !== "loading" && status !== "authenticated") {
+    return (
+      <div className="min-h-screen bg-background pb-16">
+        <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border/80 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link to="/" className="flex items-center gap-2">
+                <BrandMark size="sm" />
+              </Link>
+              <span className="text-border">/</span>
+              <span className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>Owner Sign In</span>
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-3xl mx-auto px-4 pt-6">
+          <Step0AuthGate
+            onSuccess={async (profile) => {
+              setFormData((prev) => ({
+                ...prev,
+                owner_name: profile.name || prev.owner_name,
+                owner_email: profile.email || prev.owner_email,
+                owner_phone: profile.phone || prev.owner_phone,
+              }));
+              await refreshSession();
+              setCurrentStep(1);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-28 md:pb-16">
       {/* Top Header */}
@@ -376,7 +443,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
               size="sm"
               onClick={() => handleSave("draft")}
               disabled={isSaving}
-              className="text-xs font-semibold rounded-xl"
+              className="text-xs font-semibold rounded-xl cursor-pointer"
             >
               Save Draft
             </Button>
@@ -406,7 +473,16 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
           {currentStep === 4 && <Step4Amenities data={formData} updateData={updateFormData} />}
           {currentStep === 5 && <Step5Photos data={formData} updateData={updateFormData} />}
           {currentStep === 6 && <Step6Schedule data={formData} updateData={updateFormData} />}
-          {currentStep === 7 && <Step7Review data={formData} updateData={updateFormData} />}
+          {currentStep === 7 && (
+            <Step7Review
+              data={formData}
+              updateData={updateFormData}
+              onEditStep={(stepId) => {
+                setCurrentStep(stepId);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
+          )}
         </div>
 
         {/* Desktop Step Action Footer */}
@@ -417,7 +493,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
                 variant="outline"
                 onClick={handleBack}
                 disabled={isSaving}
-                className="gap-2 rounded-xl text-sm font-semibold"
+                className="gap-2 rounded-xl text-sm font-semibold cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4" /> Back
               </Button>
@@ -429,7 +505,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
               <Button
                 onClick={() => handleSave("submit")}
                 disabled={isSaving}
-                className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md"
+                className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md cursor-pointer"
               >
                 <Check className="h-4 w-4" />
                 <span>{isSaving ? "Submitting..." : "Submit for Moderation"}</span>
@@ -438,7 +514,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
               <Button
                 onClick={handleNext}
                 disabled={isSaving}
-                className="gap-2 bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-xl shadow-xs"
+                className="gap-2 bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-xl shadow-xs cursor-pointer"
               >
                 <span>Continue</span>
                 <ArrowRight className="h-4 w-4" />
@@ -456,19 +532,6 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         onBack={handleBack}
         onNext={handleNext}
         onSaveSubmit={() => handleSave("submit")}
-      />
-
-      {/* Owner Auth Modal when step 2 phone requires authentication */}
-      <OwnerSmartAuthModal
-        isOpen={showOwnerAuthModal}
-        onClose={() => setShowOwnerAuthModal(false)}
-        phone={formData.owner_phone || ""}
-        onSuccess={async () => {
-          setShowOwnerAuthModal(false);
-          await refreshSession();
-          toast.success("Phone verified! Proceeding with your listing.");
-          setCurrentStep(3);
-        }}
       />
     </div>
   );
