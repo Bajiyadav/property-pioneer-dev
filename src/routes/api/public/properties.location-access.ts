@@ -80,6 +80,34 @@ export const Route = createFileRoute("/api/public/properties/location-access")({
           );
         }
 
+        // Reveal the EXACT address only now that the location has matched, and
+        // read it with the SERVICE-ROLE client: `address`/`landmark` are revoked
+        // from the anon/authenticated column grants and never travel in the
+        // public property payload, so this endpoint is the one place allowed to
+        // surface them (mirrors the owner_phone gate in
+        // properties.$id.contact.ts). A scraper that never matches a location
+        // therefore never receives the street address.
+        if (propertyId) {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { data: exact } = await supabaseAdmin
+              .from("properties")
+              .select("address, landmark")
+              .eq("id", propertyId)
+              .eq("is_approved", true)
+              .maybeSingle();
+            if (exact) {
+              validation.revealedLocation = {
+                address: (exact as { address?: string | null }).address ?? null,
+                landmark: (exact as { landmark?: string | null }).landmark ?? null,
+              };
+            }
+          } catch {
+            // Non-fatal: the location still validated. We simply cannot attach
+            // the exact address, and the client falls back to coarse locality.
+          }
+        }
+
         await recordAudit({
           event: "property.location_access.granted",
           outcome: "success",

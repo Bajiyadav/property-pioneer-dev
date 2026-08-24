@@ -21,19 +21,29 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../fixtures/qaAccounts";
 const canRun = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 describe("Property column set", () => {
-  it("still requests the video and location fields", () => {
+  it("still requests the video and coarse-location fields", () => {
     // Guards against "fixing" the schema gap by deleting the feature.
     for (const column of [
       "video_url",
       "video_status",
       "locality",
-      "landmark",
       "metro_station",
       "it_park",
       "college",
       "hospital",
     ]) {
       expect(PUBLIC_PROPERTY_COLUMNS).toContain(column);
+    }
+  });
+
+  it("gates the EXACT location out of the public payload (address + landmark)", () => {
+    // `address` and `landmark` are SENSITIVE. They are deliberately excluded
+    // from the public column grant/select (like owner_phone) and released only
+    // by /api/public/properties/location-access after a matching city+locality.
+    // If this ever regresses, the exact street address leaks in every public
+    // property payload again.
+    for (const column of ["address", "landmark"]) {
+      expect(PUBLIC_PROPERTY_COLUMNS.split(",")).not.toContain(column);
     }
   });
 });
