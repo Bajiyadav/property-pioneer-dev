@@ -1,3 +1,11 @@
+## v0.55.0 — 2026-08-24
+
+### Features
+- feat(analytics): time-ranged, real-time, visual activity analytics (#22) (a555941)
+
+### Fixes
+- fix(search): fill search-results width with a responsive auto-fit card grid (#21) (837b74e)
+
 ## v0.54.0 — 2026-08-24
 
 ### Features
