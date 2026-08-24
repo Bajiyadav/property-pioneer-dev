@@ -1,3 +1,8 @@
+## v0.58.0 — 2026-08-24
+
+### Features
+- feat(auth): rename to Create Account and streamline traditional password form (3077cf5)
+
 ## v0.57.0 — 2026-08-24
 
 ### Features
