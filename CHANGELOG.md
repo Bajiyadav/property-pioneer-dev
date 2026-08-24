@@ -1,3 +1,8 @@
+## v0.54.1 — 2026-08-24
+
+### Fixes
+- fix(search): fill search-results width with a responsive auto-fit card grid (#21) (837b74e)
+
 ## v0.54.0 — 2026-08-24
 
 ### Features
