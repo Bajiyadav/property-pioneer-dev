@@ -1,3 +1,8 @@
+## v0.54.0 — 2026-08-24
+
+### Features
+- feat(ui): update navigation and CTA terminology from List Property to Post Property (b0b9d86)
+
 ## v0.53.0 — 2026-08-24
 
 ### Features
