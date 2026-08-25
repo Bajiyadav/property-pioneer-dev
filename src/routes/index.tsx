@@ -12,7 +12,6 @@ import {
 
 import { HeroSection } from "@/modules/marketing/home/HeroSection";
 import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
-import { PropertyCategories } from "@/modules/marketing/home/PropertyCategories";
 import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
 import { PaymentsAndRewardsBanner } from "@/modules/marketing/home/PaymentsAndRewardsBanner";
 import { PopularCities } from "@/modules/marketing/home/PopularCities";
@@ -82,9 +81,6 @@ function Index() {
 
       {/* 2. Real Estate Quote Banner */}
       <QuoteBanner />
-
-      {/* 3. Property Categories Grid */}
-      <PropertyCategories />
 
       {/* 4. Featured Rentals (Hyderabad Focus) */}
       <FeaturedProperties
