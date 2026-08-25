@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["tests/unit/**/*.test.ts **/*.test.tsx"],
+    include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
     // These suites authenticate as four real QA accounts and sign out with
     // `scope: "global"`, which revokes that user's sessions everywhere. Two
     // files running at once therefore tear down each other's session and fail
