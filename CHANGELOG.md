@@ -1,3 +1,13 @@
+## v0.63.0 — 2026-08-25
+
+### Features
+- feat: check if account exists via RPC to provide better error messages (3b48713)
+
+### Migration notes
+- supabase/migrations/20260825000000_check_account_exists.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.62.0 — 2026-08-25
 
 ### Features
