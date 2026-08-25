@@ -1,3 +1,8 @@
+## v0.62.0 — 2026-08-25
+
+### Features
+- feat: make category and intent empty by default (182f11d)
+
 ## v0.61.3 — 2026-08-25
 
 ### Fixes
