@@ -1,3 +1,8 @@
+## v0.64.1 — 2026-08-25
+
+### Fixes
+- fix: update property detail page gallery to 1+3 mosaic layout (826dc02)
+
 ## v0.64.0 — 2026-08-25
 
 ### Features
