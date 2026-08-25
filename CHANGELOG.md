@@ -1,3 +1,8 @@
+## v0.61.0 — 2026-08-25
+
+### Features
+- feat: change minimum password length to 6 (8a6c873)
+
 ## v0.60.1 — 2026-08-24
 
 ### Fixes
