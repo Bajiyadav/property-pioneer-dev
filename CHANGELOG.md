@@ -1,3 +1,8 @@
+## v0.61.1 — 2026-08-25
+
+### Refactoring
+- refactor: remove auth tabs and use toggle (715bd1d)
+
 ## v0.61.0 — 2026-08-25
 
 ### Features
