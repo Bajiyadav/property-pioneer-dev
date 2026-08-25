@@ -48,13 +48,13 @@ import {
 } from "@/modules/property/services/propertyQueries";
 import { useFavorites } from "@/modules/property/hooks/useFavorites";
 import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
-import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
-import { ScheduleVisitModal } from "@/shared/components/dialogs/ScheduleVisitModal";
-import { EmiCalculatorModal } from "@/shared/components/dialogs/EmiCalculatorModal";
-import { ReportListingModal } from "@/shared/components/dialogs/ReportListingModal";
+import { ScheduleVisitModal } from "@/components/dialogs/ScheduleVisitModal";
+import { EmiCalculatorModal } from "@/components/dialogs/EmiCalculatorModal";
+import { ReportListingModal } from "@/components/dialogs/ReportListingModal";
 import {
   APP_NAME,
   APP_URL,

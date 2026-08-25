@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 
 export const Route = createFileRoute("/agents")({
   head: () => {

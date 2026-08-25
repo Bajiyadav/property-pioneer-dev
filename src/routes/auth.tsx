@@ -4,12 +4,12 @@ import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { BrandMark } from "@/shared/components/BrandMark";
+import { BrandMark } from "@/components/branding/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
 
-import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
+import { GoogleSignInButton } from "@/modules/authentication/components/GoogleSignInButton";
 import { ShieldCheck } from "lucide-react";
 
 const authSearchSchema = z.object({

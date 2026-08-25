@@ -1,5 +1,5 @@
 import React from "react";
-import { Label } from "@/shared/components/ui/label";
+import { Label } from "@/components/ui/label";
 import {
   Sparkles,
   Wifi,

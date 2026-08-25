@@ -2,8 +2,8 @@ import React from "react";
 import { type Property } from "@/modules/property/services/propertyService";
 import { formatPrice } from "@/modules/property/services/propertyQueries";
 import { X, CheckCircle, XCircle } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+import { Button } from "@/components/ui/button";
+import { useAdminPropertyStore } from "@/modules/admin/stores/adminPropertyStore";
 
 export function PropertyReviewModal({
   property,

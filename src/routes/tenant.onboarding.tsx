@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TenantOnboardingAI } from "@/shared/components/ai/TenantOnboardingAI";
+import { TenantOnboardingAI } from "@/modules/interactions/components/ai/TenantOnboardingAI";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 
 export const Route = createFileRoute("/tenant/onboarding")({

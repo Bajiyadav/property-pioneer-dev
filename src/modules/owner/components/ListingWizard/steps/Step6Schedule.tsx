@@ -1,6 +1,6 @@
 import React from "react";
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Calendar, Clock, Phone, MessageSquare, ShieldCheck, Check, Sparkles } from "lucide-react";
 import type { StepProps, ListingFormData } from "../types";
 

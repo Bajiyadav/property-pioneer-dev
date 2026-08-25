@@ -24,7 +24,7 @@ import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import {
   PropertyImageBranding,
   DEFAULT_PROPERTY_COVER,
-} from "@/shared/components/PropertyImageBranding";
+} from "@/modules/property/components/PropertyImageBranding";
 import { InquiryPhoneModal } from "@/modules/tenant/components/InquiryPhoneModal";
 
 export function PropertyCard({ property }: { property: Property }) {

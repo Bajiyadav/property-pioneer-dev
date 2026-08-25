@@ -1,4 +1,4 @@
-import { PropertyImage } from "@/shared/components/PropertyImage";
+import { PropertyImage } from "@/modules/property/components/PropertyImage";
 export function Stat({
   icon,
   label,

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MailCheck, TriangleAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { BrandMark } from "@/shared/components/BrandMark";
+import { BrandMark } from "@/components/branding/BrandMark";
 import { getDashboardRoute } from "@/config/roles";
 import { resolveRoleForSession } from "@/modules/authentication/services/session";
 import { APP_NAME } from "@/config/app";

@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Phone, User, CheckCircle2 } from "lucide-react";
 import { enquiryInputSchema } from "@/modules/enquiry/services/enquiryService";
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, Home, IndianRupee } from "lucide-react";
 
 export function OptionalPreferencesCard() {

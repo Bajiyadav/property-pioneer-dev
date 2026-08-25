@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { RazorpayCheckoutHandler } from "@/components/RazorpayCheckoutHandler";
 import { Heart } from "lucide-react";
-import { BrandMark } from "@/shared/components/BrandMark";
+import { BrandMark } from "@/components/branding/BrandMark";
 import { BRAND } from "@/config/platform";
 import {
   APP_NAME,
@@ -24,8 +24,8 @@ import {
   APP_URL,
 } from "@/config/app";
 import { HeaderProfileMenu } from "@/app/layouts/HeaderProfileMenu";
-import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
-import { ExpansionWaitlistModal } from "@/shared/components/dialogs/ExpansionWaitlistModal";
+import { CustomErrorBoundary } from "@/components/feedback/CustomErrorBoundary";
+import { ExpansionWaitlistModal } from "@/components/dialogs/ExpansionWaitlistModal";
 import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 
@@ -156,7 +156,7 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-import { SeedhaAIAssistant } from "@/shared/components/ai/SeedhaAIAssistant";
+import { SeedhaAIAssistant } from "@/modules/interactions/components/ai/SeedhaAIAssistant";
 import { MobileBottomNav } from "@/app/layouts/MobileBottomNav";
 
 function RootComponent() {

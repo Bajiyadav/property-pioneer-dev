@@ -8,7 +8,7 @@ import {
   resolveRoleForSession,
   type ResolvedSession,
 } from "@/modules/authentication/services/session";
-import { notifyLoginSecurityEvent } from "@/shared/services/notificationService";
+import { notifyLoginSecurityEvent } from "@/lib/notificationService";
 
 export type AuthStatus = "loading" | "authenticated" | "guest";
 

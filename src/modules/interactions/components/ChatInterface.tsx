@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, User as UserIcon, Home, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
-import { useInteractionStore, type Chat } from "@/shared/stores/interactionStore";
+import { useInteractionStore, type Chat } from "@/modules/interactions/stores/interactionStore";
 
 interface ChatInterfaceProps {
   currentUserId: string;

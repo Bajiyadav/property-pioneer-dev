@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Sparkles, ImageOff, ArrowRight, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { BackLink } from "@/shared/components/navigation/BackLink";
+import { BackLink } from "@/components/navigation/BackLink";
 import { formatPrice } from "@/modules/property/services/propertyQueries";
 import {
   VISIBILITY_PLANS,

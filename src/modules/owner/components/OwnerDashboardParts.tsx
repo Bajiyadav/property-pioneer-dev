@@ -1,4 +1,4 @@
-import { PropertyImage } from "@/shared/components/PropertyImage";
+import { PropertyImage } from "@/modules/property/components/PropertyImage";
 
 import { CreditCard, Star } from "lucide-react";
 import { SectionHeader } from "@/modules/dashboard/components/DashboardKit";

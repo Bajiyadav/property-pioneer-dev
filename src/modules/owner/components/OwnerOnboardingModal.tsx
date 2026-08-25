@@ -1,4 +1,4 @@
-import { PropertyImage } from "@/shared/components/PropertyImage";
+import { PropertyImage } from "@/modules/property/components/PropertyImage";
 import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";

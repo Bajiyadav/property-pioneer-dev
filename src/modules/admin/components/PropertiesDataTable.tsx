@@ -4,7 +4,7 @@ import { formatPrice } from "@/modules/property/services/propertyQueries";
 import { Eye, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { PropertyReviewModal } from "./PropertyReviewModal";
 import { RejectPropertyDialog } from "./RejectPropertyDialog";
-import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+import { useAdminPropertyStore } from "@/modules/admin/stores/adminPropertyStore";
 
 export function PropertiesDataTable({
   properties,

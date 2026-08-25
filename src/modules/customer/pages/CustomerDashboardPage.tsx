@@ -66,7 +66,7 @@ import {
   ProfilePanel,
   SettingsPanel,
 } from "@/modules/customer/components/CustomerDashboardParts";
-import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { useInteractionStore } from "@/modules/interactions/stores/interactionStore";
 import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
 import { TenantProfile } from "@/modules/tenant/components/TenantProfile";
 

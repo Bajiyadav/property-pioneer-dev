@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+import { useAdminPropertyStore } from "@/modules/admin/stores/adminPropertyStore";
 import { ActivityAnalyticsPanel } from "@/modules/analytics/components/ActivityAnalyticsPanel";
 import { TrendingUp, Clock, CheckCircle2, XCircle, Home } from "lucide-react";
 

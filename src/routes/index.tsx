@@ -22,11 +22,8 @@ import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
 import { FeedbackSection } from "@/modules/feedback/components/FeedbackSection";
 
-import {
-  CityExpansionModal,
-  type CityModalData,
-} from "@/shared/components/dialogs/CityExpansionModal";
-import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
+import { CityExpansionModal, type CityModalData } from "@/components/dialogs/CityExpansionModal";
+import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 
 export const Route = createFileRoute("/")({
   head: () => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   PropertyWatermark,
   type PropertyWatermarkProps,
-} from "@/shared/components/PropertyWatermark";
+} from "@/modules/property/components/PropertyWatermark";
 
 export const DEFAULT_PROPERTY_COVER =
   "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";

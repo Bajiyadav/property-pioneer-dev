@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { getDashboardRoute } from "@/config/roles";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { BrandMark } from "@/shared/components/BrandMark";
+import { BrandMark } from "@/components/branding/BrandMark";
 
 /**
  * Index route for `/dashboard` — sends the user to their own role dashboard.

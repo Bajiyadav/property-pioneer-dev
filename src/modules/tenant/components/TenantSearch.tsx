@@ -15,7 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { PropertyMatchingScore } from "./PropertyMatchingScore";
 import type { TenantProfile, MatchedProperty } from "../types";
 import { getMatchedPropertiesForTenant } from "../services/tenantFunctions";

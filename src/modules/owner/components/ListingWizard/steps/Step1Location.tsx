@@ -1,6 +1,6 @@
 import React from "react";
-import { Label } from "@/shared/components/ui/label";
-import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { MapPin, Search, Building, Check, Globe, Sparkles, Map } from "lucide-react";
 import type { StepProps } from "../types";
 

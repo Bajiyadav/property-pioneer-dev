@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { BrandMark } from "@/shared/components/BrandMark";
-import { CustomErrorBoundary } from "@/shared/components/feedback/CustomErrorBoundary";
+import { BrandMark } from "@/components/branding/BrandMark";
+import { CustomErrorBoundary } from "@/components/feedback/CustomErrorBoundary";
 import { useAuthSession } from "@/hooks/useAuthSession";
 import { getDashboardRoute } from "@/config/roles";
 

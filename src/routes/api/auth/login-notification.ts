@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { getClientIp, getUserAgent, jsonResponse, recordAudit } from "@/lib/security.server";
-import { dispatchLoginSecurityEmail } from "@/shared/services/notificationService";
+import { dispatchLoginSecurityEmail } from "@/lib/notificationService";
 import { checkSessionLive } from "@/integrations/supabase/session-liveness.server";
 import type { Database } from "@/integrations/supabase/types";
 

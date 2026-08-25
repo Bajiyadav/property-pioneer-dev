@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { fetchProperties, type Property } from "@/modules/property/services/propertyQueries";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
-import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
+import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 
 export interface Hotspot {
   name: string;

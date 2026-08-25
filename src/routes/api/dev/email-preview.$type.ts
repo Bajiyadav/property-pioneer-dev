@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getEmailPreviews, type EmailTemplateKey } from "@/shared/services/email/templates";
+import { getEmailPreviews, type EmailTemplateKey } from "@/lib/email/templates";
 
 /**
  * Local email template preview. Renders a template's HTML with SAMPLE data (no

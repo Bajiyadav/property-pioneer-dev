@@ -34,7 +34,7 @@ import type { OwnerLead } from "@/modules/owner/services/owner.server";
 import { getMyLeads, getMyListings, removeListing } from "@/modules/owner/services/ownerFunctions";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
-import { OwnerOnboardingModal } from "@/shared/components/dialogs/OwnerOnboardingModal";
+import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 import {
   ActivityTimeline,
   CardSkeleton,
@@ -60,7 +60,7 @@ import {
 import { countBy, relativeTime } from "@/modules/dashboard/services/dashboardData";
 import { displayName } from "@/modules/authentication/services/session";
 import { ListingRows, OwnerSettings } from "@/modules/owner/components/OwnerDashboardParts";
-import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { useInteractionStore } from "@/modules/interactions/stores/interactionStore";
 import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
 
 const NAV_ITEMS: NavItem[] = [

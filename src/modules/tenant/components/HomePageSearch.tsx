@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, MapPin, Sparkles, Building2, ArrowRight } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { LocationSelector } from "@/shared/components/listing/LocationSelector";
+import { Button } from "@/components/ui/button";
+import { LocationSelector } from "@/modules/property/components/listing/LocationSelector";
 
 interface HomePageSearchProps {
   initialCity?: string;

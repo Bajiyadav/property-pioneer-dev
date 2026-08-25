@@ -4,7 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { ChevronLeft, ChevronRight, Menu, X, LogOut, Home, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { type UserRole } from "@/config/roles";
-import { BrandMark } from "@/shared/components/BrandMark";
+import { BrandMark } from "@/components/branding/BrandMark";
 import { Breadcrumbs } from "@/modules/dashboard/components/DashboardKit";
 import { displayName, initialsFor } from "@/modules/authentication/services/session";
 import { useAuthSession } from "@/hooks/useAuthSession";

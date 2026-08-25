@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ImageOff, Info, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { BackLink } from "@/shared/components/navigation/BackLink";
+import { BackLink } from "@/components/navigation/BackLink";
 import { findVisibilityPlan, formatVisibilityInr } from "@/config/visibilityPlans";
 import {
   getPromotionAvailability,

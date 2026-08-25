@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
-import { TurnstileWidget } from "@/shared/components/TurnstileWidget";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 import { CheckCircle2, MessageSquare, Send } from "lucide-react";
-import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { useInteractionStore } from "@/modules/interactions/stores/interactionStore";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function EnquiryForm({

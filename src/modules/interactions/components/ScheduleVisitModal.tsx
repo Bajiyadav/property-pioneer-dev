@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, Calendar as CalendarIcon, Video, MapPin, CheckCircle2 } from "lucide-react";
 import { format, addDays } from "date-fns";
-import { useInteractionStore } from "@/shared/stores/interactionStore";
+import { useInteractionStore } from "@/modules/interactions/stores/interactionStore";
 
 interface ScheduleVisitModalProps {
   isOpen: boolean;

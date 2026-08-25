@@ -13,8 +13,8 @@
  *    as an `Authorization` header to this app's own origin and is never logged,
  *    echoed in a response, or written into the email.
  */
-import { sendTransactionalEmail, type EmailDeliveryResult } from "@/shared/services/emailService";
-import { loginSecurityEmail } from "@/shared/services/email/templates";
+import { sendTransactionalEmail, type EmailDeliveryResult } from "@/lib/emailService";
+import { loginSecurityEmail } from "@/lib/email/templates";
 
 export interface LoginSecurityEventContext {
   userId: string;

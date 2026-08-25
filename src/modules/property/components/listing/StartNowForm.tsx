@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
-import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
+import { GoogleSignInButton } from "@/modules/authentication/components/GoogleSignInButton";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
 
 export interface StartNowFormProps {

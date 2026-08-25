@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { type Property } from "@/modules/property/services/propertyService";
 import { X, AlertTriangle } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { useAdminPropertyStore } from "@/shared/stores/adminPropertyStore";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminPropertyStore } from "@/modules/admin/stores/adminPropertyStore";
 
 export function RejectPropertyDialog({
   property,

@@ -12,7 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
-import { StartNowForm } from "@/shared/components/listing/StartNowForm";
+import { StartNowForm } from "@/modules/property/components/listing/StartNowForm";
 
 export const Route = createFileRoute("/list-property/")({
   head: () => {
