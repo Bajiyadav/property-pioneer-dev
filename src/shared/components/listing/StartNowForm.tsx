@@ -62,7 +62,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
       const cleanPhone = phone.trim();
       const pureDigits = cleanPhone.replace(/\D/g, "");
 
-      if (!user && pureDigits.length === 0) {
+      if (status !== "authenticated" && pureDigits.length === 0) {
         setError("Please enter your mobile number.");
         setIsLoading(false);
         return;
@@ -238,7 +238,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
                 htmlFor="startnow-phone"
                 className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
               >
-                Your Mobile Number {user ? "(Optional for now)" : "*"}
+                Your Mobile Number {status === "authenticated" ? "(Optional for now)" : "*"}
               </label>
             </div>
             <input
