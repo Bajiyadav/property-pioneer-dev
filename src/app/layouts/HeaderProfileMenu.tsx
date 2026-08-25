@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { getDashboardRoute, type UserRole } from "@/config/roles";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { displayName, initialsFor } from "@/modules/authentication/services/session";
 import { toast } from "sonner";
 
 export function HeaderProfileMenu() {
@@ -62,13 +63,10 @@ export function HeaderProfileMenu() {
     );
   }
 
-  const getInitials = () => {
-    if (user?.email) return user.email.slice(0, 2).toUpperCase();
-    if (role === "admin") return "AD";
-    if (role === "owner") return "OW";
-    if (role === "agent") return "AG";
-    return "US";
-  };
+  // Initials come from the customer's REAL name (e.g. "Rahul Sharma" → "RS"),
+  // never from the email address. initialsFor falls back to role initials only
+  // when no name is available — never a hardcoded placeholder like "SA".
+  const getInitials = () => initialsFor(user, role);
 
   const roleColors: Record<UserRole, string> = {
     customer: "bg-blue-600 text-white",
@@ -89,8 +87,8 @@ export function HeaderProfileMenu() {
         >
           {getInitials()}
         </div>
-        <span className="hidden text-xs font-semibold capitalize text-foreground sm:inline-block">
-          {role} Account
+        <span className="hidden max-w-[9rem] truncate text-xs font-semibold text-foreground sm:inline-block">
+          {displayName(user)}
         </span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
@@ -107,9 +105,10 @@ export function HeaderProfileMenu() {
               {getInitials()}
             </div>
             <div className="overflow-hidden">
-              <p className="text-xs font-bold text-foreground truncate">
-                {user.email || `Verified ${role.toUpperCase()} User`}
-              </p>
+              <p className="text-xs font-bold text-foreground truncate">{displayName(user)}</p>
+              {user.email && (
+                <p className="truncate text-[10px] text-muted-foreground">{user.email}</p>
+              )}
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 capitalize">
                 <CheckCircle2 className="h-3 w-3" /> {role} Role Verified
               </span>
