@@ -130,64 +130,45 @@ export function EnterprisePasswordForm({
         // Continue if table query not blocked
       }
 
-      // 3. CREATE ACCOUNT (server-side, already email-confirmed), then sign in.
-      // The client `supabase.auth.signUp` path fails outright when "Confirm
-      // email" is on and Supabase can't deliver the confirmation email — it
-      // returns "Error sending confirmation email" with no account and no
-      // session, a hard dead end right after "Create Account". The server
-      // endpoint creates the account with email_confirm:true, so we can
-      // immediately establish a session and hand off to the dashboard.
-      let signupRes: Response;
-      try {
-        signupRes = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            email,
-            password,
-            name,
-            phone: fullFormattedPhone,
-            address: address || "Hyderabad",
-          }),
-        });
-      } catch {
-        setLoading(false);
-        toast.error("Network error. Please check your connection and try again.");
-        return;
-      }
-
-      if (!signupRes.ok) {
-        setLoading(false);
-        if (signupRes.status === 409) {
-          toast.error("An account with this email already exists. Please sign in.");
-        } else {
-          let message = "Could not create your account. Please try again.";
-          try {
-            const payload = (await signupRes.json()) as { error?: string };
-            if (payload?.error) message = payload.error;
-          } catch {
-            // Keep the generic message.
-          }
-          toast.error(message);
-        }
-        return;
-      }
-
-      // Account exists and is confirmed — establish the session.
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // 3. CREATE ACCOUNT (Native Supabase)
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name,
+            phone: fullFormattedPhone,
+            address: address || "Hyderabad",
+            role: SELF_REGISTRATION_ROLE,
+          },
+          emailRedirectTo,
+        },
       });
 
       setLoading(false);
 
-      if (signInError || !signInData.session) {
-        toast.success("Account created! Please sign in to continue.");
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("already registered") || msg.includes("already exists")) {
+          toast.error("An account with this email already exists. Please sign in.");
+        } else {
+          toast.error(error.message || "Could not create your account. Please try again.");
+        }
         return;
       }
 
-      toast.success("Account created! Welcome to Seedha Properties.");
-      onSuccess({ name, email, phone: fullFormattedPhone, role: SELF_REGISTRATION_ROLE });
+      if (data.session) {
+        // Email confirmation is OFF (or auto-login is somehow permitted)
+        toast.success("Account created! Welcome to Seedha Properties.");
+        onSuccess({ name, email, phone: fullFormattedPhone, role: SELF_REGISTRATION_ROLE });
+      } else if (data.user?.identities && data.user.identities.length === 0) {
+        // According to Supabase docs, if identities is empty upon signup, the user already exists
+        toast.error("An account with this email already exists. Please sign in.");
+      } else {
+        // Email confirmation is ON and session is null
+        setAwaitingConfirmation(true);
+        toast.success("Account created! Please check your email for the OTP code.");
+      }
     } else {
       // SIGN IN MODE (Supports EITHER Email Address OR Mobile Number)
       let resolvedEmail = identifier.trim();
