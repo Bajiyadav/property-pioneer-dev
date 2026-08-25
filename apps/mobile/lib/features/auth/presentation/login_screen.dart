@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
@@ -40,24 +43,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      
-      // Wait for profile to load and fetch the role
-      final profile = await ref.refresh(userProfileProvider.future);
-      if (mounted) {
-        if (profile?.role == UserRole.admin) {
-          context.go('/admin-dashboard');
-        } else if (profile?.role == UserRole.owner) {
-          context.go('/owner-dashboard');
-        } else {
-          context.go('/customer-dashboard');
-        }
+
+      // Authentication succeeded. Resolve the role for routing, but never let
+      // profile loading block navigation: the dashboard loads (and can retry)
+      // the profile itself, so a slow profile query can't hang the login.
+      UserProfile? profile;
+      try {
+        profile = await ref
+            .refresh(userProfileProvider.future)
+            .timeout(const Duration(seconds: 16));
+      } catch (_) {
+        profile = null; // fall through to the customer dashboard (it shows Retry)
       }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Invalid email or password. Please try again.';
-        _isLoading = false;
-      });
+
+      if (!mounted) return;
+      final role = profile?.role;
+      if (role == UserRole.admin) {
+        context.go('/admin-dashboard');
+      } else if (role == UserRole.owner) {
+        context.go('/owner-dashboard');
+      } else {
+        context.go('/customer-dashboard');
+      }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() {
+          _errorMessage =
+              'Connection is taking too long. Please check your internet connection and try again.';
+        });
+      }
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _errorMessage = _friendlyAuthError(e));
+    } catch (_) {
+      if (mounted) {
+        setState(() => _errorMessage = 'Something went wrong. Please try again.');
+      }
+    } finally {
+      // _isLoading can NEVER remain true — reset on success, auth error,
+      // timeout, and any unexpected exception.
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  /// Maps a Supabase [AuthException] to a clear, customer-safe message. Wrong
+  /// credentials keep their specific message; anything else becomes a clear
+  /// generic message — never raw technical text, and never mislabeled as
+  /// "invalid password".
+  String _friendlyAuthError(AuthException e) {
+    final msg = e.message.toLowerCase();
+    if (msg.contains('invalid login credentials') ||
+        msg.contains('invalid credentials') ||
+        msg.contains('invalid email or password')) {
+      return 'Invalid email or password.';
+    }
+    if (msg.contains('email not confirmed') || msg.contains('not confirmed')) {
+      return 'Your email is not verified yet. Please verify it and try again.';
+    }
+    return 'We could not sign you in. Please try again.';
   }
 
   @override
@@ -182,14 +224,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.red.shade200),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(color: Colors.red.shade900, fontSize: 13),
+                        Row(
+                          children: [
+                            Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(color: Colors.red.shade900, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: const Text(
+                              'Retry',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red.shade800,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
                           ),
                         ),
                       ],
@@ -253,7 +318,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'Signing you in…',
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          )
                         : const Text(
                             'Sign In',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

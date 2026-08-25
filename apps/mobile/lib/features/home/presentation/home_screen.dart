@@ -132,11 +132,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: const Icon(Icons.dashboard_outlined, color: AppTheme.primaryColor),
                   tooltip: 'My Dashboard',
                   onPressed: () async {
-                    final profile = await ref.read(userProfileProvider.future);
+                    // Bounded so the button can never hang; on timeout/error we
+                    // route to the customer dashboard, which shows its own Retry.
+                    UserProfile? profile;
+                    try {
+                      profile = await ref
+                          .read(userProfileProvider.future)
+                          .timeout(const Duration(seconds: 16));
+                    } catch (_) {
+                      profile = null;
+                    }
                     if (context.mounted) {
-                      if (profile?.role == UserRole.admin) {
+                      final role = profile?.role;
+                      if (role == UserRole.admin) {
                         context.go('/admin-dashboard');
-                      } else if (profile?.role == UserRole.owner) {
+                      } else if (role == UserRole.owner) {
                         context.go('/owner-dashboard');
                       } else {
                         context.go('/customer-dashboard');

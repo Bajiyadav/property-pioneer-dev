@@ -89,9 +89,14 @@ final favoritePropertiesProvider = FutureProvider.autoDispose<List<Property>>((r
   final client = ref.read(propertyServiceProvider);
   final List<Property> list = [];
   for (final id in favIds) {
-    final prop = await client.getPropertyById(id);
-    if (prop != null) {
-      list.add(prop);
+    try {
+      final prop =
+          await client.getPropertyById(id).timeout(const Duration(seconds: 15));
+      if (prop != null) {
+        list.add(prop);
+      }
+    } catch (_) {
+      // Skip a property that fails or times out — never hang the saved tab.
     }
   }
   return list;

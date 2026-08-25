@@ -7,6 +7,7 @@ import 'package:seedha_properties_mobile/models/enquiry.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
 class CustomerDashboardScreen extends ConsumerStatefulWidget {
   const CustomerDashboardScreen({super.key});
@@ -38,7 +39,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return const Center(child: Text('Profile load error.'));
+            return _profileError();
           }
 
           return IndexedStack(
@@ -50,8 +51,13 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (err, stack) => Center(child: Text('Error loading dashboard: $err')),
+        // Bounded by the 15s timeout in AuthService.getProfile — this can never
+        // spin indefinitely; it resolves to the dashboard or the error below.
+        loading: () => const SeedhaStateView(
+          type: SeedhaStateType.loading,
+          title: 'Loading your dashboard…',
+        ),
+        error: (err, stack) => _profileError(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -75,6 +81,19 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
             label: 'Profile',
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _profileError() {
+    return SeedhaStateView(
+      type: SeedhaStateType.serverError,
+      title: 'Unable to load your profile',
+      description: 'Please check your connection and try again.',
+      primaryAction: StateActionConfig(
+        label: 'Retry',
+        icon: Icons.refresh,
+        onPressed: () => ref.invalidate(userProfileProvider),
       ),
     );
   }
@@ -117,7 +136,16 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
         );
       },
       loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-      error: (err, stack) => Center(child: Text('Error loading favorites: $err')),
+      error: (err, stack) => SeedhaStateView(
+        type: SeedhaStateType.serverError,
+        title: 'Unable to load saved properties',
+        description: 'Please check your connection and try again.',
+        primaryAction: StateActionConfig(
+          label: 'Retry',
+          icon: Icons.refresh,
+          onPressed: () => ref.invalidate(favoritePropertiesProvider),
+        ),
+      ),
     );
   }
 
@@ -140,11 +168,15 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
             return <PropertyEnquiry>[];
           }
 
-          final res = await query.order('created_at', ascending: false);
+          final res = await query
+              .order('created_at', ascending: false)
+              .timeout(const Duration(seconds: 15));
           return (res as List<dynamic>)
               .map((e) => PropertyEnquiry.fromJson(e as Map<String, dynamic>))
               .toList();
         } catch (e) {
+          // Includes TimeoutException — the enquiries tab shows the empty state
+          // rather than an infinite spinner.
           return <PropertyEnquiry>[];
         }
       }(),

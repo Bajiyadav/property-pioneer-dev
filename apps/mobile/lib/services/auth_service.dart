@@ -2,6 +2,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import 'supabase_service.dart';
 
+/// Maximum time any auth or profile network call may take before it fails with
+/// a [TimeoutException]. This guarantees the login/profile flow can never hang
+/// indefinitely — the UI always resolves to success, an error, or a timeout.
+const Duration _kNetworkTimeout = Duration(seconds: 15);
+
 class AuthService {
   final SupabaseClient _client;
 
@@ -33,7 +38,8 @@ class AuthService {
             .from('profiles')
             .select('email')
             .or('phone.eq.$pureDigits,phone.eq.+91$pureDigits')
-            .maybeSingle();
+            .maybeSingle()
+            .timeout(_kNetworkTimeout);
         if (profile != null && profile['email'] != null) {
           resolvedEmail = profile['email'] as String;
         } else {
@@ -44,10 +50,12 @@ class AuthService {
       }
     }
 
-    return await _client.auth.signInWithPassword(
-      email: resolvedEmail,
-      password: password,
-    );
+    return await _client.auth
+        .signInWithPassword(
+          email: resolvedEmail,
+          password: password,
+        )
+        .timeout(_kNetworkTimeout);
   }
 
   Future<AuthResponse> createAccount({
@@ -155,13 +163,15 @@ class AuthService {
           .from('profiles')
           .select()
           .eq('id', user.id)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(_kNetworkTimeout);
 
       final roleData = await _client
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(_kNetworkTimeout);
 
       final roleStr = roleData != null ? roleData['role'] as String? : null;
 

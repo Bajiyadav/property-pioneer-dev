@@ -7,6 +7,7 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/models/enquiry.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
 class OwnerDashboardScreen extends ConsumerStatefulWidget {
   const OwnerDashboardScreen({super.key});
@@ -38,7 +39,7 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return const Center(child: Text('Profile load error.'));
+            return _profileError();
           }
 
           return IndexedStack(
@@ -50,8 +51,12 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        // Bounded by the 15s timeout in AuthService.getProfile.
+        loading: () => const SeedhaStateView(
+          type: SeedhaStateType.loading,
+          title: 'Loading your dashboard…',
+        ),
+        error: (err, stack) => _profileError(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -75,6 +80,19 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
             label: 'Profile',
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _profileError() {
+    return SeedhaStateView(
+      type: SeedhaStateType.serverError,
+      title: 'Unable to load your profile',
+      description: 'Please check your connection and try again.',
+      primaryAction: StateActionConfig(
+        label: 'Retry',
+        icon: Icons.refresh,
+        onPressed: () => ref.invalidate(userProfileProvider),
       ),
     );
   }
