@@ -130,61 +130,41 @@ export function EnterprisePasswordForm({
         // Continue if table query not blocked
       }
 
-      // 3. CREATE ACCOUNT (server-side, already email-confirmed), then sign in.
-      // The server creates the user with email_confirm:true so there is no
-      // confirmation-email round trip; we immediately establish a session with
-      // the same credentials and hand off to the dashboard. This is what makes
-      // "Create Account" land on the dashboard instead of stranding the user on
-      // an OTP screen that depends on an email that may never arrive.
-      let signupRes: Response;
-      try {
-        signupRes = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            email,
-            password,
-            name,
-            phone: fullFormattedPhone,
-            address: address || "Hyderabad",
-          }),
-        });
-      } catch {
-        setLoading(false);
-        toast.error("Network error. Please check your connection and try again.");
-        return;
-      }
-
-      if (!signupRes.ok) {
-        setLoading(false);
-        if (signupRes.status === 409) {
-          toast.error("An account with this email already exists. Please sign in.");
-        } else {
-          let message = "Could not create your account. Please try again.";
-          try {
-            const payload = (await signupRes.json()) as { error?: string };
-            if (payload?.error) message = payload.error;
-          } catch {
-            // Keep the generic message.
-          }
-          toast.error(message);
-        }
-        return;
-      }
-
-      // Account exists and is confirmed — establish the session.
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // 3. CREATE ACCOUNT via Supabase Client (triggers OTP email)
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name,
+            phone: fullFormattedPhone,
+            address: address || "Hyderabad",
+            role: "customer",
+          },
+          emailRedirectTo,
+        },
       });
 
       setLoading(false);
 
-      if (signInError || !signInData.session) {
-        toast.success("Account created! Please sign in to continue.");
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes("already registered") || msg.includes("already exists")) {
+          toast.error("An account with this email already exists. Please sign in.");
+        } else {
+          toast.error(error.message || "Could not create your account. Please try again.");
+        }
         return;
       }
 
+      // If session is null, it means email confirmation is required (OTP flow)
+      if (!data.session) {
+        setAwaitingConfirmation(true);
+        toast.success("Account created! Please check your email for the OTP code.");
+        return;
+      }
+
+      // If session exists (email confirmation disabled in Supabase), login immediately
       toast.success("Account created! Welcome to Seedha Properties.");
       onSuccess({ name, email, phone: fullFormattedPhone, role: SELF_REGISTRATION_ROLE });
     } else {
