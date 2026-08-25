@@ -1,3 +1,8 @@
+## v0.65.0 — 2026-08-25
+
+### Features
+- feat(home): refocus the home-page banner on Home Loans only (1c407f8)
+
 ## v0.64.1 — 2026-08-25
 
 ### Fixes
