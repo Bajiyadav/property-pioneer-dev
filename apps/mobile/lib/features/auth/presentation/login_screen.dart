@@ -173,14 +173,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? null
                         : () async {
                             try {
-                              setState(() => _isLoading = true);
-                              final authService = ref.read(authServiceProvider);
-                              await authService.signInWithGoogle();
-                            } catch (e) {
                               setState(() {
-                                _errorMessage = 'Google sign-in could not be completed: $e';
-                                _isLoading = false;
+                                _isLoading = true;
+                                _errorMessage = null;
                               });
+                              final authService = ref.read(authServiceProvider);
+                              await authService.signInWithGoogle().timeout(
+                                const Duration(seconds: 15),
+                              );
+                            } on TimeoutException {
+                              if (mounted) {
+                                setState(() {
+                                  _errorMessage = 'Connection is taking too long. Please try again.';
+                                });
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() {
+                                  _errorMessage = 'Google sign-in could not be completed: $e';
+                                });
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isLoading = false);
+                              }
                             }
                           },
                     style: OutlinedButton.styleFrom(

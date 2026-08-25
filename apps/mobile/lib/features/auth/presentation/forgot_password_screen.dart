@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:async';import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
@@ -53,9 +53,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           const SnackBar(content: Text('OTP sent successfully')),
         );
       }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
+        _errorMessage = 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }
@@ -103,9 +110,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         );
         context.go('/login');
       }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
+        _errorMessage = 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }

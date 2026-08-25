@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:async';import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
@@ -64,11 +64,20 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       if (mounted) {
         context.go('/verify-email', extra: email);
       }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Something went wrong. Please try again.';
+          _isLoading = false;
+        });
+      }
     }
   }
 

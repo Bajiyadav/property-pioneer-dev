@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:async';import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
@@ -61,9 +61,16 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           context.go('/customer-dashboard');
         }
       }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
+        _errorMessage = 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }
@@ -78,10 +85,16 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
           const SnackBar(content: Text('OTP sent successfully')),
         );
       }
+    } on TimeoutException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connection is taking too long. Please try again.')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          const SnackBar(content: Text('Something went wrong. Please try again.')),
         );
       }
     }

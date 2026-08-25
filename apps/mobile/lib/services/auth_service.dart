@@ -22,7 +22,7 @@ class AuthService {
     return await _client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: 'seedhaproperties://login-callback',
-    );
+    ).timeout(_kNetworkTimeout);
   }
 
   Future<AuthResponse> signInWithEmail({
@@ -89,7 +89,7 @@ class AuthService {
         'phone': phone,
         'role': role,
       },
-    );
+    ).timeout(_kNetworkTimeout);
   }
 
   Future<bool> checkPhoneExists(String fullFormattedPhone, String purePhone) async {
@@ -98,7 +98,8 @@ class AuthService {
           .from('profiles')
           .select('id, phone')
           .or('phone.eq.$fullFormattedPhone,phone.eq.$purePhone')
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(_kNetworkTimeout);
       return data != null;
     } catch (_) {
       return false;
@@ -114,14 +115,14 @@ class AuthService {
       email: email,
       token: token,
       type: type == 'signup' ? OtpType.signup : OtpType.recovery,
-    );
+    ).timeout(_kNetworkTimeout);
   }
 
   Future<void> resendOtp({required String email}) async {
     await _client.auth.resend(
       type: OtpType.signup,
       email: email,
-    );
+    ).timeout(_kNetworkTimeout);
   }
 
   Future<void> resetPasswordForEmail({required String identifier}) async {
@@ -134,24 +135,25 @@ class AuthService {
             .from('profiles')
             .select('email')
             .or('phone.eq.$pureDigits,phone.eq.+91$pureDigits')
-            .maybeSingle();
+            .maybeSingle()
+            .timeout(_kNetworkTimeout);
         if (profile != null && profile['email'] != null) {
           targetEmail = profile['email'] as String;
         }
       } catch (_) {}
     }
 
-    await _client.auth.resetPasswordForEmail(targetEmail);
+    await _client.auth.resetPasswordForEmail(targetEmail).timeout(_kNetworkTimeout);
   }
 
   Future<UserResponse> updateUser({required String newPassword}) async {
     return await _client.auth.updateUser(UserAttributes(
       password: newPassword,
-    ));
+    )).timeout(_kNetworkTimeout);
   }
 
   Future<void> signOut() async {
-    await _client.auth.signOut();
+    await _client.auth.signOut().timeout(_kNetworkTimeout);
   }
 
   Future<UserProfile?> getProfile() async {
