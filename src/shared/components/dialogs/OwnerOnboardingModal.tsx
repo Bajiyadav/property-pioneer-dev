@@ -1,5 +1,5 @@
 import { PropertyImage } from "@/shared/components/PropertyImage";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -48,13 +48,13 @@ export function OwnerOnboardingModal({
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    city: "Hyderabad",
-    locality: "Gachibowli",
-    propertyType: "Apartment",
-    bedrooms: 2,
-    areaSqft: 900,
-    rent: 25000,
-    deposit: 50000,
+    city: "",
+    locality: "",
+    propertyType: "",
+    bedrooms: 0,
+    areaSqft: "" as unknown as number,
+    rent: "" as unknown as number,
+    deposit: "" as unknown as number,
     phone: "",
   });
 
@@ -70,8 +70,12 @@ export function OwnerOnboardingModal({
   const getSignedUrl = useServerFn(getSignedVideoUploadUrl);
 
   const handleNext = () => {
-    if (step === 1 && (!formData.title.trim() || !formData.locality.trim())) {
-      toast.error("Please fill in the property title and locality.");
+    if (step === 1 && (!formData.title.trim() || !formData.locality.trim() || !formData.city)) {
+      toast.error("Please fill in the property title, city, and locality.");
+      return;
+    }
+    if (step === 2 && (!formData.propertyType || !formData.bedrooms)) {
+      toast.error("Please select a property type and number of bedrooms.");
       return;
     }
     if (step === 3 && (!formData.rent || !formData.deposit)) {
@@ -192,6 +196,20 @@ export function OwnerOnboardingModal({
 
   const cities = ["Hyderabad", "Bangalore", "Chennai"];
   const bedOptions = [1, 2, 3, 4];
+
+  useEffect(() => {
+    if (isOpen) {
+      supabase.auth.getSession().then(({ data }) => {
+        const phone = data?.session?.user?.user_metadata?.phone || data?.session?.user?.phone;
+        if (phone) {
+          setFormData((f) => ({
+            ...f,
+            phone: phone.replace(/\D/g, "").slice(-10),
+          }));
+        }
+      });
+    }
+  }, [isOpen]);
 
   const variants = {
     initial: { opacity: 0, x: 20 },
