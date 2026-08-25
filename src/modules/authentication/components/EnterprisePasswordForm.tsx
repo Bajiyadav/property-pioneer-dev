@@ -220,23 +220,13 @@ export function EnterprisePasswordForm({
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes("invalid login credentials")) {
-          try {
-            // Use RPC to check if account actually exists (bypassing RLS safely)
-            const { data: accountExists } = await supabase.rpc("check_account_exists", {
-              search_email: resolvedEmail,
-              search_phone: pureDigits ? `+91${pureDigits}` : null,
-            });
-
-            if (accountExists === false) {
-              toast.error(
-                "You don't have an account yet. Please click 'Sign up' below to create one.",
-              );
-            } else {
-              toast.error("Incorrect password. Please try again.");
-            }
-          } catch {
-            toast.error("Incorrect Email/Mobile or password. Please try again.");
-          }
+          // NOTE: a prior change called an RPC `check_account_exists` here to
+          // tell "no account" apart from "wrong password". That function does
+          // not exist in the database and wasn't in the generated types, which
+          // broke the typecheck / CD gate — so it never actually worked.
+          // Restored to a single generic message until the RPC is implemented
+          // (create the SQL function + regenerate types, then reintroduce it).
+          toast.error("Incorrect Email/Mobile or password. Please try again.");
         } else if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
           setAwaitingConfirmation(true);
           toast.error("Your email isn't confirmed yet — we can resend the link.");
