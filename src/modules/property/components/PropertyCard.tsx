@@ -127,78 +127,146 @@ export function PropertyCard({ property }: { property: Property }) {
     "group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/40";
 
   const imageClasses =
-    "relative w-full shrink-0 aspect-[4/3] overflow-hidden bg-muted group/carousel";
+    "relative w-full shrink-0 flex gap-1 h-[240px] sm:h-[320px] overflow-hidden bg-muted group/carousel";
 
   return (
     <div className={rootClasses}>
       {/* 1. IMAGE CONTAINER */}
       <div className={imageClasses}>
-        <Link
-          to="/properties/$id"
-          params={{ id: generatePropertySlug(property) }}
-          className="block h-full w-full"
-          tabIndex={-1}
-          aria-hidden="true"
-        >
-          {images[0] === DEFAULT_PROPERTY_COVER &&
-          (!property.images || property.images.length === 0) ? (
-            <div className="h-full w-full flex flex-col items-center justify-center bg-secondary text-muted-foreground border-b border-border/50">
-              <ImageIcon className="h-12 w-12 opacity-50 mb-2" />
-              <span className="text-xs font-semibold uppercase tracking-widest bg-background/80 px-3 py-1 rounded-full shadow-sm">
-                Request Photos
+        {/* Main / Carousel Image */}
+        <div className="relative flex-1 h-full min-w-0">
+          <Link
+            to="/properties/$id"
+            params={{ id: generatePropertySlug(property) }}
+            className="block h-full w-full"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            {images[0] === DEFAULT_PROPERTY_COVER &&
+            (!property.images || property.images.length === 0) ? (
+              <div className="h-full w-full flex flex-col items-center justify-center bg-secondary text-muted-foreground border-b border-border/50">
+                <ImageIcon className="h-12 w-12 opacity-50 mb-2" />
+                <span className="text-xs font-semibold uppercase tracking-widest bg-background/80 px-3 py-1 rounded-full shadow-sm">
+                  Request Photos
+                </span>
+              </div>
+            ) : (
+              <PropertyImageBranding
+                src={images[currentImageIndex]}
+                alt={`${property.title || "Rental home"} - Image ${currentImageIndex + 1}`}
+                loading="lazy"
+                watermarkSize="sm"
+                watermarkPosition="bottom-right"
+                containerClassName="h-full w-full"
+                imageClassName="transition-transform duration-700 ease-out group-hover:scale-105 object-cover h-full"
+              />
+            )}
+          </Link>
+
+          {/* Carousel Controls */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur-md shadow-md opacity-0 transition-opacity group-hover/carousel:opacity-100 hover:bg-background"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur-md shadow-md opacity-0 transition-opacity group-hover/carousel:opacity-100 hover:bg-background"
+                aria-label="Next image"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              {/* Image Indicators */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                {images.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all ${i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Top Badges */}
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 max-w-[75%] z-10 pointer-events-none">
+            <PropertyBadges property={property} size="sm" />
+            {property.video_url && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-md backdrop-blur-md border border-white/20">
+                <Play className="h-3 w-3 fill-current" /> Video Tour
               </span>
-            </div>
-          ) : (
-            <PropertyImageBranding
-              src={images[currentImageIndex]}
-              alt={`${property.title || "Rental home"} - Image ${currentImageIndex + 1}`}
-              loading="lazy"
-              watermarkSize="sm"
-              watermarkPosition="bottom-right"
-              containerClassName="h-full w-full"
-              imageClassName="transition-transform duration-700 ease-out group-hover:scale-105 object-cover h-full"
-            />
-          )}
-        </Link>
-
-        {/* Carousel Controls */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur-md shadow-md opacity-0 transition-opacity group-hover/carousel:opacity-100 hover:bg-background"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={nextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur-md shadow-md opacity-0 transition-opacity group-hover/carousel:opacity-100 hover:bg-background"
-              aria-label="Next image"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-            {/* Image Indicators */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-              {images.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all ${i === currentImageIndex ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Top Badges */}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5 max-w-[75%] z-10 pointer-events-none">
-          <PropertyBadges property={property} size="sm" />
-          {property.video_url && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-md backdrop-blur-md border border-white/20">
-              <Play className="h-3 w-3 fill-current" /> Video Tour
-            </span>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* Right side: 3 smaller images (hidden on mobile) */}
+        {images.length > 1 && (
+          <div className="hidden sm:flex w-[28%] lg:w-[32%] flex-col gap-1 h-full shrink-0">
+            <Link
+              to="/properties/$id"
+              params={{ id: generatePropertySlug(property) }}
+              className="relative block flex-1 overflow-hidden bg-muted"
+              tabIndex={-1}
+            >
+              <PropertyImageBranding
+                src={images[1]}
+                alt={`${property.title || "Rental home"} - Image 2`}
+                loading="lazy"
+                containerClassName="h-full w-full"
+                imageClassName="transition-transform duration-700 ease-out hover:scale-105 object-cover h-full"
+              />
+            </Link>
+
+            {images.length > 2 ? (
+              <Link
+                to="/properties/$id"
+                params={{ id: generatePropertySlug(property) }}
+                className="relative block flex-1 overflow-hidden bg-muted"
+                tabIndex={-1}
+              >
+                <PropertyImageBranding
+                  src={images[2]}
+                  alt={`${property.title || "Rental home"} - Image 3`}
+                  loading="lazy"
+                  containerClassName="h-full w-full"
+                  imageClassName="transition-transform duration-700 ease-out hover:scale-105 object-cover h-full"
+                />
+              </Link>
+            ) : (
+              <div className="flex-1 bg-secondary/30" />
+            )}
+
+            {images.length > 3 ? (
+              <Link
+                to="/properties/$id"
+                params={{ id: generatePropertySlug(property) }}
+                className="relative block flex-1 overflow-hidden bg-muted group/more"
+                tabIndex={-1}
+              >
+                <PropertyImageBranding
+                  src={images[3]}
+                  alt={`${property.title || "Rental home"} - Image 4`}
+                  loading="lazy"
+                  containerClassName="h-full w-full"
+                  imageClassName="transition-transform duration-700 ease-out hover:scale-105 object-cover h-full"
+                />
+                {images.length > 4 && (
+                  <div className="absolute inset-0 bg-black/60 flex items-end justify-center pb-3 transition-colors hover:bg-black/50">
+                    <span className="text-white text-xs font-bold tracking-tight">
+                      +{images.length - 4} More Photos
+                    </span>
+                  </div>
+                )}
+              </Link>
+            ) : (
+              <div className="flex-1 bg-secondary/30" />
+            )}
+          </div>
+        )}
       </div>
 
       {/* 2. CARD CONTENT */}

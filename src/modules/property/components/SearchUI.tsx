@@ -578,7 +578,7 @@ export function SearchUI({
                   1fr tracks stretch to fill the row, so a single/few results
                   never leave a large empty column on the right. `min(280px,100%)`
                   keeps a lone card from overflowing very narrow viewports. */}
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-6">
+              <div className="flex flex-col gap-6">
                 {properties.map((p) => (
                   <PropertyCard key={p.id} property={p} />
                 ))}
