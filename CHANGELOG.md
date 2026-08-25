@@ -1,3 +1,8 @@
+## v0.63.2 — 2026-08-25
+
+### Fixes
+- fix(auth): route Create Account through the confirmed-signup endpoint (works when email is down) (32acaec)
+
 ## v0.63.1 — 2026-08-25
 
 ### Fixes
