@@ -1,3 +1,8 @@
+## v0.61.3 — 2026-08-25
+
+### Fixes
+- fix: use status instead of user for auth check (800bcf7)
+
 ## v0.61.2 — 2026-08-25
 
 ### Fixes
