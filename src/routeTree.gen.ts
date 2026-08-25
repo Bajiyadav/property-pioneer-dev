@@ -62,6 +62,7 @@ import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/login-notification'
 import { Route as ApiAuthRequestOtpRouteImport } from './routes/api/auth/request-otp'
 import { Route as ApiAuthRequestPasswordResetRouteImport } from './routes/api/auth/request-password-reset'
+import { Route as ApiAuthSignupRouteImport } from './routes/api/auth/signup'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
@@ -357,6 +358,11 @@ const ApiAuthRequestPasswordResetRoute =
     path: '/api/auth/request-password-reset',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
+  id: '/api/auth/signup',
+  path: '/api/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   id: '/api/public/enquiries',
   path: '/api/public/enquiries',
@@ -506,6 +512,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -574,6 +581,7 @@ export interface FileRoutesByTo {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -648,6 +656,7 @@ export interface FileRoutesById {
   '/api/auth/login-notification': typeof ApiAuthLoginNotificationRoute
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
@@ -722,6 +731,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
+    | '/api/auth/signup'
     | '/api/public/enquiries'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
@@ -790,6 +800,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
+    | '/api/auth/signup'
     | '/api/public/enquiries'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
@@ -863,6 +874,7 @@ export interface FileRouteTypes {
     | '/api/auth/login-notification'
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
+    | '/api/auth/signup'
     | '/api/public/enquiries'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
@@ -921,6 +933,7 @@ export interface RootRouteChildren {
   ApiAuthLoginNotificationRoute: typeof ApiAuthLoginNotificationRoute
   ApiAuthRequestOtpRoute: typeof ApiAuthRequestOtpRoute
   ApiAuthRequestPasswordResetRoute: typeof ApiAuthRequestPasswordResetRoute
+  ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
@@ -1311,6 +1324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthRequestPasswordResetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/signup': {
+      id: '/api/auth/signup'
+      path: '/api/auth/signup'
+      fullPath: '/api/auth/signup'
+      preLoaderRoute: typeof ApiAuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/enquiries': {
       id: '/api/public/enquiries'
       path: '/api/public/enquiries'
@@ -1583,6 +1603,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthLoginNotificationRoute: ApiAuthLoginNotificationRoute,
   ApiAuthRequestOtpRoute: ApiAuthRequestOtpRoute,
   ApiAuthRequestPasswordResetRoute: ApiAuthRequestPasswordResetRoute,
+  ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
