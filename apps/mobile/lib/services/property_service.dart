@@ -7,7 +7,7 @@ class PropertyService {
   final SupabaseClient _client;
 
   static const String publicPropertyColumns =
-      'id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,locality,landmark,metro_station,it_park,hospital,college,video_url,video_status,total_floors,exact_floor,balconies,pincode,facing,available_from,rent_negotiable';
+      'id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,locality,landmark,metro_station,it_park,hospital,college,video_url,video_status,total_floors,exact_floor,balconies,pincode,facing,available_from,rent_negotiable,approx_latitude,approx_longitude';
 
   PropertyService([SupabaseClient? client])
       : _client = client ?? SupabaseService.client;

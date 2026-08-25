@@ -19,6 +19,7 @@ import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
 import '../features/loans/presentation/home_loans_screen.dart';
+import '../features/location/presentation/location_search_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -93,6 +94,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/home-loans',
       builder: (context, state) => const HomeLoansScreen(),
+    ),
+    GoRoute(
+      path: '/location-search',
+      builder: (context, state) => const LocationSearchScreen(),
     ),
     GoRoute(
       path: '/login',

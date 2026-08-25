@@ -5,6 +5,7 @@ import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -39,8 +40,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
 
     final category = ref.read(activeCategoryProvider);
-    final city = ref.read(selectedCityProvider);
-    final locality = ref.read(selectedLocalityProvider);
+    final locationState = ref.read(locationStateProvider);
+    final city = locationState.value?.city;
+    final locality = locationState.value?.locality;
     final minBedrooms = ref.read(selectedBedroomsFilterProvider);
     final propertyType = ref.read(selectedPropertyTypeFilterProvider);
     final furnishing = ref.read(selectedFurnishingFilterProvider);
@@ -50,7 +52,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     try {
       final properties = await ref.read(propertyServiceProvider).fetchProperties(
         category: category,
-        city: (city == 'All India' || city == 'All') ? null : city,
+        city: city?.isNotEmpty == true ? city : null,
         locality: locality,
         searchQuery: keyword.isNotEmpty ? keyword : null,
         minBedrooms: minBedrooms,
@@ -87,13 +89,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
           final currentCategory = ref.watch(activeCategoryProvider);
-          final currentCity = ref.watch(selectedCityProvider);
-          final currentLocality = ref.watch(selectedLocalityProvider);
+          final locationState = ref.watch(locationStateProvider);
+          final currentCity = locationState.value?.city ?? 'All India';
+          final currentLocality = locationState.value?.locality;
           final currentBedrooms = ref.watch(selectedBedroomsFilterProvider);
           final currentType = ref.watch(selectedPropertyTypeFilterProvider);
           final currentFurnishing = ref.watch(selectedFurnishingFilterProvider);
 
-          final availableLocalities = AppConstants.cityLocalities[currentCity] ?? [];
           final availableTypes = currentCategory == PropertyCategory.commercial
               ? AppConstants.commercialPropertyTypes
               : AppConstants.residentialPropertyTypes;
@@ -119,7 +121,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ref.read(selectedBedroomsFilterProvider.notifier).state = null;
                           ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
                           ref.read(selectedFurnishingFilterProvider.notifier).state = null;
-                          ref.read(selectedLocalityProvider.notifier).state = null;
+                          
                           ref.read(budgetRangeFilterProvider.notifier).state = const RangeValues(0, 50000000);
                           setModalState(() {});
                         },
@@ -158,40 +160,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // City Dropdown
-                  const Text('City / Region:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    initialValue: currentCity,
-                    items: AppConstants.topMetroCities.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        ref.read(selectedCityProvider.notifier).state = val;
-                        ref.read(selectedLocalityProvider.notifier).state = null;
-                        setModalState(() {});
-                      }
-                    },
-                    decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
+                  // Location Display
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Location:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            const SizedBox(height: 4),
+                            Text(
+                              currentLocality != null ? '$currentLocality, $currentCity' : currentCity,
+                              style: const TextStyle(color: Colors.black87),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context.push('/location-search').then((_) => _executeSearch());
+                        },
+                        icon: const Icon(Icons.edit, size: 16),
+                        label: const Text('Change'),
+                        style: TextButton.styleFrom(foregroundColor: const Color(0xFF0F766E)),
+                      ),
+                    ],
                   ),
-
-                  // Locality (if city chosen)
-                  if (availableLocalities.isNotEmpty) ...[
-                    const SizedBox(height: 14),
-                    const Text('Locality:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String?>(
-                      initialValue: currentLocality,
-                      items: [
-                        const DropdownMenuItem<String?>(value: null, child: Text('All Localities')),
-                        ...availableLocalities.map((loc) => DropdownMenuItem<String?>(value: loc, child: Text(loc))),
-                      ],
-                      onChanged: (val) {
-                        ref.read(selectedLocalityProvider.notifier).state = val;
-                        setModalState(() {});
-                      },
-                      decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
-                    ),
-                  ],
+                  const SizedBox(height: 14),
 
                   // Property Type
                   const SizedBox(height: 14),
@@ -286,7 +284,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final activeCategory = ref.watch(activeCategoryProvider);
-    final activeCity = ref.watch(selectedCityProvider);
+    final locationState = ref.watch(locationStateProvider);
+    final activeCity = locationState.value?.city ?? 'All India';
 
     return Scaffold(
       appBar: AppBar(
@@ -422,8 +421,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   OutlinedButton(
                                     onPressed: () {
                                       _searchController.clear();
-                                      ref.read(selectedCityProvider.notifier).state = 'All India';
-                                      ref.read(selectedLocalityProvider.notifier).state = null;
+                                      context.push('/location-search').then((_) => _executeSearch());
+                                      
                                       ref.read(selectedBedroomsFilterProvider.notifier).state = null;
                                       ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
                                       ref.read(selectedFurnishingFilterProvider.notifier).state = null;

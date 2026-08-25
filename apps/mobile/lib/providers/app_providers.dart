@@ -8,6 +8,7 @@ import '../services/enquiry_service.dart';
 import '../services/favorites_service.dart';
 import '../models/property.dart';
 import '../models/user_profile.dart';
+import '../features/location/providers/location_providers.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 final propertyServiceProvider = Provider<PropertyService>((ref) => PropertyService());
@@ -22,10 +23,6 @@ final authStateChangesProvider = StreamProvider<AuthState>((ref) {
 // Category State (Rent, Buy, Commercial)
 final activeCategoryProvider = StateProvider<PropertyCategory>((ref) => PropertyCategory.rent);
 
-// Active City & Locality State
-final selectedCityProvider = StateProvider<String>((ref) => 'All India');
-final selectedLocalityProvider = StateProvider<String?>((ref) => null);
-
 // Search & Filter State
 final searchKeywordProvider = StateProvider<String>((ref) => '');
 final selectedBedroomsFilterProvider = StateProvider<int?>((ref) => null);
@@ -36,11 +33,13 @@ final budgetRangeFilterProvider = StateProvider<RangeValues>((ref) => const Rang
 // Real-time live synchronization provider for properties
 final livePropertiesStreamProvider = StreamProvider.autoDispose((ref) {
   final category = ref.watch(activeCategoryProvider);
-  final city = ref.watch(selectedCityProvider);
-  final locality = ref.watch(selectedLocalityProvider);
+  final locationState = ref.watch(locationStateProvider);
+  final city = locationState.value?.city;
+  final locality = locationState.value?.locality;
+  
   return ref.watch(propertyServiceProvider).streamProperties(
     category: category,
-    city: (city == 'All India' || city == 'All') ? null : city,
+    city: city,
     locality: locality,
   );
 });

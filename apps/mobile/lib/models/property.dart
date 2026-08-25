@@ -40,6 +40,8 @@ class Property {
   final String? ownerPhone;
   final String? ownerEmail;
   final String? ownerVerificationStatus;
+  final double? latitude;
+  final double? longitude;
   final DateTime createdAt;
 
   Property({
@@ -82,6 +84,8 @@ class Property {
     this.ownerPhone,
     this.ownerEmail,
     this.ownerVerificationStatus,
+    this.latitude,
+    this.longitude,
     required this.createdAt,
   });
 
@@ -133,6 +137,8 @@ class Property {
       ownerPhone: json['owner_phone'] as String?,
       ownerEmail: json['owner_email'] as String?,
       ownerVerificationStatus: json['owner_verification_status'] as String?,
+      latitude: (json['approx_latitude'] as num?)?.toDouble(),
+      longitude: (json['approx_longitude'] as num?)?.toDouble(),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String) ?? DateTime.now()
           : DateTime.now(),

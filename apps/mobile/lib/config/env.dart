@@ -4,6 +4,7 @@ class AppEnv {
   static const String _envSupabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const String _envSupabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
   static const String _envApiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String _envGeoapifyApiKey = String.fromEnvironment('GEOAPIFY_API_KEY');
 
   static String get supabaseUrl =>
       _envSupabaseUrl.isNotEmpty
@@ -23,4 +24,7 @@ class AppEnv {
         ? 'https://seedhaproperties.com/api'
         : 'http://10.0.2.2:5173/api';
   }
+
+  static String get geoapifyApiKey =>
+      _envGeoapifyApiKey.isNotEmpty ? _envGeoapifyApiKey : '';
 }

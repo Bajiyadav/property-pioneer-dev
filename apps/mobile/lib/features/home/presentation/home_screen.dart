@@ -7,7 +7,11 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
+import 'package:seedha_properties_mobile/features/properties/presentation/property_map_view.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
+import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
+import 'package:latlong2/latlong.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   List<Property> _properties = [];
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isMapView = false;
 
   @override
   void initState() {
@@ -35,14 +40,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     final category = ref.read(activeCategoryProvider);
-    final city = ref.read(selectedCityProvider);
-    final locality = ref.read(selectedLocalityProvider);
+    final locationState = ref.read(locationStateProvider);
+    final location = locationState.value;
+
+    if (location == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _properties = [];
+        });
+      }
+      return;
+    }
 
     try {
       final props = await _propertyService.fetchProperties(
         category: category,
-        city: (city == 'All India' || city == 'All') ? null : city,
-        locality: locality,
+        city: location.city.isNotEmpty ? location.city : null,
+        locality: location.locality.isNotEmpty ? location.locality : null,
       );
 
       if (mounted) {
@@ -65,7 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final activeCategory = ref.watch(activeCategoryProvider);
-    final activeCity = ref.watch(selectedCityProvider);
+    final locationState = ref.watch(locationStateProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -166,12 +181,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
           ),
           IconButton(
+            icon: Icon(_isMapView ? Icons.list : Icons.map, color: AppTheme.primaryColor),
+            tooltip: 'Toggle View',
+            onPressed: () {
+              setState(() => _isMapView = !_isMapView);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => context.go('/search'),
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: locationState.when(
+        data: (location) {
+          if (location == null) {
+            return _buildLocationGate();
+          }
+          return _buildContent(location, activeCategory);
+        },
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+        error: (err, st) => Center(child: Text('Error loading location: $err')),
+      ),
+    );
+  }
+
+  Widget _buildLocationGate() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.location_on_outlined, size: 64, color: AppTheme.primaryColor),
+            const SizedBox(height: 24),
+            const Text(
+              'Choose your location',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Select a city or area to discover verified properties near you with 0% brokerage.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/location-search').then((_) => _loadData()),
+              icon: const Icon(Icons.search),
+              label: const Text('Select Location'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(SelectedLocation selectedLocation, PropertyCategory activeCategory) {
+    return RefreshIndicator(
         onRefresh: _loadData,
         color: AppTheme.primaryColor,
         child: CustomScrollView(
@@ -252,9 +325,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // Search shortcut bar
+                    // Location Selector Shortcut
                     GestureDetector(
-                      onTap: () => context.go('/search'),
+                      onTap: () => context.push('/location-search').then((_) => _loadData()),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
@@ -270,66 +343,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.search, color: Color(0xFF0F766E), size: 22),
+                            const Icon(Icons.location_on, color: Color(0xFF0F766E), size: 22),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text(
-                                "Search ${activeCategory.label.toLowerCase()} in $activeCity...",
-                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Location",
+                                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    selectedLocation.formattedAddress,
+                                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF0F766E).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Icon(Icons.tune, color: Color(0xFF0F766E), size: 16),
+                              child: const Text('Change', style: TextStyle(color: Color(0xFF0F766E), fontSize: 11, fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Top Metros Horizontal Filter
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: AppConstants.topMetroCities.map((city) {
-                          final isSelected = activeCity == city;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () {
-                                ref.read(selectedCityProvider.notifier).state = city;
-                                ref.read(selectedLocalityProvider.notifier).state = null;
-                                _loadData();
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white : Colors.black.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  city,
-                                  style: TextStyle(
-                                    color: isSelected ? const Color(0xFF0F766E) : Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
                       ),
                     ),
                   ],
@@ -338,26 +380,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
 
             // Section Header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      activeCity == 'All India'
-                          ? 'Explore ${activeCategory.label} Across India'
-                          : '${activeCategory.label} Properties in $activeCity',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                    ),
-                    Text(
-                      "${_properties.length} listings",
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w600),
-                    ),
-                  ],
+            if (!_isMapView)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${activeCategory.label} Properties in ${selectedLocation.locality.isNotEmpty ? selectedLocation.locality : selectedLocation.city}',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        "${_properties.length} listings",
+                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
             // Feed Content
             if (_isLoading)
@@ -406,28 +451,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const Icon(Icons.home_work_outlined, size: 48, color: Colors.grey),
                         const SizedBox(height: 12),
                         Text(
-                          "No ${activeCategory.label.toLowerCase()} properties currently listed in $activeCity",
+                          "No ${activeCategory.label.toLowerCase()} properties currently listed here",
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 6),
                         const Text(
-                          "Be the first owner to list in this region or switch to All India.",
+                          "Be the first owner to list in this region or try a different area.",
                           style: TextStyle(color: Colors.grey, fontSize: 13),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: () {
-                            ref.read(selectedCityProvider.notifier).state = 'All India';
-                            _loadData();
-                          },
+                          onPressed: () => context.push('/location-search').then((_) => _loadData()),
                           style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F766E), foregroundColor: Colors.white),
-                          child: const Text('View All India Listings'),
+                          child: const Text('Change Location'),
                         ),
                       ],
                     ),
                   ),
+                ),
+              )
+            else if (_isMapView)
+              SliverFillRemaining(
+                child: PropertyMapView(
+                  properties: _properties,
+                  centerLocation: selectedLocation.latitude != 0.0 && selectedLocation.longitude != 0.0
+                      ? LatLng(selectedLocation.latitude, selectedLocation.longitude)
+                      : null,
+                  favoriteIds: ref.watch(favoritesProvider),
+                  onToggleFavorite: (id) => ref.read(favoritesProvider.notifier).toggleFavorite(id),
                 ),
               )
             else
@@ -450,7 +503,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
           ],
         ),
-      ),
     );
   }
 }
