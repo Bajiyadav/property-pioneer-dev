@@ -1,3 +1,13 @@
+## v0.66.0 — 2026-08-25
+
+### Features
+- feat: add Geoapify location search and gating (f70a59e)
+- feat: improve home loans navigation (f997192)
+
+### Fixes
+- fix: improve mobile reliability and listing validation (096da2b)
+- fix(mobile): prevent infinite auth and dashboard loading (9ac7d12)
+
 ## v0.65.0 — 2026-08-25
 
 ### Features
