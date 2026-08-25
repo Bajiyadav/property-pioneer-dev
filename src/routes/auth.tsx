@@ -8,7 +8,7 @@ import { BrandMark } from "@/shared/components/BrandMark";
 import { APP_NAME } from "@/config/app";
 import { getDashboardRoute, isUserRole } from "@/config/roles";
 import { EnterprisePasswordForm } from "@/modules/authentication/components/EnterprisePasswordForm";
-import { EmailOtpForm } from "@/modules/authentication/components/EmailOtpForm";
+
 import { GoogleSignInButton } from "@/shared/components/auth/GoogleSignInButton";
 import { ShieldCheck } from "lucide-react";
 
@@ -49,17 +49,10 @@ export const Route = createFileRoute("/auth")({
  * passwordless Email-OTP (the default fast path), password, and a New Account
  * form, with Google available alongside all of them.
  */
-type AuthMethod = "otp" | "password" | "signup";
-
-const TABS: { id: AuthMethod; label: string }[] = [
-  { id: "otp", label: "Email OTP (Code)" },
-  { id: "password", label: "Password Sign In" },
-  { id: "signup", label: "New Account" },
-];
 
 function AuthPage() {
   const { redirect } = Route.useSearch();
-  const [method, setMethod] = useState<AuthMethod>("otp");
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -89,41 +82,28 @@ function AuthPage() {
           <ShieldCheck className="h-3.5 w-3.5" /> Encrypted &amp; Secure Authentication
         </span>
         <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl">
-          {method === "signup" ? "Create Account" : "Sign In to Seedha Properties"}
+          {isSignUp ? "Create Account" : "Sign In to Seedha Properties"}
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {method === "otp"
-            ? "No password needed — we'll email you a 6-digit sign-in code."
-            : method === "password"
-              ? "Enter your credentials to access your saved homes & dashboards."
-              : "Create an account to save homes, send enquiries, or list a property."}
+          {isSignUp
+            ? "Create an account to save homes, send enquiries, or list a property."
+            : "Enter your credentials to access your saved homes & dashboards."}
         </p>
-      </div>
-
-      {/* Auth method tabs — OTP · Password · New Account */}
-      <div className="mt-6 flex w-full max-w-md gap-1 rounded-2xl border border-border/60 bg-secondary/40 p-1">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setMethod(t.id)}
-            className={`flex-1 rounded-xl py-2 text-[11px] font-extrabold transition sm:text-xs ${
-              method === t.id
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
       </div>
 
       {/* Form card — the selected method, with Google alongside all of them */}
       <div className="mt-6 w-full rounded-3xl border border-border/60 bg-card p-6 shadow-xl space-y-5">
-        {method === "otp" && <EmailOtpForm redirect={redirect} onSuccess={handleSuccess} />}
-        {method === "password" && (
-          <EnterprisePasswordForm mode="signin" onSuccess={handleSuccess} />
-        )}
-        {method === "signup" && <EnterprisePasswordForm mode="signup" onSuccess={handleSuccess} />}
+        <EnterprisePasswordForm mode={isSignUp ? "signup" : "signin"} onSuccess={handleSuccess} />
+
+        <div className="text-center text-xs">
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="font-bold text-[#0F766E] hover:underline cursor-pointer"
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+          </button>
+        </div>
 
         <div className="flex items-center gap-3">
           <span className="h-px flex-1 bg-border"></span>
