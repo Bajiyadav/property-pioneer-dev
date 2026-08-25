@@ -28,7 +28,7 @@
  */
 
 /** NIST floor is 8. Ten is a deliberate product choice, still passphrase-friendly. */
-export const MIN_PASSWORD_LENGTH = 10;
+export const MIN_PASSWORD_LENGTH = 6;
 
 /**
  * Long maximum, and it matters. Truncating or rejecting long input is what
