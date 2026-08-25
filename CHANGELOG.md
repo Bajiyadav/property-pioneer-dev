@@ -1,3 +1,12 @@
+## v0.63.1 — 2026-08-25
+
+### Fixes
+- fix(tests): remove outdated email otp ui test (18a8e38)
+- fix(tests): update password tests to reflect new 6 character limit and clear qa roles (07a6f06)
+- fix(auth): restore native signup to enable OTP flow (8c7f903)
+- fix(auth): drop non-existent check_account_exists RPC that broke the typecheck gate (56c3f59)
+- fix(auth): add server signup endpoint so Create Account reaches the dashboard (120035d)
+
 ## v0.63.0 — 2026-08-25
 
 ### Features
