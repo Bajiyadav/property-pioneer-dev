@@ -221,6 +221,13 @@ function SiteHeader() {
           */}
           <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-2.5">
             <Link
+              to="/home-loans"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors"
+            >
+              <span className="whitespace-nowrap">Home Loans</span>
+            </Link>
+
+            <Link
               to="/favorites"
               aria-label="Saved Properties"
               className="p-1.5 sm:p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"

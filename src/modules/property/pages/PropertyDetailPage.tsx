@@ -45,6 +45,7 @@ import {
   HelpCircle,
   ChevronDown,
   Video,
+  Banknote,
 } from "lucide-react";
 import {
   fetchProperty,
@@ -780,6 +781,24 @@ export function PropertyDetailPage() {
                   tenantId={tenantId}
                   onSent={() => setEnquiryOpen(false)}
                 />
+              </div>
+            )}
+
+            {property.listing_type === "sale" && (
+              <div className="rounded-xl border border-border/60 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/30 dark:to-emerald-950/30 p-5 shadow-sm">
+                <h3 className="font-bold text-teal-900 dark:text-teal-100 flex items-center gap-2 mb-2">
+                  <Banknote className="w-5 h-5 text-emerald-600" />
+                  Need a Home Loan?
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Check eligibility and get the best interest rates from top banks.
+                </p>
+                <Link
+                  to="/home-loans"
+                  className="w-full flex items-center justify-center h-10 bg-white dark:bg-card border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-semibold text-sm rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/50 transition-colors"
+                >
+                  Check Eligibility
+                </Link>
               </div>
             )}
           </div>
