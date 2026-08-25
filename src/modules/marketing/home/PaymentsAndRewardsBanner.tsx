@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CreditCard, ArrowRight, ShieldCheck, Gift } from "lucide-react";
+import { ArrowRight, Percent } from "lucide-react";
 
 export function PaymentsAndRewardsBanner() {
   return (
@@ -11,15 +11,13 @@ export function PaymentsAndRewardsBanner() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-emerald-200 backdrop-blur-xs mb-2.5">
-              <Gift className="h-3.5 w-3.5" />
-              <span>Zero Convenience Fee on First Transfer</span>
+              <Percent className="h-3.5 w-3.5" />
+              <span>Lowest Interest Rates from Top Banks</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Payments, Rent & Home Rewards
-            </h3>
+            <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight">Home Loans</h3>
             <p className="mt-1 text-xs sm:text-sm text-emerald-100">
-              Pay your monthly house rent via credit card, unlock lowest interest home loans, and
-              earn instant cashback rewards.
+              Compare offers from leading banks across India and unlock the lowest interest rate on
+              your home loan — with expert guidance and zero brokerage.
             </p>
           </div>
 
