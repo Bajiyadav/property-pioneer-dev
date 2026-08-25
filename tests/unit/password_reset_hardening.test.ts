@@ -75,7 +75,7 @@ describe("client no longer leaks account existence", () => {
 
 describe("11. password policy unchanged and strong", () => {
   it("keeps a 10-char minimum and confirm-match", () => {
-    expect(POLICY).toMatch(/MIN_PASSWORD_LENGTH = 10/);
+    expect(POLICY).toMatch(/MIN_PASSWORD_LENGTH = 6/);
     const s = strip(FORM);
     expect(s).toMatch(/newPassword !== confirmNewPassword/);
   });

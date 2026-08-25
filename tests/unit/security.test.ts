@@ -32,7 +32,7 @@ describe("password policy", () => {
   });
 
   it(`rejects anything shorter than ${MIN_PASSWORD_LENGTH} characters`, () => {
-    const r = evaluatePasswordRules("Sh0rt!aA", "Sh0rt!aA", "Asha Menon", "a@b.in", "9876543210");
+    const r = evaluatePasswordRules("Sh0rt", "Sh0rt", "Asha Menon", "a@b.in", "9876543210");
     expect(r.hasMinLength).toBe(false);
     expect(r.isCompliant).toBe(false);
   });

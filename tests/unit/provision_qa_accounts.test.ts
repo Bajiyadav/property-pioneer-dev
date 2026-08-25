@@ -68,6 +68,18 @@ describe.skipIf(!canRun)("QA account provisioning", () => {
         .eq("user_id", userId!);
 
       const roles = (roleRows ?? []).map((r) => r.role);
+
+      // Clean up stray roles
+      for (const existingRole of roles) {
+        if (existingRole !== acc.role) {
+          await adminClient
+            .from("user_roles")
+            .delete()
+            .eq("user_id", userId!)
+            .eq("role", existingRole);
+        }
+      }
+
       if (!roles.includes(acc.role)) {
         const { error: insertRoleError } = await adminClient
           .from("user_roles")
