@@ -130,39 +130,63 @@ export function EnterprisePasswordForm({
         // Continue if table query not blocked
       }
 
-      // 3. CREATE ACCOUNT IN SUPABASE AUTH
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
+      // 3. CREATE ACCOUNT (server-side, already email-confirmed), then sign in.
+      // The server creates the user with email_confirm:true so there is no
+      // confirmation-email round trip; we immediately establish a session with
+      // the same credentials and hand off to the dashboard. This is what makes
+      // "Create Account" land on the dashboard instead of stranding the user on
+      // an OTP screen that depends on an email that may never arrive.
+      let signupRes: Response;
+      try {
+        signupRes = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            name,
             phone: fullFormattedPhone,
             address: address || "Hyderabad",
-            role: SELF_REGISTRATION_ROLE,
-          },
-          emailRedirectTo,
-        },
-      });
+          }),
+        });
+      } catch {
+        setLoading(false);
+        toast.error("Network error. Please check your connection and try again.");
+        return;
+      }
 
-      setLoading(false);
-
-      if (error) {
-        if (error.message.toLowerCase().includes("already registered")) {
+      if (!signupRes.ok) {
+        setLoading(false);
+        if (signupRes.status === 409) {
           toast.error("An account with this email already exists. Please sign in.");
         } else {
-          toast.error(error.message);
+          let message = "Could not create your account. Please try again.";
+          try {
+            const payload = (await signupRes.json()) as { error?: string };
+            if (payload?.error) message = payload.error;
+          } catch {
+            // Keep the generic message.
+          }
+          toast.error(message);
         }
         return;
       }
 
-      if (data.session) {
-        toast.success(`Account created! Welcome to Seedha Properties.`);
-        onSuccess({ name, email, phone: fullFormattedPhone, role: SELF_REGISTRATION_ROLE });
-      } else {
-        setAwaitingConfirmation(true);
-        toast.success(`Confirmation email sent to ${email}.`);
+      // Account exists and is confirmed — establish the session.
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      setLoading(false);
+
+      if (signInError || !signInData.session) {
+        toast.success("Account created! Please sign in to continue.");
+        return;
       }
+
+      toast.success("Account created! Welcome to Seedha Properties.");
+      onSuccess({ name, email, phone: fullFormattedPhone, role: SELF_REGISTRATION_ROLE });
     } else {
       // SIGN IN MODE (Supports EITHER Email Address OR Mobile Number)
       let resolvedEmail = identifier.trim();
@@ -196,7 +220,23 @@ export function EnterprisePasswordForm({
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes("invalid login credentials")) {
-          toast.error("Incorrect Email/Mobile or password. Please try again.");
+          try {
+            // Use RPC to check if account actually exists (bypassing RLS safely)
+            const { data: accountExists } = await supabase.rpc("check_account_exists", {
+              search_email: resolvedEmail,
+              search_phone: pureDigits ? `+91${pureDigits}` : null,
+            });
+
+            if (accountExists === false) {
+              toast.error(
+                "You don't have an account yet. Please click 'Sign up' below to create one.",
+              );
+            } else {
+              toast.error("Incorrect password. Please try again.");
+            }
+          } catch {
+            toast.error("Incorrect Email/Mobile or password. Please try again.");
+          }
         } else if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
           setAwaitingConfirmation(true);
           toast.error("Your email isn't confirmed yet — we can resend the link.");
