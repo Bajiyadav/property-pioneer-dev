@@ -3,6 +3,8 @@ import { Search, MapPin, Building2, Home, Key, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { LIVE_CITIES } from "@/config/platform";
+import { GeoapifyAutocomplete } from "@/modules/property/components/GeoapifyAutocomplete";
+import { useLocationStore } from "@/modules/property/store/locationStore";
 
 type SearchMode = "rent" | "buy" | "commercial";
 
@@ -14,6 +16,7 @@ export function TabbedSearchBox({
   onQueryChange: (q: string) => void;
 }) {
   const navigate = useNavigate();
+  const setLocation = useLocationStore((state) => state.setLocation);
   const [activeTab, setActiveTab] = useState<SearchMode>("rent");
   const [city, setCity] = useState("All Cities");
 
@@ -146,18 +149,22 @@ export function TabbedSearchBox({
 
           {/* Search Input */}
           <div className="flex-1 flex items-center px-4 py-1 bg-transparent relative">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="Search by locality, area, or landmark (e.g. Madhapur, HSR Layout, Bandra)"
-              aria-label="Search localities or landmarks"
-              className="w-full bg-transparent text-sm py-2 sm:py-3 pr-24 outline-none placeholder:text-muted-foreground text-foreground"
+            <GeoapifyAutocomplete
+              initialValue={query}
+              onSelect={(text, geoData) => {
+                onQueryChange(text);
+                if (geoData) {
+                  useLocationStore.getState().setLocation(text, geoData);
+                } else {
+                  useLocationStore.getState().clearLocation();
+                }
+              }}
+              requireSelection={true}
             />
             <button
               type="button"
               onClick={handleLocate}
-              className="absolute right-2 p-1.5 text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 bg-secondary/40 hover:bg-secondary/80 rounded border border-border text-[11px] font-medium"
+              className="absolute right-2 p-1.5 text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 bg-secondary/40 hover:bg-secondary/80 rounded border border-border text-[11px] font-medium z-10"
               title="Use my location"
             >
               <Crosshair className="h-3 w-3" />

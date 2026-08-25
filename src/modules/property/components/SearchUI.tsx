@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { PropertyMap } from "@/components/PropertyMap";
 import { toMapProperties } from "@/components/propertyMapData";
-import { LocationPicker } from "@/modules/property/components/LocationPicker";
+import { GeoapifyAutocomplete } from "@/modules/property/components/GeoapifyAutocomplete";
+import { LocationGate } from "@/modules/property/components/LocationGate";
+import { useLocationStore } from "@/modules/property/store/locationStore";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
 import { trackSearch } from "@/modules/analytics/services/tracking";
 import { OptionalPreferencesCard } from "@/modules/tenant/components/OptionalPreferencesCard";
@@ -42,6 +44,7 @@ export function SearchUI({
   baseUrl,
 }: SearchUIProps) {
   const navigate = useNavigate();
+  const setLocation = useLocationStore((state) => state.setLocation);
   // Record the search once results have settled, not on every keystroke:
   // `isLoading` gating plus the serialised search key means one row per distinct
   // query. No-ops entirely without analytics consent.
@@ -318,302 +321,310 @@ export function SearchUI({
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Header & Location Picker */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-6">
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl tracking-tight mb-2">
-            {title}
-          </h1>
-          <div className="text-muted-foreground">{subtitle}</div>
-        </div>
-
-        <div className="flex flex-col sm:items-end gap-3 shrink-0">
-          <LocationPicker
-            currentCity={search.city}
-            currentLocality={search.locality}
-            onLocationSelect={(city, locality) => {
-              const citySlug = city.toLowerCase().replace(/\s+/g, "-");
-              const localitySlug = locality
-                ? locality.toLowerCase().replace(/\s+/g, "-")
-                : undefined;
-              let prefix = "/rent";
-              if (baseUrl.startsWith("/buy") || search.listing === "sale") {
-                prefix = "/buy";
-              } else if (baseUrl.startsWith("/commercial") || search.type === "commercial") {
-                prefix = "/commercial";
-              }
-              if (localitySlug) {
-                navigate({
-                  to: `${prefix}/$city/$locality`,
-                  params: { city: citySlug, locality: localitySlug },
-                  search: (prev: PropertySearchParams) => {
-                    const next = { ...prev };
-                    delete next.locality;
-                    return next;
-                  },
-                });
-              } else {
-                navigate({
-                  to: `${prefix}/$city`,
-                  params: { city: citySlug },
-                  search: (prev: PropertySearchParams) => {
-                    const next = { ...prev };
-                    delete next.locality;
-                    return next;
-                  },
-                });
-              }
-            }}
-          />
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden flex items-center gap-2 rounded-xl bg-secondary px-4 py-2 text-sm font-medium transition active:scale-95"
-            >
-              <SlidersHorizontal className="h-4 w-4" /> Filters
-            </button>
-
-            {/* View Mode Toggle */}
-            <div className="hidden sm:flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-sm">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  viewMode === "grid"
-                    ? "bg-primary text-primary-foreground shadow"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
-              >
-                <List className="h-3.5 w-3.5" /> List
-              </button>
-              <button
-                onClick={() => setViewMode("map")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  viewMode === "map"
-                    ? "bg-primary text-primary-foreground shadow"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
-              >
-                <MapPin className="h-3.5 w-3.5" /> Map
-              </button>
-            </div>
+    <LocationGate>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        {/* Header & Location Picker */}
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl tracking-tight mb-2">
+              {title}
+            </h1>
+            <div className="text-muted-foreground">{subtitle}</div>
           </div>
-        </div>
-      </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-72 shrink-0">
-          <div className="sticky top-24 rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-bold">Filters</h2>
-              <button
-                onClick={clearFilters}
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                Clear all
-              </button>
-            </div>
-            <FilterPanel />
-          </div>
-        </aside>
-
-        {/* Mobile Filter Drawer */}
-        <AnimatePresence>
-          {isMobileFilterOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMobileFilterOpen(false)}
-                className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden"
+          <div className="flex flex-col sm:items-end gap-3 shrink-0">
+            <div className="w-[280px]">
+              <GeoapifyAutocomplete
+                initialValue={search.locality || search.city || ""}
+                placeholder="Search city or locality..."
+                onSelect={(text, geoData) => {
+                  if (geoData) {
+                    setLocation(text, geoData);
+                    const citySlug = geoData.city.toLowerCase().replace(/\s+/g, "-");
+                    const localitySlug = geoData.locality
+                      ? geoData.locality.toLowerCase().replace(/\s+/g, "-")
+                      : undefined;
+                    let prefix = "/rent";
+                    if (baseUrl.startsWith("/buy") || search.listing === "sale") {
+                      prefix = "/buy";
+                    } else if (baseUrl.startsWith("/commercial") || search.type === "commercial") {
+                      prefix = "/commercial";
+                    }
+                    if (localitySlug) {
+                      navigate({
+                        to: `${prefix}/$city/$locality`,
+                        params: { city: citySlug, locality: localitySlug },
+                        search: (prev: PropertySearchParams) => {
+                          const next = { ...prev };
+                          delete next.locality;
+                          return next;
+                        },
+                      });
+                    } else {
+                      navigate({
+                        to: `${prefix}/$city`,
+                        params: { city: citySlug },
+                        search: (prev: PropertySearchParams) => {
+                          const next = { ...prev };
+                          delete next.locality;
+                          return next;
+                        },
+                      });
+                    }
+                  }
+                }}
               />
-              <motion.div
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-border bg-card shadow-2xl lg:hidden flex flex-col"
-              >
-                <div className="flex items-center justify-between border-b border-border/50 p-4">
-                  <h2 className="text-lg font-bold">Filters</h2>
-                  <button
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="rounded-full p-2 hover:bg-secondary"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6">
-                  <FilterPanel />
-                </div>
-                <div className="border-t border-border/50 p-4 flex gap-3">
-                  <button
-                    onClick={clearFilters}
-                    className="flex-1 rounded-xl py-3 font-semibold text-foreground bg-secondary hover:bg-secondary/80"
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="flex-1 rounded-xl py-3 font-semibold text-primary-foreground bg-primary hover:brightness-110"
-                  >
-                    Show Results
-                  </button>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Main Content Area */}
-        <div className="flex-1 min-w-0">
-          {/* Sorting Row */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="text-sm text-muted-foreground font-medium">
-              {isLoading ? "Finding homes..." : `Showing ${properties.length} homes`}
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-foreground">Sort by:</span>
-              <select
-                value={search.sort || ""}
-                onChange={(e) => update({ sort: e.target.value as PropertySearchParams["sort"] })}
-                className="rounded-xl bg-secondary px-3 py-2 text-sm font-medium outline-none cursor-pointer border-none"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="lg:hidden flex items-center gap-2 rounded-xl bg-secondary px-4 py-2 text-sm font-medium transition active:scale-95"
               >
-                <option value="">Recommended</option>
-                <option value="newest">Newest</option>
-                <option value="lowest_rent">Lowest Rent</option>
-                <option value="highest_rent">Highest Rent</option>
-                <option value="largest_area">Largest Area</option>
-              </select>
+                <SlidersHorizontal className="h-4 w-4" /> Filters
+              </button>
+
+              {/* View Mode Toggle */}
+              <div className="hidden sm:flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-sm">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    viewMode === "grid"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5" /> List
+                </button>
+                <button
+                  onClick={() => setViewMode("map")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    viewMode === "map"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
+                  <MapPin className="h-3.5 w-3.5" /> Map
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
-          {isLoading ? (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card overflow-hidden shadow-xs animate-pulse"
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Desktop Sidebar */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <div className="sticky top-24 rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-lg font-bold">Filters</h2>
+                <button
+                  onClick={clearFilters}
+                  className="text-xs font-semibold text-primary hover:underline"
                 >
-                  <div className="aspect-[4/3] w-full bg-muted/60" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-5 w-3/4 bg-muted/60 rounded-md" />
-                    <div className="h-4 w-1/2 bg-muted/40 rounded-md" />
-                    <div className="pt-2 border-t border-border/50 flex justify-between items-center">
-                      <div className="h-6 w-24 bg-muted/60 rounded-md" />
-                      <div className="h-8 w-20 bg-muted/50 rounded-lg" />
+                  Clear all
+                </button>
+              </div>
+              <FilterPanel />
+            </div>
+          </aside>
+
+          {/* Mobile Filter Drawer */}
+          <AnimatePresence>
+            {isMobileFilterOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden"
+                />
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-border bg-card shadow-2xl lg:hidden flex flex-col"
+                >
+                  <div className="flex items-center justify-between border-b border-border/50 p-4">
+                    <h2 className="text-lg font-bold">Filters</h2>
+                    <button
+                      onClick={() => setIsMobileFilterOpen(false)}
+                      className="rounded-full p-2 hover:bg-secondary"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <FilterPanel />
+                  </div>
+                  <div className="border-t border-border/50 p-4 flex gap-3">
+                    <button
+                      onClick={clearFilters}
+                      className="flex-1 rounded-xl py-3 font-semibold text-foreground bg-secondary hover:bg-secondary/80"
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => setIsMobileFilterOpen(false)}
+                      className="flex-1 rounded-xl py-3 font-semibold text-primary-foreground bg-primary hover:brightness-110"
+                    >
+                      Show Results
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            {/* Sorting Row */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="text-sm text-muted-foreground font-medium">
+                {isLoading ? "Finding homes..." : `Showing ${properties.length} homes`}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-foreground">Sort by:</span>
+                <select
+                  value={search.sort || ""}
+                  onChange={(e) => update({ sort: e.target.value as PropertySearchParams["sort"] })}
+                  className="rounded-xl bg-secondary px-3 py-2 text-sm font-medium outline-none cursor-pointer border-none"
+                >
+                  <option value="">Recommended</option>
+                  <option value="newest">Newest</option>
+                  <option value="lowest_rent">Lowest Rent</option>
+                  <option value="highest_rent">Highest Rent</option>
+                  <option value="largest_area">Largest Area</option>
+                </select>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card overflow-hidden shadow-xs animate-pulse"
+                  >
+                    <div className="aspect-[4/3] w-full bg-muted/60" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-5 w-3/4 bg-muted/60 rounded-md" />
+                      <div className="h-4 w-1/2 bg-muted/40 rounded-md" />
+                      <div className="pt-2 border-t border-border/50 flex justify-between items-center">
+                        <div className="h-6 w-24 bg-muted/60 rounded-md" />
+                        <div className="h-8 w-20 bg-muted/50 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+                <div className="mx-auto flex max-w-md flex-col items-center">
+                  <Search className="mb-4 h-12 w-12 text-muted-foreground/50" />
+                  <h3 className="text-xl font-bold text-foreground">
+                    {search.q || search.locality
+                      ? `No properties found in ${search.q || search.locality} yet`
+                      : "No homes match your filters"}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Try adjusting your search criteria, or explore our active rental hubs in
+                    Hyderabad.
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
+                    >
+                      Clear all filters
+                    </button>
+                    <Link
+                      to="/properties"
+                      search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition hover:bg-secondary"
+                    >
+                      View all properties
+                    </Link>
+                  </div>
+
+                  <div className="mt-10 w-full border-t border-border pt-8">
+                    <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Popular Localities
+                    </h4>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {[
+                        { city: "bangalore", locality: "koramangala", name: "Koramangala" },
+                        { city: "bangalore", locality: "indiranagar", name: "Indiranagar" },
+                        { city: "hyderabad", locality: "madhapur", name: "Madhapur" },
+                        { city: "hyderabad", locality: "gachibowli", name: "Gachibowli" },
+                        { city: "mumbai", locality: "bandra-west", name: "Bandra West" },
+                        { city: "pune", locality: "hinjewadi", name: "Hinjewadi" },
+                      ].map((loc) => (
+                        <Link
+                          key={loc.name}
+                          to="/rent/$city/$locality"
+                          params={{
+                            city: loc.city,
+                            locality: loc.locality,
+                          }}
+                          className="rounded-lg bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground transition hover:bg-secondary"
+                        >
+                          {loc.name}
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : properties.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
-              <div className="mx-auto flex max-w-md flex-col items-center">
-                <Search className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                <h3 className="text-xl font-bold text-foreground">
-                  {search.q || search.locality
-                    ? `No properties found in ${search.q || search.locality} yet`
-                    : "No homes match your filters"}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try adjusting your search criteria, or explore our active rental hubs in
-                  Hyderabad.
-                </p>
-
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={clearFilters}
-                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
-                  >
-                    Clear all filters
-                  </button>
-                  <Link
-                    to="/properties"
-                    search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition hover:bg-secondary"
-                  >
-                    View all properties
-                  </Link>
-                </div>
-
-                <div className="mt-10 w-full border-t border-border pt-8">
-                  <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Popular Localities
-                  </h4>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {[
-                      { city: "bangalore", locality: "koramangala", name: "Koramangala" },
-                      { city: "bangalore", locality: "indiranagar", name: "Indiranagar" },
-                      { city: "hyderabad", locality: "madhapur", name: "Madhapur" },
-                      { city: "hyderabad", locality: "gachibowli", name: "Gachibowli" },
-                      { city: "mumbai", locality: "bandra-west", name: "Bandra West" },
-                      { city: "pune", locality: "hinjewadi", name: "Hinjewadi" },
-                    ].map((loc) => (
-                      <Link
-                        key={loc.name}
-                        to="/rent/$city/$locality"
-                        params={{
-                          city: loc.city,
-                          locality: loc.locality,
-                        }}
-                        className="rounded-lg bg-secondary/50 px-4 py-2 text-xs font-medium text-foreground transition hover:bg-secondary"
-                      >
-                        {loc.name}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
               </div>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="space-y-6">
-              <OptionalPreferencesCard />
-              {/* Responsive auto-fit grid: cards flow into as many columns as the
+            ) : viewMode === "grid" ? (
+              <div className="space-y-6">
+                <OptionalPreferencesCard />
+                {/* Responsive auto-fit grid: cards flow into as many columns as the
                   available width allows (~1 col mobile, 2-3 on desktop) and the
                   1fr tracks stretch to fill the row, so a single/few results
                   never leave a large empty column on the right. `min(280px,100%)`
                   keeps a lone card from overflowing very narrow viewports. */}
-              <div className="flex flex-col gap-6">
-                {properties.map((p) => (
-                  <PropertyCard key={p.id} property={p} />
-                ))}
-              </div>
-
-              {/* Server-Side Pagination Bar */}
-              {(properties.length >= (search.limit || 20) || (search.page && search.page > 1)) && (
-                <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-6">
-                  <button
-                    onClick={() => update({ page: Math.max(1, (search.page || 1) - 1) })}
-                    disabled={!search.page || search.page <= 1}
-                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Previous Page
-                  </button>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Page {search.page || 1}
-                  </span>
-                  <button
-                    onClick={() => update({ page: (search.page || 1) + 1 })}
-                    disabled={properties.length < (search.limit || 20)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Next Page
-                  </button>
+                <div className="flex flex-col gap-6">
+                  {properties.map((p) => (
+                    <PropertyCard key={p.id} property={p} />
+                  ))}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-[600px] w-full overflow-hidden rounded-3xl border border-border shadow-sm">
-              <PropertyMap properties={toMapProperties(properties)} />
-            </div>
-          )}
+
+                {/* Server-Side Pagination Bar */}
+                {(properties.length >= (search.limit || 20) ||
+                  (search.page && search.page > 1)) && (
+                  <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-6">
+                    <button
+                      onClick={() => update({ page: Math.max(1, (search.page || 1) - 1) })}
+                      disabled={!search.page || search.page <= 1}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Previous Page
+                    </button>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Page {search.page || 1}
+                    </span>
+                    <button
+                      onClick={() => update({ page: (search.page || 1) + 1 })}
+                      disabled={properties.length < (search.limit || 20)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Next Page
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="h-[600px] w-full overflow-hidden rounded-3xl border border-border shadow-sm">
+                <PropertyMap properties={toMapProperties(properties)} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </LocationGate>
   );
 }
