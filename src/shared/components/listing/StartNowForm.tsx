@@ -35,8 +35,8 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
   const navigate = useNavigate();
   const { status, user } = useAuth();
 
-  const [propertyType, setPropertyType] = useState<"Residential" | "Commercial">("Residential");
-  const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living">("Rent");
+  const [propertyType, setPropertyType] = useState<"Residential" | "Commercial" | null>(null);
+  const [intent, setIntent] = useState<"Rent" | "Sell" | "PG/Co-living" | null>(null);
   const [phone, setPhone] = useState(user?.phone || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +47,15 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
       e.stopPropagation();
     }
     if (isLoading) return;
+
+    if (!propertyType) {
+      setError("Please select a property category (Residential or Commercial).");
+      return;
+    }
+    if (!intent) {
+      setError("Please select if you want to Rent, Sell, or PG/Co-living.");
+      return;
+    }
 
     console.log("✅ [StartNowForm] START NOW clicked:", {
       propertyType,
