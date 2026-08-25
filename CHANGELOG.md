@@ -1,3 +1,8 @@
+## v0.64.0 — 2026-08-25
+
+### Features
+- feat(ui): update property search to 1-column layout with image mosaic (6a5aa33)
+
 ## v0.63.5 — 2026-08-25
 
 ### Fixes
