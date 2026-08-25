@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/constants.dart';
 import 'supabase_service.dart';
 
 class FavoritesService {
@@ -16,7 +17,8 @@ class FavoritesService {
         final res = await _client
             .from('favorites')
             .select('property_id')
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .timeout(AppConstants.networkTimeout);
         return (res as List<dynamic>)
             .map((e) => e['property_id'].toString())
             .toSet();
@@ -41,12 +43,13 @@ class FavoritesService {
               .from('favorites')
               .delete()
               .eq('user_id', user.id)
-              .eq('property_id', propertyId);
+              .eq('property_id', propertyId)
+              .timeout(AppConstants.networkTimeout);
         } else {
           await _client.from('favorites').insert({
             'user_id': user.id,
             'property_id': propertyId,
-          });
+          }).timeout(AppConstants.networkTimeout);
         }
       } catch (e) {
         // Continue to sync locally

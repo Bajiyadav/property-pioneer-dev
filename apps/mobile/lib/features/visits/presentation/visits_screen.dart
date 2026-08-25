@@ -6,6 +6,7 @@ import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/visit.dart';
 import 'package:seedha_properties_mobile/models/enquiry.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
 class VisitsScreen extends ConsumerStatefulWidget {
   const VisitsScreen({super.key});
@@ -19,6 +20,7 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
   List<PropertyVisit> _visits = [];
   List<PropertyEnquiry> _enquiries = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -34,9 +36,16 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
     final user = ref.read(authServiceProvider).currentUser;
-    if (user != null) {
+    if (user == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+    try {
       final visits = await ref.read(enquiryServiceProvider).getUserVisits(user.id);
       final enquiries = await ref.read(enquiryServiceProvider).getUserEnquiries(user.id);
       if (mounted) {
@@ -46,9 +55,14 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
           _isLoading = false;
         });
       }
-    } else {
+    } catch (e) {
+      // getUserVisits/getUserEnquiries now propagate errors and timeouts —
+      // show an error state with Retry instead of an infinite spinner.
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
       }
     }
   }
@@ -112,6 +126,17 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+          : _hasError
+          ? SeedhaStateView(
+              type: SeedhaStateType.serverError,
+              title: 'Unable to load your visits',
+              description: 'Please check your connection and try again.',
+              primaryAction: StateActionConfig(
+                label: 'Retry',
+                icon: Icons.refresh,
+                onPressed: _loadData,
+              ),
+            )
           : TabBarView(
               controller: _tabController,
               children: [

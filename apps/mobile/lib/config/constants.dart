@@ -29,6 +29,11 @@ extension PropertyCategoryExt on PropertyCategory {
 }
 
 class AppConstants {
+  /// Shared network timeout for Supabase / HTTP calls. No request may hang
+  /// longer than this — the app must always resolve to success, empty, or a
+  /// clear error + retry, never an infinite spinner.
+  static const Duration networkTimeout = Duration(seconds: 15);
+
   static const String appName = 'Seedha Properties';
   static const String appTagline = 'Verified Direct-Owner Real Estate Marketplace Across India';
   static const String founderName = 'Srinivasa Rao';

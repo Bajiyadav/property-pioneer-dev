@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -18,18 +20,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   bool _actionRunning = false;
 
   Future<List<Property>> _fetchPendingProperties() async {
-    try {
-      final res = await SupabaseService.client
-          .from('properties')
-          .select()
-          .eq('status', 'pending')
-          .order('created_at', ascending: true);
-      return (res as List<dynamic>)
-          .map((e) => Property.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      return <Property>[];
-    }
+    final res = await SupabaseService.client
+        .from('properties')
+        .select()
+        .eq('status', 'pending')
+        .order('created_at', ascending: true)
+        .timeout(AppConstants.networkTimeout);
+    return (res as List<dynamic>)
+        .map((e) => Property.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> _updateListingStatus(String id, String newStatus, bool approved, String? videoUrl) async {
@@ -50,7 +49,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
       await SupabaseService.client
           .from('properties')
           .update(updateData)
-          .eq('id', id);
+          .eq('id', id)
+          .timeout(AppConstants.networkTimeout);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,9 +63,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: Colors.red,
-            content: Text('Action failed: ${e.toString()}'),
+            content: Text('Action failed. Please check your connection and try again.'),
           ),
         );
       }
@@ -95,6 +95,18 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+          }
+          if (snapshot.hasError) {
+            return SeedhaStateView(
+              type: SeedhaStateType.serverError,
+              title: 'Unable to load pending listings',
+              description: 'Please check your connection and try again.',
+              primaryAction: StateActionConfig(
+                label: 'Retry',
+                icon: Icons.refresh,
+                onPressed: () => setState(() {}),
+              ),
+            );
           }
 
           final pending = snapshot.data ?? [];

@@ -9,16 +9,16 @@ class ListingFormData {
   final String locality;
   final String address;
   final String? landmark;
-  final String propertyType;
+  final String? propertyType;
   final String? listingType;
   final String? bhkType;
-  final int bedrooms;
-  final int bathrooms;
+  final int? bedrooms;
+  final int? bathrooms;
   final String floorNumber;
   final int? totalRooms;
   final int areaSqft;
   final String? areaUnit;
-  final String furnishingStatus;
+  final String? furnishingStatus;
   final List<String>? preferredTenant;
   final String? foodPreference;
   final int price;
@@ -48,16 +48,16 @@ class ListingFormData {
     this.locality = '',
     this.address = '',
     this.landmark,
-    this.propertyType = 'Apartment',
+    this.propertyType,
     this.listingType,
     this.bhkType,
-    this.bedrooms = 1,
-    this.bathrooms = 1,
+    this.bedrooms,
+    this.bathrooms,
     this.floorNumber = '0',
     this.totalRooms,
     this.areaSqft = 0,
     this.areaUnit,
-    this.furnishingStatus = 'unfurnished',
+    this.furnishingStatus,
     this.preferredTenant,
     this.foodPreference,
     this.price = 0,

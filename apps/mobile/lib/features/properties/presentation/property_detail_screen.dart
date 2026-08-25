@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/services/enquiry_service.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -32,6 +34,8 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   Property? _property;
   List<Property> _similarProperties = [];
   bool _isLoading = true;
+  bool _hasError = false;
+  bool _errorIsTimeout = false;
   int _currentImageIndex = 0;
   VideoPlayerController? _videoController;
 
@@ -48,17 +52,33 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   }
 
   Future<void> _loadProperty() async {
-    setState(() => _isLoading = true);
-    final prop = await _propertyService.getPropertyById(widget.propertyId);
-    if (prop != null) {
-      final similar = await _propertyService.getSimilarProperties(prop);
-      if (mounted) {
-        setState(() {
-          _property = prop;
-          _similarProperties = similar;
-          _isLoading = false;
-        });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorIsTimeout = false;
+    });
+    try {
+      final prop = await _propertyService.getPropertyById(widget.propertyId);
+      if (!mounted) return;
+      if (prop == null) {
+        // Genuine "not found" (row is null) — distinct from a network
+        // failure or timeout, which now propagate as exceptions below.
+        setState(() => _isLoading = false);
+        return;
       }
+
+      // The property loaded — "similar" is a nice-to-have, so a failure
+      // here must not hide the property behind an error screen.
+      List<Property> similar = [];
+      try {
+        similar = await _propertyService.getSimilarProperties(prop);
+      } catch (_) {}
+      if (!mounted) return;
+      setState(() {
+        _property = prop;
+        _similarProperties = similar;
+        _isLoading = false;
+      });
 
       if (prop.hasVideoTour) {
         try {
@@ -68,9 +88,15 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
             });
         } catch (_) {}
       }
-    } else {
+    } catch (e) {
+      // Network error or timeout — show an error state with Retry rather
+      // than a misleading "not found" or an infinite spinner.
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _hasError = true;
+          _errorIsTimeout = e is TimeoutException;
+          _isLoading = false;
+        });
       }
     }
   }
@@ -296,6 +322,24 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+      );
+    }
+
+    if (_hasError) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Property Details')),
+        body: SeedhaStateView(
+          type: _errorIsTimeout ? SeedhaStateType.slowNetwork : SeedhaStateType.serverError,
+          title: _errorIsTimeout ? 'Taking longer than usual' : 'Unable to load this property',
+          description: _errorIsTimeout
+              ? 'The request timed out. Please check your connection and try again.'
+              : 'Please check your connection and try again.',
+          primaryAction: StateActionConfig(
+            label: 'Retry',
+            icon: Icons.refresh,
+            onPressed: _loadProperty,
+          ),
+        ),
       );
     }
 

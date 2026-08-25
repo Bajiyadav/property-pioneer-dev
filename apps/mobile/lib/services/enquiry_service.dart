@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/constants.dart';
 import '../models/enquiry.dart';
 import '../models/visit.dart';
 import 'supabase_service.dart';
@@ -27,7 +28,7 @@ class EnquiryService {
         'message': message.trim(),
         'status': 'pending',
         'created_at': DateTime.now().toIso8601String(),
-      });
+      }).timeout(AppConstants.networkTimeout);
       return true;
     } catch (e) {
       return false;
@@ -57,7 +58,7 @@ class EnquiryService {
         'message': slotMessage,
         'status': 'pending',
         'created_at': DateTime.now().toIso8601String(),
-      });
+      }).timeout(AppConstants.networkTimeout);
       return true;
     } catch (e) {
       return false;
@@ -65,12 +66,17 @@ class EnquiryService {
   }
 
   Future<List<PropertyVisit>> getUserVisits(String userId) async {
+    // SCOPED to the authenticated user — a customer must never receive another
+    // customer's visits. Empty result → []; errors/timeouts propagate so the
+    // screen shows an error + Retry rather than a silent (or wrong) list.
     try {
       final res = await _client
           .from('enquiries')
           .select()
+          .eq('user_id', userId)
           .ilike('message', '%[SCHEDULED VISIT]%')
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .timeout(AppConstants.networkTimeout);
 
       final list = (res as List<dynamic>).map((e) {
         final map = e as Map<String, dynamic>;
@@ -94,7 +100,7 @@ class EnquiryService {
 
       return list;
     } catch (e) {
-      return [];
+      rethrow;
     }
   }
 
@@ -103,14 +109,46 @@ class EnquiryService {
       final res = await _client
           .from('enquiries')
           .select()
+          .eq('user_id', userId)
           .not('message', 'ilike', '%[SCHEDULED VISIT]%')
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .timeout(AppConstants.networkTimeout);
 
       return (res as List<dynamic>)
           .map((e) => PropertyEnquiry.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      return [];
+      rethrow;
+    }
+  }
+
+  Future<List<PropertyEnquiry>> getOwnerEnquiries(String ownerId) async {
+    try {
+      // 1. Get properties owned by current user
+      final propsRes = await _client
+          .from('properties')
+          .select('id')
+          .eq('owner_id', ownerId)
+          .timeout(AppConstants.networkTimeout);
+      final propertyIds = (propsRes as List<dynamic>)
+          .map((p) => p['id'] as String)
+          .toList();
+
+      if (propertyIds.isEmpty) return <PropertyEnquiry>[];
+
+      // 2. Get enquiries for those properties
+      final enquiriesRes = await _client
+          .from('enquiries')
+          .select()
+          .inFilter('property_id', propertyIds)
+          .order('created_at', ascending: false)
+          .timeout(AppConstants.networkTimeout);
+
+      return (enquiriesRes as List<dynamic>)
+          .map((e) => PropertyEnquiry.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      rethrow;
     }
   }
 }

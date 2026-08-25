@@ -16,11 +16,11 @@ class Step2Details extends ConsumerStatefulWidget {
 class _Step2DetailsState extends ConsumerState<Step2Details> {
   final _formKey = GlobalKey<FormState>();
   
-  String _propertyType = 'Apartment';
-  String _listingType = 'rent';
-  int _bedrooms = 1;
-  int _bathrooms = 1;
-  String _furnishingStatus = 'unfurnished';
+  String? _propertyType;
+  String? _listingType;
+  int? _bedrooms;
+  int? _bathrooms;
+  String? _furnishingStatus;
   
   late TextEditingController _areaController;
   late TextEditingController _floorController;
@@ -33,7 +33,7 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
     super.initState();
     final data = ref.read(listingWizardProvider);
     _propertyType = data.propertyType;
-    _listingType = data.listingType ?? 'rent';
+    _listingType = data.listingType;
     _bedrooms = data.bedrooms;
     _bathrooms = data.bathrooms;
     _furnishingStatus = data.furnishingStatus;
@@ -50,7 +50,7 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
   }
 
   void _saveAndNext() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && _listingType != null) {
       ref.read(listingWizardProvider.notifier).updateData((state) => state.copyWith(
             propertyType: _propertyType,
             listingType: _listingType,
@@ -76,22 +76,35 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
             Text('Property Details', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 24),
             
+            const Text('Listing Purpose *', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: const [
                 ButtonSegment(value: 'rent', label: Text('For Rent')),
                 ButtonSegment(value: 'sale', label: Text('For Sale')),
               ],
-              selected: {_listingType},
+              emptySelectionAllowed: true,
+              selected: _listingType != null ? {_listingType!} : {},
               onSelectionChanged: (Set<String> newSelection) {
-                setState(() => _listingType = newSelection.first);
+                if (newSelection.isNotEmpty) {
+                  setState(() => _listingType = newSelection.first);
+                }
               },
             ),
+            if (_listingType == null)
+              const Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: Text('Please select the listing purpose',
+                    style: TextStyle(color: Colors.red, fontSize: 12)),
+              ),
             const SizedBox(height: 16),
             
             DropdownButtonFormField<String>(
               value: _propertyType,
+              hint: const Text('Select property type'),
               decoration: const InputDecoration(labelText: 'Property Type *', border: OutlineInputBorder()),
               items: _propertyTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))).toList(),
+              validator: (v) => v == null ? 'Required' : null,
               onChanged: (val) {
                 if (val != null) setState(() => _propertyType = val);
               },
@@ -100,8 +113,10 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
             
             DropdownButtonFormField<String>(
               value: _furnishingStatus,
+              hint: const Text('Select furnishing'),
               decoration: const InputDecoration(labelText: 'Furnishing *', border: OutlineInputBorder()),
               items: _furnishingTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))).toList(),
+              validator: (v) => v == null ? 'Required' : null,
               onChanged: (val) {
                 if (val != null) setState(() => _furnishingStatus = val);
               },
@@ -113,9 +128,11 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _bedrooms,
+                    hint: const Text('Select BHK'),
                     decoration: const InputDecoration(labelText: 'Bedrooms *', border: OutlineInputBorder()),
                     items: List.generate(10, (index) => index + 1)
                         .map((count) => DropdownMenuItem(value: count, child: Text(count.toString()))).toList(),
+                    validator: (v) => v == null ? 'Required' : null,
                     onChanged: (val) {
                       if (val != null) setState(() => _bedrooms = val);
                     },
@@ -125,9 +142,11 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _bathrooms,
+                    hint: const Text('Select bathrooms'),
                     decoration: const InputDecoration(labelText: 'Bathrooms *', border: OutlineInputBorder()),
                     items: List.generate(10, (index) => index + 1)
                         .map((count) => DropdownMenuItem(value: count, child: Text(count.toString()))).toList(),
+                    validator: (v) => v == null ? 'Required' : null,
                     onChanged: (val) {
                       if (val != null) setState(() => _bathrooms = val);
                     },

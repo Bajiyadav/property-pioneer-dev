@@ -100,7 +100,8 @@ class PropertyService {
       final response = await query
           .order('is_featured', ascending: false)
           .order('created_at', ascending: false)
-          .range(offset, offset + limit - 1);
+          .range(offset, offset + limit - 1)
+          .timeout(AppConstants.networkTimeout);
 
       final list = (response as List<dynamic>)
           .map((item) => Property.fromJson(item as Map<String, dynamic>))
@@ -162,20 +163,21 @@ class PropertyService {
     }
   }
 
-  /// Single property details fetch
+  /// Single property details fetch.
+  ///
+  /// Returns null ONLY when the row genuinely does not exist. Network errors
+  /// and timeouts are allowed to propagate so callers can distinguish
+  /// "not found" from a connection/timeout failure (and show retry).
   Future<Property?> getPropertyById(String id) async {
-    try {
-      final response = await _client
-          .from('properties')
-          .select(publicPropertyColumns)
-          .eq('id', id)
-          .maybeSingle();
+    final response = await _client
+        .from('properties')
+        .select(publicPropertyColumns)
+        .eq('id', id)
+        .maybeSingle()
+        .timeout(AppConstants.networkTimeout);
 
-      if (response == null) return null;
-      return Property.fromJson(response);
-    } catch (e) {
-      return null;
-    }
+    if (response == null) return null;
+    return Property.fromJson(response);
   }
 
   /// Fetch similar recommendations
@@ -187,7 +189,8 @@ class PropertyService {
           .eq('status', 'available')
           .eq('listing_type', current.listingType)
           .neq('id', current.id)
-          .limit(20);
+          .limit(20)
+          .timeout(AppConstants.networkTimeout);
 
       final list = (response as List<dynamic>)
           .map((item) => Property.fromJson(item as Map<String, dynamic>))
@@ -223,8 +226,7 @@ class PropertyService {
         ...propertyData,
         'owner_id': user.id,
         'owner_email': user.email,
-        'status': 'available',
-        'is_approved': true,
+        'status': 'unapproved',
         'created_at': DateTime.now().toIso8601String(),
       };
 
@@ -232,7 +234,8 @@ class PropertyService {
           .from('properties')
           .insert(payload)
           .select()
-          .single();
+          .single()
+          .timeout(AppConstants.networkTimeout);
 
       return Property.fromJson(response);
     } catch (e) {
@@ -240,20 +243,20 @@ class PropertyService {
     }
   }
 
-  /// Owner: fetch their listed properties
+  /// Owner: fetch their listed properties.
+  ///
+  /// Errors/timeouts propagate so the owner dashboard can show a retry state
+  /// instead of a silent empty list. A genuine empty result returns `[]`.
   Future<List<Property>> getOwnerProperties(String ownerId) async {
-    try {
-      final response = await _client
-          .from('properties')
-          .select()
-          .eq('owner_id', ownerId)
-          .order('created_at', ascending: false);
+    final response = await _client
+        .from('properties')
+        .select()
+        .eq('owner_id', ownerId)
+        .order('created_at', ascending: false)
+        .timeout(AppConstants.networkTimeout);
 
-      return (response as List<dynamic>)
-          .map((item) => Property.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    return (response as List<dynamic>)
+        .map((item) => Property.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

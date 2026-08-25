@@ -6,7 +6,7 @@ import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/models/enquiry.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
-import 'package:seedha_properties_mobile/services/supabase_service.dart';
+
 import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
 class OwnerDashboardScreen extends ConsumerStatefulWidget {
@@ -97,25 +97,31 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
     );
   }
 
+  /// Shared error + Retry state for the dashboard's data tabs. Retry re-runs
+  /// the FutureBuilder (setState re-creates its future).
+  Widget _dataError(String message, VoidCallback onRetry) {
+    return SeedhaStateView(
+      type: SeedhaStateType.serverError,
+      title: message,
+      description: 'Please check your connection and try again.',
+      primaryAction: StateActionConfig(
+        label: 'Retry',
+        icon: Icons.refresh,
+        onPressed: onRetry,
+      ),
+    );
+  }
+
   Widget _buildMyPropertiesTab(String ownerId) {
     return FutureBuilder<List<Property>>(
-      future: () async {
-        try {
-          final res = await SupabaseService.client
-              .from('properties')
-              .select()
-              .eq('owner_id', ownerId)
-              .order('created_at', ascending: false);
-          return (res as List<dynamic>)
-              .map((e) => Property.fromJson(e as Map<String, dynamic>))
-              .toList();
-        } catch (e) {
-          return <Property>[];
-        }
-      }(),
+      // Bounded by the 15s timeout in getOwnerProperties; errors surface below.
+      future: ref.read(propertyServiceProvider).getOwnerProperties(ownerId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+        }
+        if (snapshot.hasError) {
+          return _dataError('Unable to load your properties.', () => setState(() {}));
         }
 
         final properties = snapshot.data ?? [];
@@ -228,36 +234,14 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
 
   Widget _buildEnquiriesReceivedTab(String ownerId) {
     return FutureBuilder<List<PropertyEnquiry>>(
-      future: () async {
-        try {
-          // 1. Get properties owned by current user
-          final propsRes = await SupabaseService.client
-              .from('properties')
-              .select('id')
-              .eq('owner_id', ownerId);
-          final propertyIds = (propsRes as List<dynamic>)
-              .map((p) => p['id'] as String)
-              .toList();
-
-          if (propertyIds.isEmpty) return <PropertyEnquiry>[];
-
-          // 2. Get enquiries for those properties
-          final enquiriesRes = await SupabaseService.client
-              .from('enquiries')
-              .select()
-              .inFilter('property_id', propertyIds)
-              .order('created_at', ascending: false);
-
-          return (enquiriesRes as List<dynamic>)
-              .map((e) => PropertyEnquiry.fromJson(e as Map<String, dynamic>))
-              .toList();
-        } catch (e) {
-          return <PropertyEnquiry>[];
-        }
-      }(),
+      // Bounded by the 15s timeout in getOwnerEnquiries; errors surface below.
+      future: ref.read(enquiryServiceProvider).getOwnerEnquiries(ownerId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
+        }
+        if (snapshot.hasError) {
+          return _dataError('Unable to load enquiries.', () => setState(() {}));
         }
 
         final enquiries = snapshot.data ?? [];
