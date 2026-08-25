@@ -1,3 +1,8 @@
+## v0.63.5 — 2026-08-25
+
+### Fixes
+- fix(ui): show real customer name + name-based initials in the header profile menu (802c9bb)
+
 ## v0.63.4 — 2026-08-25
 
 ### Refactoring
