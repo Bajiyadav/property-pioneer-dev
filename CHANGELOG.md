@@ -1,3 +1,8 @@
+## v0.63.4 — 2026-08-25
+
+### Refactoring
+- refactor: clean up src/shared directory and consolidate modules (55ada44)
+
 ## v0.63.3 — 2026-08-25
 
 ### Fixes
