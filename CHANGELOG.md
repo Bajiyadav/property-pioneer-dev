@@ -1,3 +1,8 @@
+## v0.63.3 — 2026-08-25
+
+### Fixes
+- fix(auth): clean up auth flows, restore native signups, and remove deprecated bypass (7d7c6fa)
+
 ## v0.63.2 — 2026-08-25
 
 ### Fixes
