@@ -1,3 +1,8 @@
+## v0.61.2 — 2026-08-25
+
+### Fixes
+- fix: remove defaults from onboarding modal and require phone (2ae2aec)
+
 ## v0.61.1 — 2026-08-25
 
 ### Refactoring
