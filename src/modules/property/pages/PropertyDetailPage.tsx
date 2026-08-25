@@ -474,26 +474,14 @@ export function PropertyDetailPage() {
                 </div>
               </div>
               {/* Right Images */}
-              <div className="col-span-1 grid grid-rows-2 gap-1 h-full">
+              <div className="col-span-1 flex flex-col gap-1 h-full">
                 <div
-                  className="relative h-full group cursor-pointer"
+                  className="relative flex-1 bg-muted group cursor-pointer overflow-hidden"
                   onClick={() => setLightboxOpen(true)}
                 >
                   <img
                     src={property.images[1] || property.images[0]}
-                    alt={(() => {
-                      const furnishing = property.furnishing_status
-                        ? `${property.furnishing_status} `
-                        : "";
-                      const type = property.property_type || "property";
-                      const beds = property.bedrooms ? `${property.bedrooms} BHK ` : "";
-                      const action = property.listing_type === "sale" ? "for sale" : "for rent";
-                      const loc = property.locality ? `in ${property.locality}` : "";
-                      const city = property.city
-                        ? `${property.locality ? ", " : "in "}${property.city}`
-                        : "";
-                      return `${beds}${furnishing}${type} ${action} ${loc}${city} - interior view`;
-                    })()}
+                    alt={`${property.title || "Property"} - view 2`}
                     className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
                   />
                   <div className="absolute top-4 right-4 z-10">
@@ -509,33 +497,43 @@ export function PropertyDetailPage() {
                     </button>
                   </div>
                 </div>
-                <div
-                  className="relative h-full group cursor-pointer"
-                  onClick={() => setLightboxOpen(true)}
-                >
-                  <img
-                    src={property.images[2] || property.images[0]}
-                    alt={(() => {
-                      const furnishing = property.furnishing_status
-                        ? `${property.furnishing_status} `
-                        : "";
-                      const type = property.property_type || "property";
-                      const beds = property.bedrooms ? `${property.bedrooms} BHK ` : "";
-                      const action = property.listing_type === "sale" ? "for sale" : "for rent";
-                      const loc = property.locality ? `in ${property.locality}` : "";
-                      const city = property.city
-                        ? `${property.locality ? ", " : "in "}${property.city}`
-                        : "";
-                      return `${beds}${furnishing}${type} ${action} ${loc}${city} - alternative view`;
-                    })()}
-                    className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition duration-300 group-hover:bg-black/60">
-                    <span className="text-white text-3xl font-bold">
-                      +{Math.max(0, property.images.length - 2)}
-                    </span>
+
+                {property.images.length > 2 ? (
+                  <div
+                    className="relative flex-1 bg-muted group cursor-pointer overflow-hidden"
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <img
+                      src={property.images[2]}
+                      alt={`${property.title || "Property"} - view 3`}
+                      className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
+                    />
                   </div>
-                </div>
+                ) : (
+                  <div className="flex-1 bg-secondary/30" />
+                )}
+
+                {property.images.length > 3 ? (
+                  <div
+                    className="relative flex-1 bg-muted group cursor-pointer overflow-hidden"
+                    onClick={() => setLightboxOpen(true)}
+                  >
+                    <img
+                      src={property.images[3]}
+                      alt={`${property.title || "Property"} - view 4`}
+                      className="w-full h-full object-cover transition duration-300 group-hover:opacity-90"
+                    />
+                    {property.images.length > 4 && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center transition duration-300 group-hover:bg-black/60">
+                        <span className="text-white text-xl sm:text-2xl font-bold">
+                          +{property.images.length - 4}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex-1 bg-secondary/30" />
+                )}
               </div>
             </div>
 
