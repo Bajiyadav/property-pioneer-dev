@@ -128,6 +128,36 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 20),
 
+            // Customer activity. My Visits lives here because the bottom bar is
+            // deliberately four tabs — Home, Search, Saved, Profile — and this
+            // is where a customer looks for their own history.
+            if (user != null)
+              _menuSection(
+                'My Activity',
+                [
+                  _menuTile(
+                    icon: Icons.forum_outlined,
+                    title: 'My Enquiries',
+                    subtitle: 'Enquiries you have sent to owners',
+                    onTap: () => context.go('/customer-dashboard'),
+                  ),
+                  _menuTile(
+                    icon: Icons.event_available_outlined,
+                    title: 'My Visits',
+                    subtitle: 'Site visits you have scheduled',
+                    onTap: () => context.go('/visits'),
+                  ),
+                  _menuTile(
+                    icon: Icons.favorite_border,
+                    title: 'Saved Properties',
+                    subtitle: 'Listings you have shortlisted',
+                    onTap: () => context.go('/saved'),
+                  ),
+                ],
+              ),
+
+            if (user != null) const SizedBox(height: 16),
+
             // Owner / Host Actions
             _menuSection(
               'Property Owners & Hosts',

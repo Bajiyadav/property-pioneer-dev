@@ -9,12 +9,16 @@ class MainScaffoldShell extends StatelessWidget {
     required this.child,
   }) : super();
 
+  /// Four tabs, not five. A bottom bar is for the places a customer returns to
+  /// constantly; My Visits is something they check occasionally, so it lives in
+  /// Profile -> My Activity instead of taking a permanent slot. `/visits` is
+  /// still a real route inside this shell, so the bar stays visible there and
+  /// highlights Profile, which is where the user came from.
   int _calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
     if (location.startsWith('/search')) return 1;
     if (location.startsWith('/saved')) return 2;
-    if (location.startsWith('/visits')) return 3;
-    if (location.startsWith('/profile')) return 4;
+    if (location.startsWith('/profile') || location.startsWith('/visits')) return 3;
     return 0;
   }
 
@@ -30,9 +34,6 @@ class MainScaffoldShell extends StatelessWidget {
         context.go('/saved');
         break;
       case 3:
-        context.go('/visits');
-        break;
-      case 4:
         context.go('/profile');
         break;
     }
@@ -68,9 +69,9 @@ class MainScaffoldShell extends StatelessWidget {
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              activeIcon: Icon(Icons.explore),
-              label: 'Explore',
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.search),
@@ -81,11 +82,6 @@ class MainScaffoldShell extends StatelessWidget {
               icon: Icon(Icons.favorite_border),
               activeIcon: Icon(Icons.favorite),
               label: 'Saved',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month_outlined),
-              activeIcon: Icon(Icons.calendar_month),
-              label: 'Visits',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

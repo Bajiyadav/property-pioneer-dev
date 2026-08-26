@@ -193,10 +193,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      // Attached to the Scaffold rather than the feed so it is present in every
-      // body state — including the location gate, where an owner who has not
-      // picked a location yet would otherwise have no way to list a property.
-      floatingActionButton: _buildPostPropertyCta(),
       body: locationState.when(
         data: (location) {
           if (location == null) {
@@ -210,22 +206,121 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Primary "Post Property" action.
-  ///
-  /// Posting used to be reachable only by opening the owner dashboard, which
-  /// made listing a property feel like an admin task rather than the main thing
-  /// an owner comes here to do. This is the entry point; the wizard opens only
-  /// when the user taps it.
-  Widget _buildPostPropertyCta() {
-    return FloatingActionButton.extended(
-      onPressed: _onPostPropertyPressed,
-      backgroundColor: AppTheme.primaryColor,
-      foregroundColor: Colors.white,
-      elevation: 4,
-      icon: const Icon(Icons.add_home_work_outlined, size: 20),
-      label: const Text(
-        'Post Property',
-        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: -0.2),
+  Widget _locationRow(SelectedLocation location) {
+    return GestureDetector(
+      onTap: () => context.push('/location-search').then((_) => _loadData()),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.26)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                location.formattedAddress,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Text('Change',
+                style: TextStyle(
+                    color: Color(0xFF99F6E4),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _searchField() {
+    return GestureDetector(
+      onTap: () => context.go('/search'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.search, color: AppTheme.textSecondary, size: 19),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Search by city, locality or landmark',
+                style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w500),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _actionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool emphasised = false,
+  }) {
+    return Material(
+      color: emphasised ? AppTheme.primaryColor : Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+                color: emphasised ? AppTheme.primaryColor : AppTheme.borderSubtle),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  size: 22,
+                  color: emphasised ? Colors.white : AppTheme.primaryColor),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                    color: emphasised ? Colors.white : AppTheme.textPrimary),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.25,
+                    color: emphasised
+                        ? const Color(0xFF99F6E4)
+                        : AppTheme.textSecondary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -249,7 +344,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Signed in — open the listing wizard. No role is granted or changed here:
     // the wizard sets owner_id from the session on submit, and the listing goes
     // into moderation like any other.
-    context.push('/owner-dashboard/list-property');
+    context.push('/post-property');
   }
 
   Widget _buildLocationGate() {
@@ -283,6 +378,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
+            const SizedBox(height: 12),
+            // Listing a property does not depend on having chosen a browsing
+            // location, so the action stays available in this state too.
+            TextButton.icon(
+              onPressed: _onPostPropertyPressed,
+              icon: const Icon(Icons.add_home_work_outlined, size: 18),
+              label: const Text('Post Your Property',
+                  style: TextStyle(fontWeight: FontWeight.w800)),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryColor),
+            ),
           ],
         ),
       ),
@@ -295,10 +400,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         color: AppTheme.primaryColor,
         child: CustomScrollView(
           slivers: [
-            // Category & Search Header
+            // Discovery hero. Leads with the intent ("find a home"), not with
+            // Buy/Rent/Commercial — those are a way to narrow a search, not the
+            // first decision a visitor should be asked to make.
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 22),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF0F766E), Color(0xFF115E59), Color(0xFF047857)],
@@ -310,117 +417,121 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Direct from Owners',
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                      'Find Your Dream Home',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.6,
+                          height: 1.15),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 5),
                     const Text(
-                      'Verified Pan-India Real Estate with 0% Brokerage',
-                      style: TextStyle(color: Color(0xFF99F6E4), fontSize: 12, fontWeight: FontWeight.w600),
+                      'Verified listings direct from owners. 0% brokerage.',
+                      style: TextStyle(
+                          color: Color(0xFF99F6E4),
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 16),
 
-                    // Primary Purpose Switcher (Rent | Buy | Commercial)
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: PropertyCategory.values.map((cat) {
-                          final isSelected = activeCategory == cat;
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                ref.read(activeCategoryProvider.notifier).state = cat;
-                                _loadData();
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    cat.label.toUpperCase(),
-                                    style: TextStyle(
-                                      color: isSelected ? const Color(0xFF0F766E) : Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 12,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                    // Location — reuses the single locationStateProvider; there
+                    // is no second location state anywhere in this screen.
+                    _locationRow(selectedLocation),
+                    const SizedBox(height: 10),
+
+                    // Search entry. Opens the existing search screen rather than
+                    // holding a second query state here.
+                    _searchField(),
                     const SizedBox(height: 14),
 
-                    // Location Selector Shortcut
-                    GestureDetector(
-                      onTap: () => context.push('/location-search').then((_) => _loadData()),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on, color: Color(0xFF0F766E), size: 22),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Location",
-                                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    selectedLocation.formattedAddress,
-                                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0F766E).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text('Change', style: TextStyle(color: Color(0xFF0F766E), fontSize: 11, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go('/search'),
+                        icon: const Icon(Icons.search, size: 18),
+                        label: const Text('Search Homes',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w900, fontSize: 15)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppTheme.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            // The two other primary journeys, given equal weight to search.
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: _actionCard(
+                        icon: Icons.add_home_work_outlined,
+                        title: 'Post Your Property',
+                        subtitle: 'List free, reach buyers directly',
+                        onTap: _onPostPropertyPressed,
+                        emphasised: true,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: _actionCard(
+                        icon: Icons.account_balance_outlined,
+                        title: 'Home Loans',
+                        subtitle: 'Check your EMI',
+                        onTap: () => context.push('/home-loans'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Category filter for the feed below. Secondary by design.
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 2),
+                child: Row(
+                  children: PropertyCategory.values.map((cat) {
+                    final isSelected = activeCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(cat.label),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          ref.read(activeCategoryProvider.notifier).state = cat;
+                          _loadData();
+                        },
+                        showCheckmark: false,
+                        labelStyle: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          color: isSelected ? Colors.white : AppTheme.textSecondary,
+                        ),
+                        selectedColor: AppTheme.primaryColor,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(
+                            color: isSelected
+                                ? AppTheme.primaryColor
+                                : AppTheme.borderSubtle),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999)),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
