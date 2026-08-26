@@ -302,7 +302,6 @@ function OwnerDashboard({ user }: { user: User | null }) {
                     navigate({
                       to: "/list-property/wizard",
                       search: { propertyType: "Residential", intent: "Rent" },
-                      search: { propertyType: "Residential", intent: "Rent" },
                     }),
                 },
                 {
@@ -374,7 +373,6 @@ function OwnerDashboard({ user }: { user: User | null }) {
               onAdd={() =>
                 navigate({
                   to: "/list-property/wizard",
-                  search: { propertyType: "Residential", intent: "Rent" },
                   search: { propertyType: "Residential", intent: "Rent" },
                 })
               }
@@ -462,7 +460,6 @@ function OwnerDashboard({ user }: { user: User | null }) {
                       onClick={() =>
                         navigate({
                           to: "/list-property/wizard",
-                          search: { propertyType: "Residential", intent: "Rent" },
                           search: { propertyType: "Residential", intent: "Rent" },
                         })
                       }
