@@ -1,3 +1,11 @@
+## v0.79.0 — 2026-08-26
+
+### Features
+- feat: prompt sign in on search and add ValueAddedServices to homepage (fed73e2)
+
+### Fixes
+- fix: resolve TS types for auth status and URL params (142229c)
+
 ## v0.78.1 — 2026-08-26
 
 ### Fixes
