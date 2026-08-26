@@ -1,3 +1,18 @@
+## v0.67.0 — 2026-08-26
+
+### Features
+- feat(mobile): integrate map and location search using geoapify (378a197)
+
+### Fixes
+- fix: complete phase 3 enquiries and property upload (fa8d5c7)
+- fix(mobile): harden authentication flows (aab5843)
+
+### Migration notes
+- supabase/migrations/20260826000000_customer_enquiries_rls.sql
+- supabase/migrations/20260826010000_phase3_enquiries_listing_and_grants.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.66.0 — 2026-08-25
 
 ### Features
