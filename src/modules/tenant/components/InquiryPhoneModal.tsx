@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Phone, User, CheckCircle2 } from "lucide-react";
-import { enquiryInputSchema } from "@/modules/enquiry/services/enquiryService";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
+import { enquiryInputSchema, TURNSTILE_SITE_KEY } from "@/modules/enquiry/services/enquiryService";
 
 interface InquiryPhoneModalProps {
   isOpen: boolean;
@@ -30,32 +31,71 @@ export function InquiryPhoneModal({
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Real Turnstile token from the Cloudflare widget. Undefined until the
+  // visitor passes the challenge, and cleared again when it expires or the
+  // server rejects it — a token is single-use.
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined);
+  // Remounting the widget is how it gets reset: a rejected token can never be
+  // replayed, so a retry needs a freshly rendered challenge.
+  const [captchaKey, setCaptchaKey] = useState(0);
+
+  // When the form became visible. The server rejects anything submitted in
+  // under MIN_SUBMIT_MS as bot-like, so this has to be a genuine measurement —
+  // the previous hardcoded 1500 was both fabricated and below that floor, so
+  // every submission was rejected as "too quick" before the captcha even ran.
+  const openedAtRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    if (isOpen) {
+      openedAtRef.current = Date.now();
+      setError(null);
+    }
+  }, [isOpen]);
+
+  const captchaRequired = Boolean(TURNSTILE_SITE_KEY);
+  const awaitingCaptcha = captchaRequired && !turnstileToken;
+
+  const resetCaptcha = () => {
+    setTurnstileToken(undefined);
+    setCaptchaKey((k) => k + 1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!name || !phone) {
+      setError("Please provide both name and phone number");
+      return;
+    }
+
+    // Never submit without a real token when the challenge is configured.
+    if (awaitingCaptcha) {
+      setError("Please complete the verification below before continuing.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Basic validation
-      if (!name || !phone) {
-        throw new Error("Please provide both name and phone number");
-      }
-
-      // Prepare payload - omitting turnstile since this is a UI prototype for now,
-      // but in real world we need turnstile integration
       const payload = {
         propertyId,
         name,
         phone,
         message: `I'm interested in ${propertyTitle}. Please contact me.`,
-        turnstileToken: "dummy_token_for_now",
-        elapsedMs: 1500, // Pass minimum time check
-        company: "", // honeypot
+        // Undefined when Turnstile is not provisioned. The server mirrors this:
+        // verifyTurnstile() reports `configured: false` and allows the request,
+        // so the two sides stay in step instead of silently disagreeing.
+        turnstileToken,
+        elapsedMs: Date.now() - openedAtRef.current,
+        company: "", // honeypot — must stay empty
       };
 
       const validation = enquiryInputSchema.safeParse(payload);
       if (!validation.success) {
-        throw new Error("Please enter a valid 10-digit phone number");
+        throw new Error(
+          validation.error.issues[0]?.message ?? "Please check the details you entered.",
+        );
       }
 
       const res = await fetch("/api/public/enquiries", {
@@ -64,10 +104,17 @@ export function InquiryPhoneModal({
         body: JSON.stringify(validation.data),
       });
 
-      const data = await res.json();
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to send enquiry");
+        // 403 is a failed or expired challenge. The token is spent either way,
+        // so issue a fresh one rather than leaving a dead token in state.
+        if (res.status === 403) {
+          resetCaptcha();
+          throw new Error("Verification failed. Please complete the check and try again.");
+        }
+        resetCaptcha();
+        throw new Error(data.error || "Unable to send your enquiry. Please try again.");
       }
 
       setIsSuccess(true);
@@ -75,11 +122,15 @@ export function InquiryPhoneModal({
       // Save minimal profile to localStorage for future interactions
       try {
         localStorage.setItem("sp_tenant_profile", JSON.stringify({ name, phone }));
-      } catch (err) {
-        // ignore
+      } catch {
+        // Private browsing or blocked storage — not worth surfacing.
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
+      if (err instanceof TypeError) {
+        // fetch() rejects with TypeError when the network is unreachable.
+        resetCaptcha();
+        setError("Couldn't reach the server. Check your connection and try again.");
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("An unknown error occurred");
@@ -162,14 +213,32 @@ export function InquiryPhoneModal({
             </div>
           </div>
 
+          {/* Renders nothing when VITE_TURNSTILE_SITE_KEY is unset, matching the
+              server, which then treats a missing token as acceptable. */}
+          <TurnstileWidget
+            key={captchaKey}
+            action="enquiry"
+            onToken={setTurnstileToken}
+            className="[&>*]:max-w-full"
+          />
+
           <div className="pt-2">
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || awaitingCaptcha}
+              aria-describedby={awaitingCaptcha ? "enquiry-captcha-hint" : undefined}
               className="w-full h-12 rounded-xl bg-gradient-to-r from-[#0F766E] to-[#115E59] hover:from-[#115E59] hover:to-[#134E4A] text-white font-extrabold text-base shadow-lg transition-all"
             >
               {isSubmitting ? "Sending Request..." : "Get Owner Details"}
             </Button>
+            {awaitingCaptcha && (
+              <p
+                id="enquiry-captcha-hint"
+                className="text-xs text-center text-muted-foreground mt-2"
+              >
+                Complete the verification above to continue.
+              </p>
+            )}
             <p className="text-xs text-center text-muted-foreground mt-4">
               By continuing, you agree to our Terms of Service & Privacy Policy. No brokerage will
               be charged.
