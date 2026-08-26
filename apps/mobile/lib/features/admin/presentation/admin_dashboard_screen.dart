@@ -19,11 +19,25 @@ class AdminDashboardScreen extends ConsumerStatefulWidget {
 class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   bool _actionRunning = false;
 
+  /// Listings awaiting moderation.
+  ///
+  /// `is_approved` is the authority, not `status`: it is the column the
+  /// "Public can view approved properties" RLS policy tests, so it alone
+  /// decides whether a listing is visible to the public. `status` is the
+  /// lifecycle label on top of it. This matches the web moderation queue
+  /// exactly (`!p.is_approved && p.status !== "rejected"`) so both consoles
+  /// show the same set.
+  ///
+  /// This previously filtered `status == 'pending'`. No creation path ever
+  /// writes that value — the wizard and the owner form both write
+  /// 'unapproved' — so the queue matched nothing and submitted listings could
+  /// never be approved from mobile.
   Future<List<Property>> _fetchPendingProperties() async {
     final res = await SupabaseService.client
         .from('properties')
         .select()
-        .eq('status', 'pending')
+        .eq('is_approved', false)
+        .neq('status', 'rejected')
         .order('created_at', ascending: true)
         .timeout(AppConstants.networkTimeout);
     return (res as List<dynamic>)
