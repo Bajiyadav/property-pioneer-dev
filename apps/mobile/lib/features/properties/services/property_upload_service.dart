@@ -254,9 +254,15 @@ class PropertyUploadService {
       // Identity comes from the session, never from the form, a route param or
       // anything else the client could set.
       map['owner_id'] = user.id;
-      // Moderation state, set explicitly rather than left to a column default.
       map['status'] = 'unapproved';
-      map['is_approved'] = false;
+
+      // is_approved is deliberately NOT sent. It is the column the
+      // "Public can view approved properties" policy tests, so it is the one
+      // that decides whether a listing goes live. The owner INSERT grant does
+      // not include it, which means a client cannot name it at all — the
+      // privilege system refuses rather than a policy having to catch it — and
+      // the column DEFAULT of false is what puts the listing into moderation.
+      // Sending `false` here would look harmless and still fail with 42501.
 
       final inserted = await _supabase
           .from('properties')

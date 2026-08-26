@@ -41,6 +41,16 @@ class ListingFormData {
   final String? availableFrom;
   final bool? rentNegotiable;
 
+  /// Exact coordinates of the property, taken from a validated Geoapify result
+  /// the owner confirmed on the map. Null until they do.
+  ///
+  /// Only these two are ever sent. `approx_latitude`/`approx_longitude` and the
+  /// PostGIS `location` column are GENERATED ALWAYS in the database — writing
+  /// them is refused (428C9), and they are what the public map actually reads,
+  /// rounded to ~110m so a listing never points at somebody's front door.
+  final double? latitude;
+  final double? longitude;
+
   const ListingFormData({
     this.ownerName,
     this.ownerPhone,
@@ -79,6 +89,8 @@ class ListingFormData {
     this.facing,
     this.availableFrom,
     this.rentNegotiable,
+    this.latitude,
+    this.longitude,
   });
 
   ListingFormData copyWith({
@@ -119,6 +131,8 @@ class ListingFormData {
     String? facing,
     String? availableFrom,
     bool? rentNegotiable,
+    double? latitude,
+    double? longitude,
   }) {
     return ListingFormData(
       ownerName: ownerName ?? this.ownerName,
@@ -158,6 +172,8 @@ class ListingFormData {
       facing: facing ?? this.facing,
       availableFrom: availableFrom ?? this.availableFrom,
       rentNegotiable: rentNegotiable ?? this.rentNegotiable,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
@@ -178,6 +194,12 @@ class ListingFormData {
     void require(bool ok, String field, String message) {
       if (!ok) errors[field] = message;
     }
+
+    // A pinned location is what puts the listing on the customer map. Without
+    // it the property is invisible there, so it is required rather than
+    // optional — and it must come from a confirmed search result, never typed.
+    require(latitude != null && longitude != null, 'location',
+        'Select and confirm the property location on the map');
 
     require(city.trim().isNotEmpty, 'city', 'Select a city');
     require(locality.trim().isNotEmpty, 'locality', 'Select a locality');
@@ -243,6 +265,10 @@ class ListingFormData {
       'facing': facing,
       'available_from': availableFrom,
       'rent_negotiable': rentNegotiable,
+      // Exact coordinates only. The database derives approx_latitude,
+      // approx_longitude and the PostGIS point from these.
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 }

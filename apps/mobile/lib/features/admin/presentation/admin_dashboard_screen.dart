@@ -45,26 +45,61 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         .toList();
   }
 
-  Future<void> _updateListingStatus(String id, String newStatus, bool approved, String? videoUrl) async {
+  /// Rejections need a reason the owner can act on — the database enforces it,
+  /// so ask for it here rather than letting the call fail.
+  Future<void> _promptRejectReason(String id) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reject listing'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'What does the owner need to fix?',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+    if (reason == null || reason.isEmpty) return;
+    if (!mounted) return;
+    await _updateListingStatus(id, false, reason);
+  }
+
+  /// Approve or reject a listing.
+  ///
+  /// Goes through the `moderate_property` RPC rather than updating the table.
+  /// No client role holds UPDATE on public.properties — deliberately, because
+  /// the "Owners manage their own properties" policy is scoped by ownership
+  /// alone, so a table grant would have let an owner set is_approved on their
+  /// own listing and publish past review. The function is SECURITY DEFINER and
+  /// checks get_employee_role() itself, so the staff check is the gate and an
+  /// owner calling it is refused.
+  ///
+  /// A rejection must carry a reason; the function rejects an empty one.
+  Future<void> _updateListingStatus(
+      String id, bool approved, String? reason) async {
     setState(() => _actionRunning = true);
     try {
-      final updateData = {
-        'status': newStatus,
-        'is_approved': approved,
-      };
-      
-      // Approve video automatically if approved is true and video exists
-      if (approved && videoUrl != null && videoUrl.isNotEmpty) {
-        updateData['video_status'] = 'approved';
-      } else if (!approved) {
-        updateData['video_status'] = 'rejected';
-      }
-
-      await SupabaseService.client
-          .from('properties')
-          .update(updateData)
-          .eq('id', id)
-          .timeout(AppConstants.networkTimeout);
+      await SupabaseService.client.rpc(
+        'moderate_property',
+        params: {
+          'p_property_id': id,
+          'p_approve': approved,
+          'p_reason': reason,
+        },
+      ).timeout(AppConstants.networkTimeout);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -243,7 +278,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             child: OutlinedButton(
                               onPressed: _actionRunning
                                   ? null
-                                  : () => _updateListingStatus(prop.id, 'rejected', false, prop.videoUrl),
+                                  : () => _promptRejectReason(prop.id),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 side: const BorderSide(color: Colors.red),
@@ -257,7 +292,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                             child: ElevatedButton(
                               onPressed: _actionRunning
                                   ? null
-                                  : () => _updateListingStatus(prop.id, 'available', true, prop.videoUrl),
+                                  : () => _updateListingStatus(prop.id, true, null),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

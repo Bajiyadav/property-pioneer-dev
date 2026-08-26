@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../config/theme.dart';
 import '../../../providers/listing_wizard_provider.dart';
 import '../../../services/property_upload_service.dart';
 
@@ -133,6 +134,95 @@ class _Step6ReviewState extends ConsumerState<Step6Review> {
     }
   }
 
+  /// Read-only recap of everything captured across the wizard.
+  Widget _summaryCard(ListingFormData d) {
+    final rows = <List<String>>[
+      if (d.listingType != null)
+        ['Purpose', d.listingType == 'sale' ? 'For Sale' : 'For Rent'],
+      if (d.propertyType != null) ['Property type', d.propertyType!],
+      if (!d.isCommercial && d.bedrooms != null) ['Bedrooms', '${d.bedrooms} BHK'],
+      if (!d.isCommercial && d.bathrooms != null) ['Bathrooms', '${d.bathrooms}'],
+      if (d.furnishingStatus != null)
+        ['Furnishing', d.furnishingStatus!.replaceAll('-', ' ')],
+      if (d.areaSqft > 0) ['Area', '${d.areaSqft} sqft'],
+      if (d.price > 0) ['Price', '₹${d.price}'],
+      if (d.listingType == 'rent' && d.deposit > 0) ['Deposit', '₹${d.deposit}'],
+      if (d.locality.trim().isNotEmpty) ['Locality', d.locality],
+      if (d.city.trim().isNotEmpty) ['City', d.city],
+      ['Photos', '${d.images.length}'],
+      if (d.amenities.isNotEmpty) ['Amenities', '${d.amenities.length} selected'],
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.borderSubtle),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Listing summary',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          ...rows.map(
+            (r) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 108,
+                    child: Text(r[0],
+                        style: const TextStyle(
+                            fontSize: 12.5, color: AppTheme.textSecondary)),
+                  ),
+                  Expanded(
+                    child: Text(r[1],
+                        style: const TextStyle(
+                            fontSize: 12.5, fontWeight: FontWeight.w700),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 18, color: AppTheme.borderSubtle),
+          // The pin is called out separately: it is the one field that decides
+          // whether the listing can appear on the customer map at all.
+          Row(
+            children: [
+              Icon(
+                d.latitude != null ? Icons.place : Icons.location_off_outlined,
+                size: 17,
+                color: d.latitude != null
+                    ? AppTheme.successColor
+                    : AppTheme.errorColor,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  d.latitude != null && d.longitude != null
+                      ? 'Map location confirmed'
+                      : 'No map location — go back to Step 1 and confirm it',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: d.latitude != null
+                        ? AppTheme.successColor
+                        : AppTheme.errorColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showSubmittedDialog(String? newPropertyId) {
     ref.read(listingWizardProvider.notifier).reset();
 
@@ -189,7 +279,39 @@ class _Step6ReviewState extends ConsumerState<Step6Review> {
                 style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             const Text('Almost done! Add a catchy title and description.'),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
+
+            // What the owner is actually submitting. Shown before the submit
+            // button so nothing is sent that they have not seen.
+            _summaryCard(ref.watch(listingWizardProvider)),
+            const SizedBox(height: 14),
+
+            // Submission is not publication. Saying so here is the difference
+            // between an owner who waits and one who thinks the listing is live.
+            Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.verified_outlined, size: 18, color: Color(0xFFB45309)),
+                  SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      'Your property will be reviewed before it becomes visible to '
+                      'customers. You will be notified once it is approved.',
+                      style: TextStyle(
+                          fontSize: 12.5, height: 1.35, color: Color(0xFF92400E)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 22),
             TextFormField(
               controller: _titleController,
               decoration: const InputDecoration(
