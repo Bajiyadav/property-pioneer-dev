@@ -1,3 +1,8 @@
+## v0.75.0 — 2026-08-26
+
+### Features
+- feat(homepage): enforce locality selection before search (af51cbf)
+
 ## v0.74.0 — 2026-08-26
 
 ### Features
