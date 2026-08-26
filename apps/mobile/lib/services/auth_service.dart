@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
 import '../models/user_profile.dart';
@@ -160,39 +161,78 @@ class AuthService {
     await _client.auth.signOut().timeout(_kNetworkTimeout);
   }
 
+  /// Highest-privilege role held by the user, from their `user_roles` rows.
+  ///
+  /// A user legitimately holds more than one role — someone who browses as a
+  /// customer and also lists a property has both 'customer' and 'owner'. The
+  /// precedence here is the same order the web uses in
+  /// `session.ts#resolveRoleFromDatabase`, so both clients resolve an account
+  /// to the same role.
+  ///
+  /// Returns null when the user has no rows at all, which leaves the caller to
+  /// fall back to `profiles.role`.
+  @visibleForTesting
+  static String? highestRole(List<String> roles) => _highestRole(roles);
+
+  static String? _highestRole(List<String> roles) {
+    for (final candidate in ['admin', 'agent', 'owner', 'customer']) {
+      if (roles.contains(candidate)) return candidate;
+    }
+    return roles.isEmpty ? null : roles.first;
+  }
+
+  /// Loads the signed-in user's profile.
+  ///
+  /// Throws on network failure, timeout, or an unexpected query error so the
+  /// caller can show an error + Retry. It deliberately does NOT collapse a
+  /// failure into null: "the profile could not be loaded" and "this user has no
+  /// profile row" need different UI, and treating the first as the second is
+  /// what made a failed load look like a missing account.
+  ///
+  /// Returns null only when there is no signed-in user.
   Future<UserProfile?> getProfile() async {
     final user = currentUser;
     if (user == null) return null;
 
-    try {
-      final data = await _client
-          .from('profiles')
-          .select()
-          .eq('id', user.id)
-          .maybeSingle()
-          .timeout(_kNetworkTimeout);
+    final data = await _client
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle()
+        .timeout(_kNetworkTimeout);
 
-      final roleData = await _client
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .maybeSingle()
-          .timeout(_kNetworkTimeout);
+    // Selected as a LIST, not maybeSingle(). maybeSingle() throws PGRST116 the
+    // moment a user holds two roles, and that throw used to be swallowed into a
+    // null profile — so a dual-role account signed in successfully and then saw
+    // "Unable to load your profile" on a dashboard it had been routed to as if
+    // it had no role at all.
+    final roleRows = await _client
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .timeout(_kNetworkTimeout);
 
-      final roleStr = roleData != null ? roleData['role'] as String? : null;
+    final roles = roleRows
+        .map<String?>((dynamic r) => (r as Map<String, dynamic>)['role'] as String?)
+        .whereType<String>()
+        .map((r) => r.toLowerCase())
+        .toList();
 
-      if (data == null) {
-        return UserProfile(
-          id: user.id,
-          fullName: user.userMetadata?['full_name'] as String?,
-          phone: user.userMetadata?['phone'] as String?,
-          createdAt: DateTime.now(),
-        );
-      }
+    final roleStr = _highestRole(roles);
 
-      return UserProfile.fromJson(data, roleStr: roleStr);
-    } catch (e) {
-      return null;
+    if (data == null) {
+      // Authenticated but no profile row yet (e.g. a trigger has not run).
+      // Fall back to the auth metadata rather than failing the session, and
+      // stay on the least-privileged role.
+      return UserProfile(
+        id: user.id,
+        fullName: user.userMetadata?['full_name'] as String?,
+        phone: user.userMetadata?['phone'] as String?,
+        role: UserRole.customer,
+        createdAt: DateTime.now(),
+      );
     }
+
+    return UserProfile.fromJson(data, roleStr: roleStr);
   }
 }

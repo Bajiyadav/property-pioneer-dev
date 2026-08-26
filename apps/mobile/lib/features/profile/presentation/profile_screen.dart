@@ -77,7 +77,9 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 loading: () => const Text('Loading role...', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                                error: (_, __) => const Text('Customer', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                // Never name a role we failed to load — showing
+                                // "Customer" for an owner is a claim, not a fallback.
+                                error: (_, __) => const Text('Role unavailable', style: TextStyle(fontSize: 11, color: Colors.grey)),
                               ),
                             ],
                           ),

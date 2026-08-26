@@ -53,7 +53,16 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
         type: 'signup',
       );
 
-      final profile = await authService.getProfile();
+      // Verification has already succeeded at this point. Resolving the role is
+      // only about picking a destination, so a profile failure must not turn a
+      // verified account into an error screen — fall through to the customer
+      // dashboard, which is the least-privileged landing and shows its own Retry.
+      UserProfile? profile;
+      try {
+        profile = await authService.getProfile();
+      } catch (_) {
+        profile = null;
+      }
       if (mounted) {
         if (profile?.role == UserRole.owner || profile?.role == UserRole.admin) {
           context.go('/owner-dashboard');

@@ -300,7 +300,11 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
           const SizedBox(height: 32),
           _profileInfoRow(Icons.email_outlined, 'Email Address', ref.read(authServiceProvider).currentUser?.email ?? ''),
           _profileInfoRow(Icons.phone_outlined, 'Phone Number', profile.phone ?? 'Not set'),
-          _profileInfoRow(Icons.location_city_outlined, 'Preferred City', profile.city ?? 'Hyderabad'),
+          // `profiles` has no city column, so profile.city is always null and this
+          // row rendered a hardcoded "Hyderabad" for every account — a value the
+          // customer never set and could not change.
+          _profileInfoRow(Icons.location_city_outlined, 'Preferred City',
+              (profile.city?.trim().isNotEmpty ?? false) ? profile.city! : 'Not set'),
           const SizedBox(height: 48),
           SizedBox(
             width: double.infinity,
