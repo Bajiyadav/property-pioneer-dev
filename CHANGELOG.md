@@ -1,3 +1,8 @@
+## v0.73.0 — 2026-08-26
+
+### Features
+- feat(web): simplify property search entry (ddab4d0)
+
 ## v0.72.0 — 2026-08-26
 
 ### Features
