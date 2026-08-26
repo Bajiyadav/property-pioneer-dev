@@ -20,7 +20,11 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
   List<PropertyVisit> _visits = [];
   List<PropertyEnquiry> _enquiries = [];
   bool _isLoading = true;
-  bool _hasError = false;
+
+  // Tracked per tab: if visits load and enquiries fail, the visits tab must
+  // still show its data rather than both collapsing into one error screen.
+  bool _visitsFailed = false;
+  bool _enquiriesFailed = false;
 
   @override
   void initState() {
@@ -38,33 +42,44 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
-      _hasError = false;
+      _visitsFailed = false;
+      _enquiriesFailed = false;
     });
     final user = ref.read(authServiceProvider).currentUser;
     if (user == null) {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
-    try {
-      final visits = await ref.read(enquiryServiceProvider).getUserVisits(user.id);
-      final enquiries = await ref.read(enquiryServiceProvider).getUserEnquiries(user.id);
-      if (mounted) {
-        setState(() {
-          _visits = visits;
-          _enquiries = enquiries;
-          _isLoading = false;
-        });
+
+    final service = ref.read(enquiryServiceProvider);
+
+    // Both requests are scoped to the signed-in user inside the service — no
+    // user id is passed in, so this screen cannot ask for anyone else's rows.
+    // Fired together and settled independently so one failure cannot mask the
+    // other's result, and every path below leaves _isLoading false.
+    final results = await Future.wait<Object?>([
+      service.getMyVisits().then<Object?>((v) => v).catchError((Object e) => e),
+      service.getMyEnquiries().then<Object?>((e) => e).catchError((Object e) => e),
+    ]);
+
+    if (!mounted) return;
+
+    final visitsResult = results[0];
+    final enquiriesResult = results[1];
+
+    setState(() {
+      if (visitsResult is List<PropertyVisit>) {
+        _visits = visitsResult;
+      } else {
+        _visitsFailed = true;
       }
-    } catch (e) {
-      // getUserVisits/getUserEnquiries now propagate errors and timeouts —
-      // show an error state with Retry instead of an infinite spinner.
-      if (mounted) {
-        setState(() {
-          _hasError = true;
-          _isLoading = false;
-        });
+      if (enquiriesResult is List<PropertyEnquiry>) {
+        _enquiries = enquiriesResult;
+      } else {
+        _enquiriesFailed = true;
       }
-    }
+      _isLoading = false;
+    });
   }
 
   @override
@@ -126,29 +141,29 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
-          : _hasError
-          ? SeedhaStateView(
-              type: SeedhaStateType.serverError,
-              title: 'Unable to load your visits',
-              description: 'Please check your connection and try again.',
-              primaryAction: StateActionConfig(
-                label: 'Retry',
-                icon: Icons.refresh,
-                onPressed: _loadData,
-              ),
-            )
           : TabBarView(
               controller: _tabController,
               children: [
                 // Visits Tab
-                _visits.isEmpty
+                _visitsFailed
+                    ? SeedhaStateView(
+                        type: SeedhaStateType.serverError,
+                        title: 'Unable to load your visits.',
+                        description: 'Please check your connection and try again.',
+                        primaryAction: StateActionConfig(
+                          label: 'Retry',
+                          icon: Icons.refresh,
+                          onPressed: _loadData,
+                        ),
+                      )
+                    : _visits.isEmpty
                     ? const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.calendar_today_outlined, size: 48, color: Colors.grey),
                             SizedBox(height: 12),
-                            Text('No scheduled visits yet', style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text('No visits yet', style: TextStyle(fontWeight: FontWeight.bold)),
                             SizedBox(height: 6),
                             Text('Schedule free site visits directly with property owners.', style: TextStyle(color: Colors.grey, fontSize: 12)),
                           ],
@@ -181,14 +196,25 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
                       ),
 
                 // Enquiries Tab
-                _enquiries.isEmpty
+                _enquiriesFailed
+                    ? SeedhaStateView(
+                        type: SeedhaStateType.serverError,
+                        title: 'Unable to load your enquiries.',
+                        description: 'Please check your connection and try again.',
+                        primaryAction: StateActionConfig(
+                          label: 'Retry',
+                          icon: Icons.refresh,
+                          onPressed: _loadData,
+                        ),
+                      )
+                    : _enquiries.isEmpty
                     ? const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.mark_email_unread_outlined, size: 48, color: Colors.grey),
                             SizedBox(height: 12),
-                            Text('No sent enquiries yet', style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text('No enquiries yet', style: TextStyle(fontWeight: FontWeight.bold)),
                             SizedBox(height: 6),
                             Text('Enquire directly with owners on any listing page.', style: TextStyle(color: Colors.grey, fontSize: 12)),
                           ],

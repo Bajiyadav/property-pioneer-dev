@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/listing_wizard_provider.dart';
+import '../../../../../config/constants.dart';
 
 class Step2Details extends ConsumerStatefulWidget {
   final VoidCallback onNext;
@@ -25,7 +26,7 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
   late TextEditingController _areaController;
   late TextEditingController _floorController;
 
-  final List<String> _propertyTypes = ['Apartment', 'Independent House', 'Villa', 'Builder Floor'];
+  List<String> get _propertyTypes => AppConstants.residentialPropertyTypes + AppConstants.commercialPropertyTypes;
   final List<String> _furnishingTypes = ['fully-furnished', 'semi-furnished', 'unfurnished'];
 
   @override
@@ -123,6 +124,7 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
             ),
             const SizedBox(height: 16),
             
+            if (!AppConstants.commercialPropertyTypes.contains(_propertyType)) ...[
             Row(
               children: [
                 Expanded(
@@ -155,6 +157,7 @@ class _Step2DetailsState extends ConsumerState<Step2Details> {
               ],
             ),
             const SizedBox(height: 16),
+            ],
             
             TextFormField(
               controller: _areaController,

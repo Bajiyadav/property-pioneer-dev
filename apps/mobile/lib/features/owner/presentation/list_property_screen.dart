@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,6 +55,9 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
   }
 
   Future<void> _handleSubmit() async {
+    // Guards a double tap: the button is disabled while _isLoading, but a fast
+    // second tap can land before the rebuild and create a duplicate listing.
+    if (_isLoading) return;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -103,31 +108,52 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
         'listing_type': _selectedCategory == PropertyCategory.buy ? 'sale' : 'rent',
         'furnishing_status': _furnishing.toLowerCase().replaceAll(' ', '-'),
         'amenities': _selectedAmenities.toList(),
-        'status': 'available',
+        // Moderation state. This screen previously inserted is_approved: true
+        // with status 'available', which put an owner's listing straight into
+        // the public feed — the "Public can view approved properties" policy is
+        // USING (is_approved = true) — with no review at all. Owner submissions
+        // enter moderation here exactly as the wizard path does.
+        'status': 'unapproved',
+        'is_approved': false,
         'images': defaultImages,
         'video_url': videoUrl.isNotEmpty ? videoUrl : null,
-        'video_status': videoUrl.isNotEmpty ? 'approved' : null,
-        'is_approved': true,
+        // Self-approving submitted video was the same bypass one level down.
+        'video_status': videoUrl.isNotEmpty ? 'pending' : null,
         'is_zero_brokerage': true,
         'created_at': DateTime.now().toIso8601String(),
-      });
+      }).timeout(AppConstants.networkTimeout);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Color(0xFF0F766E),
-            content: Text('Property published successfully across India with 0% brokerage!'),
+            // The listing is queued, not live. Saying "published" when it is
+            // awaiting review is the kind of claim owners plan around.
+            content: Text(
+              'Property submitted successfully. Your property is pending approval.',
+            ),
           ),
         );
         context.go('/owner-dashboard');
+      }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Connection is taking too long.'),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: Colors.red,
-            content: Text('Listing failed: ${e.toString()}'),
+            // A raw PostgrestException here leaked column and policy names.
+            content: Text('Unable to submit your property.'),
           ),
         );
       }

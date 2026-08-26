@@ -16,6 +16,12 @@ dist-ssr
 .nitro
 *.local
 
+# Mobile release binaries. The APK is a Flutter build output, not source: the
+# mobile-build workflow publishes it as a GitHub Actions artifact. Committing it
+# put a 64MB file under public/, where Vite copies it into .output/public and
+# blew the 15MB client bundle budget in CI.
+public/downloads/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars

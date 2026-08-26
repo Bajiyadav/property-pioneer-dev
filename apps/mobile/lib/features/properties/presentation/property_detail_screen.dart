@@ -207,23 +207,26 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
 
                             setModalState(() => submitting = true);
                             try {
-                              if (isScheduleVisit) {
-                                await _enquiryService.scheduleVisit(
-                                  propertyId: widget.propertyId,
-                                  date: selectedDate,
-                                  timeSlot: selectedTimeSlot,
-                                  notes: messageCtrl.text.trim(),
-                                );
-                              } else {
-                                await _enquiryService.createEnquiry(
-                                  propertyId: widget.propertyId,
-                                  customerName: nameCtrl.text.trim(),
-                                  customerPhone: phoneCtrl.text.trim(),
-                                  message: messageCtrl.text.trim(),
-                                );
-                              }
+                              // The result decides what the customer is told.
+                              // Announcing success without reading it is how a
+                              // failed insert used to render as "Enquiry sent".
+                              final EnquiryResult result = isScheduleVisit
+                                  ? await _enquiryService.scheduleVisit(
+                                      propertyId: widget.propertyId,
+                                      date: selectedDate,
+                                      timeSlot: selectedTimeSlot,
+                                      notes: messageCtrl.text.trim(),
+                                    )
+                                  : await _enquiryService.createEnquiry(
+                                      propertyId: widget.propertyId,
+                                      customerName: nameCtrl.text.trim(),
+                                      customerPhone: phoneCtrl.text.trim(),
+                                      message: messageCtrl.text.trim(),
+                                    );
 
-                              if (ctx.mounted) {
+                              if (!ctx.mounted) return;
+
+                              if (result.isSuccess) {
                                 Navigator.pop(ctx);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
@@ -235,12 +238,24 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                                     backgroundColor: const Color(0xFF0F766E),
                                   ),
                                 );
+                              } else {
+                                // Stay on the sheet so the typed message is not
+                                // lost and the customer can correct and retry.
+                                setModalState(() => submitting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result.displayMessage),
+                                    backgroundColor: Colors.red.shade700,
+                                  ),
+                                );
                               }
                             } catch (e) {
                               if (ctx.mounted) {
                                 setModalState(() => submitting = false);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: ${e.toString()}')),
+                                  const SnackBar(
+                                    content: Text('Unable to send your enquiry.'),
+                                  ),
                                 );
                               }
                             }

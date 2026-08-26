@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/enquiry.dart';
+import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
-import 'package:seedha_properties_mobile/services/supabase_service.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
@@ -46,7 +46,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
             index: _currentIndex,
             children: [
               _buildSavedListingsTab(),
-              _buildMyEnquiriesTab(profile),
+              _buildMyEnquiriesTab(),
               _buildProfileTab(profile),
             ],
           );
@@ -149,43 +149,38 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
     );
   }
 
-  Widget _buildMyEnquiriesTab(dynamic profile) {
-    final user = ref.read(authServiceProvider).currentUser;
-    final email = user?.email ?? '';
-    final phone = profile.phone ?? '';
-
+  Widget _buildMyEnquiriesTab() {
+    // Scoped to the authenticated user by the service, which reads the id from
+    // the session and accepts none from the caller.
+    //
+    // This previously matched on `phone.eq.$phone,email.eq.$email` taken from
+    // the editable profile. That is not an identity: two accounts sharing a
+    // phone number see each other's leads, and a customer who edits their
+    // profile phone to someone else's inherits that person's enquiries. The
+    // values were also interpolated straight into a PostgREST `or()` filter,
+    // so a comma or a `)` in either field rewrote the query. user_id comes from
+    // the JWT and is matched again by RLS server-side.
     return FutureBuilder<List<PropertyEnquiry>>(
-      future: () async {
-        try {
-          var query = SupabaseService.client.from('enquiries').select();
-          if (email.isNotEmpty && phone.isNotEmpty) {
-            query = query.or('phone.eq.$phone,email.eq.$email');
-          } else if (email.isNotEmpty) {
-            query = query.eq('email', email);
-          } else if (phone.isNotEmpty) {
-            query = query.eq('phone', phone);
-          } else {
-            return <PropertyEnquiry>[];
-          }
-
-          final res = await query
-              .order('created_at', ascending: false)
-              .timeout(const Duration(seconds: 15));
-          return (res as List<dynamic>)
-              .map((e) => PropertyEnquiry.fromJson(e as Map<String, dynamic>))
-              .toList();
-        } catch (e) {
-          // Includes TimeoutException — the enquiries tab shows the empty state
-          // rather than an infinite spinner.
-          return <PropertyEnquiry>[];
-        }
-      }(),
+      future: ref.read(enquiryServiceProvider).getMyEnquiries(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
         }
 
-        final enquiries = snapshot.data ?? [];
+        if (snapshot.hasError) {
+          return SeedhaStateView(
+            type: SeedhaStateType.serverError,
+            title: 'Unable to load your enquiries.',
+            description: 'Please check your connection and try again.',
+            primaryAction: StateActionConfig(
+              label: 'Retry',
+              icon: Icons.refresh,
+              onPressed: () => setState(() {}),
+            ),
+          );
+        }
+
+        final enquiries = snapshot.data ?? <PropertyEnquiry>[];
         if (enquiries.isEmpty) {
           return Center(
             child: Column(
@@ -193,7 +188,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
               children: [
                 Icon(Icons.mail_outline, size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
-                const Text('No enquiries sent yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textSecondary)),
+                const Text('No enquiries yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textSecondary)),
               ],
             ),
           );
@@ -282,7 +277,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
     );
   }
 
-  Widget _buildProfileTab(dynamic profile) {
+  Widget _buildProfileTab(UserProfile profile) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(

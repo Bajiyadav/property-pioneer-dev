@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../config/constants.dart';
+
 class ListingFormData {
   final String? ownerName;
   final String? ownerPhone;
@@ -157,6 +159,49 @@ class ListingFormData {
       availableFrom: availableFrom ?? this.availableFrom,
       rentNegotiable: rentNegotiable ?? this.rentNegotiable,
     );
+  }
+
+  /// True when this property type has no bedrooms/bathrooms to collect.
+  bool get isCommercial =>
+      propertyType != null &&
+      AppConstants.commercialPropertyTypes.contains(propertyType);
+
+  /// Field-level validation for the whole wizard, keyed by field name.
+  ///
+  /// Runs immediately before submit so a step the owner skipped by tapping
+  /// back-and-forward cannot reach the database as a silent default. Empty map
+  /// means valid. Only fields that apply to the chosen property type are
+  /// required — a warehouse is not asked for a bedroom count.
+  Map<String, String> validate() {
+    final errors = <String, String>{};
+
+    void require(bool ok, String field, String message) {
+      if (!ok) errors[field] = message;
+    }
+
+    require(city.trim().isNotEmpty, 'city', 'Select a city');
+    require(locality.trim().isNotEmpty, 'locality', 'Select a locality');
+    require(address.trim().isNotEmpty, 'address', 'Enter the property address');
+    require(listingType != null, 'listingType', 'Select the listing purpose');
+    require(propertyType != null, 'propertyType', 'Select a property type');
+    require(furnishingStatus != null, 'furnishingStatus', 'Select the furnishing');
+    require(areaSqft > 0, 'areaSqft', 'Enter the built-up area');
+    require(price > 0, 'price', 'Enter a price');
+    require(title.trim().isNotEmpty, 'title', 'Enter a listing title');
+    require(images.isNotEmpty, 'images', 'Add at least one photo');
+
+    if (!isCommercial) {
+      require(bedrooms != null, 'bedrooms', 'Select the number of bedrooms');
+      require(bathrooms != null, 'bathrooms', 'Select the number of bathrooms');
+    }
+
+    // Rent-only: a deposit of zero is a real answer for a sale, but for a
+    // rental it almost always means the field was never filled in.
+    if (listingType == 'rent') {
+      require(deposit > 0, 'deposit', 'Enter the security deposit');
+    }
+
+    return errors;
   }
 
   Map<String, dynamic> toMap() {
