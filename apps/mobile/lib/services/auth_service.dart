@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
+import '../models/employee_access.dart';
 import '../models/user_profile.dart';
 import 'supabase_service.dart';
 
@@ -159,6 +160,30 @@ class AuthService {
 
   Future<void> signOut() async {
     await _client.auth.signOut().timeout(_kNetworkTimeout);
+  }
+
+  /// The signed-in user's staff grant, or null if they are not staff.
+  ///
+  /// Reads `employee_access`, which is the same table the RLS policies consult
+  /// through `get_employee_role()`. The client uses it only to decide which
+  /// console to show — every staff action is still authorised server-side, so a
+  /// tampered client gains nothing but a screen with no data behind it.
+  ///
+  /// A missing row is the normal case for a customer or owner and returns null.
+  /// Errors propagate so the caller can retry rather than silently treating a
+  /// failed lookup as "not staff".
+  Future<EmployeeAccess?> getEmployeeAccess() async {
+    final user = currentUser;
+    if (user == null) return null;
+
+    final rows = await _client
+        .from('employee_access')
+        .select('user_id, role, regions')
+        .eq('user_id', user.id)
+        .timeout(_kNetworkTimeout);
+
+    if (rows.isEmpty) return null;
+    return EmployeeAccess.fromJson(rows.first);
   }
 
   /// Highest-privilege role held by the user, from their `user_roles` rows.

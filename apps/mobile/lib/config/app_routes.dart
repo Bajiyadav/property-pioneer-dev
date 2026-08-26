@@ -16,6 +16,8 @@ import '../features/properties/presentation/wizard/listing_wizard_screen.dart';
 import '../features/owner/presentation/kyc_upload_screen.dart';
 import '../features/owner/presentation/promote_listing_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
+import '../features/staff/presentation/staff_dashboard_screen.dart';
+import '../features/splash/presentation/splash_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
 import '../features/loans/presentation/home_loans_screen.dart';
@@ -23,14 +25,21 @@ import '../features/location/presentation/location_search_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/',
+  // The launch screen resolves the session and decides where to go. Everyone
+  // lands on Home unless their role genuinely requires a console.
+  initialLocation: '/splash',
   redirect: (context, state) {
     final session = Supabase.instance.client.auth.currentSession;
     final isAuth = session != null;
     final path = state.uri.path;
-    
-    final isProtected = path.contains('-dashboard') || path.startsWith('/profile');
-    
+
+    // The splash resolves auth itself; redirecting it would defeat that.
+    if (path == '/splash') return null;
+
+    final isProtected = path.contains('-dashboard') ||
+        path.startsWith('/profile') ||
+        path.startsWith('/post-property');
+
     if (isProtected && !isAuth) {
       return '/login';
     }
@@ -142,6 +151,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/admin-dashboard',
       builder: (context, state) => const AdminDashboardScreen(),
+    ),
+    GoRoute(
+      path: '/staff-dashboard',
+      builder: (context, state) => const StaffDashboardScreen(),
+    ),
+    // Named entry point for the listing wizard. `/owner-dashboard/list-property`
+    // still works, but posting is not an owner-dashboard sub-task — it is the
+    // main thing an owner comes here to do, so it gets a route that says so.
+    GoRoute(
+      path: '/post-property',
+      builder: (context, state) => const ListingWizardScreen(),
+    ),
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
     ),
   ],
 );

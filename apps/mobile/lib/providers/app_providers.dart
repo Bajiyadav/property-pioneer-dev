@@ -7,6 +7,7 @@ import '../services/property_service.dart';
 import '../services/enquiry_service.dart';
 import '../services/favorites_service.dart';
 import '../models/property.dart';
+import '../models/employee_access.dart';
 import '../models/user_profile.dart';
 import '../features/location/providers/location_providers.dart';
 
@@ -48,6 +49,15 @@ final livePropertiesStreamProvider = StreamProvider.autoDispose((ref) {
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
   ref.watch(authStateChangesProvider);
   return ref.watch(authServiceProvider).getProfile();
+});
+
+/// The signed-in user's staff grant, or null when they are not staff.
+///
+/// Kept separate from [userProfileProvider] because it answers a different
+/// question and most users legitimately have no row here.
+final employeeAccessProvider = FutureProvider<EmployeeAccess?>((ref) async {
+  ref.watch(authStateChangesProvider);
+  return ref.watch(authServiceProvider).getEmployeeAccess();
 });
 
 // Reactive Favorites IDs
