@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -34,7 +35,6 @@ import type { OwnerLead } from "@/modules/owner/services/owner.server";
 import { getMyLeads, getMyListings, removeListing } from "@/modules/owner/services/ownerFunctions";
 import { DashboardLayout, type NavItem } from "@/modules/dashboard/components/DashboardLayout";
 import { RequireRole } from "@/modules/dashboard/components/RequireRole";
-import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 import {
   ActivityTimeline,
   CardSkeleton,
@@ -91,8 +91,7 @@ export function OwnerDashboardPage() {
 
 function OwnerDashboard({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useDashboardTab("/dashboard/owner");
-
-  const [showWizard, setShowWizard] = useState(false);
+  const navigate = useNavigate();
   const [listingQuery, setListingQuery] = useState("");
   const [leadFilter, setLeadFilter] = useState("all");
 
@@ -218,11 +217,11 @@ function OwnerDashboard({ user }: { user: User | null }) {
       subtitle="Manage your listings and the enquiries they receive."
       navItems={NAV_ITEMS}
       activeTab={activeTab}
-      onTabChange={(id) => (id === "add" ? setShowWizard(true) : setActiveTab(id))}
+      onTabChange={(id) => (id === "add" ? navigate({ to: "/list-property" }) : setActiveTab(id))}
       user={user}
       headerAction={
         <button
-          onClick={() => setShowWizard(true)}
+          onClick={() => navigate({ to: "/list-property" })}
           className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-500"
         >
           <PlusCircle className="h-3.5 w-3.5" /> Add property
@@ -287,7 +286,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                   label: "Add a property",
                   hint: "Free listing",
                   icon: <PlusCircle className="h-4 w-4" />,
-                  onClick: () => setShowWizard(true),
+                  onClick: () => navigate({ to: "/list-property" }),
                 },
                 {
                   id: "leads",
@@ -355,7 +354,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
               isLoading={isLoading}
               isError={isError}
               onRetry={refetch}
-              onAdd={() => setShowWizard(true)}
+              onAdd={() => navigate({ to: "/list-property" })}
             />
           </div>
         </div>
@@ -379,7 +378,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
             isLoading={mineLoading}
             isError={mineError}
             onRetry={refetchMine}
-            onAdd={() => setShowWizard(true)}
+            onAdd={() => navigate({ to: "/list-property" })}
             onDelete={(id) => removal.mutate(id)}
             deletingId={removal.isPending ? removal.variables : null}
           />
@@ -401,7 +400,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
               hint="Start a listing and save it — unfinished properties collect here."
               action={
                 <button
-                  onClick={() => setShowWizard(true)}
+                  onClick={() => navigate({ to: "/list-property" })}
                   className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
                 >
                   <PlusCircle className="h-3.5 w-3.5" /> Start a listing
@@ -427,7 +426,7 @@ function OwnerDashboard({ user }: { user: User | null }) {
                   </p>
                   <div className="mt-4 flex gap-2">
                     <button
-                      onClick={() => setShowWizard(true)}
+                      onClick={() => navigate({ to: "/list-property" })}
                       className="rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
                     >
                       Continue editing
@@ -651,8 +650,6 @@ function OwnerDashboard({ user }: { user: User | null }) {
       )}
 
       {activeTab === "settings" && <OwnerSettings user={user} />}
-
-      <OwnerOnboardingModal isOpen={showWizard} onClose={() => setShowWizard(false)} />
     </DashboardLayout>
   );
 }

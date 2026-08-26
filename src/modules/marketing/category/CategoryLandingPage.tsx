@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { fetchProperties, type Property } from "@/modules/property/services/propertyQueries";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
-import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 
 export interface Hotspot {
   name: string;
@@ -90,7 +89,6 @@ export function CategoryLandingPage({
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocality, setSelectedLocality] = useState<string>("");
-  const [showOwnerWizard, setShowOwnerWizard] = useState(false);
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
@@ -276,7 +274,7 @@ export function CategoryLandingPage({
 
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <button
-                  onClick={() => setShowOwnerWizard(true)}
+                  onClick={() => navigate({ to: "/list-property" })}
                   className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow hover:brightness-110 transition cursor-pointer"
                 >
                   <PlusCircle className="h-4 w-4" />
@@ -377,9 +375,6 @@ export function CategoryLandingPage({
           </div>
         </section>
       </div>
-
-      {/* Owner Onboarding Modal Trigger */}
-      <OwnerOnboardingModal isOpen={showOwnerWizard} onClose={() => setShowOwnerWizard(false)} />
     </div>
   );
 }

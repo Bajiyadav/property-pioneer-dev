@@ -241,34 +241,36 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label
-                htmlFor="startnow-phone"
-                className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
-              >
-                Your Mobile Number {status === "authenticated" ? "(Optional for now)" : "*"}
-              </label>
+          {status !== "authenticated" && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="startnow-phone"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                >
+                  Your Mobile Number *
+                </label>
+              </div>
+              <input
+                id="startnow-phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                maxLength={18}
+                placeholder="+91 98765 43210"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
+                  if (error) setError(null);
+                }}
+                className="w-full h-11 min-h-[44px] rounded-xl border border-input bg-background px-3.5 text-sm font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F766E] transition-all"
+              />
+              <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                Direct WhatsApp & verified buyer connections.
+              </p>
             </div>
-            <input
-              id="startnow-phone"
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              maxLength={18}
-              placeholder="+91 98765 43210"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value.replace(/[^0-9+\s-]/g, "").slice(0, 18));
-                if (error) setError(null);
-              }}
-              className="w-full h-11 min-h-[44px] rounded-xl border border-input bg-background px-3.5 text-sm font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0F766E] transition-all"
-            />
-            <p className="mt-1.5 text-[11px] text-muted-foreground flex items-center gap-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              Direct WhatsApp & verified buyer connections.
-            </p>
-          </div>
+          )}
 
           {/* Error Banner */}
           {error && (

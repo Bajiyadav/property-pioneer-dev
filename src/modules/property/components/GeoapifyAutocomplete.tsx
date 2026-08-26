@@ -189,7 +189,7 @@ export function GeoapifyAutocomplete({
         )}
       </div>
 
-      {isOpen && (suggestions.length > 0 || isLoading) && (
+      {isOpen && (suggestions.length > 0 || isLoading || (query && query.length >= 3)) && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-border shadow-lg rounded-md overflow-hidden z-50 max-h-60 overflow-y-auto">
           {isLoading && suggestions.length === 0 ? (
             <div className="p-3 text-sm text-muted-foreground text-center">Loading...</div>
@@ -207,6 +207,31 @@ export function GeoapifyAutocomplete({
                   </button>
                 </li>
               ))}
+              {query && query.length >= 3 && (
+                <li key="manual-entry">
+                  <button
+                    type="button"
+                    className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-start gap-2 text-emerald-600 dark:text-emerald-400"
+                    onClick={() => {
+                      setQuery(query);
+                      setIsOpen(false);
+                      setSuggestions([]);
+                      if (onSelect) {
+                        onSelect(query, {
+                          lat: 0,
+                          lon: 0,
+                          city: "",
+                          locality: query,
+                          placeId: "manual",
+                        });
+                      }
+                    }}
+                  >
+                    <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span className="text-sm font-medium">Use "{query}" as location</span>
+                  </button>
+                </li>
+              )}
             </ul>
           )}
         </div>

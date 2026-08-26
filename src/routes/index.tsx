@@ -22,7 +22,6 @@ import { FAQSection } from "@/modules/marketing/home/FAQSection";
 import { FeedbackSection } from "@/modules/feedback/components/FeedbackSection";
 
 import { CityExpansionModal, type CityModalData } from "@/components/dialogs/CityExpansionModal";
-import { OwnerOnboardingModal } from "@/modules/owner/components/OwnerOnboardingModal";
 
 export const Route = createFileRoute("/")({
   head: () => {
@@ -56,7 +55,6 @@ function Index() {
 
   // Interactive Modal States
   const [activeCity, setActiveCity] = useState<CityModalData | null>(null);
-  const [showOwnerWizard, setShowOwnerWizard] = useState(false);
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
@@ -103,7 +101,7 @@ function Index() {
       <HowItWorks />
 
       {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
-      <OwnerCTA onOpenWizard={() => setShowOwnerWizard(true)} />
+      <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
 
       {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
       <FeedbackSection />
@@ -117,7 +115,6 @@ function Index() {
       {/* INTERACTIVE MODALS                      */}
       {/* ======================================= */}
       <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
-      <OwnerOnboardingModal isOpen={showOwnerWizard} onClose={() => setShowOwnerWizard(false)} />
     </div>
   );
 }
