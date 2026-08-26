@@ -84,7 +84,8 @@ jobs:
           flutter build apk --release --no-tree-shake-icons \
             --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
             --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
-            --dart-define=API_BASE_URL=https://seedhaproperties.com/api
+            --dart-define=API_BASE_URL=https://seedhaproperties.com/api \
+            --dart-define=GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
       - name: Verify Generated APK File
         working-directory: apps/mobile
