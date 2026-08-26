@@ -218,12 +218,22 @@ function OwnerDashboard({ user }: { user: User | null }) {
       navItems={NAV_ITEMS}
       activeTab={activeTab}
       onTabChange={(id) =>
-        id === "add" ? navigate({ to: "/list-property/wizard" }) : setActiveTab(id)
+        id === "add"
+          ? navigate({
+              to: "/list-property/wizard",
+              search: { propertyType: "Residential", intent: "Rent" },
+            })
+          : setActiveTab(id)
       }
       user={user}
       headerAction={
         <button
-          onClick={() => navigate({ to: "/list-property/wizard" })}
+          onClick={() =>
+            navigate({
+              to: "/list-property/wizard",
+              search: { propertyType: "Residential", intent: "Rent" },
+            })
+          }
           className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-500"
         >
           <PlusCircle className="h-3.5 w-3.5" /> Add property
@@ -288,7 +298,12 @@ function OwnerDashboard({ user }: { user: User | null }) {
                   label: "Add a property",
                   hint: "Free listing",
                   icon: <PlusCircle className="h-4 w-4" />,
-                  onClick: () => navigate({ to: "/list-property/wizard" }),
+                  onClick: () =>
+                    navigate({
+                      to: "/list-property/wizard",
+                      search: { propertyType: "Residential", intent: "Rent" },
+                      search: { propertyType: "Residential", intent: "Rent" },
+                    }),
                 },
                 {
                   id: "leads",
@@ -356,7 +371,13 @@ function OwnerDashboard({ user }: { user: User | null }) {
               isLoading={isLoading}
               isError={isError}
               onRetry={refetch}
-              onAdd={() => navigate({ to: "/list-property/wizard" })}
+              onAdd={() =>
+                navigate({
+                  to: "/list-property/wizard",
+                  search: { propertyType: "Residential", intent: "Rent" },
+                  search: { propertyType: "Residential", intent: "Rent" },
+                })
+              }
             />
           </div>
         </div>
@@ -380,7 +401,12 @@ function OwnerDashboard({ user }: { user: User | null }) {
             isLoading={mineLoading}
             isError={mineError}
             onRetry={refetchMine}
-            onAdd={() => navigate({ to: "/list-property/wizard" })}
+            onAdd={() =>
+              navigate({
+                to: "/list-property/wizard",
+                search: { propertyType: "Residential", intent: "Rent" },
+              })
+            }
             onDelete={(id) => removal.mutate(id)}
             deletingId={removal.isPending ? removal.variables : null}
           />
@@ -402,7 +428,12 @@ function OwnerDashboard({ user }: { user: User | null }) {
               hint="Start a listing and save it — unfinished properties collect here."
               action={
                 <button
-                  onClick={() => navigate({ to: "/list-property/wizard" })}
+                  onClick={() =>
+                    navigate({
+                      to: "/list-property/wizard",
+                      search: { propertyType: "Residential", intent: "Rent" },
+                    })
+                  }
                   className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground"
                 >
                   <PlusCircle className="h-3.5 w-3.5" /> Start a listing
@@ -428,7 +459,13 @@ function OwnerDashboard({ user }: { user: User | null }) {
                   </p>
                   <div className="mt-4 flex gap-2">
                     <button
-                      onClick={() => navigate({ to: "/list-property/wizard" })}
+                      onClick={() =>
+                        navigate({
+                          to: "/list-property/wizard",
+                          search: { propertyType: "Residential", intent: "Rent" },
+                          search: { propertyType: "Residential", intent: "Rent" },
+                        })
+                      }
                       className="rounded-xl bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
                     >
                       Continue editing
