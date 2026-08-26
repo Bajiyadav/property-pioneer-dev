@@ -1,3 +1,11 @@
+## v0.74.0 — 2026-08-26
+
+### Features
+- feat(homepage): enforce state/city selection for quick links (26a7b77)
+
+### Documentation
+- docs(qa): add phase 6-7 audit and final release reports (5b83bfb)
+
 ## v0.73.0 — 2026-08-26
 
 ### Features
