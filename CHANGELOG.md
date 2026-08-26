@@ -1,3 +1,12 @@
+## v0.80.0 — 2026-08-26
+
+### Features
+- feat: update location prompt to search bar and skip StartNowForm in owner dashboard (65ca3a1)
+- feat: update location prompt to search bar and skip StartNowForm in owner dashboard (1f35792)
+
+### Fixes
+- fix: remove duplicate search parameters in navigate (21f857b)
+
 ## v0.79.0 — 2026-08-26
 
 ### Features
