@@ -3,13 +3,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Build args carry no inline defaults on purpose. They previously fell
+      # back to real project values — including a live Google Maps key — so a
+      # checkout with no .env silently built an image pointing at production
+      # with a committed key. `:?` makes a missing variable fail the build with
+      # that message instead.
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-https://iyttetfaavokzyexvqam.supabase.co}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x}
-        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:-iyttetfaavokzyexvqam}
-        VITE_APP_URL: ${VITE_APP_URL:-http://localhost:3000}
-        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-AIzaSyDhiRcWpvLzyRVmA8rNdj1s5r9oAp_7xfg}
-        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-0x4AAAAAAET7XQlvwk5N-Om6}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:?set in .env — see .env.example}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:?set in .env — see .env.example}
+        VITE_SUPABASE_PROJECT_ID: ${VITE_SUPABASE_PROJECT_ID:?set in .env — see .env.example}
+        VITE_APP_URL: ${VITE_APP_URL:?set in .env — see .env.example}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:?set in .env — see .env.example}
+        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:?set in .env — see .env.example}
     image: property-pioneer:latest
     container_name: property_pioneer_app
     ports:

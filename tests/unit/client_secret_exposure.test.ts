@@ -25,6 +25,13 @@ const INTENTIONALLY_PUBLIC = new Set([
   "VITE_GOOGLE_MAPS_API_KEY",
   // Cloudflare Turnstile's site key is public by design; the secret is server-side.
   "VITE_TURNSTILE_SITE_KEY",
+  // Geoapify autocomplete runs in the browser, so this key ships in the bundle
+  // and cannot be secret. Same shape as the Maps key: the control is a domain
+  // restriction plus a usage cap in the Geoapify dashboard, not secrecy.
+  // NOTE: as of 2026-08-26 the live key answered a server-side request with no
+  // Referer header (HTTP 200), i.e. it is NOT domain-restricted yet. That is a
+  // dashboard setting, not something this repo can enforce — see the audit.
+  "VITE_GEOAPIFY_API_KEY",
 ]);
 
 const SECRET_SHAPED = /(_API_KEY|_SECRET|_TOKEN|_PASSWORD|SERVICE_ROLE|_PRIVATE)/i;
