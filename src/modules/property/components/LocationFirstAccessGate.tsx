@@ -9,11 +9,7 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
-import {
-  fetchLocationHierarchy,
-  type LocationHierarchy,
-  type LocationValidationResult,
-} from "@/modules/property/services/locationDetailsService";
+import { type LocationValidationResult } from "@/modules/property/services/locationDetailsService";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 interface LocationFirstAccessGateProps {
@@ -32,51 +28,25 @@ export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = (
   className = "",
 }) => {
   const { user } = useAuthSession();
-  const [hierarchy, setHierarchy] = useState<LocationHierarchy>({
-    cities: ["Hyderabad", "Bengaluru", "Mumbai", "Pune", "Chennai", "Delhi NCR", "Kolkata"],
-    localities: [],
-    places: [],
-  });
-
-  const [selectedCity, setSelectedCity] = useState(initialCity);
-  const [selectedLocality, setSelectedLocality] = useState(initialLocality);
-  const [selectedPlace, setSelectedPlace] = useState("");
-  const [loadingHierarchy, setLoadingHierarchy] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(
+    initialLocality ? `${initialLocality}, ${initialCity}` : initialCity,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Load localities and places when city or locality changes
-  useEffect(() => {
-    let isMounted = true;
-    setLoadingHierarchy(true);
-    fetchLocationHierarchy(selectedCity, selectedLocality)
-      .then((data) => {
-        if (isMounted) {
-          setHierarchy(data);
-          if (data.localities.length > 0 && !data.localities.includes(selectedLocality)) {
-            setSelectedLocality(data.localities[0] || "");
-          }
-          if (data.places.length > 0 && !data.places.includes(selectedPlace)) {
-            setSelectedPlace(data.places[0] || "");
-          }
-          setLoadingHierarchy(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setLoadingHierarchy(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedCity, selectedLocality]);
 
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!selectedCity.trim() || !selectedLocality.trim()) {
-      setErrorMessage("Please select a valid location from the available options.");
+    const parts = searchQuery
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const locality = parts[0] || "";
+    const city = parts.length > 1 ? parts[parts.length - 1] : "Unknown City";
+
+    if (!locality) {
+      setErrorMessage("Please enter a valid location.");
       return;
     }
 
@@ -87,23 +57,23 @@ export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = (
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           propertyId,
-          city: selectedCity.trim(),
-          locality: selectedLocality.trim(),
-          place: selectedPlace.trim() || undefined,
+          city: city,
+          locality: locality,
+          place: undefined,
         }),
       });
 
       const data = (await res.json()) as LocationValidationResult;
 
       if (!res.ok || !data.ok) {
-        setErrorMessage(data.error || "Please select a valid location from the available options.");
+        setErrorMessage(data.error || "Please enter a valid location.");
         setSubmitting(false);
         return;
       }
 
       onLocationValidated(data);
     } catch {
-      setErrorMessage("Please select a valid location from the available options.");
+      setErrorMessage("Please enter a valid location.");
     } finally {
       setSubmitting(false);
     }
@@ -136,81 +106,22 @@ export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = (
       </div>
 
       <form onSubmit={handleContinue} className="mt-6 space-y-4">
-        {/* City Selection */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-            City
+            Location
           </label>
           <div className="relative">
-            <select
-              value={selectedCity}
+            <Search className="absolute left-3.5 top-3 h-5 w-5 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
               onChange={(e) => {
-                setSelectedCity(e.target.value);
-                setSelectedLocality("");
-                setSelectedPlace("");
+                setSearchQuery(e.target.value);
                 setErrorMessage(null);
               }}
-              className="w-full h-11 rounded-xl border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
-            >
-              {hierarchy.cities.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Locality Selection */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-            Locality
-          </label>
-          <div className="relative">
-            <select
-              value={selectedLocality}
-              disabled={loadingHierarchy || hierarchy.localities.length === 0}
-              onChange={(e) => {
-                setSelectedLocality(e.target.value);
-                setSelectedPlace("");
-                setErrorMessage(null);
-              }}
-              className="w-full h-11 rounded-xl border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:opacity-60"
-            >
-              {hierarchy.localities.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Place / Landmark Selection */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-            Place
-          </label>
-          <div className="relative">
-            <select
-              value={selectedPlace}
-              disabled={loadingHierarchy || hierarchy.places.length === 0}
-              onChange={(e) => {
-                setSelectedPlace(e.target.value);
-                setErrorMessage(null);
-              }}
-              className="w-full h-11 rounded-xl border border-border bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:opacity-60"
-            >
-              {hierarchy.places.length === 0 ? (
-                <option value="">Main Road / Central Corridor</option>
-              ) : (
-                hierarchy.places.map((place) => (
-                  <option key={place} value={place}>
-                    {place}
-                  </option>
-                ))
-              )}
-            </select>
+              placeholder="e.g. Bandra, Mumbai"
+              className="w-full h-11 rounded-xl border border-border bg-background pl-10 pr-3.5 py-2 text-sm font-medium text-foreground shadow-sm transition focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            />
           </div>
         </div>
 
@@ -228,7 +139,7 @@ export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = (
         {/* Action Button */}
         <button
           type="submit"
-          disabled={submitting || loadingHierarchy}
+          disabled={submitting || !searchQuery.trim()}
           className="mt-2 w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-500 active:scale-98 disabled:opacity-60"
         >
           {submitting ? (
