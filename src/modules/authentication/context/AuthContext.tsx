@@ -105,6 +105,25 @@ function purgeAuthStorage() {
       // Storage access can throw in private browsing mode.
     }
   }
+
+  // Also clear cookies
+  try {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+      if (
+        name.startsWith("sb-") ||
+        name.includes("auth-token") ||
+        LEGACY_AUTH_STORAGE_KEYS.includes(name)
+      ) {
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      }
+    }
+  } catch {
+    // Document access can throw
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

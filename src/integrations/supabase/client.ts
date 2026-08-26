@@ -35,6 +35,22 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
+const cookieStorage = {
+  getItem: (key: string) => {
+    if (typeof document === "undefined") return null;
+    const match = document.cookie.match(new RegExp("(^| )" + key + "=([^;]+)"));
+    return match ? decodeURIComponent(match[2]) : null;
+  },
+  setItem: (key: string, value: string) => {
+    if (typeof document === "undefined") return;
+    document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax; secure`;
+  },
+  removeItem: (key: string) => {
+    if (typeof document === "undefined") return;
+    document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  },
+};
+
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to process.env for SSR (server-side rendering)
@@ -52,12 +68,29 @@ function createSupabaseClient() {
     throw new Error(message);
   }
 
+  // Migrate any existing localStorage session to cookies to prevent logging active users out
+  if (typeof window !== "undefined") {
+    try {
+      const urlParts = SUPABASE_URL.split("//");
+      const projectId = urlParts.length > 1 ? urlParts[1].split(".")[0] : "";
+      const storageKey = projectId ? `sb-${projectId}-auth-token` : "supabase.auth.token";
+
+      const localSession = localStorage.getItem(storageKey);
+      if (localSession) {
+        cookieStorage.setItem(storageKey, localSession);
+        localStorage.removeItem(storageKey);
+      }
+    } catch (e) {
+      // Ignore private browsing storage errors
+    }
+  }
+
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
     },
     auth: {
-      storage: typeof window !== "undefined" ? localStorage : undefined,
+      storage: typeof window !== "undefined" ? cookieStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
     },

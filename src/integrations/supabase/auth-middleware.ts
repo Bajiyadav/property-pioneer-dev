@@ -56,17 +56,36 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     }
 
     const authHeader = request.headers.get("authorization");
+    let token = "";
 
-    if (!authHeader) {
-      throw new Error("Unauthorized: No authorization header provided");
+    if (authHeader) {
+      const match = authHeader.match(/^Bearer\s+([A-Za-z0-9-_=.]+)\s*$/);
+      if (match) token = match[1];
     }
 
-    const match = authHeader.match(/^Bearer\s+([A-Za-z0-9-_=.]+)\s*$/);
-    if (!match) {
-      throw new Error("Unauthorized: Only Bearer tokens in valid format are supported");
+    if (!token) {
+      // Fallback to cookie for direct page loads (SSR)
+      const cookieHeader = request.headers.get("cookie");
+      if (cookieHeader) {
+        const urlParts = SUPABASE_URL.split("//");
+        const projectId = urlParts.length > 1 ? urlParts[1].split(".")[0] : "";
+        const storageKey = projectId ? `sb-${projectId}-auth-token` : "supabase.auth.token";
+
+        const match = cookieHeader.match(new RegExp("(^| )" + storageKey + "=([^;]+)"));
+        if (match) {
+          try {
+            const cookieValue = decodeURIComponent(match[2]);
+            const parsed = JSON.parse(cookieValue);
+            if (parsed && parsed.access_token) {
+              token = parsed.access_token;
+            }
+          } catch {
+            // Invalid JSON in cookie
+          }
+        }
+      }
     }
 
-    const token = match[1];
     if (!token) {
       throw new Error("Unauthorized: No token provided");
     }
