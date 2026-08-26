@@ -1,3 +1,16 @@
+## v0.67.1 — 2026-08-26
+
+### Fixes
+- fix: stop attaching stock photos to real listings (f5c02cc)
+- fix: enable verified enquiry captcha (8546d4d)
+- fix: restore mobile moderation queue (b3cea68)
+- fix: reconcile production migration history (91c5ad1)
+
+### Migration notes
+- supabase/migrations/20260825000000_check_account_exists.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.67.0 — 2026-08-26
 
 ### Features
