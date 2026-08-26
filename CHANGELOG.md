@@ -1,3 +1,8 @@
+## v0.78.1 — 2026-08-26
+
+### Fixes
+- fix(router): auto-reload on chunk load error after deployment (b6c41e7)
+
 ## v0.78.0 — 2026-08-26
 
 ### Features
