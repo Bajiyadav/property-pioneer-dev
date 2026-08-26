@@ -21,6 +21,7 @@ import { OwnerCTA } from "@/modules/marketing/home/OwnerCTA";
 import { FAQSection } from "@/modules/marketing/home/FAQSection";
 import { FeedbackSection } from "@/modules/feedback/components/FeedbackSection";
 
+import { ValueAddedServices } from "@/modules/marketing/home/ValueAddedServices";
 import { CityExpansionModal, type CityModalData } from "@/components/dialogs/CityExpansionModal";
 
 export const Route = createFileRoute("/")({
@@ -87,7 +88,7 @@ function Index() {
         onSearch={handleSearchSubmit}
       />
 
-      {Boolean(selectedState && selectedCity && q) && (
+      {Boolean(selectedState && selectedCity) && (
         <>
           {/* 2. Real Estate Quote Banner */}
           <QuoteBanner />
@@ -124,6 +125,9 @@ function Index() {
           </div>
         </>
       )}
+
+      {/* Value Added Services - Always visible as an attraction at the bottom */}
+      <ValueAddedServices />
 
       {/* ======================================= */}
       {/* INTERACTIVE MODALS                      */}

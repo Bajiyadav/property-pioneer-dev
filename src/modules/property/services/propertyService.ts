@@ -907,30 +907,35 @@ export async function fetchPublicProperties(params?: PropertySearchParams): Prom
 }
 
 export async function fetchPublicPropertyById(id: string): Promise<Property | null> {
-  const detailQuery = (useExtended: boolean) =>
-    db
-      .from("properties")
-      .select(propertyColumns(useExtended))
-      .eq("id", id)
-      .eq("is_approved", true)
-      .maybeSingle();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
-  try {
-    const tryExtended = shouldTryExtended();
-    let { data, error } = await detailQuery(tryExtended);
+  if (isUuid) {
+    const detailQuery = (useExtended: boolean) =>
+      db
+        .from("properties")
+        .select(propertyColumns(useExtended))
+        .eq("id", id)
+        .eq("is_approved", true)
+        .maybeSingle();
 
-    if (error && tryExtended && isExtendedColumnUnavailable(error)) {
-      schema.record(false);
-      ({ data, error } = await detailQuery(false));
-    } else if (!error && tryExtended) {
-      schema.record(true);
+    try {
+      const tryExtended = shouldTryExtended();
+      let { data, error } = await detailQuery(tryExtended);
+
+      if (error && tryExtended && isExtendedColumnUnavailable(error)) {
+        schema.record(false);
+        ({ data, error } = await detailQuery(false));
+      } else if (!error && tryExtended) {
+        schema.record(true);
+      }
+
+      if (!error && data) return withVerificationDefaults(data as unknown as PropertyRow);
+      if (error) console.error("[properties] detail query failed", error);
+    } catch (err) {
+      console.error("[properties] detail unreachable", err);
     }
-
-    if (!error && data) return withVerificationDefaults(data as unknown as PropertyRow);
-    if (error) console.error("[properties] detail query failed", error);
-  } catch (err) {
-    console.error("[properties] detail unreachable", err);
   }
+
   // Seed listings keep the demo links (e.g. /properties/hyd-000) working.
   return ALL_FALLBACK_PROPERTIES.find((p) => p.id === id) ?? null;
 }

@@ -38,6 +38,15 @@ export const STATES = [
   "Himachal Pradesh",
   "Jammu & Kashmir",
   "Chandigarh",
+  "Tripura",
+  "Meghalaya",
+  "Manipur",
+  "Nagaland",
+  "Arunachal Pradesh",
+  "Mizoram",
+  "Sikkim",
+  "Puducherry",
+  "Andaman & Nicobar",
 ] as const;
 
 export const CITIES: CityConfig[] = [
@@ -188,6 +197,16 @@ export const CITIES: CityConfig[] = [
 
   // ────────────────────────── Assam ──────────────────────────
   { slug: "guwahati", name: "Guwahati", state: "Assam", live: true },
+  { slug: "silchar", name: "Silchar", state: "Assam", live: true },
+  { slug: "agartala", name: "Agartala", state: "Tripura", live: true },
+  { slug: "shillong", name: "Shillong", state: "Meghalaya", live: true },
+  { slug: "imphal", name: "Imphal", state: "Manipur", live: true },
+  { slug: "kohima", name: "Kohima", state: "Nagaland", live: true },
+  { slug: "itanagar", name: "Itanagar", state: "Arunachal Pradesh", live: true },
+  { slug: "aizawl", name: "Aizawl", state: "Mizoram", live: true },
+  { slug: "gangtok", name: "Gangtok", state: "Sikkim", live: true },
+  { slug: "puducherry", name: "Puducherry", state: "Puducherry", live: true },
+  { slug: "port-blair", name: "Port Blair", state: "Andaman & Nicobar", live: true },
 ];
 
 export const LIVE_CITIES = CITIES.filter((c) => c.live);

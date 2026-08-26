@@ -6,6 +6,8 @@ import { LIVE_CITIES, STATES } from "@/config/platform";
 import { GeoapifyAutocomplete } from "@/modules/property/components/GeoapifyAutocomplete";
 import { useLocationStore } from "@/modules/property/store/locationStore";
 
+import { useAuthSession } from "@/hooks/useAuthSession";
+
 /**
  * Homepage search bar with cascading location selection:
  *   1. State  — pick a state
@@ -35,6 +37,7 @@ export function TabbedSearchBox({
   onCityChange: (c: string) => void;
 }) {
   const navigate = useNavigate();
+  const { status } = useAuthSession();
 
   // Cities filtered to the selected state
   const filteredCities = useMemo(() => {
@@ -42,7 +45,7 @@ export function TabbedSearchBox({
     return LIVE_CITIES.filter((c) => c.state === selectedState);
   }, [selectedState]);
 
-  const locationReady = Boolean(selectedState && selectedCity && query);
+  const locationReady = Boolean(selectedState && selectedCity);
 
   const handleStateChange = (newState: string) => {
     onStateChange(newState);
@@ -58,7 +61,7 @@ export function TabbedSearchBox({
       return;
     }
 
-    const search: Record<string, string | number> = {
+    const searchParams = {
       q: query,
       city: selectedCity,
       listing: "",
@@ -67,7 +70,13 @@ export function TabbedSearchBox({
       beds: 0,
     };
 
-    navigate({ to: "/properties", search });
+    if (status === "unauthenticated") {
+      const qs = new URLSearchParams(searchParams as Record<string, string>).toString();
+      navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
+      return;
+    }
+
+    navigate({ to: "/properties", search: searchParams });
   };
 
   return (

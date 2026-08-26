@@ -232,8 +232,9 @@ export function SearchUI({
           className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none cursor-pointer"
           aria-label="Select property type"
         >
-          <option value="">Any Type</option>
-          <option value="Apartment">Apartment</option>
+          <option value="" disabled hidden>
+            Select Property Type
+          </option>
           <option value="Villa">Villa</option>
           <option value="Independent House">Independent House</option>
           <option value="Studio">1 RK / Studio</option>

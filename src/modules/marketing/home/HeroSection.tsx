@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function HeroSection({
   query,
@@ -34,15 +35,16 @@ export function HeroSection({
   onOpenOwnerWizard?: () => void;
 }) {
   const navigate = useNavigate();
+  const { status } = useAuthSession();
 
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
-    if (!selectedState || !selectedCity || !query) {
-      toast.error("Please select a state, city, and locality first.");
+    if (!selectedState || !selectedCity) {
+      toast.error("Please select a state and city first.");
       return;
     }
 
-    const search: Record<string, string | number> = {
+    const searchParams = {
       q: "",
       city: selectedCity,
       listing: params.listing || "",
@@ -52,7 +54,33 @@ export function HeroSection({
       beds: 0,
     };
 
-    navigate({ to: "/properties", search });
+    if (status === "unauthenticated") {
+      const qs = new URLSearchParams(searchParams as Record<string, string>).toString();
+      navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
+      return;
+    }
+
+    navigate({ to: "/properties", search: searchParams });
+  };
+
+  const handleLocalSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const searchParams = {
+      q: query,
+      city: selectedCity,
+      listing: "rent",
+      minPrice: 0,
+      maxPrice: 0,
+      beds: 0,
+    };
+    if (status === "unauthenticated") {
+      const qs = new URLSearchParams(searchParams as Record<string, string>).toString();
+      navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
+      return;
+    }
+
+    onSearch(e);
   };
 
   return (
