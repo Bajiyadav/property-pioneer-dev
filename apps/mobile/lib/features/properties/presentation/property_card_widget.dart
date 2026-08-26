@@ -4,6 +4,23 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+/// One spec item on a property card. Kept small and self-sizing so a [Wrap]
+/// can reflow the set on a narrow screen.
+Widget _specChip(IconData icon, String label) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 15, color: const Color(0xFF475569)),
+      const SizedBox(width: 3),
+      Text(
+        label,
+        style: const TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+      ),
+    ],
+  );
+}
+
 class PropertyCardWidget extends StatelessWidget {
   final Property property;
   final VoidCallback onTap;
@@ -209,15 +226,24 @@ class PropertyCardWidget extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            property.formattedPrice,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF0F172A),
-                              letterSpacing: -0.4,
+                          // Flexible: a high-value sale price ("₹99.99 Cr")
+                          // together with the brokerage badge overflowed a
+                          // 360dp screen by 28px. The price shrinks to fit
+                          // rather than pushing the badge off the card.
+                          Flexible(
+                            child: Text(
+                              property.formattedPrice,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF0F172A),
+                                letterSpacing: -0.4,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                             decoration: BoxDecoration(
@@ -284,52 +310,46 @@ class PropertyCardWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: const Color(0xFFF1F5F9)),
                         ),
+                        // Wrap, not Row: BHK + Bath + area + the View
+                        // affordance need about 474px side by side, which
+                        // overflows every real phone (360-430dp). The previous
+                        // Row was unconstrained so it took its intrinsic width
+                        // and overflowed by ~76px on all of them; it went
+                        // unnoticed because the default widget-test surface is
+                        // 800px wide. Wrapping lets the specs flow to a second
+                        // line on narrow screens instead of being clipped.
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Row(
-                              children: [
-                                if (property.bedrooms > 0) ...[
-                                  const Icon(Icons.bed_outlined, size: 15, color: Color(0xFF475569)),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    "${property.bedrooms} BHK",
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ] else ...[
-                                  const Icon(Icons.business_outlined, size: 15, color: Color(0xFF475569)),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    property.propertyType,
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
-                                  ),
-                                  const SizedBox(width: 10),
+                            Expanded(
+                              child: Wrap(
+                                spacing: 10,
+                                runSpacing: 4,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  if (property.bedrooms > 0)
+                                    _specChip(Icons.bed_outlined, "${property.bedrooms} BHK")
+                                  else
+                                    _specChip(Icons.business_outlined, property.propertyType),
+                                  if (property.bathrooms > 0)
+                                    _specChip(Icons.bathtub_outlined, "${property.bathrooms} Bath"),
+                                  if (property.areaSqft > 0)
+                                    _specChip(Icons.square_foot_outlined, "${property.areaSqft} sqft"),
                                 ],
-                                if (property.bathrooms > 0) ...[
-                                  const Icon(Icons.bathtub_outlined, size: 15, color: Color(0xFF475569)),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    "${property.bathrooms} Bath",
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ],
-                                if (property.areaSqft > 0) ...[
-                                  const Icon(Icons.square_foot_outlined, size: 15, color: Color(0xFF475569)),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    "${property.areaSqft} sqft",
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             const Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('View', style: TextStyle(color: Color(0xFF0F766E), fontSize: 11, fontWeight: FontWeight.w800)),
+                                Text('View',
+                                    style: TextStyle(
+                                        color: AppTheme.primaryColor,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800)),
                                 SizedBox(width: 2),
-                                Icon(Icons.arrow_forward_ios, size: 10, color: Color(0xFF0F766E)),
+                                Icon(Icons.arrow_forward_ios,
+                                    size: 10, color: AppTheme.primaryColor),
                               ],
                             ),
                           ],

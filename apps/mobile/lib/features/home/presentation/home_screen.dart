@@ -649,7 +649,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     return PropertyCardWidget(
                       property: prop,
                       isFavorite: isFav,
-                      onTap: () => context.go('/properties/${prop.id}'),
+                      onTap: () => context.push('/properties/${prop.id}'),
                       onToggleFavorite: () {
                         ref.read(favoritesProvider.notifier).toggleFavorite(prop.id);
                       },

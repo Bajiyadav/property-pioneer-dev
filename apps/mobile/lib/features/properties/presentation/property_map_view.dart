@@ -96,7 +96,7 @@ class _PropertyMapViewState extends State<PropertyMapView> {
             right: 16,
             bottom: 32,
             child: GestureDetector(
-              onTap: () => context.go('/properties/${_selectedProperty!.id}'),
+              onTap: () => context.push('/properties/${_selectedProperty!.id}'),
               child: Container(
                 constraints: const BoxConstraints(maxHeight: 180),
                 decoration: BoxDecoration(
@@ -112,27 +112,66 @@ class _PropertyMapViewState extends State<PropertyMapView> {
                     property: _selectedProperty!,
                     isFavorite: widget.favoriteIds.contains(_selectedProperty!.id),
                     onToggleFavorite: () => widget.onToggleFavorite(_selectedProperty!.id),
-                    onTap: () => context.go('/properties/${_selectedProperty!.id}'),
+                    onTap: () => context.push('/properties/${_selectedProperty!.id}'),
                   ),
                 ),
               ),
             ),
           ),
+        // Coordinates are optional on a listing, and most are published without
+        // one. Say so plainly instead of leaving an empty map that looks broken
+        // — and never drop a pin at a guessed position to fill the space.
         if (propertiesWithCoords.isEmpty)
           Positioned(
-            top: 16,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'No properties with map coordinates available in this area.',
-                style: TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
+            left: 20,
+            right: 20,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.borderSubtle),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.location_off_outlined,
+                        size: 38, color: AppTheme.textSecondary),
+                    const SizedBox(height: 12),
+                    Text(
+                      widget.properties.isEmpty
+                          ? 'No properties to map'
+                          : 'These listings have no map location',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.textPrimary),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      widget.properties.isEmpty
+                          ? 'Adjust your filters or location to see results here.'
+                          : 'Owners have not pinned these ${widget.properties.length} '
+                              'properties yet. Switch to List to browse them.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 12.5,
+                          height: 1.35,
+                          color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

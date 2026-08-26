@@ -130,7 +130,7 @@ class _CustomerDashboardScreenState extends ConsumerState<CustomerDashboardScree
               property: prop,
               isFavorite: favIds.contains(prop.id),
               onToggleFavorite: () => ref.read(favoritesProvider.notifier).toggleFavorite(prop.id),
-              onTap: () => context.go('/properties/${prop.id}'),
+              onTap: () => context.push('/properties/${prop.id}'),
             );
           },
         );

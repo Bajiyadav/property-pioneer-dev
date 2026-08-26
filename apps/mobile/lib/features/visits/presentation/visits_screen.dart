@@ -189,7 +189,7 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
                               title: Text(DateFormat('EEE, MMM d, yyyy').format(v.visitDate), style: const TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Text("Slot: ${v.visitTime} • Status: ${v.status.toUpperCase()}"),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                              onTap: () => context.go('/properties/${v.propertyId}'),
+                              onTap: () => context.push('/properties/${v.propertyId}'),
                             ),
                           );
                         },
@@ -233,7 +233,7 @@ class _VisitsScreenState extends ConsumerState<VisitsScreen> with SingleTickerPr
                               title: Text(enq.message.isNotEmpty ? enq.message : 'Direct Owner Enquiry', maxLines: 1, overflow: TextOverflow.ellipsis),
                               subtitle: Text(DateFormat('MMM d, yyyy').format(enq.createdAt)),
                               trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                              onTap: () => context.go('/properties/${enq.propertyId}'),
+                              onTap: () => context.push('/properties/${enq.propertyId}'),
                             ),
                           );
                         },

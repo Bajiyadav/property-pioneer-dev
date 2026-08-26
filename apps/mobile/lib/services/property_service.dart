@@ -6,8 +6,30 @@ import 'supabase_service.dart';
 class PropertyService {
   final SupabaseClient _client;
 
+  /// Columns a customer is allowed to read.
+  ///
+  /// Every name here was verified against the live column grants. Deliberately
+  /// absent, because `authenticated` has no grant on them and asking would fail
+  /// the whole query with 42501:
+  ///
+  ///   owner_name, owner_phone, owner_email — contact details are released
+  ///     through the contact-unlock flow, not by listing them on the card.
+  ///   latitude, longitude — the exact pin is private. `approx_latitude` /
+  ///     `approx_longitude` are the public, deliberately coarse coordinates,
+  ///     and the model maps them onto Property.latitude/longitude.
+  ///
+  /// furnishing_status, deposit, maintenance, amenities, is_zero_brokerage and
+  /// owner_verification_status ARE readable and are now requested: the detail
+  /// screen already had cards for deposit and furnishing, but never received
+  /// the values, so those sections could never render.
   static const String publicPropertyColumns =
-      'id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,property_type,listing_type,status,images,is_featured,created_at,locality,landmark,metro_station,it_park,hospital,college,video_url,video_status,total_floors,exact_floor,balconies,pincode,facing,available_from,rent_negotiable,approx_latitude,approx_longitude';
+      'id,title,description,price,city,address,bedrooms,bathrooms,area_sqft,'
+      'property_type,listing_type,status,images,is_featured,created_at,'
+      'locality,landmark,metro_station,it_park,hospital,college,'
+      'video_url,video_status,total_floors,exact_floor,balconies,pincode,'
+      'facing,available_from,rent_negotiable,approx_latitude,approx_longitude,'
+      'furnishing_status,deposit,maintenance,amenities,is_zero_brokerage,'
+      'owner_verification_status';
 
   PropertyService([SupabaseClient? client])
       : _client = client ?? SupabaseService.client;

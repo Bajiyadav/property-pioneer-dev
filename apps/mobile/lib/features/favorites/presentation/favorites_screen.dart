@@ -88,7 +88,7 @@ class FavoritesScreen extends ConsumerWidget {
               return PropertyCardWidget(
                 property: prop,
                 isFavorite: true,
-                onTap: () => context.go('/properties/${prop.id}'),
+                onTap: () => context.push('/properties/${prop.id}'),
                 onToggleFavorite: () {
                   ref.read(favoritesProvider.notifier).toggleFavorite(prop.id);
                 },

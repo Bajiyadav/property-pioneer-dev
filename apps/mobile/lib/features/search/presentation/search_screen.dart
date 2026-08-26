@@ -7,6 +7,8 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
+import 'package:seedha_properties_mobile/features/properties/presentation/property_map_view.dart';
+import 'package:latlong2/latlong.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -20,6 +22,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<Property> _results = [];
   bool _isLoading = false;
   String? _errorMessage;
+
+  /// List is the default: most people scan results before placing them on a
+  /// map, and only a subset of listings carry coordinates at all.
+  bool _isMapView = false;
 
   @override
   void initState() {
@@ -78,6 +84,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  /// Compact Indian-format money label for the budget slider.
+  static String _budgetLabel(double v) {
+    if (v >= 10000000) return '₹${(v / 10000000).toStringAsFixed(v % 10000000 == 0 ? 0 : 1)} Cr';
+    if (v >= 100000) return '₹${(v / 100000).toStringAsFixed(v % 100000 == 0 ? 0 : 1)} L';
+    if (v >= 1000) return '₹${(v / 1000).toStringAsFixed(0)}K';
+    return '₹${v.toStringAsFixed(0)}';
+  }
+
+  static const RangeValues _kBudgetBounds = RangeValues(0, 50000000);
+
+  /// True when the customer has narrowed anything beyond location/category, so
+  /// Reset is only offered when it would actually do something.
+  bool get _hasActiveFilters =>
+      ref.read(selectedBedroomsFilterProvider) != null ||
+      ref.read(selectedPropertyTypeFilterProvider) != null ||
+      ref.read(selectedFurnishingFilterProvider) != null ||
+      ref.read(budgetRangeFilterProvider) != _kBudgetBounds ||
+      _searchController.text.trim().isNotEmpty;
+
+  void _resetFilters() {
+    ref.read(selectedBedroomsFilterProvider.notifier).state = null;
+    ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
+    ref.read(selectedFurnishingFilterProvider.notifier).state = null;
+    ref.read(budgetRangeFilterProvider.notifier).state = _kBudgetBounds;
+    _searchController.clear();
+    _executeSearch();
+  }
+
   void _showFilterModal() {
     showModalBottomSheet(
       context: context,
@@ -95,6 +129,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           final currentBedrooms = ref.watch(selectedBedroomsFilterProvider);
           final currentType = ref.watch(selectedPropertyTypeFilterProvider);
           final currentFurnishing = ref.watch(selectedFurnishingFilterProvider);
+          final currentBudget = ref.watch(budgetRangeFilterProvider);
 
           final availableTypes = currentCategory == PropertyCategory.commercial
               ? AppConstants.commercialPropertyTypes
@@ -121,11 +156,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ref.read(selectedBedroomsFilterProvider.notifier).state = null;
                           ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
                           ref.read(selectedFurnishingFilterProvider.notifier).state = null;
-                          
-                          ref.read(budgetRangeFilterProvider.notifier).state = const RangeValues(0, 50000000);
+                          ref.read(budgetRangeFilterProvider.notifier).state = _kBudgetBounds;
                           setModalState(() {});
                         },
-                        child: const Text('Reset All', style: TextStyle(color: Color(0xFF0F766E), fontWeight: FontWeight.bold)),
+                        child: const Text('Reset All',
+                            style: TextStyle(
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -255,6 +292,41 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                   ],
 
+                  // Budget. The provider already existed and was already applied
+                  // to the query — there was simply no control for it, so a
+                  // customer could never actually set a price range.
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Budget:',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(
+                        '${_budgetLabel(currentBudget.start)} — ${_budgetLabel(currentBudget.end)}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12.5,
+                            color: AppTheme.primaryColor),
+                      ),
+                    ],
+                  ),
+                  RangeSlider(
+                    values: currentBudget,
+                    min: _kBudgetBounds.start,
+                    max: _kBudgetBounds.end,
+                    divisions: 100,
+                    activeColor: AppTheme.primaryColor,
+                    inactiveColor: AppTheme.borderSubtle,
+                    labels: RangeLabels(
+                      _budgetLabel(currentBudget.start),
+                      _budgetLabel(currentBudget.end),
+                    ),
+                    onChanged: (v) {
+                      ref.read(budgetRangeFilterProvider.notifier).state = v;
+                      setModalState(() {});
+                    },
+                  ),
+
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
@@ -277,6 +349,69 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// Centre for the map view: the chosen browsing location when it has
+  /// coordinates, otherwise let the map fall back to the first result that
+  /// carries one. Returns null rather than inventing a position.
+  LatLng? _mapCenter() {
+    final loc = ref.read(locationStateProvider).value;
+    if (loc != null && loc.latitude != 0.0 && loc.longitude != 0.0) {
+      return LatLng(loc.latitude, loc.longitude);
+    }
+    return null;
+  }
+
+  /// Segmented List | Map control. Both views render the same result set, so
+  /// switching never re-queries.
+  Widget _listMapToggle() {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppTheme.borderSubtle),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _toggleSegment('List', Icons.view_agenda_outlined, !_isMapView,
+              () => setState(() => _isMapView = false)),
+          _toggleSegment('Map', Icons.map_outlined, _isMapView,
+              () => setState(() => _isMapView = true)),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleSegment(
+      String label, IconData icon, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 14,
+                color: selected ? Colors.white : AppTheme.textSecondary),
+            const SizedBox(width: 5),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? Colors.white : AppTheme.textSecondary)),
+          ],
+        ),
       ),
     );
   }
@@ -348,26 +483,69 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F766E).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        "${activeCategory.label.toUpperCase()} • $activeCity",
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF0F766E)),
+                    // Scope chip. Flexible so a long locality name ellipsises
+                    // instead of pushing the toggle off a 360px screen.
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "${activeCategory.label.toUpperCase()} • $activeCity",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.primaryColor),
+                        ),
                       ),
                     ),
-                    const Spacer(),
-                    Text(
-                      "${_results.length} properties found",
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
-                    ),
+                    const SizedBox(width: 8),
+                    if (_hasActiveFilters)
+                      GestureDetector(
+                        onTap: _resetFilters,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.borderSubtle),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.close, size: 12, color: AppTheme.textSecondary),
+                              SizedBox(width: 4),
+                              Text('Reset',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppTheme.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    _listMapToggle(),
                   ],
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _isLoading
+                        ? 'Searching…'
+                        : '${_results.length} ${_results.length == 1 ? 'property' : 'properties'} found',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary),
+                  ),
                 ),
               ],
             ),
@@ -434,22 +612,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               ),
                             ),
                           )
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            itemCount: _results.length,
-                            itemBuilder: (context, index) {
-                              final prop = _results[index];
-                              final isFav = ref.watch(favoritesProvider).contains(prop.id);
-                              return PropertyCardWidget(
-                                property: prop,
-                                isFavorite: isFav,
-                                onTap: () => context.go('/properties/${prop.id}'),
-                                onToggleFavorite: () {
-                                  ref.read(favoritesProvider.notifier).toggleFavorite(prop.id);
+                        : _isMapView
+                            ? PropertyMapView(
+                                properties: _results,
+                                centerLocation: _mapCenter(),
+                                favoriteIds: ref.watch(favoritesProvider),
+                                onToggleFavorite: (id) => ref
+                                    .read(favoritesProvider.notifier)
+                                    .toggleFavorite(id),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                itemCount: _results.length,
+                                itemBuilder: (context, index) {
+                                  final prop = _results[index];
+                                  final isFav =
+                                      ref.watch(favoritesProvider).contains(prop.id);
+                                  return PropertyCardWidget(
+                                    property: prop,
+                                    isFavorite: isFav,
+                                    // push, not go: back must return to these
+                                    // results with the filters still applied.
+                                    onTap: () => context.push('/properties/${prop.id}'),
+                                    onToggleFavorite: () {
+                                      ref
+                                          .read(favoritesProvider.notifier)
+                                          .toggleFavorite(prop.id);
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                          ),
+                              ),
           ),
         ],
       ),

@@ -653,6 +653,46 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                     ],
                   ),
 
+                  // Amenities. Rendered only when the listing actually has some
+                  // — an empty "Amenities" heading reads as a listing with none
+                  // rather than one where the owner did not fill the field in.
+                  if (property.amenities.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Text('Amenities',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: property.amenities
+                          .map((a) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withValues(alpha: 0.07),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                      color: AppTheme.primaryColor
+                                          .withValues(alpha: 0.20)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.check_circle_outline,
+                                        size: 14, color: AppTheme.primaryColor),
+                                    const SizedBox(width: 6),
+                                    Text(a,
+                                        style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.textPrimary)),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+
                   // Video Tour Section (if available)
                   if (property.hasVideoTour && _videoController != null && _videoController!.value.isInitialized) ...[
                     const SizedBox(height: 24),
