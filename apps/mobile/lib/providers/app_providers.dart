@@ -90,7 +90,7 @@ final favoritePropertiesProvider = FutureProvider.autoDispose<List<Property>>((r
   for (final id in favIds) {
     try {
       final prop =
-          await client.getPropertyById(id).timeout(const Duration(seconds: 15));
+          await client.getPropertyById(id).timeout(AppConstants.networkTimeout);
       if (prop != null) {
         list.add(prop);
       }

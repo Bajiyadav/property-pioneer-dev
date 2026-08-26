@@ -1,11 +1,15 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../config/constants.dart';
 import '../models/user_profile.dart';
 import 'supabase_service.dart';
 
 /// Maximum time any auth or profile network call may take before it fails with
 /// a [TimeoutException]. This guarantees the login/profile flow can never hang
 /// indefinitely — the UI always resolves to success, an error, or a timeout.
-const Duration _kNetworkTimeout = Duration(seconds: 15);
+///
+/// Aliases the single shared constant rather than redeclaring the duration, so
+/// auth can never drift out of step with the rest of the app's networking.
+const Duration _kNetworkTimeout = AppConstants.networkTimeout;
 
 class AuthService {
   final SupabaseClient _client;

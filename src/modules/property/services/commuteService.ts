@@ -107,7 +107,14 @@ export async function calculateCommute(
 
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${propertyLon},${propertyLat};${landmark.longitude},${landmark.latitude}?overview=false`;
-    const res = await fetch(url);
+    // Bounded on purpose. The catch below handles a rejection, but a socket
+    // that hangs never rejects — it just stalls, and this is a free public demo
+    // server with no availability guarantee. Without the signal the request
+    // could outlive the caller: in CI it stalled past the 5s test timeout, and
+    // in a browser it would hold the commute panel in a spinner indefinitely.
+    // On abort we fall through to the Haversine estimate, which is the whole
+    // point of having one.
+    const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {

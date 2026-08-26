@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
@@ -179,7 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               });
                               final authService = ref.read(authServiceProvider);
                               await authService.signInWithGoogle().timeout(
-                                const Duration(seconds: 15),
+                                AppConstants.networkTimeout,
                               );
                             } on TimeoutException {
                               if (mounted) {
