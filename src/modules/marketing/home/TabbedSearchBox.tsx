@@ -42,7 +42,7 @@ export function TabbedSearchBox({
     return LIVE_CITIES.filter((c) => c.state === selectedState);
   }, [selectedState]);
 
-  const locationReady = Boolean(selectedState && selectedCity);
+  const locationReady = Boolean(selectedState && selectedCity && query);
 
   const handleStateChange = (newState: string) => {
     onStateChange(newState);

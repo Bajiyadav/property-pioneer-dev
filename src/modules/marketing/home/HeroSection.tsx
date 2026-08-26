@@ -29,8 +29,8 @@ export function HeroSection({
 
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
-    if (!selectedState || !selectedCity) {
-      toast.error("Please select a state and city first.");
+    if (!selectedState || !selectedCity || !query) {
+      toast.error("Please select a state, city, and locality first.");
       return;
     }
 
