@@ -193,6 +193,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+      // Attached to the Scaffold rather than the feed so it is present in every
+      // body state — including the location gate, where an owner who has not
+      // picked a location yet would otherwise have no way to list a property.
+      floatingActionButton: _buildPostPropertyCta(),
       body: locationState.when(
         data: (location) {
           if (location == null) {
@@ -204,6 +208,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         error: (err, st) => Center(child: Text('Error loading location: $err')),
       ),
     );
+  }
+
+  /// Primary "Post Property" action.
+  ///
+  /// Posting used to be reachable only by opening the owner dashboard, which
+  /// made listing a property feel like an admin task rather than the main thing
+  /// an owner comes here to do. This is the entry point; the wizard opens only
+  /// when the user taps it.
+  Widget _buildPostPropertyCta() {
+    return FloatingActionButton.extended(
+      onPressed: _onPostPropertyPressed,
+      backgroundColor: AppTheme.primaryColor,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      icon: const Icon(Icons.add_home_work_outlined, size: 20),
+      label: const Text(
+        'Post Property',
+        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: -0.2),
+      ),
+    );
+  }
+
+  void _onPostPropertyPressed() {
+    // Read the session at tap time rather than caching it, so signing in or out
+    // elsewhere in the app is always reflected.
+    final user = ref.read(authServiceProvider).currentUser;
+
+    if (user == null) {
+      // Send them to sign in. The wizard is never opened for a signed-out user:
+      // a listing has to belong to an account, and owner_id comes from the
+      // session, never from the form.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to post your property.')),
+      );
+      context.go('/login');
+      return;
+    }
+
+    // Signed in — open the listing wizard. No role is granted or changed here:
+    // the wizard sets owner_id from the session on submit, and the listing goes
+    // into moderation like any other.
+    context.push('/owner-dashboard/list-property');
   }
 
   Widget _buildLocationGate() {
@@ -501,6 +547,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   childCount: _properties.length,
                 ),
               ),
+
+            // Clearance for the Post Property button so it never covers the
+            // last card's price or favourite control.
+            const SliverToBoxAdapter(child: SizedBox(height: 88)),
           ],
         ),
     );
