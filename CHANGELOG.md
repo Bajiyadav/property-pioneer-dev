@@ -1,3 +1,8 @@
+## v0.71.1 — 2026-08-26
+
+### Fixes
+- fix(mobile): harden roles and ai reliability (b79b3ae)
+
 ## v0.71.0 — 2026-08-26
 
 ### Features
