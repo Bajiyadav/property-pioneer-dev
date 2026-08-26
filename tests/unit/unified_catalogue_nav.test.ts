@@ -54,26 +54,30 @@ describe("unified property catalogue navigation", () => {
   });
 });
 
-describe("home search tabs map to the right catalogue mode", () => {
+describe("home search bar maps to the right catalogue mode", () => {
   const src = fs.readFileSync(
     path.join(process.cwd(), "src/modules/marketing/home/TabbedSearchBox.tsx"),
     "utf-8",
   );
 
-  it("does not collapse three tabs into a two-way choice", () => {
-    // `activeTab === "buy" ? "sale" : "rent"` sent COMMERCIAL to listing=rent,
-    // so that tab searched rentals and applied no commercial filter at all.
+  it("does not collapse listing types into a two-way choice", () => {
+    // The old two-way ternary sent COMMERCIAL to listing=rent. The
+    // simplified bar has no tabs or type selector at all, so this
+    // class of bug is structurally impossible — but the guard stays.
     expect(src).not.toMatch(/listing:\s*activeTab === "buy" \? "sale" : "rent"/);
   });
 
-  it("treats commercial as a property type, not a listing type", () => {
-    // A commercial unit can be for rent OR for sale, so it must not pin listing.
-    expect(src).toContain('if (activeTab === "commercial") search.type = "commercial"');
+  it("defaults listing to neutral so results page shows all types", () => {
+    // The simplified bar has no Rent/Buy tab and no Property Type dropdown.
+    // Quick-action cards in HeroSection supply listing/type independently.
+    expect(src).toContain('listing: ""');
   });
 
-  it("still maps rent and buy to their listing values", () => {
-    expect(src).toMatch(/activeTab === "buy" \? "sale"/);
-    expect(src).toMatch(/activeTab === "rent" \? "rent"/);
+  it("does not embed property-type or budget selectors", () => {
+    // Property Type and Budget were removed from the homepage bar.
+    // They remain available on the results page (SearchUI sidebar).
+    expect(src).not.toContain("PROPERTY_TYPES");
+    expect(src).not.toContain("BUDGET_BANDS");
   });
 });
 

@@ -1,5 +1,16 @@
-import { Link } from "@tanstack/react-router";
-import { ShieldCheck, Zap, CheckCircle2, Sparkles, Building2, Home, Building } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import {
+  ShieldCheck,
+  Zap,
+  CheckCircle2,
+  Sparkles,
+  Building2,
+  Home,
+  Building,
+  ChevronRight,
+} from "lucide-react";
+import { toast } from "sonner";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
 
@@ -12,6 +23,30 @@ export function HeroSection({
   onSearch: (e: React.FormEvent) => void;
   onOpenOwnerWizard?: () => void;
 }) {
+  const navigate = useNavigate();
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
+    e.preventDefault();
+    if (!selectedState || !selectedCity) {
+      toast.error("Please select a state and city first.");
+      return;
+    }
+
+    const search: Record<string, string | number> = {
+      q: "",
+      city: selectedCity,
+      listing: params.listing || "",
+      type: params.type || "",
+      minPrice: 0,
+      maxPrice: 0,
+      beds: 0,
+    };
+
+    navigate({ to: "/properties", search });
+  };
+
   return (
     <section className="relative isolate overflow-hidden">
       {/*
@@ -38,143 +73,117 @@ export function HeroSection({
         <div className="absolute inset-0 bg-gradient-to-b from-stone-950/55 via-stone-900/25 to-stone-950/60" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6 sm:pb-24 sm:pt-28 lg:pt-32 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-semibold mb-4 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>Direct Owner Marketplace Across India · 0% Brokerage</span>
-        </div>
-
-        <h1 className="text-3xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]">
+      <div className="mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-24 lg:pt-28 flex flex-col items-center text-center">
+        {/* Heading */}
+        <h1 className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]">
           Find Your Perfect Property in India
         </h1>
 
-        <p className="mt-4 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
+        {/* Subtitle */}
+        <p className="mt-3 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
           Buy • Rent • Commercial — All in One Place
         </p>
 
-        {/* Tabbed Search Box */}
-        <div className="mt-8 w-full max-w-3xl">
-          <TabbedSearchBox query={query} onQueryChange={onQueryChange} />
+        {/* Search Bar — flat single-row pill matching the reference */}
+        <div className="mt-8 w-full max-w-4xl">
+          <TabbedSearchBox
+            query={query}
+            onQueryChange={onQueryChange}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
+            selectedCity={selectedCity}
+            onCityChange={setSelectedCity}
+          />
         </div>
 
-        {/* 4 Quick Category Action Cards */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-3xl">
-          <Link
-            to="/properties"
-            search={{ listing: "sale", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+        {/* Quick Category Action Cards */}
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-4xl">
+          {/* Buy */}
+          <button
+            onClick={(e) => handleQuickLink(e, { listing: "sale" })}
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
             <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Building2 className="h-5 w-5" />
             </div>
-            <div>
-              <span className="block text-xs font-extrabold text-foreground leading-tight">
+            <div className="flex-1 min-w-0">
+              <span className="block text-sm font-extrabold text-foreground leading-tight">
                 Buy
               </span>
-              <span className="block text-[10px] font-medium text-muted-foreground">
-                Properties
-              </span>
+              <span className="block text-xs font-medium text-muted-foreground">Properties</span>
             </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 flex-none transition-colors" />
+          </button>
 
-          <Link
-            to="/properties"
-            search={{ listing: "rent", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+          {/* Rent */}
+          <button
+            onClick={(e) => handleQuickLink(e, { listing: "rent" })}
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
             <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Home className="h-5 w-5" />
             </div>
-            <div>
-              <span className="block text-xs font-extrabold text-foreground leading-tight">
+            <div className="flex-1 min-w-0">
+              <span className="block text-sm font-extrabold text-foreground leading-tight">
                 Rent
               </span>
-              <span className="block text-[10px] font-medium text-muted-foreground">
-                Properties
-              </span>
+              <span className="block text-xs font-medium text-muted-foreground">Properties</span>
             </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 flex-none transition-colors" />
+          </button>
 
-          <Link
-            to="/properties"
-            search={{ type: "commercial", q: "", city: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-            className="flex items-center gap-3 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+          {/* Commercial */}
+          <button
+            onClick={(e) => handleQuickLink(e, { type: "commercial" })}
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
             <div className="h-10 w-10 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Building className="h-5 w-5" />
             </div>
-            <div>
-              <span className="block text-xs font-extrabold text-foreground leading-tight">
+            <div className="flex-1 min-w-0">
+              <span className="block text-sm font-extrabold text-foreground leading-tight">
                 Commercial
               </span>
-              <span className="block text-[10px] font-medium text-muted-foreground">
-                Offices & Shops
+              <span className="block text-xs font-medium text-muted-foreground">
+                Offices &amp; Shops
               </span>
             </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-500 flex-none transition-colors" />
+          </button>
 
+          {/* Post Property (does not require location) */}
           <Link
             to="/list-property"
-            className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
             <div className="h-10 w-10 rounded-xl bg-white/20 text-white flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Sparkles className="h-5 w-5 text-amber-300" />
             </div>
-            <div>
-              <span className="block text-xs font-extrabold leading-tight">Post Property</span>
-              <span className="block text-[10px] font-bold text-emerald-100">Free Ad</span>
+            <div className="flex-1 min-w-0">
+              <span className="block text-sm font-extrabold leading-tight">Post Property</span>
+              <span className="block text-xs font-bold text-emerald-100">Free Ad</span>
             </div>
+            <ChevronRight className="h-4 w-4 text-white/70 group-hover:text-white flex-none transition-colors" />
           </Link>
         </div>
 
-        {/* Trust Assurances Row */}
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-12 pt-8 border-t border-white/10 w-full max-w-4xl">
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="h-5 w-5" />
+        {/* Trust strip — compact chips below action cards */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          {(
+            [
+              { icon: ShieldCheck, label: "Verified Owners", color: "text-emerald-500" },
+              { icon: CheckCircle2, label: "Zero Brokerage", color: "text-amber-500" },
+              { icon: Zap, label: "Quick Response", color: "text-blue-400" },
+            ] as const
+          ).map(({ icon: Icon, label, color }) => (
+            <div
+              key={label}
+              className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-sm"
+            >
+              <Icon className={`h-3.5 w-3.5 ${color}`} />
+              <span className="text-xs font-semibold text-gray-800">{label}</span>
             </div>
-            <div>
-              {/*
-                Not "100% Verified": the review is moderation, not verification.
-                We do not check title, Aadhaar or government records — the FAQ
-                says so, so the badge contradicted our own answer. smoke.spec.ts
-                fails any page making a claim the platform cannot back.
-              */}
-              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                Moderated Listings
-              </h3>
-              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                Reviewed before going live
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="h-10 w-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <Zap className="h-5 w-5" />
-            </div>
-            <div>
-              {/* We take no commission; we cannot promise what an owner charges. */}
-              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                No Platform Commission
-              </h3>
-              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                We charge you nothing
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col items-center text-center gap-2 col-span-2 sm:col-span-1">
-            <div className="h-10 w-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-              <CheckCircle2 className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white text-sm [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                Direct Contact
-              </h3>
-              <p className="text-xs text-white/90 mt-0.5 [text-shadow:0_1px_8px_rgb(2_6_23_/_0.85)]">
-                Chat with owners
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
