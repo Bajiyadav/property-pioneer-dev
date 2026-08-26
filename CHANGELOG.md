@@ -1,3 +1,11 @@
+## v0.68.0 — 2026-08-26
+
+### Features
+- feat(mobile): make Post Property a home-screen action (8c3ee72)
+
+### Fixes
+- fix(mobile): load the profile for accounts holding multiple roles (70ffc3c)
+
 ## v0.67.1 — 2026-08-26
 
 ### Fixes
