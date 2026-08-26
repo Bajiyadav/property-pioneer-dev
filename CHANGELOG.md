@@ -1,3 +1,9 @@
+## v0.69.0 — 2026-08-26
+
+### Features
+- feat(mobile): lead Home with discovery, not Buy/Rent/Commercial (717478d)
+- feat(mobile): add launch screen and separate the staff console (c1111eb)
+
 ## v0.68.0 — 2026-08-26
 
 ### Features
