@@ -20,9 +20,11 @@ class PropertyCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverImage = property.images.isNotEmpty
-        ? property.images.first
-        : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+    // A listing with no photos shows a neutral placeholder, not a stock photo
+    // of an unrelated house. Substituting one made a photo-less listing
+    // indistinguishable from a photographed one to the buyer scrolling past it.
+    final String? coverImage =
+        property.images.isNotEmpty ? property.images.first : null;
 
     return Center(
       child: ConstrainedBox(
@@ -54,22 +56,31 @@ class PropertyCardWidget extends StatelessWidget {
                       SizedBox(
                         height: 185,
                         width: double.infinity,
-                        child: CachedNetworkImage(
-                          imageUrl: coverImage,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.grey.shade100,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Colors.grey.shade100,
-                            child: const Center(
-                              child: Icon(Icons.home_work_outlined, size: 44, color: Colors.grey),
-                            ),
-                          ),
-                        ),
+                        child: coverImage == null
+                            ? Container(
+                                color: Colors.grey.shade100,
+                                child: const Center(
+                                  child: Icon(Icons.home_work_outlined,
+                                      size: 44, color: Colors.grey),
+                                ),
+                              )
+                            : CachedNetworkImage(
+                                imageUrl: coverImage,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: Colors.grey.shade100,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey.shade100,
+                                  child: const Center(
+                                    child: Icon(Icons.home_work_outlined,
+                                        size: 44, color: Colors.grey),
+                                  ),
+                                ),
+                              ),
                       ),
 
                       // Gradient overlay for better badge/text contrast

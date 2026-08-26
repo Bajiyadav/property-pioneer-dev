@@ -81,12 +81,16 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
       final pincode = _pincodeController.text.trim();
       final videoUrl = _videoUrlController.text.trim();
 
-      // High-res verified image placeholders if none uploaded
-      final defaultImages = [
-        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80',
-      ];
+      // This quick-post form has no photo picker, so a listing created here
+      // starts with no images and the owner adds them from the listing wizard.
+      //
+      // It previously attached three Unsplash stock photos to every listing.
+      // Those showed a house nobody involved had ever seen, on a real listing,
+      // to a real buyer — and because they were indistinguishable from genuine
+      // photos, neither the owner nor moderation had any signal that the
+      // listing had none. An empty list is the honest state: every render site
+      // already guards with `images.isNotEmpty` and falls back to a placeholder.
+      const List<String> images = <String>[];
 
       await SupabaseService.client.from('properties').insert({
         'owner_id': user.id,
@@ -115,7 +119,7 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
         // enter moderation here exactly as the wizard path does.
         'status': 'unapproved',
         'is_approved': false,
-        'images': defaultImages,
+        'images': images,
         'video_url': videoUrl.isNotEmpty ? videoUrl : null,
         // Self-approving submitted video was the same bypass one level down.
         'video_status': videoUrl.isNotEmpty ? 'pending' : null,
@@ -130,7 +134,8 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
             // The listing is queued, not live. Saying "published" when it is
             // awaiting review is the kind of claim owners plan around.
             content: Text(
-              'Property submitted successfully. Your property is pending approval.',
+              'Property submitted successfully. Your property is pending approval — '
+              'add photos from My Listings to help it get approved faster.',
             ),
           ),
         );

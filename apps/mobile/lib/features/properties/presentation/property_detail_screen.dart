@@ -427,9 +427,17 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                     itemCount: property.images.isNotEmpty ? property.images.length : 1,
                     onPageChanged: (idx) => setState(() => _currentImageIndex = idx),
                     itemBuilder: (context, idx) {
-                      final url = property.images.isNotEmpty
-                          ? property.images[idx]
-                          : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80';
+                      // No photos means a neutral placeholder, never a stock
+                      // photo of a different house presented as this listing.
+                      if (property.images.isEmpty) {
+                        return Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: Icon(Icons.home, size: 64, color: Colors.grey),
+                          ),
+                        );
+                      }
+                      final url = property.images[idx];
                       return CachedNetworkImage(
                         imageUrl: url,
                         fit: BoxFit.cover,
@@ -703,16 +711,20 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                           child: ListTile(
                             leading: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: CachedNetworkImage(
-                                imageUrl: simProp.images.isNotEmpty
-                                    ? simProp.images.first
-                                    : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=200&auto=format&fit=crop&q=80',
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => const SizedBox(width: 56, height: 56, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
-                                errorWidget: (context, url, error) => const Icon(Icons.home, size: 32),
-                              ),
+                              child: simProp.images.isEmpty
+                                  ? const SizedBox(
+                                      width: 56,
+                                      height: 56,
+                                      child: Icon(Icons.home, size: 32, color: Colors.grey),
+                                    )
+                                  : CachedNetworkImage(
+                                      imageUrl: simProp.images.first,
+                                      width: 56,
+                                      height: 56,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => const SizedBox(width: 56, height: 56, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+                                      errorWidget: (context, url, error) => const Icon(Icons.home, size: 32),
+                                    ),
                             ),
                             title: Text(simProp.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                             subtitle: Text("${simProp.formattedPrice} • ${simProp.locationLabel}", style: const TextStyle(fontSize: 11)),
