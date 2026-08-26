@@ -299,6 +299,12 @@ class _StaffBody extends ConsumerWidget {
   List<Widget> _toolsFor(BuildContext context) {
     final tools = <Widget>[];
 
+    // Only tools with a real destination are given one. Customer enquiries and
+    // site visits previously linked to /visits, which is the signed-in user's
+    // OWN "My Visits & Enquiries" list — a support agent tapping it saw their
+    // own empty history, not customers'. Reports linked to the moderation
+    // queue, which an analyst has no permission to act on. Sending staff to the
+    // wrong screen is worse than telling them the tool is not built yet.
     if (access.role.canModerateListings) {
       tools.add(_toolRow(
         icon: Icons.rule_folder_outlined,
@@ -311,24 +317,24 @@ class _StaffBody extends ConsumerWidget {
       tools.add(_toolRow(
         icon: Icons.support_agent_outlined,
         title: 'Customer enquiries',
-        subtitle: 'Respond to enquiries from customers',
-        onTap: () => context.push('/visits'),
+        subtitle: 'A staff enquiry queue is not built yet',
+        onTap: null,
       ));
     }
     if (access.role.canManageVisits) {
       tools.add(_toolRow(
         icon: Icons.event_available_outlined,
         title: 'Site visits',
-        subtitle: 'Coordinate scheduled property visits',
-        onTap: () => context.push('/visits'),
+        subtitle: 'A staff visit queue is not built yet',
+        onTap: null,
       ));
     }
     if (access.role.canViewReports) {
       tools.add(_toolRow(
         icon: Icons.insights_outlined,
         title: 'Reports',
-        subtitle: 'Read-only operational reporting',
-        onTap: () => context.push('/admin-dashboard'),
+        subtitle: 'Operational reporting is not built yet',
+        onTap: null,
       ));
     }
 
@@ -343,12 +349,15 @@ class _StaffBody extends ConsumerWidget {
     return tools;
   }
 
+  /// A single tool. `onTap: null` renders it visibly unavailable rather than
+  /// navigating somewhere that does not do what the label promises.
   Widget _toolRow({
     required IconData icon,
     required String title,
     required String subtitle,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
   }) {
+    final enabled = onTap != null;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
@@ -368,10 +377,15 @@ class _StaffBody extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(9),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.10),
+                    color: (enabled ? AppTheme.primaryColor : AppTheme.textSecondary)
+                        .withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, size: 20, color: AppTheme.primaryColor),
+                  child: Icon(icon,
+                      size: 20,
+                      color: enabled
+                          ? AppTheme.primaryColor
+                          : AppTheme.textSecondary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -379,10 +393,12 @@ class _StaffBody extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary)),
+                              color: enabled
+                                  ? AppTheme.textPrimary
+                                  : AppTheme.textSecondary)),
                       const SizedBox(height: 2),
                       Text(subtitle,
                           style: const TextStyle(
@@ -392,7 +408,8 @@ class _StaffBody extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+                Icon(enabled ? Icons.chevron_right : Icons.lock_clock_outlined,
+                    size: enabled ? 24 : 18, color: AppTheme.textSecondary),
               ],
             ),
           ),

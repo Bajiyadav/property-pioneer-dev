@@ -1,11 +1,19 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../services/supabase_service.dart';
+
+/// Document upload allowance. Longer than an ordinary query because a photo on
+/// a mobile connection legitimately takes longer, and the same 30s the listing
+/// wizard already uses for property images.
+const Duration kKycUploadTimeout = Duration(seconds: 30);
 
 class KYCUploadScreen extends ConsumerStatefulWidget {
   const KYCUploadScreen({super.key});
@@ -18,6 +26,10 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
   String _selectedDocType = 'aadhar';
   bool _isLoading = true;
   bool _isUploading = false;
+
+  /// True when the document list could not be loaded, so the screen can say so
+  /// rather than rendering an empty list that looks like "nothing uploaded".
+  bool _loadFailed = false;
   List<Map<String, dynamic>> _documents = [];
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
@@ -33,12 +45,15 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
   Future<void> _loadKYCStatus() async {
     if (currentUserId.isEmpty) return;
 
+    if (mounted) setState(() => _loadFailed = false);
+
     try {
       final res = await SupabaseService.client
           .from('kyc_documents')
           .select()
           .eq('owner_id', currentUserId)
-          .order('uploaded_at', ascending: false);
+          .order('uploaded_at', ascending: false)
+          .timeout(AppConstants.networkTimeout);
 
       if (mounted) {
         setState(() {
@@ -47,7 +62,9 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
+      // A failed load previously left an empty list, which reads as "you have
+      // uploaded nothing" — a different claim from "we could not check".
+      if (mounted) setState(() { _loadFailed = true; _isLoading = false; });
     }
   }
 
@@ -81,11 +98,17 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
       final filePath = '$currentUserId/${_selectedDocType}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       
       // Upload to properties bucket (or kyc bucket if exists)
-      await SupabaseService.client.storage.from('properties').upload(
-        filePath,
-        _selectedImage!,
-        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-      );
+      // A document photo on a slow connection legitimately takes longer than an
+      // ordinary query, so it gets the same 30s allowance the listing wizard
+      // uses. Unbounded, this could hold the spinner indefinitely.
+      await SupabaseService.client.storage
+          .from('properties')
+          .upload(
+            filePath,
+            _selectedImage!,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          )
+          .timeout(kKycUploadTimeout);
 
       final publicUrl = SupabaseService.client.storage.from('properties').getPublicUrl(filePath);
 
@@ -94,7 +117,7 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
         'document_type': _selectedDocType,
         'file_path': publicUrl,
         'status': 'pending',
-      });
+      }).timeout(AppConstants.networkTimeout);
 
       if (mounted) {
         setState(() => _selectedImage = null);
@@ -106,10 +129,34 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
         );
         _loadKYCStatus();
       }
+    } on TimeoutException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Connection is taking too long. Please try again.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _submitVerification,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Submission failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            // A raw PostgrestException/StorageException leaks bucket and column
+            // names to the owner.
+            content: const Text('Unable to submit your document.'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: _submitVerification,
+            ),
+          ),
         );
       }
     } finally {
@@ -139,6 +186,47 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // The list could not be loaded. Say so, with a way to try
+                  // again — an empty list would claim nothing was ever uploaded.
+                  if (_loadFailed)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF1F2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFECDD3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 18, color: Color(0xFF9F1239)),
+                          const SizedBox(width: 9),
+                          const Expanded(
+                            child: Text(
+                              'Could not load your documents. Any you have already submitted are unaffected.',
+                              style: TextStyle(
+                                  fontSize: 12.5,
+                                  height: 1.3,
+                                  color: Color(0xFF9F1239)),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: _loadKYCStatus,
+                            icon: const Icon(Icons.refresh, size: 15),
+                            label: const Text('Retry'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF9F1239),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   // Gold Badge Promotion Card
                   Container(
                     width: double.infinity,

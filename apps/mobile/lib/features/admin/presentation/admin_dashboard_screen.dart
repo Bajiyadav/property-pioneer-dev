@@ -128,7 +128,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Admin Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        // "Moderation Queue", not "Admin Dashboard": this screen contains only
+        // the pending-listing queue and approve/reject, and moderators reach it
+        // too. Labelling it admin presented a moderator as an administrator.
+        title: const Text('Moderation Queue', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
