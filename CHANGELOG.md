@@ -1,3 +1,8 @@
+## v0.76.0 — 2026-08-26
+
+### Features
+- feat: refactor listing flow and add manual location entry (14c9766)
+
 ## v0.75.0 — 2026-08-26
 
 ### Features
