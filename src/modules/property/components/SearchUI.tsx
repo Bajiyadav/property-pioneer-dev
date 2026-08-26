@@ -6,7 +6,6 @@ import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { PropertyMap } from "@/components/PropertyMap";
 import { toMapProperties } from "@/components/propertyMapData";
 import { GeoapifyAutocomplete } from "@/modules/property/components/GeoapifyAutocomplete";
-import { LocationGate } from "@/modules/property/components/LocationGate";
 import { useLocationStore } from "@/modules/property/store/locationStore";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
 import { trackSearch } from "@/modules/analytics/services/tracking";
@@ -321,7 +320,7 @@ export function SearchUI({
   );
 
   return (
-    <LocationGate>
+    <>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {/* Header & Location Picker */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-6">
@@ -625,6 +624,6 @@ export function SearchUI({
           </div>
         </div>
       </div>
-    </LocationGate>
+    </>
   );
 }
