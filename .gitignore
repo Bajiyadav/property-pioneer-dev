@@ -68,3 +68,7 @@ auth-html.html
 auth-screenshot.png
 scratch-test.js
 scratch/
+
+# Throwaway QA/debug scripts run from the repo root (need node_modules to resolve)
+.check*.mjs
+.visualqa*.mjs
