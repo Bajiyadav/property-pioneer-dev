@@ -1,3 +1,8 @@
+## v0.71.2 — 2026-08-26
+
+### Fixes
+- fix(mobile): complete production readiness phase 6b (17ca7d2)
+
 ## v0.71.1 — 2026-08-26
 
 ### Fixes
