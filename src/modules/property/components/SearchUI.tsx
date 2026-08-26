@@ -237,7 +237,6 @@ export function SearchUI({
           <option value="Villa">Villa</option>
           <option value="Independent House">Independent House</option>
           <option value="Studio">1 RK / Studio</option>
-          <option value="PG">PG / Co-living</option>
           <option value="Gated Society">Gated Society</option>
         </select>
       </div>

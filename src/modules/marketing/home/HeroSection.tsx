@@ -45,12 +45,11 @@ export function HeroSection({
         </div>
 
         <h1 className="text-3xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]">
-          Where do you want to find a home?
+          Find Your Perfect Property in India
         </h1>
 
         <p className="mt-4 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
-          Enter any locality, landmark, or city to instantly explore verified direct-owner rentals
-          and properties for sale. No middleman, zero commission.
+          Buy • Rent • Commercial — All in One Place
         </p>
 
         {/* Tabbed Search Box */}
