@@ -1,3 +1,8 @@
+## v0.77.0 — 2026-08-26
+
+### Features
+- feat(homepage): restrict homepage sections until location is selected (b50aad5)
+
 ## v0.76.0 — 2026-08-26
 
 ### Features
