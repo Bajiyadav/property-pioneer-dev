@@ -1,3 +1,11 @@
+## v0.72.0 — 2026-08-26
+
+### Features
+- feat(web): lead the homepage with search, not a location gate (cdef3da)
+
+### Fixes
+- fix(mobile): pass geoapify key to release builds (d563022)
+
 ## v0.71.2 — 2026-08-26
 
 ### Fixes
