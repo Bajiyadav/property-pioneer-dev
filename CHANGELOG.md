@@ -1,3 +1,8 @@
+## v0.78.0 — 2026-08-26
+
+### Features
+- feat(auth): migrate session storage to cookies to resolve SSR flicker (f71bcd2)
+
 ## v0.77.0 — 2026-08-26
 
 ### Features
