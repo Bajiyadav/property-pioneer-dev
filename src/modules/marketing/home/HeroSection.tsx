@@ -17,15 +17,23 @@ import heroImg from "@/assets/hero.jpg";
 export function HeroSection({
   query,
   onQueryChange,
+  selectedState,
+  setSelectedState,
+  selectedCity,
+  setSelectedCity,
+  onSearch,
+  onOpenOwnerWizard,
 }: {
   query: string;
   onQueryChange: (q: string) => void;
+  selectedState: string;
+  setSelectedState: (s: string) => void;
+  selectedCity: string;
+  setSelectedCity: (c: string) => void;
   onSearch: (e: React.FormEvent) => void;
   onOpenOwnerWizard?: () => void;
 }) {
   const navigate = useNavigate();
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
 
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();

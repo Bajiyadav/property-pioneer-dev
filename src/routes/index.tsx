@@ -52,6 +52,8 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   // Interactive Modal States
   const [activeCity, setActiveCity] = useState<CityModalData | null>(null);
@@ -75,41 +77,53 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* 1. Hero Section (Hyderabad Focus) */}
-      <HeroSection query={q} onQueryChange={setQ} onSearch={handleSearchSubmit} />
-
-      {/* 2. Real Estate Quote Banner */}
-      <QuoteBanner />
-
-      {/* 4. Featured Rentals (Hyderabad Focus) */}
-      <FeaturedProperties
-        properties={featured.length > 0 ? featured : properties}
-        isLoading={isLoading}
+      <HeroSection
+        query={q}
+        onQueryChange={setQ}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+        onSearch={handleSearchSubmit}
       />
 
-      {/* 6. Payments & Rent Rewards Banner */}
-      <PaymentsAndRewardsBanner />
+      {Boolean(selectedState && selectedCity && q) && (
+        <>
+          {/* 2. Real Estate Quote Banner */}
+          <QuoteBanner />
 
-      {/* 7. What Seedha Properties actually does today */}
-      <div id="why-us">
-        <WhySeedhaProperties />
-      </div>
+          {/* 4. Featured Rentals (Hyderabad Focus) */}
+          <FeaturedProperties
+            properties={featured.length > 0 ? featured : properties}
+            isLoading={isLoading}
+          />
 
-      {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
-      <PopularCities onSelectCity={(city) => setActiveCity(city)} />
+          {/* 6. Payments & Rent Rewards Banner */}
+          <PaymentsAndRewardsBanner />
 
-      {/* 7. Dual-tab How It Works Workflow */}
-      <HowItWorks />
+          {/* 7. What Seedha Properties actually does today */}
+          <div id="why-us">
+            <WhySeedhaProperties />
+          </div>
 
-      {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
-      <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
+          {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
+          <PopularCities onSelectCity={(city) => setActiveCity(city)} />
 
-      {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
-      <FeedbackSection />
+          {/* 7. Dual-tab How It Works Workflow */}
+          <HowItWorks />
 
-      {/* 10. Support FAQ Accordion */}
-      <div id="contact">
-        <FAQSection />
-      </div>
+          {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
+          <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
+
+          {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
+          <FeedbackSection />
+
+          {/* 10. Support FAQ Accordion */}
+          <div id="contact">
+            <FAQSection />
+          </div>
+        </>
+      )}
 
       {/* ======================================= */}
       {/* INTERACTIVE MODALS                      */}
