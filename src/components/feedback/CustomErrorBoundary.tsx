@@ -1,11 +1,35 @@
 import { Link } from "@tanstack/react-router";
 import { Wrench, ArrowLeft, Home, RefreshCw, Terminal } from "lucide-react";
+import { useEffect } from "react";
 import { BrandMark } from "@/components/branding/BrandMark";
 import { APP_COPYRIGHT } from "@/config/app";
 
 export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: () => void }) {
   const requestId = `REQ-${Date.now().toString(36).toUpperCase()}-UP`;
   const isDev = Boolean(import.meta.env.DEV);
+
+  const isChunkLoadError =
+    error?.message?.toLowerCase().includes("importing a module script failed") ||
+    error?.message?.toLowerCase().includes("dynamically imported module");
+
+  // Automatically attempt a single hard reload if we detect a chunk load error
+  // (which happens when a new version is deployed while a user has the app open)
+  useEffect(() => {
+    if (isChunkLoadError && typeof window !== "undefined") {
+      const hasReloaded = sessionStorage.getItem("chunk_reload_attempted");
+      if (!hasReloaded) {
+        sessionStorage.setItem("chunk_reload_attempted", "true");
+        window.location.reload();
+      }
+    }
+  }, [isChunkLoadError]);
+
+  // If this is a chunk load error (user is on an old version and we deployed a new one),
+  // we can advise them to reload instead of showing a generic "page unavailable" error.
+  const title = isChunkLoadError ? "App Update Available" : "The page is temporarily unavailable";
+  const description = isChunkLoadError
+    ? "A new version of the app has just been released. Please refresh the page to continue your search."
+    : "Our technical team has been automatically alerted. We are resolving this short interruption to get you back to your property search.";
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12 text-center">
@@ -18,15 +42,10 @@ export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: (
 
         <div>
           <span className="rounded-full bg-amber-500/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            🚧 We're Fixing Something
+            {isChunkLoadError ? "✨ New Update" : "🚧 We're Fixing Something"}
           </span>
-          <h1 className="mt-4 text-2xl font-extrabold text-foreground sm:text-3xl">
-            The page is temporarily unavailable
-          </h1>
-          <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-            Our technical team has been automatically alerted. We are resolving this short
-            interruption to get you back to your property search.
-          </p>
+          <h1 className="mt-4 text-2xl font-extrabold text-foreground sm:text-3xl">{title}</h1>
+          <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{description}</p>
         </div>
 
         {/* Reference Code & Message */}
@@ -56,28 +75,39 @@ export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: (
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          {reset && (
+          {isChunkLoadError ? (
             <button
-              onClick={reset}
+              onClick={() => window.location.reload()}
               className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110"
             >
-              <RefreshCw className="h-4 w-4" /> Try Again
+              <RefreshCw className="h-4 w-4" /> Reload Page
             </button>
+          ) : (
+            <>
+              {reset && (
+                <button
+                  onClick={reset}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110"
+                >
+                  <RefreshCw className="h-4 w-4" /> Try Again
+                </button>
+              )}
+
+              <button
+                onClick={() => window.history.back()}
+                className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
+              >
+                <ArrowLeft className="h-4 w-4" /> Go Back
+              </button>
+
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
+              >
+                <Home className="h-4 w-4" /> Home
+              </Link>
+            </>
           )}
-
-          <button
-            onClick={() => window.history.back()}
-            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
-          >
-            <ArrowLeft className="h-4 w-4" /> Go Back
-          </button>
-
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary"
-          >
-            <Home className="h-4 w-4" /> Home
-          </Link>
         </div>
 
         <p className="pt-4 text-xs text-muted-foreground">{APP_COPYRIGHT}</p>
