@@ -1,3 +1,13 @@
+## v0.71.0 — 2026-08-26
+
+### Features
+- feat(mobile): complete owner posting and map pinning (bca219a)
+
+### Migration notes
+- supabase/migrations/20260827000000_owner_property_insert_grant.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.70.0 — 2026-08-26
 
 ### Features
