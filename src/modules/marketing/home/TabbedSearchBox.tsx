@@ -70,8 +70,15 @@ export function TabbedSearchBox({
       beds: 0,
     };
 
-    if (status === "unauthenticated") {
-      const qs = new URLSearchParams(searchParams as Record<string, string>).toString();
+    if (status === "guest") {
+      const qs = new URLSearchParams({
+        q: query,
+        city: selectedCity,
+        listing: "",
+        minPrice: "0",
+        maxPrice: "0",
+        beds: "0",
+      }).toString();
       navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
       return;
     }
