@@ -1,3 +1,8 @@
+## v0.70.0 — 2026-08-26
+
+### Features
+- feat(mobile): complete customer property discovery flow (373387d)
+
 ## v0.69.0 — 2026-08-26
 
 ### Features
