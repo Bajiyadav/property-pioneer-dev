@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../config/constants.dart';
 import '../../../config/theme.dart';
-import '../../../models/employee_access.dart';
 import '../../../providers/app_providers.dart';
+import '../../../services/session_router.dart';
 
 /// How long the brand stays on screen at minimum.
 ///
@@ -62,14 +62,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<String> _destinationForCurrentUser() async {
     final auth = ref.read(authServiceProvider);
-    if (auth.currentUser == null) return '/';
+    if (auth.currentUser == null) return SessionRouter.home;
 
-    // Staff grants live in `employee_access`, separate from `user_roles`. A
-    // customer or owner has no row here and goes to Home like anyone else.
+    // Staff grants live in `employee_access`, which is what the database itself
+    // consults. A customer or owner has no row here and goes to Home.
     final access = await auth.getEmployeeAccess();
-    if (access == null) return '/';
 
-    return access.role.isAdmin ? '/admin-dashboard' : '/staff-dashboard';
+    // A cold start lands on Home for everyone who is not staff — browsing is
+    // the more useful default when the app was simply reopened.
+    return SessionRouter.resolve(
+      access: access,
+      appRole: null,
+      afterExplicitSignIn: false,
+    );
   }
 
   @override

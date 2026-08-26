@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
+import 'package:seedha_properties_mobile/models/employee_access.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
+import 'package:seedha_properties_mobile/services/session_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -45,27 +47,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         password: _passwordController.text,
       );
 
-      // Authentication succeeded. Resolve the role for routing, but never let
-      // profile loading block navigation: the dashboard loads (and can retry)
-      // the profile itself, so a slow profile query can't hang the login.
+      // Authentication succeeded. Resolve the destination, but never let a slow
+      // lookup block navigation: each destination loads and can retry its own
+      // data, so a stalled query must not hang the sign-in.
+      //
+      // Staff status comes from `employee_access` — the table the database
+      // itself consults through get_employee_role(). It previously came from
+      // `user_roles`, which grants nothing at the database level, so an account
+      // with a stale admin value there was sent to a console where every query
+      // and the moderation RPC refused it.
       UserProfile? profile;
+      EmployeeAccess? access;
       try {
         profile = await ref
             .refresh(userProfileProvider.future)
             .timeout(const Duration(seconds: 16));
+        access = await ref
+            .refresh(employeeAccessProvider.future)
+            .timeout(const Duration(seconds: 16));
       } catch (_) {
-        profile = null; // fall through to the customer dashboard (it shows Retry)
+        // Unresolved role must never widen access — SessionRouter falls back to
+        // Home, and each screen surfaces its own Retry.
+        access = null;
       }
 
       if (!mounted) return;
-      final role = profile?.role;
-      if (role == UserRole.admin) {
-        context.go('/admin-dashboard');
-      } else if (role == UserRole.owner) {
-        context.go('/owner-dashboard');
-      } else {
-        context.go('/customer-dashboard');
-      }
+      context.go(SessionRouter.resolve(
+        access: access,
+        appRole: profile?.role,
+        afterExplicitSignIn: true,
+      ));
     } on TimeoutException {
       if (mounted) {
         setState(() {

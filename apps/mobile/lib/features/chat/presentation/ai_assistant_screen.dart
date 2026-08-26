@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import '../../../config/constants.dart';
+import '../../../config/env.dart';
 import '../../../config/theme.dart';
+import '../../../services/supabase_service.dart';
+import '../ai_chat_outcome.dart';
 
 class AIAssistantScreen extends ConsumerStatefulWidget {
   const AIAssistantScreen({super.key});
@@ -17,14 +23,17 @@ class _AIAssistantScreenState extends ConsumerState<AIAssistantScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
 
+  /// Set when a question failed. Drives the inline error + Retry, so a failure
+  /// is always visible and always recoverable — never a silent empty reply.
+  String? _errorMessage;
+  String? _lastFailedQuery;
+
   final List<Map<String, String>> _messages = [
     {
       'role': 'model',
       'text': 'Namaste! 🙏 I am Seedha AI, your 0% brokerage real estate assistant. Ask me anything about searching homes, listing properties, or local tech corridor commute times!',
     },
   ];
-
-  static const String _geminiApiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
   static const String _systemPrompt = '''
 You are "Seedha AI", the expert, friendly, and helpful AI assistant for SEEDHA PROPERTIES (seedhaproperties.com).
@@ -45,65 +54,71 @@ KEY FACTS:
     setState(() {
       _messages.add({'role': 'user', 'text': query});
       _isLoading = true;
+      _errorMessage = null;
+      _lastFailedQuery = null;
       if (presetText == null) _controller.clear();
     });
 
     _scrollToBottom();
+    await _ask(query);
+  }
 
+  /// Sends one question through the server-side assistant.
+  ///
+  /// The Gemini key is NEVER in this app. A key shipped via --dart-define is
+  /// recoverable from the APK by anyone who downloads it, so the request goes
+  /// to /api/ai/chat, which holds the secret server-side and applies its own
+  /// rate limiting. The user's Supabase token is forwarded so the server can
+  /// attribute the request; the endpoint also accepts anonymous callers.
+  ///
+  /// Every failure now surfaces as an error with Retry. This previously
+  /// substituted a keyword-matched canned paragraph whenever the call failed or
+  /// returned nothing, and presented it as an assistant answer — which, since
+  /// release builds carried no key, meant every reply in production was
+  /// fabricated and indistinguishable from a real one.
+  Future<void> _ask(String query) async {
     try {
-      final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_geminiApiKey',
-      );
+      final uri = Uri.parse('${AppEnv.apiBaseUrl}/ai/chat');
+      final token = SupabaseService.client.auth.currentSession?.accessToken;
 
-      final contents = [
-        {
-          'role': 'user',
-          'parts': [
-            {'text': '$_systemPrompt\n\nUser Question: $query'}
-          ]
-        }
-      ];
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'contents': [
+                {
+                  'role': 'user',
+                  'parts': [
+                    {'text': '$_systemPrompt\n\nUser Question: $query'}
+                  ]
+                }
+              ]
+            }),
+          )
+          .timeout(AppConstants.networkTimeout);
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'contents': contents}),
-      );
+      if (!mounted) return;
 
-      String reply = '';
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        reply = data['candidates']?[0]?['content']?['parts']?[0]?['text'] ?? '';
+      final outcome =
+          AiChatOutcome.fromResponse(response.statusCode, response.body);
+      if (!outcome.isSuccess) {
+        _failWith(query, outcome.errorMessage!);
+        return;
       }
+      final reply = outcome.reply!;
 
-      if (reply.isEmpty) {
-        final q = query.toLowerCase();
-        if (q.contains('list') || q.contains('owner') || q.contains('post')) {
-          reply = 'To list your property with 0% brokerage, tap "List Property". Complete the 6 steps (Location, Type, Details, Price, Photos, Contact). Your draft auto-saves so you never lose data!';
-        } else if (q.contains('brokerage') || q.contains('fee') || q.contains('commission')) {
-          reply = 'Seedha Properties is 100% direct-owner with 0% brokerage. Neither tenants nor owners pay any commission or broker charges.';
-        } else if (q.contains('visit') || q.contains('schedule') || q.contains('tour')) {
-          reply = 'To schedule a walkthrough, open any property detail page and tap "Schedule Visit". Pick your date & time, and the owner will confirm your appointment!';
-        } else if (q.contains('badge') || q.contains('verify') || q.contains('trust')) {
-          reply = 'Seedha Properties features verified trust badges (✓ Direct Owner, ✓ Owner Verified, ✓ Property Verified) based on digital KYC checks to prevent scams.';
-        } else {
-          reply = 'Seedha Properties connects you directly with genuine owners at 0% brokerage across Hyderabad, Bengaluru, Mumbai, Delhi-NCR, Chennai, Pune, and Kolkata. What property are you looking for?';
-        }
-      }
-
+      setState(() => _messages.add({'role': 'model', 'text': reply}));
+    } on TimeoutException {
       if (mounted) {
-        setState(() {
-          _messages.add({'role': 'model', 'text': reply.trim()});
-        });
+        _failWith(query, 'Connection is taking too long. Please try again.');
       }
     } catch (_) {
       if (mounted) {
-        setState(() {
-          _messages.add({
-            'role': 'model',
-            'text': 'Seedha Properties connects you directly with genuine owners at 0% brokerage. How can I help you find or list your home today?'
-          });
-        });
+        _failWith(query, "Couldn't reach the assistant. Check your connection.");
       }
     } finally {
       if (mounted) {
@@ -111,6 +126,23 @@ KEY FACTS:
         _scrollToBottom();
       }
     }
+  }
+
+  void _failWith(String query, String message) {
+    setState(() {
+      _errorMessage = message;
+      _lastFailedQuery = query;
+    });
+  }
+
+  Future<void> _retryLastQuestion() async {
+    final q = _lastFailedQuery;
+    if (q == null || _isLoading) return;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    await _ask(q);
   }
 
   void _scrollToBottom() {
@@ -263,6 +295,45 @@ KEY FACTS:
               },
             ),
           ),
+
+          // A failed question is always visible and always recoverable. Nothing
+          // is invented to fill the gap.
+          if (_errorMessage != null && !_isLoading)
+            Container(
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1F2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFECDD3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 18, color: Color(0xFF9F1239)),
+                  const SizedBox(width: 9),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                          fontSize: 12.5, height: 1.3, color: Color(0xFF9F1239)),
+                    ),
+                  ),
+                  if (_lastFailedQuery != null)
+                    TextButton.icon(
+                      onPressed: _retryLastQuestion,
+                      icon: const Icon(Icons.refresh, size: 15),
+                      label: const Text('Retry'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF9F1239),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                ],
+              ),
+            ),
 
           if (_isLoading)
             Padding(

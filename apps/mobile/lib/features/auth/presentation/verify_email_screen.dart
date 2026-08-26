@@ -2,6 +2,7 @@ import 'dart:async';import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
+import 'package:seedha_properties_mobile/services/session_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import '../../../config/theme.dart';
 
@@ -63,12 +64,15 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       } catch (_) {
         profile = null;
       }
+      // A freshly verified account is never staff — employee_access is granted
+      // by an existing admin, not by verifying an email — so resolve with no
+      // staff grant and let the app role decide.
       if (mounted) {
-        if (profile?.role == UserRole.owner || profile?.role == UserRole.admin) {
-          context.go('/owner-dashboard');
-        } else {
-          context.go('/customer-dashboard');
-        }
+        context.go(SessionRouter.resolve(
+          access: null,
+          appRole: profile?.role,
+          afterExplicitSignIn: true,
+        ));
       }
     } on TimeoutException {
       if (mounted) {

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
+import 'package:seedha_properties_mobile/models/employee_access.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
+import 'package:seedha_properties_mobile/services/session_router.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_map_view.dart';
@@ -147,25 +149,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: const Icon(Icons.dashboard_outlined, color: AppTheme.primaryColor),
                   tooltip: 'My Dashboard',
                   onPressed: () async {
-                    // Bounded so the button can never hang; on timeout/error we
-                    // route to the customer dashboard, which shows its own Retry.
+                    // Bounded so the button can never hang. Staff status comes
+                    // from employee_access, the table the database consults —
+                    // a stale admin value in user_roles opens no console.
                     UserProfile? profile;
+                    EmployeeAccess? access;
                     try {
                       profile = await ref
                           .read(userProfileProvider.future)
                           .timeout(const Duration(seconds: 16));
+                      access = await ref
+                          .read(employeeAccessProvider.future)
+                          .timeout(const Duration(seconds: 16));
                     } catch (_) {
-                      profile = null;
+                      access = null;
                     }
                     if (context.mounted) {
-                      final role = profile?.role;
-                      if (role == UserRole.admin) {
-                        context.go('/admin-dashboard');
-                      } else if (role == UserRole.owner) {
-                        context.go('/owner-dashboard');
-                      } else {
-                        context.go('/customer-dashboard');
-                      }
+                      context.go(SessionRouter.resolve(
+                        access: access,
+                        appRole: profile?.role,
+                        afterExplicitSignIn: true,
+                      ));
                     }
                   },
                 );
