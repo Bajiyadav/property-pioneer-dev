@@ -135,36 +135,64 @@ export const Route = createFileRoute("/api/auth/request-otp")({
         }
 
         const { APP_URL } = await import("@/config/app");
-        const { supabase } = await import("@/integrations/supabase/client");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Supabase generates + sends the code. We pass emailRedirectTo so the link
-        // variant returns to the validated internal path; the numeric code variant
-        // is verified by the client against the same email.
-        const { error } = await supabase.auth.signInWithOtp({
+        // We generate the code but deliver it OURSELVES via Resend, rather than
+        // letting Supabase send it. Supabase's built-in email is test-only (a very
+        // low hourly cap and poor deliverability), which was silently dropping
+        // login codes. `admin.generateLink` returns the one-time code WITHOUT
+        // sending any email; we then send it through the app's branded transactional
+        // email. The client still verifies it with `verifyOtp({ type: "email" })`.
+        const redirectTo = `${APP_URL}/auth/callback?next=${encodeURIComponent(next)}`;
+        let gen = await supabaseAdmin.auth.admin.generateLink({
+          type: "magiclink",
           email,
-          options: {
-            shouldCreateUser: true,
-            emailRedirectTo: `${APP_URL}/auth/callback?next=${encodeURIComponent(next)}`,
-          },
+          options: { redirectTo },
         });
+        // `magiclink` requires an existing user; create a pre-confirmed passwordless
+        // account if this is a first-time email (mirrors the old shouldCreateUser).
+        if (gen.error && /user|not found|exist|registered/i.test(gen.error.message ?? "")) {
+          await supabaseAdmin.auth.admin.createUser({ email, email_confirm: true }).catch(() => {});
+          gen = await supabaseAdmin.auth.admin.generateLink({
+            type: "magiclink",
+            email,
+            options: { redirectTo },
+          });
+        }
 
-        // Record the attempt for rate-limiting REGARDLESS of provider outcome, so a
-        // provider error cannot be used to bypass the limiter by retrying.
+        // Deliver the code via Resend. The OTP travels only in the email body sent
+        // to the provider — it is never logged, audited, or returned to the client.
+        let delivered = false;
+        const otp = gen.data?.properties?.email_otp;
+        if (!gen.error && otp) {
+          const { otpEmail } = await import("@/shared/services/email/templates");
+          const { sendTransactionalEmail } = await import("@/shared/services/emailService");
+          const userName = (gen.data?.user?.user_metadata?.full_name as string | undefined) ?? null;
+          const rendered = otpEmail({ userName, otp, expiry: "10 minutes" });
+          const result = await sendTransactionalEmail({
+            to: email,
+            subject: rendered.subject,
+            eventType: "security_event",
+            recipientName: userName ?? undefined,
+            htmlBody: rendered.htmlBody,
+            textBody: rendered.textBody,
+            // Identifiers only — never the code itself.
+            metadata: { flow: "email_otp_login" },
+          });
+          delivered = result.status === "sent";
+        }
+
+        // Record the attempt for rate-limiting REGARDLESS of outcome, so a delivery
+        // error cannot be used to bypass the limiter by retrying.
         await recordAudit({
           event: "auth.otp.requested",
-          outcome: error ? "error" : "success",
+          outcome: delivered ? "success" : "error",
           ip,
           userAgent,
           subjectId: redacted,
-          // No token, no raw email. Only whether the provider accepted the send.
-          details: { delivered: !error },
+          // No token, no raw email. Only whether we delivered the code.
+          details: { delivered },
         });
-
-        if (error) {
-          // If the provider fails to send the email (e.g. rate limit, SMTP error),
-          // we must inform the client so they don't wait for an email that will never arrive.
-          return jsonResponse({ error: error.message || "Failed to send OTP code." }, 400);
-        }
 
         // ENUMERATION-SAFE: Since shouldCreateUser is true, this succeeds for both new
         // and existing users. The user is told to check their inbox.

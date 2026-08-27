@@ -104,7 +104,7 @@ export function EmailOtpForm({ redirect, onSuccess }: EmailOtpFormProps) {
         </button>
         <div className="text-center">
           <KeyRound className="mx-auto h-6 w-6 text-emerald-600" />
-          <p className="mt-2 text-sm font-semibold">Enter the 6-digit code</p>
+          <p className="mt-2 text-sm font-semibold">Enter your verification code</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Sent to <span className="font-medium text-foreground">{email}</span>
           </p>
@@ -112,16 +112,16 @@ export function EmailOtpForm({ redirect, onSuccess }: EmailOtpFormProps) {
         <input
           inputMode="numeric"
           autoComplete="one-time-code"
-          maxLength={6}
+          maxLength={8}
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
           placeholder="••••••"
           className="w-full rounded-xl border border-border bg-background px-4 py-3 text-center text-lg tracking-[0.5em] tabular-nums outline-none focus:ring-2 focus:ring-emerald-600"
-          aria-label="6-digit verification code"
+          aria-label="Verification code"
         />
         <Button
           className="w-full rounded-xl"
-          disabled={loading || code.length !== 6}
+          disabled={loading || code.length < 6 || code.length > 8}
           onClick={verify}
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

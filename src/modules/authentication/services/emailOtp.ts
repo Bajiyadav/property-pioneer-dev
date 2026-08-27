@@ -64,8 +64,8 @@ export type OtpVerifyResult = { ok: true } | { ok: false; error: string };
  */
 export async function verifyEmailOtp(email: string, token: string): Promise<OtpVerifyResult> {
   const code = token.trim();
-  if (!/^\d{6}$/.test(code)) {
-    return { ok: false, error: "Enter the 6-digit code from your email." };
+  if (!/^\d{6,8}$/.test(code)) {
+    return { ok: false, error: "Enter the code from your email (6–8 digits)." };
   }
 
   const { data, error } = await supabase.auth.verifyOtp({
