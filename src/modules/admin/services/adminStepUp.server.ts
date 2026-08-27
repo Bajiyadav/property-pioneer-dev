@@ -139,7 +139,7 @@ export async function requestAdminOtp(args: {
     updated_at: new Date().toISOString(),
   });
 
-  const { sendTransactionalEmail } = await import("@/shared/services/emailService");
+  const { sendTransactionalEmail } = await import("@/lib/emailService");
   await sendTransactionalEmail({
     to: email,
     subject: "Seedha Admin Verification Code",

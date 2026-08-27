@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ShieldCheck, Loader2, KeyRound, MailCheck } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/shared/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { requestAdminOtp, verifyAdminOtp } from "@/modules/admin/services/adminStepUpFunctions";
 
 /**

@@ -151,7 +151,6 @@ export const getAdminEnquiries = createServerFn({ method: "GET" })
       )
       .order("created_at", { ascending: false });
 
-    const access = await assertEmployee(authCtx);
     if (
       (access.role === "regional_admin" || access.role === "moderator") &&
       access.regions.length > 0
