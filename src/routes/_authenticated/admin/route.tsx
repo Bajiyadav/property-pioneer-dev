@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuthSession } from "@/hooks/useAuthSession";
-import { AdminMfaSecurityModal } from "@/modules/admin/components/AdminMfaSecurityModal";
+import { AdminOtpVerification } from "@/modules/admin/components/AdminOtpVerification";
 
 /**
  * Access is checked in the component, not in `beforeLoad`.
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminGate() {
   const check = useServerFn(checkEmployeeAccess);
   const navigate = useNav();
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ["admin", "employee-access"],
     queryFn: () => check({}),
     retry: false,
@@ -63,6 +63,14 @@ function AdminGate() {
 
   if (denied || !data?.access) return null;
 
+  // Email-OTP step-up gate. For admins, once the admin_step_up feature is
+  // deployed, the dashboard is unreachable until a valid server-side verified
+  // window exists — the UI is not the security boundary (every server fn also
+  // enforces assertAdminStepUp), this just drives what renders.
+  if (data.stepUp?.required && !data.stepUp.verified) {
+    return <AdminOtpVerification onVerified={() => void refetch()} />;
+  }
+
   return <AdminLayout access={data.access} />;
 }
 
@@ -81,8 +89,6 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
       setSigningOut(false);
     }
   }
-
-  const [mfaModalOpen, setMfaModalOpen] = useState(false);
 
   const regionsLabel =
     access.regions.length > 0
@@ -128,22 +134,6 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
               <div className="text-sm font-medium text-neutral-300 truncate" title={regionsLabel}>
                 {regionsLabel}
               </div>
-            </div>
-            <div className="pt-1">
-              <div className="text-xs text-neutral-400 uppercase font-semibold mb-1">
-                MFA Security
-              </div>
-              <button
-                type="button"
-                onClick={() => setMfaModalOpen(true)}
-                className="inline-flex w-full items-center justify-between px-2.5 py-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-xs font-medium text-neutral-200 border border-neutral-700 transition"
-              >
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <Shield className="w-3.5 h-3.5" />
-                  MFA Configured
-                </span>
-                <span className="text-[10px] text-neutral-400">Manage</span>
-              </button>
             </div>
           </div>
 
@@ -206,8 +196,6 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
           </div>
         </main>
       </div>
-
-      <AdminMfaSecurityModal isOpen={mfaModalOpen} onClose={() => setMfaModalOpen(false)} />
     </div>
   );
 }

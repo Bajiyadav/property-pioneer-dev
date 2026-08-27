@@ -68,64 +68,45 @@ async function assertEmployee(context: AuthContext): Promise<EmployeeAccess> {
   return access;
 }
 
+/**
+ * Email-OTP step-up gate for privileged ADMIN operations. Runs AFTER
+ * assertEmployee. Denies an admin caller who lacks a valid, server-recorded
+ * verified window. It is a no-op for non-admin employees and while the
+ * admin_step_up feature is undeployed (see getAdminStepUpState) — so shipping
+ * this without the migration cannot lock admins out; once the table exists the
+ * gate enforces. Server-authoritative: reads DB state, never a client flag.
+ */
+async function assertAdminStepUp(context: AuthContext, access: EmployeeAccess): Promise<void> {
+  const { getAdminStepUpState, stepUpDecision } = await import("./adminStepUp.server");
+  const s = await getAdminStepUpState(context.userId);
+  if (stepUpDecision({ role: access.role, active: s.active, verified: s.verified }) === "deny") {
+    throw new Error("Forbidden: Admin email verification required");
+  }
+}
+
 export const checkEmployeeAccess = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const authCtx = context as AuthContext & { claims?: { aal?: string } };
-    const access = await getEmployeeAccess(authCtx);
-    const mfaLevel = authCtx.claims?.aal ?? "aal1";
-    return {
-      access,
-      userId: authCtx.userId,
-      mfa: {
-        required: Boolean(access),
-        verified: mfaLevel === "aal2",
-        level: mfaLevel,
-      },
-    };
-  });
-
-export const recordAdminMfaAudit = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .validator((input: unknown) =>
-    z
-      .object({
-        event: z.enum([
-          "admin_mfa_enrollment_started",
-          "admin_mfa_enrollment_completed",
-          "admin_mfa_verification_success",
-          "admin_mfa_verification_failed",
-          "admin_mfa_recovery",
-          "privileged_access_denied_mfa",
-        ]),
-        factorType: z.string().max(20).default("totp"),
-        outcome: z.enum(["success", "rejected", "error"]).default("success"),
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }) => {
     const authCtx = context as AuthContext;
-    const access = await assertEmployee(authCtx);
-    const { recordAudit } = await import("@/lib/security.server");
-    await recordAudit({
-      event: data.event,
-      actorId: authCtx.userId,
-      subjectType: "admin_mfa",
-      subjectId: authCtx.userId,
-      outcome: data.outcome,
-      details: {
-        role: access.role,
-        factorType: data.factorType,
-      },
-    });
-    return { ok: true };
+    const access = await getEmployeeAccess(authCtx);
+    // Email-OTP step-up status (email OTP replaced the earlier TOTP/AAL2 work).
+    // Only meaningful for admins; `required` stays false until the feature is
+    // deployed (admin_step_up migration applied).
+    let stepUp = { required: false, verified: false };
+    if (access?.role === "admin") {
+      const { getAdminStepUpState } = await import("./adminStepUp.server");
+      const s = await getAdminStepUpState(authCtx.userId);
+      stepUp = { required: s.active, verified: s.verified };
+    }
+    return { access, userId: authCtx.userId, stepUp };
   });
 
 export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     return loadOverview(authCtx.supabase);
   });
 
@@ -133,7 +114,8 @@ export const getAdminProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     const { data } = await authCtx.supabase
       .from("properties")
       .select(
@@ -147,7 +129,8 @@ export const getAdminEnquiries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     const { data } = await authCtx.supabase
       .from("enquiries")
       .select(
@@ -162,6 +145,7 @@ export const getAdminAuditLogs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
     const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     if (access.role !== "admin") return []; // Only admin sees global audit logs for now
     const { data } = await authCtx.supabase
       .from("audit_logs")
@@ -176,6 +160,7 @@ export const getEmployeeActivity = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
     const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     if (access.role !== "admin" && access.role !== "ops") return []; // Admins/Ops can view activity
 
     // 1. Fetch all employees
@@ -237,7 +222,8 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     const { id, ...patch } = data;
     const { error } = await authCtx.supabase
       .from("properties")
@@ -272,6 +258,7 @@ export const upsertEmployeeAccess = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const authCtx = context as AuthContext;
     const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
     if (access.role !== "admin") throw new Error("Forbidden: Only admins can manage access");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -319,7 +306,8 @@ export const getAdminUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
 
     // In a real app we'd paginate this and fetch email from auth schema.
     // For now we get what's in public schema.
