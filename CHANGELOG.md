@@ -1,3 +1,8 @@
+## v0.85.0 — 2026-08-27
+
+### Features
+- feat(copy): update hero headline to 'Rent & Buy Homes Directly from Owners — Zero Commission' (cd4804e)
+
 ## v0.84.0 — 2026-08-27
 
 ### Features
