@@ -1,3 +1,8 @@
+## v0.90.0 — 2026-08-27
+
+### Features
+- feat(ai): ground Seedha AI assistant with rental agreement knowledge and add quick service prompts (268690c)
+
 ## v0.89.0 — 2026-08-27
 
 ### Features
