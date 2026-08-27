@@ -1,3 +1,9 @@
+## v0.81.0 — 2026-08-27
+
+### Features
+- Merge pull request #14 from Bajiyadav/feature/admin-email-otp-final (345b682)
+- feat(admin): replace admin TOTP with email-OTP step-up and enforce server-side (1af389b)
+
 ## v0.80.0 — 2026-08-26
 
 ### Features
