@@ -227,8 +227,6 @@ function SiteHeader() {
             User Actions & CTAs
           */}
           <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-2.5">
-            <LanguageSwitcher />
-
             <Link
               to="/favorites"
               aria-label="Saved Properties"

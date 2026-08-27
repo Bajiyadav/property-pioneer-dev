@@ -1,14 +1,5 @@
 import { Link, type LinkProps } from "@tanstack/react-router";
-import {
-  ShieldCheck,
-  FileText,
-  Home,
-  MessageSquare,
-  ArrowRight,
-  CheckCircle2,
-  Lock,
-  Clock,
-} from "lucide-react";
+import { ShieldCheck, MapPin, ArrowRight, Lock } from "lucide-react";
 
 const SEARCH_DEFAULTS = {
   q: "",
@@ -32,58 +23,53 @@ interface ValueCard {
 
 const VALUE_CARDS: ValueCard[] = [
   {
-    title: "Moderated Listings",
-    desc: "Every property is reviewed by our team before going live, keeping spam, duplicates, and phantom listings off your feed.",
-    badge: "Moderated",
-    icon: ShieldCheck,
-    cta: "Explore Verified Catalogue",
+    title: "0% Brokerage Guarantee",
+    desc: "Never pay 1 to 2 months' rent as broker commission again. Contact owners directly or get free walkthrough assistance from our assigned area agents.",
+    badge: "0% Commission",
+    icon: Lock,
+    cta: "Contact Owners Directly",
     to: "/properties",
     search: SEARCH_DEFAULTS,
     highlight: true,
   },
   {
-    title: "No Platform Commission",
-    desc: "Connect directly with property owners and landlords. Seedha Properties does not charge tenant fees or commission on deals.",
-    badge: "0% Platform Fee",
-    icon: Lock,
-    cta: "Browse Direct Homes",
+    title: "Verified Property Listings",
+    desc: "Every listing is thoroughly inspected on‑site for accurate photos, authentic ownership records, and up‑to‑date amenities—eliminating fake listings and hidden surprises.",
+    badge: "Verified",
+    icon: ShieldCheck,
+    cta: "See Verified Homes",
     to: "/properties",
     search: SEARCH_DEFAULTS,
   },
   {
-    title: "Direct Owner Connect",
-    desc: "Reach property owners directly on WhatsApp or submit private tour inquiries with full privacy protection.",
-    badge: "Direct Contact",
-    icon: MessageSquare,
-    cta: "Start Browsing",
+    title: "Local Territory Specialists",
+    desc: "Our micro-market area agents in Kukatpally, Gachibowli, Madhapur, and Kondapur accompany you on site visits and assist with rental agreements.",
+    badge: "Local Experts",
+    icon: MapPin,
+    cta: "Find Your Area Agent",
     to: "/properties",
     search: SEARCH_DEFAULTS,
-  },
-  {
-    title: "Free Self-Service Listing",
-    desc: "Property owners list flats, villas, or commercial spaces in simple guided steps with live performance tracking from their dashboard.",
-    badge: "Free for Owners",
-    icon: Home,
-    cta: "Post Your Property",
-    to: "/list-property",
   },
 ];
 
 export function WhySeedhaProperties() {
   return (
-    <section className="bg-gradient-to-b from-secondary/40 via-background to-secondary/30 py-16 sm:py-24 border-y border-border/60">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-4xl tracking-tight">
-            Built for Transparency &amp; Trust
+    <section className="bg-secondary/30 py-20 sm:py-28 relative overflow-hidden">
+      {/* Decorative gradients */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-[80px] -z-10 pointer-events-none" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-14 text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Why 50,000+ Users Trust SEEDHA Properties
           </h2>
           <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-            Eliminating broker fees, phantom listings, and wasted site visits with direct
-            verification.
+            Built to eliminate real estate scams and high brokerage fees
           </p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {VALUE_CARDS.map((item) => {
             const Icon = item.icon;
             const cardContent = (
@@ -130,6 +116,72 @@ export function WhySeedhaProperties() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Traditional Agents vs. SEEDHA Properties Comparison */}
+        <div className="mt-20">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl font-extrabold text-foreground sm:text-3xl">
+              Traditional Agents vs. SEEDHA Properties
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              See how much time and money you save with us
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+            {/* Traditional Brokers */}
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 shadow-sm">
+              <h4 className="text-lg font-bold text-red-900 dark:text-red-400 mb-6 flex items-center gap-2">
+                Traditional Real Estate Brokers
+              </h4>
+              <ul className="space-y-4 text-sm text-muted-foreground">
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 shrink-0">❌</span>
+                  <span>1 to 2 months' rent brokerage charged</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 shrink-0">❌</span>
+                  <span>Unverified photos & misleading prices</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 shrink-0">❌</span>
+                  <span>High pressure sales tactics</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-500 shrink-0">❌</span>
+                  <span>No rental agreement support</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* SEEDHA Properties */}
+            <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-8 shadow-md ring-1 ring-primary/20 relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 bg-primary text-primary-foreground text-[10px] font-extrabold px-6 py-1 rounded-full transform rotate-12">
+                BEST CHOICE
+              </div>
+              <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                SEEDHA Properties Platform
+              </h4>
+              <ul className="space-y-4 text-sm font-medium text-foreground">
+                <li className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                  <span>₹0 Brokerage for Tenants & Buyers</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                  <span>Physically Verified Photos & Video Tours</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                  <span>Free Area Agent Site Visit Assistance</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                  <span>Online E-Stamping & Rental Agreements</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>

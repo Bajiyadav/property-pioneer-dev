@@ -158,8 +158,7 @@ export const StartNowForm: React.FC<StartNowFormProps> = ({ className = "", onSu
           <div className="flex items-center gap-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
             <UserCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <div className="truncate">
-              Signed in as <span className="font-bold">{user?.email}</span> (Listing will link to
-              your owner account).
+              Signed in as <span className="font-bold">{user?.email}</span>
             </div>
           </div>
         ) : (

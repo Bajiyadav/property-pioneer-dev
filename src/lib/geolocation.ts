@@ -65,7 +65,7 @@ export async function getCurrentUserLocality(): Promise<GeolocationResult> {
   if (typeof window === "undefined" || !navigator.geolocation) {
     return {
       supported: false,
-      locality: "Kukatpally",
+      locality: "",
       latitude: null,
       longitude: null,
       error: "Geolocation is not supported by your browser.",
@@ -88,7 +88,7 @@ export async function getCurrentUserLocality(): Promise<GeolocationResult> {
       (err) => {
         resolve({
           supported: true,
-          locality: "Kukatpally",
+          locality: "",
           latitude: null,
           longitude: null,
           error: err.message || "Location permission denied.",

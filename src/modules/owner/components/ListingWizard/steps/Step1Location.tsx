@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search, Building, Check, Globe, Sparkles, Map } from "lucide-react";
+import { MapPin, Search, Building, Check, Globe, Sparkles, Map, Crosshair } from "lucide-react";
 import type { StepProps } from "../types";
+import { getCurrentUserLocality } from "@/lib/geolocation";
+import { toast } from "sonner";
 
 const MAJOR_METROS = [
   "Hyderabad",
@@ -59,8 +61,32 @@ const CITY_LOCALITIES: Record<string, string[]> = {
 };
 
 export function Step1Location({ data, updateData }: StepProps) {
+  const [isDetecting, setIsDetecting] = useState(false);
   const currentCity = data.city || "Hyderabad";
   const popularLocalities = CITY_LOCALITIES[currentCity] || CITY_LOCALITIES["Hyderabad"];
+
+  const handleDetectLocation = async () => {
+    setIsDetecting(true);
+    try {
+      const result = await getCurrentUserLocality();
+      if (!result.supported) {
+        toast.error("Browser unsupported", { description: result.error });
+        return;
+      }
+      if (result.error) {
+        toast.error("Location Denied", { description: result.error });
+        return;
+      }
+      if (result.locality) {
+        updateData({ locality: result.locality });
+        toast.success("Location Detected", { description: `Found locality: ${result.locality}` });
+      }
+    } catch (e) {
+      toast.error("Error", { description: "Failed to detect location." });
+    } finally {
+      setIsDetecting(false);
+    }
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out">
@@ -203,9 +229,20 @@ export function Step1Location({ data, updateData }: StepProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
             {/* Locality Input & Quick Chips */}
             <div className="space-y-2.5">
-              <Label htmlFor="locality" className="text-sm font-semibold text-foreground">
-                Locality / Area Name *
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="locality" className="text-sm font-semibold text-foreground">
+                  Locality / Area Name *
+                </Label>
+                <button
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={isDetecting}
+                  className="text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                >
+                  <Crosshair className={`w-3.5 h-3.5 ${isDetecting ? "animate-spin" : ""}`} />
+                  {isDetecting ? "Detecting..." : "Detect My Location"}
+                </button>
+              </div>
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
