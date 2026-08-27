@@ -39,8 +39,7 @@ function WhyUsPage() {
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight max-w-3xl mx-auto leading-tight">
-            Rent &amp; Buy Homes Directly from Owners —{" "}
-            <span className="text-primary">Zero Commission</span>
+            Find Your Next Home Directly from <span className="text-primary">Verified Owners</span>
           </h1>
 
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
