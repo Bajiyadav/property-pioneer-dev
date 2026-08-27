@@ -165,18 +165,22 @@ export const Route = createFileRoute("/api/auth/request-otp")({
         let delivered = false;
         const otp = gen.data?.properties?.email_otp;
         if (!gen.error && otp) {
-          const { otpEmail } = await import("@/shared/services/email/templates");
-          const { sendTransactionalEmail } = await import("@/shared/services/emailService");
+          const { sendTransactionalEmail } = await import("@/lib/emailService");
           const userName = (gen.data?.user?.user_metadata?.full_name as string | undefined) ?? null;
-          const rendered = otpEmail({ userName, otp, expiry: "10 minutes" });
           const result = await sendTransactionalEmail({
             to: email,
-            subject: rendered.subject,
+            subject: "Your Seedha Properties Verification Code",
             eventType: "security_event",
             recipientName: userName ?? undefined,
-            htmlBody: rendered.htmlBody,
-            textBody: rendered.textBody,
-            // Identifiers only — never the code itself.
+            textBody: `Your Seedha Properties verification code is: ${otp}\n\nThis code will expire in 10 minutes. If you did not request this login code, you can safely ignore this email.`,
+            htmlBody: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;rounded:12px;">
+              <h2 style="color:#0f766e;margin-top:0;">Seedha Properties</h2>
+              <p style="color:#334155;font-size:15px;">Your verification code is:</p>
+              <div style="background:#f1f5f9;padding:16px;text-align:center;font-size:28px;font-weight:bold;letter-spacing:4px;color:#0f172a;border-radius:8px;margin:16px 0;">
+                ${otp}
+              </div>
+              <p style="color:#64748b;font-size:13px;">This code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.</p>
+            </div>`,
             metadata: { flow: "email_otp_login" },
           });
           delivered = result.status === "sent";
