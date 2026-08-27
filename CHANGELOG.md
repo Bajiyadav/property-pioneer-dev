@@ -1,3 +1,13 @@
+## v0.91.0 — 2026-08-27
+
+### Features
+- feat(rental-agreement): implement production rental agreement module and terms of service (8ef3cbd)
+
+### Migration notes
+- supabase/migrations/20260829000000_create_rental_agreements_table.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.90.0 — 2026-08-27
 
 ### Features
