@@ -1,3 +1,8 @@
+## v0.87.0 — 2026-08-27
+
+### Features
+- feat(marketing): elevate Why Us value pillars, comparison matrix, and visual polish (931d940)
+
 ## v0.86.0 — 2026-08-27
 
 ### Features
