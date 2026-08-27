@@ -1,3 +1,8 @@
+## v0.88.0 — 2026-08-27
+
+### Features
+- feat(marketing): adopt modern and minimal PropTech copy across Why Us and Home (c76c507)
+
 ## v0.87.0 — 2026-08-27
 
 ### Features
