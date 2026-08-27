@@ -35,12 +35,12 @@ function WhyUsPage() {
       <section className="relative overflow-hidden pt-12 pb-16 border-b border-border/40 bg-gradient-to-b from-primary/5 via-background to-background">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center space-y-6">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary uppercase tracking-wider">
-            <Sparkles className="h-4 w-4" /> Re-inventing Indian Real Estate
+            <Sparkles className="h-4 w-4" /> Zero Commission Real Estate
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight max-w-3xl mx-auto leading-tight">
-            Rent &amp; Buy Properties with{" "}
-            <span className="text-primary">No Platform Commission</span>
+            Rent &amp; Buy Homes Directly from Owners —{" "}
+            <span className="text-primary">Zero Commission</span>
           </h1>
 
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
