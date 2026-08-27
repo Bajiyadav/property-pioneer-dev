@@ -1,3 +1,8 @@
+## v0.89.0 — 2026-08-27
+
+### Features
+- feat(services): launch online rental agreement service in Hyderabad and India (99d8ecf)
+
 ## v0.88.1 — 2026-08-27
 
 ### Fixes
