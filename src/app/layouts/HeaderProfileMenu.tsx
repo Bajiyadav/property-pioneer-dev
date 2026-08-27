@@ -14,6 +14,7 @@ import {
   Users,
   Shield,
   FileCheck,
+  FileText,
   FileBarChart,
   ChevronDown,
   CheckCircle2,
@@ -142,6 +143,12 @@ export function HeaderProfileMenu() {
               search={{ tab: "enquiries" }}
               icon={MessageSquare}
               label="My Enquiries"
+              onClick={() => setOpen(false)}
+            />
+            <MenuItem
+              to="/my-agreements"
+              icon={FileText}
+              label="My Agreements"
               onClick={() => setOpen(false)}
             />
 

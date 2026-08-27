@@ -1,970 +1,489 @@
+/**
+ * Seedha Properties — Online Rental Agreement Service Landing Page
+ */
+
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import {
   FileText,
   ShieldCheck,
   Zap,
-  CheckCircle2,
-  Download,
-  Calculator,
-  HelpCircle,
-  Star,
   Clock,
-  Building,
-  UserCheck,
-  Truck,
   ArrowRight,
+  CheckCircle2,
+  HelpCircle,
+  Scale,
   Sparkles,
+  Calculator,
+  IndianRupee,
+  Building2,
+  Users,
+  User,
   ChevronDown,
-  ChevronUp,
-  FileCheck2,
   Lock,
+  Printer,
+  FileCheck,
+  AlertCircle,
 } from "lucide-react";
-import { APP_NAME } from "@/config/app";
-import { toast } from "sonner";
+import {
+  APP_NAME,
+  APP_DESCRIPTION,
+  GLOBAL_TITLE,
+  getCanonicalUrl,
+  getOgImageUrl,
+} from "@/config/app";
+import { calculateStampDutyAndFees } from "@/modules/rental-agreements/services/agreementService";
 
 export const Route = createFileRoute("/rental-agreement")({
-  head: () => ({
-    meta: [
-      { title: `Online Rent Agreement in Hyderabad & India — ${APP_NAME}` },
-      {
-        name: "description",
-        content: `Create legally valid online rent agreements in Hyderabad with e-stamping, Aadhaar e-signing, and doorstep delivery. Calculate stamp duty and get soft copies in 24 hours.`,
-      },
-      { property: "og:title", content: `Online Rent Agreement in Hyderabad & India — ${APP_NAME}` },
-      {
-        property: "og:description",
-        content: `Fast, legally compliant rental agreements online. Aadhaar E-Sign, valid stamp paper, and 24-hour delivery in Hyderabad.`,
-      },
-    ],
-  }),
-  component: RentalAgreementPage,
+  head: () => {
+    const canonicalUrl = getCanonicalUrl("/rental-agreement");
+    const ogImage = getOgImageUrl();
+    return {
+      meta: [
+        { title: `Online Rental Agreement in Hyderabad & India — ${APP_NAME}` },
+        {
+          name: "description",
+          content:
+            "Create legally valid, customized rental agreements online in minutes with Seedha Properties. Includes transparent stamp duty calculator, custom clauses, and instant printable drafts.",
+        },
+        { property: "og:title", content: `Online Rental Agreement — ${APP_NAME}` },
+        {
+          property: "og:description",
+          content:
+            "Draft, customize, and print legally binding tenancy agreements with 0% platform commission.",
+        },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonicalUrl },
+        { property: "og:image", content: ogImage },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "robots", content: "index, follow" },
+      ],
+      links: [{ rel: "canonical", href: canonicalUrl }],
+    };
+  },
+  component: RentalAgreementLandingPage,
 });
 
-interface StateDutyConfig {
-  name: string;
-  calcDuty: (annualRent: number, deposit: number, months: number) => number;
-  fixedFee: number;
-  desc: string;
-}
+function RentalAgreementLandingPage() {
+  const [calcState, setCalcState] = useState("Telangana");
+  const [calcRent, setCalcRent] = useState(25000);
+  const [calcDeposit, setCalcDeposit] = useState(50000);
+  const [calcDuration, setCalcDuration] = useState(11);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
-const STATE_DUTIES: Record<string, StateDutyConfig> = {
-  Telangana: {
-    name: "Telangana (Hyderabad)",
-    calcDuty: (annualRent, deposit) =>
-      Math.max(100, Math.round((annualRent + deposit * 0.1) * 0.005)),
-    fixedFee: 299,
-    desc: "0.5% of annual rent + 10% deposit (Min ₹100 stamp paper)",
-  },
-  Karnataka: {
-    name: "Karnataka (Bangalore)",
-    calcDuty: (annualRent, deposit) => Math.max(200, Math.round((annualRent + deposit) * 0.005)),
-    fixedFee: 349,
-    desc: "0.5% of annual rent + deposit (Min ₹200 e-stamp)",
-  },
-  Maharashtra: {
-    name: "Maharashtra (Mumbai/Pune)",
-    calcDuty: (annualRent, deposit, months) =>
-      Math.max(500, Math.round(((annualRent / 12) * months + deposit * 0.1) * 0.0025)),
-    fixedFee: 399,
-    desc: "0.25% of total consideration value",
-  },
-  "Delhi NCR": {
-    name: "Delhi NCR (Delhi/Noida/Gurgaon)",
-    calcDuty: () => 100,
-    fixedFee: 299,
-    desc: "₹100 for standard 11-month agreement",
-  },
-  "Tamil Nadu": {
-    name: "Tamil Nadu (Chennai)",
-    calcDuty: (annualRent, deposit) => Math.max(100, Math.round((annualRent + deposit) * 0.01)),
-    fixedFee: 299,
-    desc: "1% of total rent + deposit value",
-  },
-};
+  const feeCalc = calculateStampDutyAndFees(calcState, calcRent, calcDeposit, calcDuration);
 
-const ADD_ONS = [
-  {
-    id: "notary",
-    title: "Notarised Agreement",
-    desc: "Official notary seal and stamp — valid as address proof for passport, bank, and government verification.",
-    price: 349,
-    popular: true,
-  },
-  {
-    id: "esign",
-    title: "Aadhaar Digital E-Sign",
-    desc: "Remote biometric/OTP e-sign for landlords & tenants in different cities without physical meeting.",
-    price: 199,
-    popular: true,
-  },
-  {
-    id: "verification",
-    title: "Instant Tenant PAN/ID Verification",
-    desc: "Verify tenant credentials and identity instantly against official government databases.",
-    price: 149,
-    popular: false,
-  },
-  {
-    id: "hardcopy",
-    title: "Extra Original Physical Copy",
-    desc: "One original copy for the landlord and one for the tenant with doorstep courier delivery.",
-    price: 249,
-    popular: false,
-  },
-];
-
-const FAQS = [
-  {
-    q: "Is an online rental agreement legally valid in Hyderabad and India?",
-    a: "Yes. Online rent agreements executed on state-approved e-stamp paper and signed via Aadhaar e-Sign or physical signatures are 100% legally binding and admissible in court under the Indian Evidence Act and Information Technology Act.",
-  },
-  {
-    q: "Why are 11-month rent agreements so standard in India?",
-    a: "Under the Registration Act of 1908, leases of immovable property for a term exceeding 11 months require mandatory registration. An 11-month agreement avoids mandatory registrar office visits while remaining legally enforceable.",
-  },
-  {
-    q: "How fast do I receive my rental agreement?",
-    a: "You receive a draft within 30 minutes of submission. Once approved and e-signed, the final legally stamped digital copy is delivered within 24 hours. Physical stamp copies are delivered to your doorstep within 1–3 business days.",
-  },
-  {
-    q: "Can the owner and tenant sign from different cities?",
-    a: "Absolutely! With our Aadhaar E-Sign add-on, both parties receive a secure link to sign using their Aadhaar-linked mobile number from anywhere in the world.",
-  },
-  {
-    q: "What documents are required to generate an agreement?",
-    a: "You only need basic details: Landlord & Tenant names, Aadhaar/PAN details, property address, monthly rent amount, security deposit, and agreed notice/lock-in terms.",
-  },
-];
-
-function RentalAgreementPage() {
-  // Calculator State
-  const [selectedState, setSelectedState] = useState("Telangana");
-  const [rent, setRent] = useState<number>(25000);
-  const [deposit, setDeposit] = useState<number>(50000);
-  const [durationMonths, setDurationMonths] = useState<number>(11);
-  const [selectedAddons, setSelectedAddons] = useState<string[]>(["notary", "esign"]);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  // Drafting Form Modal / Drawer State
-  const [isDrafting, setIsDrafting] = useState(false);
-  const [draftStep, setDraftStep] = useState(1);
-  const [formData, setFormData] = useState({
-    city: "Hyderabad",
-    locality: "Gachibowli",
-    propertyAddress: "",
-    landlordName: "",
-    landlordPhone: "",
-    tenantName: "",
-    tenantPhone: "",
-    startDate: new Date().toISOString().split("T")[0],
-    maintenanceCharges: 2000,
-    noticePeriodMonths: 1,
-    lockInMonths: 6,
-  });
-
-  const stateConfig = STATE_DUTIES[selectedState] || STATE_DUTIES["Telangana"];
-
-  const calculations = useMemo(() => {
-    const annualRent = rent * 12;
-    const stampDuty = stateConfig.calcDuty(annualRent, deposit, durationMonths);
-    const draftingFee = stateConfig.fixedFee;
-    const addonsTotal = selectedAddons.reduce((sum, id) => {
-      const item = ADD_ONS.find((a) => a.id === id);
-      return sum + (item ? item.price : 0);
-    }, 0);
-
-    const total = stampDuty + draftingFee + addonsTotal;
-    return {
-      stampDuty,
-      draftingFee,
-      addonsTotal,
-      total,
-    };
-  }, [rent, deposit, durationMonths, selectedState, selectedAddons, stateConfig]);
-
-  const toggleAddon = (id: string) => {
-    setSelectedAddons((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  };
-
-  const handleStartDraft = () => {
-    setIsDrafting(true);
-    setDraftStep(1);
-  };
-
-  const handleDraftSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(
-      "Draft submitted successfully! Our legal team is preparing your e-stamp agreement.",
-    );
-    setIsDrafting(false);
-  };
+  const FAQS = [
+    {
+      q: "What is an 11-month rental agreement and why is it standard in India?",
+      a: "Under the Registration Act of 1908, any lease of immovable property for a term exceeding 11 months requires mandatory registration at the local Sub-Registrar Office. An 11-month agreement executed on non-judicial stamp paper is legally enforceable in court without necessitating cumbersome sub-registrar visits, making it the preferred standard for residential tenancies across Indian metros.",
+    },
+    {
+      q: "Is an online rental agreement legally valid in court?",
+      a: "Yes. An agreement drafted with valid consideration, mutually agreed clauses, executed on appropriate state stamp duty value, and signed by both landlord and tenant with two witnesses constitutes a legally binding contract enforceable under the Indian Contract Act (1872) and Indian Evidence Act.",
+    },
+    {
+      q: "Can I add multiple tenants / roommates to one agreement?",
+      a: "Yes! Seedha Properties supports both single tenant and multiple co-tenants. All roommates can be named with their contact information, creating a transparent joint tenancy deed.",
+    },
+    {
+      q: "How does the notice period and lock-in period work?",
+      a: "A lock-in period is the minimum period during which neither landlord nor tenant can terminate the agreement without mutual penalty. The notice period is the advance written notice (typically 1 to 2 months) required before vacating once the lock-in period has elapsed.",
+    },
+    {
+      q: "Can I renew or duplicate an agreement next year?",
+      a: "Absolutely. With Seedha Properties' 'Renew' feature in your My Agreements dashboard, you can duplicate any completed agreement with 1-click. It automatically adjusts tenancy dates, applies agreed escalation percentages, and creates a fresh record without manual re-typing.",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background pb-20 space-y-16">
+    <div className="min-h-screen bg-background text-foreground space-y-16 pb-20">
       {/* 1. Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 border-b border-border/40 bg-gradient-to-b from-primary/10 via-background to-background">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-xs font-bold text-primary tracking-wide shadow-2xs">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                <span>4.8★ • 50,000+ Legally Valid Agreements</span>
-              </div>
+      <section className="relative isolate overflow-hidden pt-12 sm:pt-20 pb-16 bg-gradient-to-b from-primary/5 via-background to-background border-b border-border/60">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold shadow-2xs">
+            <ShieldCheck className="h-4 w-4" />
+            <span>100% Legally Binding Tenancy Agreements</span>
+          </div>
 
-              <h1 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight leading-tight">
-                Online Rent Agreement in <span className="text-primary">Hyderabad</span> &amp;
-                Across India
-              </h1>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground max-w-4xl mx-auto leading-tight">
+            Create Valid Rental Agreements Online in Minutes
+          </h1>
 
-              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xl">
-                Create legally binding, government-stamped rental agreements without visiting
-                sub-registrar offices or local typists. Includes instant Aadhaar E-Sign and 24-hour
-                soft copy delivery.
-              </p>
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Professional legal drafting, transparent statutory stamp duty calculation, custom
+            clauses, and instant printable documents for owners and tenants across Hyderabad and
+            India.
+          </p>
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-3 gap-3 pt-2">
-                <div className="rounded-2xl bg-card border border-border/80 p-3 text-center shadow-2xs">
-                  <Clock className="h-5 w-5 text-primary mx-auto mb-1" />
-                  <p className="text-[11px] font-bold text-foreground">Same-Day Soft Copy</p>
-                  <p className="text-[10px] text-muted-foreground">Within 24 Hours</p>
-                </div>
-                <div className="rounded-2xl bg-card border border-border/80 p-3 text-center shadow-2xs">
-                  <ShieldCheck className="h-5 w-5 text-emerald-500 mx-auto mb-1" />
-                  <p className="text-[11px] font-bold text-foreground">100% Legally Valid</p>
-                  <p className="text-[10px] text-muted-foreground">Govt E-Stamp Paper</p>
-                </div>
-                <div className="rounded-2xl bg-card border border-border/80 p-3 text-center shadow-2xs">
-                  <Zap className="h-5 w-5 text-amber-500 mx-auto mb-1" />
-                  <p className="text-[11px] font-bold text-foreground">Aadhaar E-Sign</p>
-                  <p className="text-[10px] text-muted-foreground">Remote Signing</p>
-                </div>
-              </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <Link
+              to="/rental-agreement/create"
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl bg-primary text-primary-foreground text-sm font-extrabold shadow-md hover:brightness-105 transition active:scale-95"
+            >
+              <span>Create Rental Agreement</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
 
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
-                <button
-                  type="button"
-                  onClick={handleStartDraft}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-extrabold text-primary-foreground shadow-md transition hover:brightness-110 active:scale-95 cursor-pointer"
-                >
-                  <FileText className="h-4 w-4" /> Start Creating Agreement
-                </button>
-                <a
-                  href="#calculator"
-                  className="inline-flex items-center gap-2 rounded-full bg-secondary border border-border/80 px-6 py-3.5 text-sm font-bold text-foreground transition hover:bg-secondary/80 shadow-2xs"
-                >
-                  <Calculator className="h-4 w-4" /> Calculate Stamp Duty
-                </a>
-              </div>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-card hover:bg-secondary text-foreground border border-border text-sm font-bold transition active:scale-95"
+            >
+              <span>How It Works</span>
+            </a>
+          </div>
+
+          {/* Value Highlights */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto pt-8">
+            <div className="p-3.5 rounded-2xl bg-card border border-border text-center space-y-1">
+              <span className="text-base font-extrabold text-foreground block">⚡ 10 Mins</span>
+              <span className="text-[11px] text-muted-foreground">Instant Online Drafting</span>
             </div>
-
-            {/* Quick Summary Card */}
-            <div className="lg:col-span-5">
-              <div className="rounded-3xl border border-primary/30 bg-card/95 p-6 sm:p-7 shadow-xl backdrop-blur-sm space-y-5 ring-1 ring-primary/20">
-                <div className="flex items-center justify-between border-b border-border pb-4">
-                  <div>
-                    <h3 className="font-extrabold text-foreground text-base">
-                      Quick Cost Estimate
-                    </h3>
-                    <p className="text-xs text-muted-foreground">{stateConfig.name}</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 text-xs font-black">
-                    Standard 11M
-                  </span>
-                </div>
-
-                <div className="space-y-3 text-xs">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Govt Stamp Duty</span>
-                    <span className="font-semibold text-foreground">
-                      ₹{calculations.stampDuty.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Legal Drafting &amp; E-Stamp Processing</span>
-                    <span className="font-semibold text-foreground">
-                      ₹{calculations.draftingFee.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Selected Add-ons ({selectedAddons.length})</span>
-                    <span className="font-semibold text-foreground">
-                      ₹{calculations.addonsTotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="border-t border-border pt-3 flex justify-between items-center">
-                    <span className="font-extrabold text-sm text-foreground">
-                      Total Payable Amount
-                    </span>
-                    <span className="text-xl font-black text-primary">
-                      ₹{calculations.total.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleStartDraft}
-                  className="w-full rounded-2xl bg-primary py-3 text-xs font-black text-primary-foreground shadow-md transition hover:brightness-110 active:scale-95 cursor-pointer"
-                >
-                  Create Agreement for ₹{calculations.total.toLocaleString()}
-                </button>
-
-                <p className="text-[11px] text-center text-muted-foreground">
-                  🔒 Encrypted &amp; legally valid under the Indian Stamp Act
-                </p>
-              </div>
+            <div className="p-3.5 rounded-2xl bg-card border border-border text-center space-y-1">
+              <span className="text-base font-extrabold text-foreground block">
+                ⚖️ Legally Valid
+              </span>
+              <span className="text-[11px] text-muted-foreground">Indian Evidence Act</span>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-card border border-border text-center space-y-1">
+              <span className="text-base font-extrabold text-foreground block">
+                🖨️ PDF &amp; Print
+              </span>
+              <span className="text-[11px] text-muted-foreground">Direct Document Output</span>
+            </div>
+            <div className="p-3.5 rounded-2xl bg-card border border-border text-center space-y-1">
+              <span className="text-base font-extrabold text-foreground block">
+                🔄 1-Click Renewal
+              </span>
+              <span className="text-[11px] text-muted-foreground">Easy Tenancy Extension</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 2. Interactive Calculator Section */}
-      <section id="calculator" className="mx-auto max-w-6xl px-4 sm:px-6 space-y-8 scroll-mt-20">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary uppercase tracking-wider">
-            <Calculator className="h-3.5 w-3.5" /> Instant Pricing Engine
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            Rent Agreement Cost &amp; Stamp Duty Calculator
-          </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm">
-            Accurately calculated according to state-specific stamp duty and legal regulations.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-md">
-          {/* Controls */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* State Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-foreground">
-                Where is your property located?
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {Object.keys(STATE_DUTIES).map((stateKey) => (
-                  <button
-                    key={stateKey}
-                    type="button"
-                    onClick={() => setSelectedState(stateKey)}
-                    className={`rounded-xl px-3 py-2.5 text-xs font-bold transition text-left border cursor-pointer ${
-                      selectedState === stateKey
-                        ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                        : "bg-secondary/60 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
-                    }`}
-                  >
-                    {stateKey}
-                  </button>
-                ))}
+      {/* 2. Interactive Stamp Duty & Cost Calculator */}
+      <section className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="p-6 sm:p-10 rounded-3xl bg-card border border-border shadow-sm space-y-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-1">
+                <Calculator className="h-4 w-4" />
+                <span>Statutory Fee Estimator</span>
               </div>
+              <h2 className="text-xl sm:text-2xl font-black text-foreground">
+                Stamp Duty &amp; Legal Cost Calculator
+              </h2>
             </div>
+            <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full font-semibold">
+              Transparent Government Rates
+            </span>
+          </div>
 
-            {/* Monthly Rent */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-foreground">Monthly Rent (₹)</label>
-                <span className="text-xs font-black text-primary">₹{rent.toLocaleString()}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Input Controls */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground">Select State / Region</label>
+                <select
+                  value={calcState}
+                  onChange={(e) => setCalcState(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-sm font-semibold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="Telangana">Telangana (Hyderabad, Secunderabad, Cyberabad)</option>
+                  <option value="Karnataka">Karnataka (Bengaluru, Mysuru)</option>
+                  <option value="Maharashtra">Maharashtra (Mumbai, Pune, Thane)</option>
+                  <option value="Delhi">Delhi NCR (Delhi, Gurugram, Noida)</option>
+                  <option value="Tamil Nadu">Tamil Nadu (Chennai, Coimbatore)</option>
+                </select>
               </div>
-              <input
-                type="range"
-                min={5000}
-                max={200000}
-                step={1000}
-                value={rent}
-                onChange={(e) => setRent(Number(e.target.value))}
-                className="w-full accent-primary h-2 bg-secondary rounded-lg cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>₹5,000</span>
-                <span>₹1,00,000</span>
-                <span>₹2,00,000+</span>
-              </div>
-            </div>
 
-            {/* Security Deposit */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-foreground">Security Deposit (₹)</label>
-                <span className="text-xs font-black text-primary">₹{deposit.toLocaleString()}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="font-bold text-foreground">Monthly Rent (₹)</span>
+                  <span className="font-extrabold text-primary">
+                    ₹{calcRent.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={5000}
+                  max={200000}
+                  step={2000}
+                  value={calcRent}
+                  onChange={(e) => setCalcRent(parseInt(e.target.value))}
+                  className="w-full accent-primary"
+                />
               </div>
-              <input
-                type="range"
-                min={10000}
-                max={500000}
-                step={5000}
-                value={deposit}
-                onChange={(e) => setDeposit(Number(e.target.value))}
-                className="w-full accent-primary h-2 bg-secondary rounded-lg cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>₹10,000</span>
-                <span>₹2,50,000</span>
-                <span>₹5,00,000+</span>
-              </div>
-            </div>
 
-            {/* Duration */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-foreground">Agreement Duration</label>
-              <div className="flex flex-wrap gap-2">
-                {[11, 12, 24, 36].map((months) => (
-                  <button
-                    key={months}
-                    type="button"
-                    onClick={() => setDurationMonths(months)}
-                    className={`rounded-xl px-4 py-2 text-xs font-bold transition border cursor-pointer ${
-                      durationMonths === months
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-secondary/60 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
-                    }`}
-                  >
-                    {months} Months {months === 11 && "★ Most Popular"}
-                  </button>
-                ))}
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="font-bold text-foreground">Security Deposit (₹)</span>
+                  <span className="font-extrabold text-primary">
+                    ₹{calcDeposit.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={10000}
+                  max={1000000}
+                  step={10000}
+                  value={calcDeposit}
+                  onChange={(e) => setCalcDeposit(parseInt(e.target.value))}
+                  className="w-full accent-primary"
+                />
               </div>
-            </div>
 
-            {/* Addons Selection */}
-            <div className="space-y-2.5 pt-2">
-              <label className="text-xs font-bold text-foreground">
-                Optional Value-Added Services
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {ADD_ONS.map((addon) => {
-                  const isChecked = selectedAddons.includes(addon.id);
-                  return (
-                    <div
-                      key={addon.id}
-                      onClick={() => toggleAddon(addon.id)}
-                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
-                        isChecked
-                          ? "bg-primary/5 border-primary/60 ring-1 ring-primary/20"
-                          : "bg-card border-border hover:border-border/80"
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-foreground">Agreement Tenure</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[11, 12, 24, 36].map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setCalcDuration(m)}
+                      className={`py-2 rounded-xl text-xs font-bold transition ${
+                        calcDuration === m
+                          ? "bg-primary text-primary-foreground shadow-2xs"
+                          : "bg-secondary hover:bg-secondary/80 text-muted-foreground"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-xs font-bold text-foreground">{addon.title}</p>
-                          <p className="text-[10px] text-muted-foreground line-clamp-2 mt-0.5">
-                            {addon.desc}
-                          </p>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}}
-                          className="mt-0.5 h-4 w-4 rounded accent-primary cursor-pointer shrink-0"
-                        />
-                      </div>
-                      <p className="text-xs font-black text-primary mt-2">+₹{addon.price}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Breakdown Receipt */}
-          <div className="lg:col-span-5 flex flex-col justify-between rounded-2xl bg-secondary/40 border border-border/80 p-6 space-y-6">
-            <div>
-              <h3 className="font-extrabold text-foreground text-base border-b border-border pb-3">
-                Calculation Breakdown
-              </h3>
-              <div className="space-y-3.5 pt-4 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">State Duty Rule</span>
-                  <span className="font-semibold text-foreground text-right">
-                    {stateConfig.name}
-                  </span>
+                      {m} Months
+                    </button>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tenure</span>
-                  <span className="font-semibold text-foreground">{durationMonths} Months</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Stamp Duty Charge</span>
-                  <span className="font-semibold text-foreground">
-                    ₹{calculations.stampDuty.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Legal Drafting &amp; E-Stamp Paper</span>
-                  <span className="font-semibold text-foreground">
-                    ₹{calculations.draftingFee.toLocaleString()}
-                  </span>
-                </div>
-                {selectedAddons.map((id) => {
-                  const item = ADD_ONS.find((a) => a.id === id);
-                  if (!item) return null;
-                  return (
-                    <div key={id} className="flex justify-between text-muted-foreground">
-                      <span>{item.title}</span>
-                      <span className="font-semibold text-foreground">+₹{item.price}</span>
-                    </div>
-                  );
-                })}
               </div>
             </div>
 
-            <div className="border-t border-border pt-4 space-y-4">
-              <div className="flex justify-between items-center">
+            {/* Live Fee Breakdown Card */}
+            <div className="lg:col-span-5 p-6 rounded-2xl bg-secondary/40 border border-border space-y-4">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block">
+                Estimated Breakdown
+              </span>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Digital Legal Drafting:</span>
+                  <span className="font-bold text-foreground">₹{feeCalc.draftingFee}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Estimated State Stamp Duty:</span>
+                  <span className="font-bold text-foreground">₹{feeCalc.stampDuty}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Govt Processing &amp; Verification:</span>
+                  <span className="font-bold text-foreground">₹{feeCalc.registrationFee}</span>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-border flex justify-between items-center">
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Total Amount
-                  </p>
-                  <p className="text-2xl font-black text-foreground">
-                    ₹{calculations.total.toLocaleString()}
-                  </p>
+                  <span className="text-sm font-black text-foreground block">
+                    Total Statutory Cost
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">0% Platform Brokerage</span>
                 </div>
-                <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 text-xs font-black">
-                  Zero Hidden Fees
-                </span>
+                <span className="text-2xl font-black text-primary">₹{feeCalc.totalCost}</span>
               </div>
-              <button
-                type="button"
-                onClick={handleStartDraft}
-                className="w-full rounded-2xl bg-primary py-3.5 text-sm font-black text-primary-foreground shadow-md transition hover:brightness-110 active:scale-95 cursor-pointer"
+
+              <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">
+                {feeCalc.rulesExplanation}
+              </p>
+
+              <Link
+                to="/rental-agreement/create"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:brightness-105 transition shadow-xs"
               >
-                Proceed to Draft Agreement <ArrowRight className="h-4 w-4 inline ml-1" />
-              </button>
+                <span>Draft Agreement Now</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. How It Works (4 Simple Steps) */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 space-y-10">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            How It Works in 4 Simple Steps
+      {/* 3. How It Works Section */}
+      <section id="how-it-works" className="mx-auto max-w-6xl px-4 sm:px-6 space-y-10">
+        <div className="text-center space-y-2">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-primary">
+            Simple 4-Step Process
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            How Online Rental Agreements Work
           </h2>
-          <p className="text-muted-foreground text-xs sm:text-sm">
-            Complete the entire rental documentation from the comfort of your home.
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
+            From entering details to printing your signed legal deed in four easy steps.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="rounded-3xl border border-border/80 bg-card p-6 space-y-3 shadow-sm relative">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground font-black text-xs shadow-xs">
-              1
-            </span>
-            <h3 className="font-bold text-foreground text-sm">Enter Details</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Fill in owner, tenant, property address, and monthly rent details in under 3 minutes.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-border/80 bg-card p-6 space-y-3 shadow-sm relative">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground font-black text-xs shadow-xs">
-              2
-            </span>
-            <h3 className="font-bold text-foreground text-sm">Drafting &amp; E-Stamping</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Our legal team formats state-compliant clauses and prints onto official government
-              e-stamp paper.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-border/80 bg-card p-6 space-y-3 shadow-sm relative">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground font-black text-xs shadow-xs">
-              3
-            </span>
-            <h3 className="font-bold text-foreground text-sm">Aadhaar E-Sign</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Sign remotely using Aadhaar OTP verification. Both parties sign digitally with zero
-              physical hassle.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-border/80 bg-card p-6 space-y-3 shadow-sm relative">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground font-black text-xs shadow-xs">
-              4
-            </span>
-            <h3 className="font-bold text-foreground text-sm">Instant Delivery</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Download your signed, stamped soft copy within 24 hours. Physical hard copy delivered
-              in 1–3 days.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Comparison Table: SEEDHA vs Local Vendors */}
-      <section className="mx-auto max-w-5xl px-4 sm:px-6">
-        <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 space-y-6 shadow-md">
-          <div className="text-center space-y-1">
-            <h3 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-              {APP_NAME} vs. Traditional Offline Vendors
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Why thousands of landlords and tenants in Hyderabad switch to digital agreements
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead>
-                <tr className="border-b border-border text-muted-foreground">
-                  <th className="py-3 font-bold">Feature / Service</th>
-                  <th className="py-3 font-extrabold text-primary">{APP_NAME} Platform</th>
-                  <th className="py-3 font-bold text-muted-foreground">Local Stamp Vendors</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                <tr>
-                  <td className="py-3.5 font-semibold text-foreground">Turnaround Time</td>
-                  <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    Soft copy in 24 Hours
-                  </td>
-                  <td className="py-3.5 text-muted-foreground">3 to 7 Days (Multiple visits)</td>
-                </tr>
-                <tr>
-                  <td className="py-3.5 font-semibold text-foreground">Remote Signing</td>
-                  <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    Aadhaar OTP E-Sign (Pan-India)
-                  </td>
-                  <td className="py-3.5 text-muted-foreground">Both parties must meet in person</td>
-                </tr>
-                <tr>
-                  <td className="py-3.5 font-semibold text-foreground">Custom Legal Clauses</td>
-                  <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    Customizable lock-in, pet &amp; notice clauses
-                  </td>
-                  <td className="py-3.5 text-muted-foreground">
-                    Rigid, outdated standard template
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-3.5 font-semibold text-foreground">Pricing Transparency</td>
-                  <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    Transparent government stamp duty + flat fee
-                  </td>
-                  <td className="py-3.5 text-muted-foreground">
-                    Arbitrary typing &amp; broker markups
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-3.5 font-semibold text-foreground">Digital Backup</td>
-                  <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">
-                    Lifetime cloud storage on dashboard
-                  </td>
-                  <td className="py-3.5 text-muted-foreground">
-                    No digital copy; lost if misplaced
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. State-wise Stamp Duty Details */}
-      <section className="mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
-        <div className="text-center space-y-2">
-          <h3 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-            State-wise Stamp Duty &amp; Legal Rates
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Standard residential rates for 11-month agreements
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-          {Object.entries(STATE_DUTIES).map(([key, config]) => (
+          {[
+            {
+              step: "01",
+              title: "Enter Party Details",
+              desc: "Fill in landlord, tenant, and property address with instant mobile number validation.",
+              icon: User,
+            },
+            {
+              step: "02",
+              title: "Customize Terms & Clauses",
+              desc: "Define rent, deposit, lock-in, notice period, and toggle standard or custom tenancy covenants.",
+              icon: Scale,
+            },
+            {
+              step: "03",
+              title: "Review & Print Document",
+              desc: "Review the full rendered legal deed with draft watermark, print, or save as PDF directly.",
+              icon: Printer,
+            },
+            {
+              step: "04",
+              title: "Manage & Renew Anytime",
+              desc: "Access your agreements anytime from your dashboard with 1-click duplication for extensions.",
+              icon: FileCheck,
+            },
+          ].map((item) => (
             <div
-              key={key}
-              className="rounded-2xl border border-border/80 bg-card p-4 space-y-2 shadow-2xs"
+              key={item.step}
+              className="p-6 rounded-2xl bg-card border border-border hover:border-primary/40 transition shadow-xs space-y-3 relative overflow-hidden"
             >
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-foreground">{config.name}</h4>
-                <Building className="h-4 w-4 text-primary" />
+              <span className="text-3xl font-black text-primary/15 absolute right-4 top-4 select-none">
+                {item.step}
+              </span>
+              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <item.icon className="h-5 w-5" />
               </div>
-              <p className="text-muted-foreground leading-relaxed">{config.desc}</p>
+              <h3 className="font-bold text-foreground text-sm">{item.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 6. FAQs Accordion */}
-      <section className="mx-auto max-w-4xl px-4 sm:px-6 space-y-6">
+      {/* 4. Educational Legal Guide */}
+      <section className="mx-auto max-w-6xl px-4 sm:px-6 space-y-8">
         <div className="text-center space-y-2">
-          <h3 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
-            Frequently Asked Questions
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Everything you need to know about digital rent agreements
+          <span className="text-xs font-extrabold uppercase tracking-widest text-primary">
+            Legal Knowledge
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            Essential Tenancy Concepts Explained
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
+            Everything you need to know about rights, obligations, and commercial clauses.
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-2">
+            <h3 className="font-bold text-sm text-foreground">Security Deposit &amp; Deductions</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              An interest-free refundable deposit held by the landlord. Legally, landlords can only
+              deduct unpaid electricity/utility bills or actual verified structural damage beyond
+              normal wear and tear before returning it within 7–14 days of vacating.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-2">
+            <h3 className="font-bold text-sm text-foreground">Notice Period vs. Lock-in Period</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              During the lock-in period (e.g. 3 or 6 months), neither party can terminate without
+              paying compensatory rent. After the lock-in expires, either party can terminate by
+              providing 1 month of advance written notice.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-card border border-border space-y-2">
+            <h3 className="font-bold text-sm text-foreground">Maintenance &amp; Minor Repairs</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Standard tenancy contracts allocate minor routine repairs (fuses, tap washers, light
+              fixtures) to the tenant, while structural seepage, plumbing mainlines, and electrical
+              wiring remain the landlord's responsibility.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Frequently Asked Questions */}
+      <section className="mx-auto max-w-4xl px-4 sm:px-6 space-y-8">
+        <div className="text-center space-y-2">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-primary">
+            Got Questions?
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            Frequently Asked Questions
+          </h2>
         </div>
 
         <div className="space-y-3">
-          {FAQS.map((faq, index) => {
-            const isOpen = openFaq === index;
-            return (
-              <div
-                key={faq.q}
-                className="rounded-2xl border border-border/80 bg-card overflow-hidden transition shadow-2xs"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : index)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between text-xs sm:text-sm font-bold text-foreground hover:bg-secondary/40 transition cursor-pointer"
-                >
-                  <span>{faq.q}</span>
-                  {isOpen ? (
-                    <ChevronUp className="h-4 w-4 text-primary shrink-0 ml-2" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
-                  )}
-                </button>
-                {isOpen && (
-                  <div className="px-5 pb-4 pt-1 text-xs text-muted-foreground leading-relaxed border-t border-border/40">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 7. Bottom CTA Banner */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 p-8 sm:p-10 text-white text-center space-y-4 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-1/4 w-72 h-72 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Ready to Generate Your Rent Agreement?
-          </h3>
-          <p className="text-xs sm:text-sm text-emerald-100 max-w-xl mx-auto leading-relaxed">
-            Get your government-stamped, legally compliant agreement drafted in minutes. Free
-            delivery across Hyderabad.
-          </p>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={handleStartDraft}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-xs sm:text-sm font-black text-emerald-800 shadow-md hover:bg-emerald-50 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          {FAQS.map((faq, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-border bg-card overflow-hidden transition"
             >
-              Start Creating Agreement Now <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Interactive Agreement Drafting Modal */}
-      {isDrafting && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div>
-                <h3 className="text-lg font-black text-foreground">Create Rental Agreement</h3>
-                <p className="text-xs text-muted-foreground">Step {draftStep} of 3</p>
-              </div>
               <button
                 type="button"
-                onClick={() => setIsDrafting(false)}
-                className="text-xs font-bold text-muted-foreground hover:text-foreground p-2 rounded-full bg-secondary cursor-pointer"
+                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+                className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-foreground"
               >
-                ✕
+                <span>{faq.q}</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${
+                    expandedFaq === i ? "rotate-180 text-primary" : ""
+                  }`}
+                />
               </button>
+              {expandedFaq === i && (
+                <div className="px-5 pb-5 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
+                  {faq.a}
+                </div>
+              )}
             </div>
+          ))}
+        </div>
+      </section>
 
-            <form onSubmit={handleDraftSubmit} className="space-y-4 text-xs">
-              {draftStep === 1 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                    <Building className="h-4 w-4 text-primary" /> Property &amp; Locality Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">City</label>
-                      <input
-                        type="text"
-                        value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">Locality</label>
-                      <input
-                        type="text"
-                        value={formData.locality}
-                        onChange={(e) => setFormData({ ...formData, locality: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-bold text-foreground">Complete Property Address</label>
-                    <textarea
-                      value={formData.propertyAddress}
-                      onChange={(e) =>
-                        setFormData({ ...formData, propertyAddress: e.target.value })
-                      }
-                      placeholder="Flat No, Building Name, Street, Landmark, Pincode"
-                      className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary h-20"
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setDraftStep(2)}
-                      className="rounded-full bg-primary px-6 py-2.5 font-bold text-primary-foreground text-xs shadow-sm hover:brightness-110 cursor-pointer"
-                    >
-                      Next: Parties Details →
-                    </button>
-                  </div>
-                </div>
-              )}
+      {/* 6. Legal Disclaimer */}
+      <section className="mx-auto max-w-4xl px-4 sm:px-6">
+        <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-300 space-y-2">
+          <div className="flex items-center gap-2 font-bold">
+            <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <span>Legal Disclaimer &amp; Compliance Notice</span>
+          </div>
+          <p className="leading-relaxed">
+            The agreements generated on Seedha Properties follow standard Indian Model Tenancy and
+            Contract Act guidelines. State-specific stamp duty laws and local registration rules may
+            vary. Users are advised to review all terms and seek independent legal counsel for
+            complex commercial or non-standard leasing arrangements.
+          </p>
+        </div>
+      </section>
 
-              {draftStep === 2 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                    <UserCheck className="h-4 w-4 text-primary" /> Landlord &amp; Tenant Information
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">Landlord Full Name</label>
-                      <input
-                        type="text"
-                        value={formData.landlordName}
-                        onChange={(e) => setFormData({ ...formData, landlordName: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">
-                        Landlord Mobile (for E-Sign)
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.landlordPhone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, landlordPhone: e.target.value })
-                        }
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">Tenant Full Name</label>
-                      <input
-                        type="text"
-                        value={formData.tenantName}
-                        onChange={(e) => setFormData({ ...formData, tenantName: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">
-                        Tenant Mobile (for E-Sign)
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.tenantPhone}
-                        onChange={(e) => setFormData({ ...formData, tenantPhone: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-between pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setDraftStep(1)}
-                      className="rounded-full bg-secondary px-5 py-2.5 font-bold text-foreground text-xs border border-border cursor-pointer"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDraftStep(3)}
-                      className="rounded-full bg-primary px-6 py-2.5 font-bold text-primary-foreground text-xs shadow-sm hover:brightness-110 cursor-pointer"
-                    >
-                      Next: Terms &amp; Submit →
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {draftStep === 3 && (
-                <div className="space-y-4">
-                  <h4 className="font-bold text-foreground text-sm flex items-center gap-2">
-                    <FileCheck2 className="h-4 w-4 text-primary" /> Tenancy Terms &amp; Final Review
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">Agreement Start Date</label>
-                      <input
-                        type="date"
-                        value={formData.startDate}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-foreground">Lock-in Period (Months)</label>
-                      <input
-                        type="number"
-                        value={formData.lockInMonths}
-                        onChange={(e) =>
-                          setFormData({ ...formData, lockInMonths: Number(e.target.value) })
-                        }
-                        className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-secondary/60 border border-border space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Monthly Rent</span>
-                      <span className="font-bold text-foreground">₹{rent.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Security Deposit</span>
-                      <span className="font-bold text-foreground">₹{deposit.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between border-t border-border/60 pt-2">
-                      <span className="font-extrabold text-foreground">Total Payable</span>
-                      <span className="font-black text-primary text-sm">
-                        ₹{calculations.total.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setDraftStep(2)}
-                      className="rounded-full bg-secondary px-5 py-2.5 font-bold text-foreground text-xs border border-border cursor-pointer"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      type="submit"
-                      className="rounded-full bg-emerald-600 px-7 py-2.5 font-black text-white text-xs shadow-md hover:bg-emerald-500 cursor-pointer"
-                    >
-                      Submit &amp; Generate Agreement
-                    </button>
-                  </div>
-                </div>
-              )}
-            </form>
+      {/* 7. Bottom CTA */}
+      <section className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="p-8 sm:p-12 rounded-3xl bg-primary text-primary-foreground text-center space-y-6 shadow-xl">
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
+            Ready to Create Your Rental Agreement?
+          </h2>
+          <p className="text-xs sm:text-sm text-primary-foreground/85 max-w-xl mx-auto leading-relaxed">
+            Start now and have your customized, printable rental agreement ready in under 10
+            minutes.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/rental-agreement/create"
+              className="px-8 py-3.5 rounded-2xl bg-background text-foreground text-xs font-black shadow-md hover:bg-secondary transition active:scale-95"
+            >
+              Start Creating Agreement
+            </Link>
+            <Link
+              to="/my-agreements"
+              className="px-6 py-3.5 rounded-2xl bg-primary-foreground/15 hover:bg-primary-foreground/25 text-primary-foreground text-xs font-bold transition border border-primary-foreground/20"
+            >
+              View My Agreements
+            </Link>
           </div>
         </div>
-      )}
+      </section>
     </div>
   );
 }

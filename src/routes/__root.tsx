@@ -390,8 +390,8 @@ function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/profile" className="hover:text-foreground transition">
-                  My Profile
+                <Link to="/my-agreements" className="hover:text-foreground transition font-medium">
+                  My Agreements
                 </Link>
               </li>
               <li>

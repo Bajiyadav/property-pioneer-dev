@@ -22,6 +22,7 @@ import { Route as HelpRouteImport } from './routes/help'
 import { Route as HomeLoansRouteImport } from './routes/home-loans'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as LoansRouteImport } from './routes/loans'
+import { Route as MyAgreementsRouteImport } from './routes/my-agreements'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -45,6 +46,8 @@ import { Route as ListPropertyWizardRouteImport } from './routes/list-property.w
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesIdRouteImport } from './routes/properties.$id'
 import { Route as RentIndexRouteImport } from './routes/rent.index'
+import { Route as RentalAgreementIdRouteImport } from './routes/rental-agreement.$id'
+import { Route as RentalAgreementCreateRouteImport } from './routes/rental-agreement.create'
 import { Route as TenantMatchesRouteImport } from './routes/tenant.matches'
 import { Route as TenantOnboardingRouteImport } from './routes/tenant.onboarding'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -144,6 +147,11 @@ const ListPropertyRoute = ListPropertyRouteImport.update({
 const LoansRoute = LoansRouteImport.update({
   id: '/loans',
   path: '/loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyAgreementsRoute = MyAgreementsRouteImport.update({
+  id: '/my-agreements',
+  path: '/my-agreements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -260,6 +268,16 @@ const RentIndexRoute = RentIndexRouteImport.update({
   id: '/rent/',
   path: '/rent/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const RentalAgreementIdRoute = RentalAgreementIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => RentalAgreementRoute,
+} as any)
+const RentalAgreementCreateRoute = RentalAgreementCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => RentalAgreementRoute,
 } as any)
 const TenantMatchesRoute = TenantMatchesRouteImport.update({
   id: '/tenant/matches',
@@ -474,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
+  '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -481,7 +500,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
-  '/rental-agreement': typeof RentalAgreementRoute
+  '/rental-agreement': typeof RentalAgreementRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -492,6 +511,8 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rental-agreement/$id': typeof RentalAgreementIdRoute
+  '/rental-agreement/create': typeof RentalAgreementCreateRoute
   '/tenant/matches': typeof TenantMatchesRoute
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
@@ -546,13 +567,14 @@ export interface FileRoutesByTo {
   '/help': typeof HelpRoute
   '/home-loans': typeof HomeLoansRoute
   '/loans': typeof LoansRoute
+  '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/profile': typeof ProfileRoute
   '/refund-policy': typeof RefundPolicyRoute
-  '/rental-agreement': typeof RentalAgreementRoute
+  '/rental-agreement': typeof RentalAgreementRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -561,6 +583,8 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rental-agreement/$id': typeof RentalAgreementIdRoute
+  '/rental-agreement/create': typeof RentalAgreementCreateRoute
   '/tenant/matches': typeof TenantMatchesRoute
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy': typeof BuyIndexRoute
@@ -618,6 +642,7 @@ export interface FileRoutesById {
   '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
+  '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
   '/pricing': typeof PricingRoute
@@ -625,7 +650,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/properties': typeof PropertiesRouteWithChildren
   '/refund-policy': typeof RefundPolicyRoute
-  '/rental-agreement': typeof RentalAgreementRoute
+  '/rental-agreement': typeof RentalAgreementRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/why-us': typeof WhyUsRoute
@@ -636,6 +661,8 @@ export interface FileRoutesById {
   '/auth_/callback': typeof AuthCallbackRoute
   '/list-property/wizard': typeof ListPropertyWizardRoute
   '/properties/$id': typeof PropertiesIdRoute
+  '/rental-agreement/$id': typeof RentalAgreementIdRoute
+  '/rental-agreement/create': typeof RentalAgreementCreateRoute
   '/tenant/matches': typeof TenantMatchesRoute
   '/tenant/onboarding': typeof TenantOnboardingRoute
   '/buy/': typeof BuyIndexRoute
@@ -693,6 +720,7 @@ export interface FileRouteTypes {
     | '/home-loans'
     | '/list-property'
     | '/loans'
+    | '/my-agreements'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -711,6 +739,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/rental-agreement/$id'
+    | '/rental-agreement/create'
     | '/tenant/matches'
     | '/tenant/onboarding'
     | '/buy/'
@@ -765,6 +795,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/home-loans'
     | '/loans'
+    | '/my-agreements'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -780,6 +811,8 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/rental-agreement/$id'
+    | '/rental-agreement/create'
     | '/tenant/matches'
     | '/tenant/onboarding'
     | '/buy'
@@ -836,6 +869,7 @@ export interface FileRouteTypes {
     | '/home-loans'
     | '/list-property'
     | '/loans'
+    | '/my-agreements'
     | '/notifications'
     | '/plans'
     | '/pricing'
@@ -854,6 +888,8 @@ export interface FileRouteTypes {
     | '/auth_/callback'
     | '/list-property/wizard'
     | '/properties/$id'
+    | '/rental-agreement/$id'
+    | '/rental-agreement/create'
     | '/tenant/matches'
     | '/tenant/onboarding'
     | '/buy/'
@@ -911,6 +947,7 @@ export interface RootRouteChildren {
   HomeLoansRoute: typeof HomeLoansRoute
   ListPropertyRoute: typeof ListPropertyRouteWithChildren
   LoansRoute: typeof LoansRoute
+  MyAgreementsRoute: typeof MyAgreementsRoute
   NotificationsRoute: typeof NotificationsRoute
   PlansRoute: typeof PlansRoute
   PricingRoute: typeof PricingRoute
@@ -918,7 +955,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   PropertiesRoute: typeof PropertiesRouteWithChildren
   RefundPolicyRoute: typeof RefundPolicyRoute
-  RentalAgreementRoute: typeof RentalAgreementRoute
+  RentalAgreementRoute: typeof RentalAgreementRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
   WhyUsRoute: typeof WhyUsRoute
@@ -1042,6 +1079,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof LoansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-agreements': {
+      id: '/my-agreements'
+      path: '/my-agreements'
+      fullPath: '/my-agreements'
+      preLoaderRoute: typeof MyAgreementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -1204,6 +1248,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/rent/'
       preLoaderRoute: typeof RentIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/rental-agreement/$id': {
+      id: '/rental-agreement/$id'
+      path: '/$id'
+      fullPath: '/rental-agreement/$id'
+      preLoaderRoute: typeof RentalAgreementIdRouteImport
+      parentRoute: typeof RentalAgreementRoute
+    }
+    '/rental-agreement/create': {
+      id: '/rental-agreement/create'
+      path: '/create'
+      fullPath: '/rental-agreement/create'
+      preLoaderRoute: typeof RentalAgreementCreateRouteImport
+      parentRoute: typeof RentalAgreementRoute
     }
     '/tenant/matches': {
       id: '/tenant/matches'
@@ -1567,6 +1625,20 @@ const PropertiesRouteWithChildren = PropertiesRoute._addFileChildren(
   PropertiesRouteChildren,
 )
 
+interface RentalAgreementRouteChildren {
+  RentalAgreementIdRoute: typeof RentalAgreementIdRoute
+  RentalAgreementCreateRoute: typeof RentalAgreementCreateRoute
+}
+
+const RentalAgreementRouteChildren: RentalAgreementRouteChildren = {
+  RentalAgreementIdRoute: RentalAgreementIdRoute,
+  RentalAgreementCreateRoute: RentalAgreementCreateRoute,
+}
+
+const RentalAgreementRouteWithChildren = RentalAgreementRoute._addFileChildren(
+  RentalAgreementRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1581,6 +1653,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeLoansRoute: HomeLoansRoute,
   ListPropertyRoute: ListPropertyRouteWithChildren,
   LoansRoute: LoansRoute,
+  MyAgreementsRoute: MyAgreementsRoute,
   NotificationsRoute: NotificationsRoute,
   PlansRoute: PlansRoute,
   PricingRoute: PricingRoute,
@@ -1588,7 +1661,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   PropertiesRoute: PropertiesRouteWithChildren,
   RefundPolicyRoute: RefundPolicyRoute,
-  RentalAgreementRoute: RentalAgreementRoute,
+  RentalAgreementRoute: RentalAgreementRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
   WhyUsRoute: WhyUsRoute,

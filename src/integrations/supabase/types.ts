@@ -14,6 +14,69 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: "14.5" };
   public: {
     Tables: {
+      rental_agreements: {
+        Row: {
+          id: string;
+          user_id: string;
+          agreement_number: string;
+          agreement_type: string;
+          tenant_type: string;
+          status: string;
+          owner_details: Json;
+          tenants: Json;
+          property_details: Json;
+          rental_terms: Json;
+          clauses: Json;
+          custom_terms: Json | null;
+          payment_status: string;
+          payment_amount: number;
+          payment_reference: string | null;
+          original_agreement_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          agreement_number?: string;
+          agreement_type: string;
+          tenant_type: string;
+          status?: string;
+          owner_details: Json;
+          tenants: Json;
+          property_details: Json;
+          rental_terms: Json;
+          clauses: Json;
+          custom_terms?: Json | null;
+          payment_status?: string;
+          payment_amount?: number;
+          payment_reference?: string | null;
+          original_agreement_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          agreement_number?: string;
+          agreement_type?: string;
+          tenant_type?: string;
+          status?: string;
+          owner_details?: Json;
+          tenants?: Json;
+          property_details?: Json;
+          rental_terms?: Json;
+          clauses?: Json;
+          custom_terms?: Json | null;
+          payment_status?: string;
+          payment_amount?: number;
+          payment_reference?: string | null;
+          original_agreement_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       kyc_documents: {
         Row: {
           id: string;

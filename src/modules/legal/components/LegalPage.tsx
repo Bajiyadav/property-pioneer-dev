@@ -4,7 +4,7 @@ import { APP_NAME } from "@/config/app";
 export const LEGAL_CONTACT = "support@seedhaproperties.com";
 
 /** Every legal page states the date it took effect, so revisions are auditable. */
-export const LEGAL_EFFECTIVE_DATE = "17 August 2026";
+export const LEGAL_EFFECTIVE_DATE = "28 August 2026";
 
 export interface LegalSection {
   heading: string;
