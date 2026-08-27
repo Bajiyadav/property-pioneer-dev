@@ -118,66 +118,74 @@ export function WhySeedhaProperties() {
           })}
         </div>
 
-        {/* Traditional Agents vs. SEEDHA Properties Comparison */}
+        {/* Traditional Brokers vs. SEEDHA Properties Comparison */}
         <div className="mt-20">
           <div className="text-center mb-10">
-            <h3 className="text-2xl font-extrabold text-foreground sm:text-3xl">
-              Traditional Agents vs. SEEDHA Properties
+            <h3 className="text-2xl font-extrabold text-foreground sm:text-3xl tracking-tight">
+              Traditional Brokers vs. SEEDHA Properties
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              See how much time and money you save with us
+              See why direct discovery saves you thousands of rupees and weeks of frustration
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
             {/* Traditional Brokers */}
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 shadow-sm">
-              <h4 className="text-lg font-bold text-red-900 dark:text-red-400 mb-6 flex items-center gap-2">
+            <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 shadow-sm">
+              <h4 className="text-lg font-bold text-rose-600 dark:text-rose-400 mb-6 flex items-center gap-2">
                 Traditional Real Estate Brokers
               </h4>
-              <ul className="space-y-4 text-sm text-muted-foreground">
+              <ul className="space-y-4 text-sm text-muted-foreground leading-relaxed">
                 <li className="flex items-start gap-3">
-                  <span className="text-red-500 shrink-0">❌</span>
-                  <span>1 to 2 months' rent brokerage charged</span>
+                  <span className="text-rose-500 font-bold shrink-0">✕</span>
+                  <span>1 to 2 months' rent brokerage charged up front</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-red-500 shrink-0">❌</span>
-                  <span>Unverified photos & misleading prices</span>
+                  <span className="text-rose-500 font-bold shrink-0">✕</span>
+                  <span>Unverified photos, outdated prices &amp; bait listings</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-red-500 shrink-0">❌</span>
-                  <span>High pressure sales tactics</span>
+                  <span className="text-rose-500 font-bold shrink-0">✕</span>
+                  <span>Aggressive sales tactics and biased recommendations</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-red-500 shrink-0">❌</span>
-                  <span>No rental agreement support</span>
+                  <span className="text-rose-500 font-bold shrink-0">✕</span>
+                  <span>No rental agreement drafting or digital stamping support</span>
                 </li>
               </ul>
             </div>
 
             {/* SEEDHA Properties */}
-            <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-8 shadow-md ring-1 ring-primary/20 relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 bg-primary text-primary-foreground text-[10px] font-extrabold px-6 py-1 rounded-full transform rotate-12">
+            <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-8 shadow-md ring-1 ring-primary/20 relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 bg-primary text-primary-foreground text-[10px] font-black px-6 py-1 rounded-full transform rotate-12 shadow-xs">
                 BEST CHOICE
               </div>
               <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
                 SEEDHA Properties Platform
               </h4>
-              <ul className="space-y-4 text-sm font-medium text-foreground">
+              <ul className="space-y-4 text-sm font-medium text-foreground leading-relaxed">
                 <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                  <span>₹0 Brokerage for Tenants & Buyers</span>
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>
+                    <strong>₹0 Brokerage</strong> for both tenants &amp; buyers
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                  <span>Physically Verified Photos & Video Tours</span>
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>
+                    <strong>100% Physically Verified</strong> photos &amp; HD video tours
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                  <span>Free Area Specialist Site Visit Assistance</span>
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Free Local Specialist</strong> site visit &amp; walkthrough assistance
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                  <span>Online E-Stamping & Rental Agreements</span>
+                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Online E-Stamping</strong> &amp; verified digital rental agreements
+                  </span>
                 </li>
               </ul>
             </div>
