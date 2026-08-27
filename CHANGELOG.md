@@ -1,3 +1,19 @@
+## v0.82.0 — 2026-08-27
+
+### Features
+- feat: implement multi-level admin scoping and push notification infra (efbfd35)
+
+### Fixes
+- fix: resolve build errors from bad imports and duplicate declarations (312d5d6)
+
+### Migration notes
+- supabase/migrations/20260827010000_create_site_visitors_table.sql
+- supabase/migrations/20260827133000_setup_messaging_webhooks.sql
+- supabase/migrations/20260827230000_add_user_devices.sql
+- supabase/migrations/20260828000000_agent_property_submission.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.81.0 — 2026-08-27
 
 ### Features
