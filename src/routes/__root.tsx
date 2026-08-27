@@ -222,6 +222,30 @@ function SiteHeader() {
           >
             <BrandMark responsiveName />
           </Link>
+          {/* Quick Nav Links on Desktop */}
+          <nav className="hidden md:flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+            <Link
+              to="/why-us"
+              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition"
+            >
+              Why Us
+            </Link>
+            <Link
+              to="/rental-agreement"
+              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition flex items-center gap-1.5"
+            >
+              <span>Rental Agreement</span>
+              <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[9px] font-bold">
+                E-Sign
+              </span>
+            </Link>
+            <Link
+              to="/home-loans"
+              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition"
+            >
+              Home Loans
+            </Link>
+          </nav>
 
           {/*
             User Actions & CTAs
@@ -253,8 +277,8 @@ function SiteHeader() {
       {/* Interactive Expansion & Services Modals */}
       <ExpansionWaitlistModal
         isOpen={Boolean(waitlistCategory)}
-        onClose={() => setWaitlistCategory(null)}
         categoryName={waitlistCategory || ""}
+        onClose={() => setWaitlistCategory(null)}
       />
     </>
   );
@@ -326,6 +350,14 @@ function SiteFooter() {
                   className="hover:text-foreground transition"
                 >
                   Commercial Spaces
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/rental-agreement"
+                  className="hover:text-foreground transition font-semibold text-primary flex items-center gap-1"
+                >
+                  <span>Rent Agreement in Hyderabad</span>
                 </Link>
               </li>
               <li>

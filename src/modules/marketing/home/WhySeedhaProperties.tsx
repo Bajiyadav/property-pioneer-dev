@@ -184,10 +184,19 @@ export function WhySeedhaProperties() {
                 <li className="flex items-start gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <span>
-                    <strong>Online E-Stamping</strong> &amp; verified digital rental agreements
+                    <strong>Online E-Stamping</strong> &amp; digital rental agreements in Hyderabad
                   </span>
                 </li>
               </ul>
+              <div className="mt-6 pt-4 border-t border-primary/20">
+                <Link
+                  to="/rental-agreement"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                >
+                  <span>Explore Online Rental Agreement Service</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
