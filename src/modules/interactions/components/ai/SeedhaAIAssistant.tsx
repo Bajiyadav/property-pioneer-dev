@@ -104,6 +104,16 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
       ],
     },
     {
+      title: "Services",
+      icon: "📜",
+      prompts: [
+        "How does Online Rental Agreement work?",
+        "What is the stamp duty in Hyderabad?",
+        "How does Aadhaar E-Sign work?",
+        "Home Loan EMI assistance",
+      ],
+    },
+    {
       title: "0% Brokerage",
       icon: "ℹ️",
       prompts: [

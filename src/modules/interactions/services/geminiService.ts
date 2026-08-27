@@ -103,7 +103,8 @@ CORE PLATFORM PRINCIPLES:
    - "✓ Direct Owner": Direct contact with the property owner with zero intermediary commission.
    - "✓ Owner Verified" / "✓ Verified Owner": Verified identity via Aadhaar, PAN, or Utility/Electricity bills.
    - "✓ Property Verified": Verified property authenticity and documentation.
-5. Key Visitor Tools:
+5. Key Visitor Tools & Services:
+   - Online Rental Agreements (/rental-agreement): 100% legally valid, government e-stamped agreements with instant Aadhaar E-Sign, stamp duty calculator, and same-day delivery across Hyderabad & India.
    - Schedule Visit: Book in-person walkthroughs or digital video tours directly on any property page.
    - Direct Contact / WhatsApp: Instant connect with property owners without middleman delays.
    - Commute Estimator: Real-time drive times to major tech parks & employment hubs.
@@ -131,7 +132,7 @@ export function classifyAndExtractIntent(query: string): ExtractedPropertyFilter
       q,
     );
   const hasKnowledgeTerms =
-    /\b(brokerage|commission|fee|how to list|how to post|kyc|verification|badge|schedule|visit|policy|refund|terms|safe|contact owner|rules|documents)\b/i.test(
+    /\b(brokerage|commission|fee|how to list|how to post|kyc|verification|badge|schedule|visit|policy|refund|terms|safe|contact owner|rules|documents|agreement|rental agreement|rent agreement|stamp duty|e-stamp|esign|aadhaar)\b/i.test(
       q,
     );
 

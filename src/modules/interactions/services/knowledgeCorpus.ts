@@ -88,6 +88,28 @@ export const SEEDHA_KNOWLEDGE_DOCS: KnowledgeChunk[] = [
       "gachibowli",
     ],
   },
+  {
+    id: "doc-rental-agreement",
+    source: "Seedha Legal & Agreement Service",
+    category: "guide",
+    title: "Online Rental Agreement & E-Stamping",
+    content:
+      "Seedha Properties provides legally valid, government-stamped online rental agreements (/rental-agreement) across Hyderabad, Telangana, Karnataka, Maharashtra, Delhi-NCR, and Tamil Nadu. Features include: 1. Live Stamp Duty & Cost Calculator, 2. Aadhaar E-Sign for remote multi-city signing, 3. Government E-Stamp Paper, 4. Soft copy delivered within 24 hours, and 5. Optional physical doorstep delivery & notarisation. 100% legally binding under the Indian Registration Act and Evidence Act.",
+    tags: [
+      "agreement",
+      "rental agreement",
+      "rent agreement",
+      "stamp duty",
+      "e-stamp",
+      "aadhaar",
+      "e-sign",
+      "esign",
+      "notary",
+      "legal",
+      "hyderabad",
+      "contract",
+    ],
+  },
 ];
 
 /**
