@@ -1,3 +1,8 @@
+## v0.86.0 — 2026-08-27
+
+### Features
+- feat(copy): update hero title to 'Find Your Next Home Directly from Verified Owners' (843c2a0)
+
 ## v0.85.0 — 2026-08-27
 
 ### Features
