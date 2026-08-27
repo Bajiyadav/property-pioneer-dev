@@ -23,9 +23,9 @@ interface ValueCard {
 
 const VALUE_CARDS: ValueCard[] = [
   {
-    title: "0% Brokerage Guarantee",
-    desc: "Never pay 1 to 2 months' rent as broker commission again. Contact owners directly or get free walkthrough assistance from our assigned local area specialists.",
-    badge: "0% Commission",
+    title: "Zero Brokerage",
+    desc: "Save 1–2 months of rent on every deal. Connect and negotiate directly with authentic property owners.",
+    badge: "100% Free",
     icon: Lock,
     cta: "Contact Owners Directly",
     to: "/properties",
@@ -33,17 +33,17 @@ const VALUE_CARDS: ValueCard[] = [
     highlight: true,
   },
   {
-    title: "100% Physical Verification",
-    desc: "Every listing is thoroughly inspected on‑site for authentic ownership records, genuine HD photos, and verified amenities—eliminating fake listings.",
-    badge: "Verified",
+    title: "Verified Listings",
+    desc: "Real photos, authentic ownership records, and accurate amenities. What you see is exactly what you get.",
+    badge: "Inspected",
     icon: ShieldCheck,
     cta: "See Verified Homes",
     to: "/properties",
     search: SEARCH_DEFAULTS,
   },
   {
-    title: "Local Territory Specialists",
-    desc: "Our micro-market area specialists in Kukatpally, Gachibowli, Madhapur, and Kondapur accompany you on site visits and assist with rental agreements.",
+    title: "Territory Specialists",
+    desc: "Micro-market specialists across Hyderabad assist with property walkthroughs and digital rental agreements.",
     badge: "Local Experts",
     icon: MapPin,
     cta: "Find Your Area Specialist",

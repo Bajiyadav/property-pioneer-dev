@@ -35,7 +35,7 @@ function WhyUsPage() {
       <section className="relative overflow-hidden pt-14 pb-16 border-b border-border/40 bg-gradient-to-b from-primary/5 via-background to-background">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-6">
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-xs font-bold text-primary uppercase tracking-wider shadow-2xs">
-            <Sparkles className="h-3.5 w-3.5" /> 100% Direct • Zero Commission
+            <Sparkles className="h-3.5 w-3.5" /> 100% Direct • Zero Brokerage
           </span>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-foreground tracking-tight max-w-4xl mx-auto leading-tight">
@@ -43,9 +43,8 @@ function WhyUsPage() {
           </h1>
 
           <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            {APP_NAME} connects tenants and buyers directly with authentic property owners and local
-            micro-market specialists — eliminating broker fees, fake photos, and middleman delays
-            across Hyderabad.
+            Direct connections with verified property owners. No brokers, no hidden fees, and zero
+            commissions across Hyderabad.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
@@ -61,13 +60,13 @@ function WhyUsPage() {
               }}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-md transition hover:brightness-110 hover:shadow-lg active:scale-95"
             >
-              Explore Verified Homes <ArrowRight className="h-4 w-4" />
+              Explore Homes <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/list-property"
               className="inline-flex items-center gap-2 rounded-full bg-card border border-border/80 px-6 py-3 text-sm font-extrabold text-foreground transition hover:bg-secondary/80 hover:border-primary/50 shadow-2xs active:scale-95"
             >
-              <span>Post Free Property</span>
+              <span>Post Property</span>
               <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-black uppercase">
                 Free
               </span>
@@ -77,13 +76,13 @@ function WhyUsPage() {
           {/* Trust Stat Strip */}
           <div className="pt-6 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs font-semibold text-muted-foreground">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 border border-border/60 px-3.5 py-1.5 text-foreground shadow-2xs">
-              <Zap className="h-3.5 w-3.5 text-amber-500" /> ₹0 Brokerage Charged
+              <Zap className="h-3.5 w-3.5 text-amber-500" /> Zero Brokerage
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 border border-border/60 px-3.5 py-1.5 text-foreground shadow-2xs">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> 100% On-Site Verification
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> 100% Verified
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/80 border border-border/60 px-3.5 py-1.5 text-foreground shadow-2xs">
-              <Users className="h-3.5 w-3.5 text-blue-500" /> Local Specialist Support
+              <Users className="h-3.5 w-3.5 text-blue-500" /> Direct Owners
             </span>
           </div>
         </div>
@@ -93,11 +92,10 @@ function WhyUsPage() {
       <section className="mx-auto max-w-6xl px-4 sm:px-6 space-y-10">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-            Why 50,000+ Users Trust {APP_NAME}
+            The Modern Way to Rent &amp; Buy
           </h2>
           <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-            Built from the ground up to eliminate real estate scams, high brokerage fees, and
-            outdated listings.
+            Designed for speed, transparency, and real savings.
           </p>
         </div>
 
@@ -108,15 +106,15 @@ function WhyUsPage() {
                 <Zap className="h-6 w-6" />
               </div>
               <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 text-[11px] font-bold">
-                Zero Fees
+                100% Free
               </span>
             </div>
             <h3 className="text-lg font-bold text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-              0% Brokerage Guarantee
+              Zero Brokerage
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Never pay 1 to 2 months' rent to middlemen. Connect directly with verified owners and
-              save ₹25,000–₹1,00,000 on every lease or purchase.
+              Save 1–2 months of rent on every deal. Connect and negotiate directly with authentic
+              property owners.
             </p>
           </div>
 
@@ -126,15 +124,15 @@ function WhyUsPage() {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <span className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold">
-                100% Verified
+                Inspected
               </span>
             </div>
             <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-              100% Physical Verification
+              Verified Listings
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Every home listed on our portal undergoes on-site verification checks for photos,
-              ownership documents, and amenities accuracy. Zero ghost listings.
+              Real photos, authentic ownership records, and accurate amenities. What you see is
+              exactly what you get.
             </p>
           </div>
 
@@ -144,15 +142,15 @@ function WhyUsPage() {
                 <Users className="h-6 w-6" />
               </div>
               <span className="rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2.5 py-0.5 text-[11px] font-bold">
-                On-Ground Team
+                Local Experts
               </span>
             </div>
             <h3 className="text-lg font-bold text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-              Local Territory Specialists
+              Territory Specialists
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Our micro-market specialists in Kukatpally, Gachibowli, Madhapur, and Kondapur
-              accompany you on property visits and assist with legal rental agreements.
+              Micro-market specialists across Hyderabad assist with property walkthroughs and
+              digital rental agreements.
             </p>
           </div>
         </div>
@@ -166,7 +164,7 @@ function WhyUsPage() {
               Traditional Brokers vs. {APP_NAME}
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              See why direct discovery saves you thousands of rupees and weeks of frustration
+              Clear advantages from search to move-in
             </p>
           </div>
 
@@ -178,19 +176,19 @@ function WhyUsPage() {
               <ul className="space-y-2.5 text-muted-foreground leading-relaxed">
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>1 to 2 months' rent brokerage charged up front</span>
+                  <span>1 to 2 months' rent brokerage fees</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>Unverified photos, outdated prices &amp; bait listings</span>
+                  <span>Fake photos, outdated prices &amp; bait listings</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>Aggressive sales tactics and biased recommendations</span>
+                  <span>High-pressure sales calls and biased advice</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>No rental agreement drafting or digital stamping support</span>
+                  <span>Slow, manual agreement paperwork</span>
                 </li>
               </ul>
             </div>
@@ -206,25 +204,25 @@ function WhyUsPage() {
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>₹0 Brokerage</strong> for both tenants &amp; buyers
+                    <strong>Zero Brokerage</strong> for tenants &amp; buyers
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>100% Physically Verified</strong> photos &amp; HD video tours
+                    <strong>100% Verified</strong> photos &amp; HD tours
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>Free Local Specialist</strong> site visit &amp; walkthrough assistance
+                    <strong>Direct Contact</strong> with authentic property owners
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>Online E-Stamping</strong> &amp; verified digital rental agreements
+                    <strong>Instant Digital</strong> agreements &amp; e-stamping
                   </span>
                 </li>
               </ul>
@@ -237,12 +235,10 @@ function WhyUsPage() {
       <section className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 p-8 sm:p-10 text-white text-center space-y-4 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-1/4 w-72 h-72 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Ready to Find Your Ideal Home?
-          </h3>
+          <h3 className="text-2xl sm:text-3xl font-black tracking-tight">Ready to Move In?</h3>
           <p className="text-xs sm:text-sm text-emerald-100 max-w-xl mx-auto leading-relaxed">
-            Browse verified listings in Kukatpally, Gachibowli, Madhapur, Hitec City, and Kondapur
-            with zero brokerage fees.
+            Explore verified rental homes and properties for sale across Hyderabad with zero
+            brokerage.
           </p>
           <div className="pt-2">
             <Link
@@ -257,7 +253,7 @@ function WhyUsPage() {
               }}
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs sm:text-sm font-black text-emerald-800 shadow-md hover:bg-emerald-50 transition-all hover:scale-105 active:scale-95"
             >
-              Browse Listings Now <ArrowRight className="h-4 w-4" />
+              Explore Listings <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
