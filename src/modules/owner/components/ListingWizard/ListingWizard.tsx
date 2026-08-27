@@ -25,7 +25,8 @@ import type { ListingFormData } from "./types";
 import { buildListingPayload } from "./buildListingPayload";
 import { BrandMark } from "@/components/branding/BrandMark";
 import { useServerFn } from "@tanstack/react-start";
-import { createListing } from "@/modules/owner/services/ownerFunctions";
+import { createListing, editListing } from "@/modules/owner/services/ownerFunctions";
+import type { Property } from "@/modules/property/services/propertyQueries";
 import { useAuth } from "@/modules/authentication/context/AuthContext";
 import { LISTING_PHONE_KEY } from "@/routes/list-property";
 import { resolveInitialStep } from "./resolveInitialStep";
@@ -40,6 +41,7 @@ interface ListingWizardProps {
     prefilled?: boolean;
     step?: number;
   };
+  editProperty?: Property | null;
 }
 
 /**
@@ -137,78 +139,90 @@ const steps = [
   { id: 7, name: "Review", desc: "Verify & Submit", percent: 100 },
 ];
 
-export function ListingWizard({ initialData }: ListingWizardProps = {}) {
+export function ListingWizard({ initialData, editProperty }: ListingWizardProps = {}) {
   const navigate = useNavigate();
   const stashedDraft = readStashedDraft();
 
   const initialStep = resolveInitialStep(initialData);
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [isSaving, setIsSaving] = useState(false);
-  const { status, user, refreshSession } = useAuth();
+  const { status, user, role, roleVerified, refreshSession } = useAuth();
   const create = useServerFn(createListing);
+  const edit = useServerFn(editListing);
   const addProperty = useAdminPropertyStore((state) => state.addProperty);
 
   const [formData, setFormData] = useState<ListingFormData>({
-    owner_name:
-      (user?.user_metadata?.full_name as string) ||
-      (user?.user_metadata?.name as string) ||
-      stashedDraft?.owner_name ||
-      "",
-    owner_phone:
-      (user?.user_metadata?.phone as string) ||
-      (user?.phone as string) ||
-      readStashedPhone() ||
-      stashedDraft?.owner_phone ||
-      "",
-    owner_email: user?.email || stashedDraft?.owner_email || "",
+    owner_name: stashedDraft?.owner_name || "",
+    owner_phone: readStashedPhone() || stashedDraft?.owner_phone || "",
+    owner_email: stashedDraft?.owner_email || "",
     project_name: "",
     city: initialData?.city || stashedDraft?.city || "Hyderabad",
     locality: initialData?.locality || stashedDraft?.locality || "",
     address: "",
     landmark: "",
     property_type:
-      initialData?.propertyType === "Commercial"
-        ? "Office"
-        : stashedDraft?.property_type || "Apartment",
-    listing_type: initialData?.intent === "Sell" ? "sale" : stashedDraft?.listing_type || "rent",
-    bhk_type: "2 BHK",
-    bedrooms: 2,
-    bathrooms: 2,
-    floor_number: "1-3",
-    total_rooms: 3,
-    area_sqft: 1100,
+      initialData?.propertyType === "Commercial" ? "Office" : stashedDraft?.property_type || "",
+    listing_type: initialData?.intent === "Sell" ? "sale" : stashedDraft?.listing_type || "",
+    bhk_type: stashedDraft?.bhk_type || "",
+    bedrooms: stashedDraft?.bedrooms || 0,
+    bathrooms: stashedDraft?.bathrooms || 0,
+    floor_number: stashedDraft?.floor_number || "",
+    total_rooms: stashedDraft?.total_rooms || 0,
+    area_sqft: stashedDraft?.area_sqft || 0,
     area_unit: "Sq.ft",
-    furnishing_status: "semi-furnished",
-    preferred_tenant: ["Family"],
-    food_preference: "Any (Non-Veg OK)",
-    price: 25000,
-    deposit: 50000,
-    maintenance: 2500,
-    maintenance_included: false,
-    amenities: ["Lift", "Power Backup", "24x7 Security", "Reserved Parking"],
-    images: [],
-    title: "",
-    description: "",
-    property_age: "0-1 Years",
-    total_floors: 5,
-    exact_floor: 2,
-    balconies: 1,
-    parking_covered: 1,
-    parking_open: 0,
-    facing: "East",
-    available_from: "",
-    rent_negotiable: false,
+    furnishing_status: stashedDraft?.furnishing_status || "",
+    preferred_tenant: stashedDraft?.preferred_tenant || [],
+    food_preference: stashedDraft?.food_preference || "",
+    price: stashedDraft?.price || 0,
+    deposit: stashedDraft?.deposit || 0,
+    maintenance: stashedDraft?.maintenance || 0,
+    maintenance_included: stashedDraft?.maintenance_included || false,
+    amenities: stashedDraft?.amenities || [],
+    images: stashedDraft?.images || [],
+    title: stashedDraft?.title || "",
+    description: stashedDraft?.description || "",
+    property_age: stashedDraft?.property_age || "",
+    total_floors: stashedDraft?.total_floors || 0,
+    exact_floor: stashedDraft?.exact_floor || 0,
+    balconies: stashedDraft?.balconies || 0,
+    parking_covered: stashedDraft?.parking_covered || 0,
+    parking_open: stashedDraft?.parking_open || 0,
+    facing: stashedDraft?.facing || "",
+    available_from: stashedDraft?.available_from || "",
+    rent_negotiable: stashedDraft?.rent_negotiable || false,
     visit_availability: "Immediate",
     visit_days: ["All Days"],
     visit_time_slots: ["Morning", "Evening"],
     contact_preference: "all",
     owner_declaration: false,
-    ...(stashedDraft ?? {}),
+    id: editProperty?.id,
+    ...(editProperty
+      ? {
+          owner_name: (editProperty as any).owner_name || "",
+          owner_phone: (editProperty as any).owner_phone || "",
+          owner_email: (editProperty as any).owner_email || "",
+          city: editProperty.city || "",
+          locality: editProperty.locality || "",
+          address: editProperty.address || "",
+          landmark: editProperty.landmark || "",
+          property_type: editProperty.property_type || "",
+          listing_type: editProperty.listing_type || "",
+          bedrooms: editProperty.bedrooms || 0,
+          bathrooms: editProperty.bathrooms || 0,
+          area_sqft: editProperty.area_sqft || 0,
+          price: editProperty.price || 0,
+          images: editProperty.images || [],
+          title: editProperty.title || "",
+          description: editProperty.description || "",
+          available_from: editProperty.available_from || "",
+        }
+      : (stashedDraft ?? {})),
   });
 
   // Automatically populate owner contact from user profile whenever auth state settles
   useEffect(() => {
-    if (status === "authenticated" && user) {
+    if (status === "authenticated" && user && roleVerified) {
+      if (role === "agent" || role === "admin") return;
       setFormData((prev) => ({
         ...prev,
         owner_name:
@@ -221,7 +235,7 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         owner_email: prev.owner_email || user.email || "",
       }));
     }
-  }, [status, user]);
+  }, [status, user, role, roleVerified]);
 
   const updateFormData = (data: Partial<ListingFormData>) => {
     setFormData((prev) => {
@@ -308,11 +322,24 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
       return;
     }
 
-    setIsSaving(true);
     try {
-      const created = await create({ data: built.payload });
+      setIsSaving(true);
+      const built = buildListingPayload(formData, mode);
+      const isEditing = !!formData.id;
 
-      clearDraft();
+      if (!built.ok) {
+        toast.error(built.problems[0].message);
+        setIsSaving(false);
+        return;
+      }
+
+      let created;
+      if (isEditing) {
+        created = await edit({ data: { id: formData.id!, patch: built.payload } });
+      } else {
+        created = await create({ data: built.payload });
+        clearDraft();
+      }
 
       // Refresh session in case user just acquired owner role
       await refreshSession();
@@ -322,8 +349,8 @@ export function ListingWizard({ initialData }: ListingWizardProps = {}) {
         {
           description:
             mode === "draft"
-              ? "You can resume editing anytime from your dashboard."
-              : "Our moderation team will review and verify your listing within 2-4 hours.",
+              ? "Your draft has been saved. You can continue later."
+              : "We'll review your listing and make it live within 24 hours.",
         },
       );
 

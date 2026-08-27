@@ -1,0 +1,15 @@
+{
+  "hero": {
+    "title": "भारत में अपनी संपूर्ण संपत्ति खोजें",
+    "subtitle": "खरीदें • किराए पर लें • वाणिज्यिक — सब एक जगह",
+    "quick_buy": "खरीदें",
+    "quick_buy_desc": "संपत्ति",
+    "quick_rent": "किराए पर",
+    "quick_rent_desc": "घर",
+    "quick_commercial": "वाणिज्यिक",
+    "quick_commercial_desc": "स्थान"
+  },
+  "nav": {
+    "language": "भाषा"
+  }
+}

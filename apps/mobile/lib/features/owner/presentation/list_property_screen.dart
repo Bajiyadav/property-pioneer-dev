@@ -6,9 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/supabase_service.dart';
+import 'package:seedha_properties_mobile/models/property.dart';
 
 class ListPropertyScreen extends ConsumerStatefulWidget {
-  const ListPropertyScreen({super.key});
+  final Property? propertyToEdit;
+  
+  const ListPropertyScreen({super.key, this.propertyToEdit});
 
   @override
   ConsumerState<ListPropertyScreen> createState() => _ListPropertyScreenState();
@@ -35,7 +38,34 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
   String _propertyType = 'Apartment';
   final String _furnishing = 'Semi Furnished';
   bool _isLoading = false;
-  final Set<String> _selectedAmenities = {'Power Backup', 'Lift', 'Covered Car Parking', '24/7 Security & CCTV'};
+  late Set<String> _selectedAmenities;
+
+  @override
+  void initState() {
+    super.initState();
+    final p = widget.propertyToEdit;
+    if (p != null) {
+      _selectedCategory = p.listingType == 'sale' ? PropertyCategory.buy : PropertyCategory.rent;
+      _titleController.text = p.title;
+      _descController.text = p.description ?? '';
+      _priceController.text = p.price.toStringAsFixed(0);
+      _depositController.text = p.deposit?.toStringAsFixed(0) ?? '';
+      _bedsController.text = p.bedrooms.toString();
+      _bathsController.text = p.bathrooms.toString();
+      _areaController.text = p.areaSqft.toString();
+      _selectedCity = ['Hyderabad', 'Bengaluru'].contains(p.city) ? p.city : 'Other';
+      if (_selectedCity == 'Other') _customCityController.text = p.city;
+      _localityController.text = p.locality ?? '';
+      _addressController.text = p.address;
+      _pincodeController.text = p.pincode ?? '';
+      _videoUrlController.text = p.videoUrl ?? '';
+      _propertyType = ['apartment', 'villa', 'independent house'].contains(p.propertyType.toLowerCase()) ? 
+          p.propertyType[0].toUpperCase() + p.propertyType.substring(1) : 'Apartment';
+      _selectedAmenities = Set<String>.from(p.amenities);
+    } else {
+      _selectedAmenities = {'Power Backup', 'Lift', 'Covered Car Parking', '24/7 Security & CCTV'};
+    }
+  }
 
   @override
   void dispose() {
@@ -91,8 +121,8 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
       // listing had none. An empty list is the honest state: every render site
       // already guards with `images.isNotEmpty` and falls back to a placeholder.
       const List<String> images = <String>[];
-
-      await SupabaseService.client.from('properties').insert({
+      
+      final payload = {
         'owner_id': user.id,
         'owner_name': user.userMetadata?['full_name'] as String? ?? 'Owner',
         'owner_phone': user.userMetadata?['phone'] as String? ?? '',
@@ -112,30 +142,38 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
         'listing_type': _selectedCategory == PropertyCategory.buy ? 'sale' : 'rent',
         'furnishing_status': _furnishing.toLowerCase().replaceAll(' ', '-'),
         'amenities': _selectedAmenities.toList(),
-        // Moderation state. This screen previously inserted is_approved: true
-        // with status 'available', which put an owner's listing straight into
-        // the public feed — the "Public can view approved properties" policy is
-        // USING (is_approved = true) — with no review at all. Owner submissions
-        // enter moderation here exactly as the wizard path does.
-        'status': 'unapproved',
-        'is_approved': false,
-        'images': images,
         'video_url': videoUrl.isNotEmpty ? videoUrl : null,
-        // Self-approving submitted video was the same bypass one level down.
         'video_status': videoUrl.isNotEmpty ? 'pending' : null,
-        'is_zero_brokerage': true,
-        'created_at': DateTime.now().toIso8601String(),
-      }).timeout(AppConstants.networkTimeout);
+      };
+
+      if (widget.propertyToEdit != null) {
+        // Enforce re-moderation by un-approving if there are edits
+        payload['is_approved'] = false;
+        payload['status'] = 'unapproved';
+        await SupabaseService.client.from('properties')
+            .update(payload)
+            .eq('id', widget.propertyToEdit!.id)
+            .timeout(AppConstants.networkTimeout);
+      } else {
+        payload['status'] = 'unapproved';
+        payload['is_approved'] = false;
+        payload['images'] = images;
+        payload['is_zero_brokerage'] = true;
+        payload['created_at'] = DateTime.now().toIso8601String();
+        await SupabaseService.client.from('properties')
+            .insert(payload)
+            .timeout(AppConstants.networkTimeout);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Color(0xFF0F766E),
-            // The listing is queued, not live. Saying "published" when it is
-            // awaiting review is the kind of claim owners plan around.
             content: Text(
-              'Property submitted successfully. Your property is pending approval — '
-              'add photos from My Listings to help it get approved faster.',
+              widget.propertyToEdit != null 
+                ? 'Property updated successfully. Your changes are pending approval.'
+                : 'Property submitted successfully. Your property is pending approval — '
+                  'add photos from My Listings to help it get approved faster.',
             ),
           ),
         );

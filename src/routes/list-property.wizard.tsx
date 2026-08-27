@@ -14,6 +14,7 @@ export interface WizardSearch {
   locality?: string;
   prefilled?: boolean;
   step?: number;
+  editId?: string;
 }
 
 export const Route = createFileRoute("/list-property/wizard")({
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/list-property/wizard")({
         : typeof search.step === "string"
           ? parseInt(search.step, 10)
           : undefined;
+    const rawEditId = typeof search.editId === "string" ? search.editId : undefined;
 
     return {
       propertyType: (rawType === "Commercial" ? "Commercial" : "Residential") as
@@ -43,16 +45,26 @@ export const Route = createFileRoute("/list-property/wizard")({
       ...(rawLocality ? { locality: rawLocality } : {}),
       ...(rawPrefilled !== undefined ? { prefilled: rawPrefilled } : {}),
       ...(rawStep !== undefined ? { step: rawStep } : {}),
+      ...(rawEditId ? { editId: rawEditId } : {}),
     };
+  },
+  loaderDeps: ({ search: { editId } }) => ({ editId }),
+  loader: async ({ deps: { editId } }) => {
+    if (!editId) return { editProperty: null };
+    const { fetchProperty } = await import("@/modules/property/services/propertyQueries");
+    const property = await fetchProperty(editId);
+    return { editProperty: property };
   },
   component: ListPropertyWizardPage,
 });
 
 function ListPropertyWizardPage() {
   const search = Route.useSearch();
+  const { editProperty } = Route.useLoaderData();
+
   return (
     <div className="min-h-screen bg-neutral-50 pt-20">
-      <ListingWizard initialData={search} />
+      <ListingWizard initialData={search} editProperty={editProperty} />
     </div>
   );
 }

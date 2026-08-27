@@ -85,6 +85,8 @@ export function EmployeeAccessForm() {
             <option value="analyst">Analyst</option>
             <option value="ops">Field Ops</option>
             <option value="admin">Admin</option>
+            <option value="regional_admin">Regional Admin</option>
+            <option value="root">Root Admin</option>
           </select>
         </div>
 

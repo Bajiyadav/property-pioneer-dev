@@ -28,6 +28,9 @@ import { CustomErrorBoundary } from "@/components/feedback/CustomErrorBoundary";
 import { ExpansionWaitlistModal } from "@/components/dialogs/ExpansionWaitlistModal";
 import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 /** Bump when the files in public/ that hold the brand icon change. */
 const ICON_VERSION = "4";
@@ -162,6 +165,10 @@ import { MobileBottomNav } from "@/app/layouts/MobileBottomNav";
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+
+  // Track visitor for admin dashboard
+  useVisitorTracking();
+
   const isWizardRoute = router.state.location.pathname.startsWith("/list-property/wizard");
 
   return (
@@ -220,10 +227,12 @@ function SiteHeader() {
             User Actions & CTAs
           */}
           <div className="flex min-w-0 shrink items-center gap-0.5 sm:gap-2.5">
+            <LanguageSwitcher />
+
             <Link
               to="/favorites"
               aria-label="Saved Properties"
-              className="p-1.5 sm:p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"
+              className="hidden sm:flex p-1.5 sm:p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"
             >
               <Heart className="h-4 w-4" />
             </Link>

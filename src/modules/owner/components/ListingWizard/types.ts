@@ -1,4 +1,5 @@
 export interface ListingFormData {
+  id?: string;
   // Owner identity (Private)
   owner_name?: string;
   /** Owner's WhatsApp number. Enquiries are delivered here. */
@@ -6,14 +7,14 @@ export interface ListingFormData {
   owner_email?: string;
 
   // Step 1: Property Details
-  listing_type?: "rent" | "sale";
+  listing_type?: "rent" | "sale" | "";
   property_type: string;
   property_category?: string;
   bhk_type?: string;
   bedrooms: number;
   bathrooms: number;
   balconies?: number;
-  floor_number: string;
+  floor_number?: string;
   total_floors?: number;
   exact_floor?: number;
   property_age?: string;
@@ -21,7 +22,7 @@ export interface ListingFormData {
   area_sqft: number;
   carpet_area_sqft?: number;
   area_unit?: string;
-  furnishing_status: "fully-furnished" | "semi-furnished" | "unfurnished";
+  furnishing_status?: "fully-furnished" | "semi-furnished" | "unfurnished" | "";
   parking_covered?: number;
   parking_open?: number;
 

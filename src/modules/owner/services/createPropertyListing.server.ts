@@ -7,10 +7,22 @@ export const createPropertyListing = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((data: any) => data)
   .handler(async ({ data, context }: { data: any; context: any }) => {
+    // Check if the user is an agent/admin
+    const { data: userRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .single();
+
+    const isAgent =
+      userRole?.role === "agent" || userRole?.role === "admin" || userRole?.role === "superadmin";
+    const isAgentSubmission = isAgent && data.isAgentSubmission;
+
     const { data: property, error } = await supabaseAdmin
       .from("properties")
       .insert({
-        owner_id: context.userId,
+        owner_id: isAgentSubmission ? null : context.userId,
+        created_by_agent_id: isAgentSubmission ? context.userId : null,
         title: data.title,
         description: data.description,
         price: Number(data.price),
@@ -29,7 +41,7 @@ export const createPropertyListing = createServerFn({ method: "POST" })
         owner_name: data.ownerName || data.owner_name,
         owner_email: data.ownerEmail || data.owner_email,
         status: "pending",
-        is_approved: false,
+        is_approved: isAgentSubmission ? true : false,
         created_at: new Date().toISOString(),
       } as any)
       .select()

@@ -26,6 +26,7 @@ import {
   DEFAULT_PROPERTY_COVER,
 } from "@/modules/property/components/PropertyImageBranding";
 import { InquiryPhoneModal } from "@/modules/tenant/components/InquiryPhoneModal";
+import { motion } from "framer-motion";
 
 export function PropertyCard({ property }: { property: Property }) {
   const { has, toggle } = useFavorites();
@@ -130,7 +131,13 @@ export function PropertyCard({ property }: { property: Property }) {
     "relative w-full shrink-0 flex gap-1 h-[240px] sm:h-[320px] overflow-hidden bg-muted group/carousel";
 
   return (
-    <div className={rootClasses}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={rootClasses}
+    >
       {/* 1. IMAGE CONTAINER */}
       <div className={imageClasses}>
         {/* Main / Carousel Image */}
@@ -270,9 +277,9 @@ export function PropertyCard({ property }: { property: Property }) {
       </div>
 
       {/* 2. CARD CONTENT */}
-      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-3.5 sm:p-5">
         {/* Header Row */}
-        <div className="flex items-start justify-between gap-4 border-b border-border/50 pb-3.5">
+        <div className="flex items-start justify-between gap-3 sm:gap-4 border-b border-border/50 pb-3 sm:pb-3.5">
           <div className="min-w-0 flex-1">
             <Link
               to="/properties/$id"
@@ -403,12 +410,14 @@ export function PropertyCard({ property }: { property: Property }) {
           </button>
         </div>
       </div>
+
+      {/* Phone Inquiry Modal */}
       <InquiryPhoneModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         propertyId={property.id}
         propertyTitle={property.title || "Property in Hyderabad"}
       />
-    </div>
+    </motion.div>
   );
 }

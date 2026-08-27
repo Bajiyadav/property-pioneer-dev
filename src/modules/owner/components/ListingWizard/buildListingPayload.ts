@@ -22,6 +22,7 @@ export interface ListingPayload {
   property_type: string;
   listing_type: "rent" | "sale";
   owner_phone: string;
+  owner_name?: string | null;
   images: string[];
   status?: "draft" | "available";
   locality?: string | null;
@@ -136,6 +137,7 @@ export function buildListingPayload(
       property_type: (d.property_type ?? "Apartment").trim(),
       listing_type: d.listing_type === "sale" ? "sale" : "rent",
       owner_phone: phone,
+      owner_name: d.owner_name?.trim() || null,
       images: usableImages(d.images),
       status: mode === "draft" ? "draft" : "available",
       locality: d.locality?.trim() || null,

@@ -175,12 +175,20 @@ export async function createOwnerProperty(ownerId: string, input: OwnerListingIn
   // Sync owner contact profile details so name & phone persist seamlessly
   if (input.owner_name || input.owner_phone) {
     try {
-      const updates: { full_name?: string; phone?: string; updated_at: string } = {
-        updated_at: new Date().toISOString(),
-      };
-      if (input.owner_name) updates.full_name = input.owner_name;
-      if (input.owner_phone) updates.phone = input.owner_phone;
-      await db.from("profiles").update(updates).eq("id", ownerId);
+      const { data: roles } = await db
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", ownerId)
+        .in("role", ["agent", "admin"]);
+
+      if (!roles || roles.length === 0) {
+        const updates: { full_name?: string; phone?: string; updated_at: string } = {
+          updated_at: new Date().toISOString(),
+        };
+        if (input.owner_name) updates.full_name = input.owner_name;
+        if (input.owner_phone) updates.phone = input.owner_phone;
+        await db.from("profiles").update(updates).eq("id", ownerId);
+      }
     } catch (err) {
       console.warn("[owner] could not sync profile info", err);
     }

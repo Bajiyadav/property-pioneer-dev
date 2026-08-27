@@ -9,6 +9,8 @@ import 'package:seedha_properties_mobile/providers/app_providers.dart';
 
 import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 
+import 'package:seedha_properties_mobile/features/owner/presentation/list_property_screen.dart';
+
 class OwnerDashboardScreen extends ConsumerStatefulWidget {
   const OwnerDashboardScreen({super.key});
 
@@ -217,6 +219,29 @@ class _OwnerDashboardScreenState extends ConsumerState<OwnerDashboardScreen> {
                             Text(
                               "${prop.bedrooms} BHK • ${prop.bathrooms} Bath",
                               style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: const Text('Edit'),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ListPropertyScreen(propertyToEdit: prop),
+                                  ),
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.primaryColor,
+                                side: const BorderSide(color: AppTheme.primaryColor),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
                             ),
                           ],
                         ),

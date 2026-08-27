@@ -1,0 +1,15 @@
+{
+  "hero": {
+    "title": "Find Your Perfect Property in India",
+    "subtitle": "Buy • Rent • Commercial — All in One Place",
+    "quick_buy": "Buy",
+    "quick_buy_desc": "Properties",
+    "quick_rent": "Rent",
+    "quick_rent_desc": "Homes",
+    "quick_commercial": "Commercial",
+    "quick_commercial_desc": "Spaces"
+  },
+  "nav": {
+    "language": "Language"
+  }
+}

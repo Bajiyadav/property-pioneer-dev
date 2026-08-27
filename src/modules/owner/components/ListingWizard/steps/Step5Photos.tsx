@@ -49,27 +49,36 @@ export function Step5Photos({ data, updateData }: StepProps) {
 
         const fileExt = file.name.split(".").pop() || "jpg";
         const fileName = `owner_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-
         let publicUrl = "";
 
-        // Primary: Supabase Storage bucket 'property-images'
-        const { error: uploadErr } = await supabase.storage
-          .from("property-images")
-          .upload(fileName, file, { upsert: true });
+        // Use Edge Function for Compression and Watermarking
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        formData.append("bucket", "property-images");
 
-        if (!uploadErr) {
-          const { data: pubData } = supabase.storage.from("property-images").getPublicUrl(fileName);
-          publicUrl = pubData.publicUrl;
+        const { data: uploadData, error: uploadErr } = await supabase.functions.invoke(
+          "process-image",
+          {
+            body: formData,
+          },
+        );
+
+        if (!uploadErr && uploadData?.success) {
+          publicUrl = uploadData.url;
         } else {
-          // Secondary fallback bucket 'property-media'
+          console.error("Compression upload failed, falling back to direct upload", uploadErr);
+          // Secondary fallback bucket 'property-media' (uncompressed)
+          const fallbackExt = file.name.split(".").pop() || "jpg";
+          const fallbackName = `owner_fallback_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fallbackExt}`;
+
           const { error: fallbackErr } = await supabase.storage
             .from("property-media")
-            .upload(fileName, file, { upsert: true });
+            .upload(fallbackName, file, { upsert: true });
 
           if (!fallbackErr) {
             const { data: pubData } = supabase.storage
               .from("property-media")
-              .getPublicUrl(fileName);
+              .getPublicUrl(fallbackName);
             publicUrl = pubData.publicUrl;
           }
         }

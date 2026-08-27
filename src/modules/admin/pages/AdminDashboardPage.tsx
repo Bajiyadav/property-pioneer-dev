@@ -76,6 +76,8 @@ const DEFAULT_SEARCH_PARAMS = {
 import { UserTable, PropertyTable } from "@/modules/admin/components/AdminDashboardParts";
 import { EmployeeActivityBoard } from "@/modules/admin/components/EmployeeActivityBoard";
 import { EmployeeAccessForm } from "@/modules/admin/components/EmployeeAccessForm";
+import { SiteVisitorsView } from "@/modules/admin/components/SiteVisitorsView";
+import { useEmployeeAccess } from "@/modules/admin/hooks/useEmployeeAccess";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -91,6 +93,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "reports", label: "Reports", icon: FileBarChart },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "audit", label: "Audit Logs", icon: ScrollText },
+  { id: "visitors", label: "Site Visitors", icon: UsersRound },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -101,6 +104,7 @@ export function AdminDashboardPage() {
 }
 
 function AdminDashboard({ user }: { user: User | null }) {
+  const access = useEmployeeAccess();
   const [activeTab, setActiveTab] = useDashboardTab("/dashboard/admin");
 
   const [userQuery, setUserQuery] = useState("");
@@ -282,6 +286,11 @@ function AdminDashboard({ user }: { user: User | null }) {
     settings: "Platform settings",
   };
 
+  const regionScopeText =
+    access?.role === "regional_admin" && access.regions.length > 0
+      ? ` | Scope: ${access.regions.join(", ")}`
+      : "";
+
   return (
     <DashboardLayout
       role="admin"
@@ -290,7 +299,7 @@ function AdminDashboard({ user }: { user: User | null }) {
           ? `Welcome back, ${displayName(user)}`
           : (tabTitle[activeTab] ?? "Admin")
       }
-      subtitle="Operations, approvals, verification, revenue, and security across the platform."
+      subtitle={`Operations, approvals, verification, revenue, and security across the platform.${regionScopeText}`}
       navItems={NAV_ITEMS}
       activeTab={activeTab}
       onTabChange={setActiveTab}
@@ -808,6 +817,8 @@ function AdminDashboard({ user }: { user: User | null }) {
 
       {activeTab === "job_applications" && <JobApplicationsView />}
 
+      {activeTab === "visitors" && <SiteVisitorsView />}
+
       {activeTab === "reports" && (
         <div className="space-y-6">
           <SectionHeader title="Platform reports" subtitle="Revenue, supply, and demand" />
@@ -948,7 +959,7 @@ function AdminDashboard({ user }: { user: User | null }) {
 
       {activeTab === "activity" && (
         <div className="space-y-8">
-          <EmployeeAccessForm />
+          {(access?.role === "root" || access?.role === "admin") && <EmployeeAccessForm />}
           <EmployeeActivityBoard />
         </div>
       )}

@@ -57,6 +57,35 @@ export default defineConfig(({ command }) => ({
     ],
   },
 
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "react-vendor";
+          }
+          if (
+            id.includes("node_modules/@radix-ui/") ||
+            id.includes("node_modules/lucide-react/") ||
+            id.includes("node_modules/framer-motion/") ||
+            id.includes("node_modules/tailwind-merge/")
+          ) {
+            return "ui-vendor";
+          }
+          if (id.includes("node_modules/@vis.gl/react-google-maps/")) {
+            return "maps-vendor";
+          }
+          if (id.includes("node_modules/recharts/")) {
+            return "charts-vendor";
+          }
+          if (id.includes("node_modules/@supabase/supabase-js/")) {
+            return "supabase-vendor";
+          }
+        },
+      },
+    },
+  },
+
   plugins: [
     tailwindcss(),
 

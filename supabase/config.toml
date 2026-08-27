@@ -1,1 +1,33 @@
 project_id = "iyttetfaavokzyexvqam"
+[functions.automated-messaging]
+enabled = true
+verify_jwt = false
+import_map = "./functions/automated-messaging/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/automated-messaging/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/automated-messaging/*.html" ]
+
+[functions.process-image]
+enabled = true
+verify_jwt = false
+import_map = "./functions/process-image/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/process-image/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/process-image/*.html" ]
+
+[functions.auth-hook-send-otp]
+enabled = true
+verify_jwt = false
+import_map = "./functions/auth-hook-send-otp/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/auth-hook-send-otp/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/auth-hook-send-otp/*.html" ]

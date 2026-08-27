@@ -49,6 +49,7 @@ import { displayName } from "@/modules/authentication/services/session";
 import { useServerFn } from "@tanstack/react-start";
 import { getAgentDashboard } from "@/modules/agent/services/agentFunctions";
 import { relativeTime } from "@/modules/dashboard/services/dashboardData";
+import { AgentPropertySubmission } from "../components/AgentPropertySubmission";
 
 /*
  * Row shapes for the sections the schema cannot yet answer.
@@ -130,6 +131,7 @@ export function AgentDashboardPage() {
 function AgentDashboard({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useDashboardTab("/dashboard/agent");
 
+  const [isAddPropertyModalOpen, setIsAddPropertyModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientRow | null>(null);
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
 
@@ -235,14 +237,41 @@ function AgentDashboard({ user }: { user: User | null }) {
       onTabChange={setActiveTab}
       user={user}
       headerAction={
-        <button
-          onClick={() => setActiveTab("leads")}
-          className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
-        >
-          <Target className="h-3.5 w-3.5" /> Work my leads
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsAddPropertyModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-border bg-background px-4 py-2 text-xs font-bold text-foreground shadow-sm transition hover:bg-secondary"
+          >
+            <Building2 className="h-3.5 w-3.5" /> Add Property
+          </button>
+          <button
+            onClick={() => setActiveTab("leads")}
+            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
+          >
+            <Target className="h-3.5 w-3.5" /> Work my leads
+          </button>
+        </div>
       }
     >
+      {isAddPropertyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card shadow-2xl">
+            <button
+              onClick={() => setIsAddPropertyModalOpen(false)}
+              className="absolute right-4 top-4 z-10 p-2 rounded-full bg-secondary/50 hover:bg-secondary text-foreground"
+            >
+              ✕
+            </button>
+            <AgentPropertySubmission
+              onSuccess={() => {
+                setIsAddPropertyModalOpen(false);
+                refetch();
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {activeTab === "overview" && (
         <div className="space-y-8">
           {isSampleData && <SampleDataNotice reason={feed?.error} />}

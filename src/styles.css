@@ -179,25 +179,31 @@
 
 /* Glassmorphism & Micro-animations */
 .glass-nav {
-  background: oklch(1 0 0 / 0.85);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: oklch(1 0 0 / 0.7);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-bottom: 1px solid oklch(1 0 0 / 0.5);
+  box-shadow: 0 4px 30px oklch(0 0 0 / 0.05);
 }
 
 .dark .glass-nav {
-  background: oklch(0.12 0.025 240 / 0.85);
+  background: oklch(0.12 0.025 240 / 0.65);
+  border-bottom: 1px solid oklch(1 0 0 / 0.05);
+  box-shadow: 0 4px 30px oklch(0 0 0 / 0.4);
 }
 
 .glass-panel {
-  background: oklch(1 0 0 / 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid oklch(1 0 0 / 0.4);
+  background: linear-gradient(135deg, oklch(1 0 0 / 0.8), oklch(1 0 0 / 0.4));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid oklch(1 0 0 / 0.5);
+  box-shadow: 0 8px 32px 0 oklch(0 0 0 / 0.05);
 }
 
 .dark .glass-panel {
-  background: oklch(0.18 0.025 240 / 0.75);
-  border: 1px solid oklch(1 0 0 / 0.1);
+  background: linear-gradient(135deg, oklch(0.18 0.025 240 / 0.6), oklch(0.12 0.025 240 / 0.3));
+  border: 1px solid oklch(1 0 0 / 0.08);
+  box-shadow: 0 8px 32px 0 oklch(0 0 0 / 0.4);
 }
 
 .text-gradient {

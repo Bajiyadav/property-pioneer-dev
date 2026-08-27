@@ -8,6 +8,7 @@ import '../../../config/constants.dart';
 import '../../../config/theme.dart';
 import '../../../providers/app_providers.dart';
 import '../../../services/session_router.dart';
+import '../../../core/services/visitor_tracking_service.dart';
 
 /// How long the brand stays on screen at minimum.
 ///
@@ -43,6 +44,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _resolveDestination() async {
     final held = Future<void>.delayed(_kMinimumHold);
+    
+    // Fire off tracking in the background
+    VisitorTrackingService.trackVisitor();
 
     String destination = '/';
     try {

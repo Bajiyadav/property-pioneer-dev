@@ -61,15 +61,31 @@ export function PropertyMediaModal({
     const filePath = `property-${property.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
     try {
-      const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+      if (bucket === "property-images") {
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        formData.append("bucket", bucket);
 
-      if (error) throw error;
+        const { data: uploadData, error: uploadErr } = await supabase.functions.invoke(
+          "process-image",
+          { body: formData },
+        );
 
-      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
-      return publicUrlData.publicUrl;
+        if (uploadErr) throw uploadErr;
+        if (!uploadData?.success) throw new Error("Compression failed");
+
+        return uploadData.url;
+      } else {
+        const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
+        return publicUrlData.publicUrl;
+      }
     } catch (err) {
       console.warn(
         "Supabase Storage upload failed or offline. Generating local Object URL fallback.",

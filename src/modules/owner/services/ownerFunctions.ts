@@ -33,6 +33,7 @@ const listingSchema = z.object({
     .trim()
     .transform((v) => v.replace(/\D/g, "").replace(/^91/, ""))
     .refine((v) => /^[6-9]\d{9}$/.test(v), "Enter a valid 10-digit Indian mobile number"),
+  owner_name: z.string().trim().min(2).max(100).optional().nullable(),
   images: z.array(z.string().url()).max(12).default([]),
   status: z.enum(["draft", "available"]).optional(),
   video_url: z.string().url().optional().nullable(),

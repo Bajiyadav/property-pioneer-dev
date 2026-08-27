@@ -8,7 +8,8 @@ import { z } from "zod";
 /** Context injected by `requireSupabaseAuth` — an RLS-scoped client plus the caller's id. */
 type AuthContext = { supabase: SupabaseClient<Database>; userId: string };
 
-export type EmployeeRole = "support" | "moderator" | "analyst" | "ops" | "admin";
+export type EmployeeRole =
+  "support" | "moderator" | "analyst" | "ops" | "admin" | "root" | "regional_admin";
 export type EmployeeAccess = {
   role: EmployeeRole;
   regions: string[];
@@ -125,21 +126,33 @@ export const getAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
-    return loadOverview(authCtx.supabase);
+    const access = await assertEmployee(authCtx);
+    return loadOverview(authCtx.supabase, access.regions);
   });
 
 export const getAdminProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
-    const { data } = await authCtx.supabase
+    const access = await assertEmployee(authCtx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let query = supabaseAdmin
       .from("properties")
       .select(
         "id, title, description, price, city, address, bedrooms, bathrooms, area_sqft, property_type, listing_type, status, images, owner_name, owner_phone, owner_email, is_approved, is_featured, owner_verification_status, property_verification_status, verified_by, verified_at, verification_notes, is_zero_brokerage, video_url, video_status, locality, landmark, region, created_at",
       )
       .order("created_at", { ascending: false });
+
+    // Enforce region scope for regional admins and moderators
+    if (
+      (access.role === "regional_admin" || access.role === "moderator") &&
+      access.regions.length > 0
+    ) {
+      query = query.in("region", access.regions);
+    }
+
+    const { data } = await query;
     return data || [];
   });
 
@@ -147,13 +160,22 @@ export const getAdminEnquiries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
-    const { data } = await authCtx.supabase
+    let query = authCtx.supabase
       .from("enquiries")
       .select(
-        "id, name, email, phone, message, created_at, property_id, properties (title, city, region)",
+        "id, name, email, phone, message, created_at, property_id, properties!inner(title, city, region)",
       )
       .order("created_at", { ascending: false });
+
+    const access = await assertEmployee(authCtx);
+    if (
+      (access.role === "regional_admin" || access.role === "moderator") &&
+      access.regions.length > 0
+    ) {
+      query = query.in("properties.region", access.regions);
+    }
+
+    const { data } = await query;
     return data || [];
   });
 
@@ -162,7 +184,7 @@ export const getAdminAuditLogs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const authCtx = context as AuthContext;
     const access = await assertEmployee(authCtx);
-    if (access.role !== "admin") return []; // Only admin sees global audit logs for now
+    if (access.role !== "admin" && access.role !== "root") return []; // Only admin and root see global audit logs for now
     const { data } = await authCtx.supabase
       .from("audit_logs")
       .select("*")
@@ -237,9 +259,23 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const authCtx = context as AuthContext;
-    await assertEmployee(authCtx);
+    const access = await assertEmployee(authCtx);
     const { id, ...patch } = data;
-    const { error } = await authCtx.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Enforce region scope for moderators manually
+    if (access.role === "moderator" && access.regions.length > 0) {
+      const { data: prop } = await supabaseAdmin
+        .from("properties")
+        .select("region")
+        .eq("id", id)
+        .single();
+      if (!prop || (prop.region && !access.regions.includes(prop.region))) {
+        throw new Error("Forbidden: Property is outside your assigned region");
+      }
+    }
+
+    const { error } = await supabaseAdmin
       .from("properties")
       .update(patch as Database["public"]["Tables"]["properties"]["Update"])
       .eq("id", id);
@@ -264,6 +300,7 @@ export const upsertEmployeeAccess = createServerFn({ method: "POST" })
     z
       .object({
         email: z.string().email(),
+        password: z.string().min(6).optional(),
         role: z.enum(["support", "moderator", "analyst", "ops", "admin"]),
         regions: z.array(z.string()),
       })
@@ -278,8 +315,20 @@ export const upsertEmployeeAccess = createServerFn({ method: "POST" })
     const { data: usersData, error: usersErr } = await supabaseAdmin.auth.admin.listUsers();
     if (usersErr) throw new Error(usersErr.message);
 
-    const targetUser = usersData.users.find((u) => u.email === data.email);
-    if (!targetUser) throw new Error("User with that email not found");
+    let targetUser = usersData.users.find((u) => u.email === data.email);
+
+    if (!targetUser) {
+      if (!data.password) {
+        throw new Error("User not found. Password is required to create a new account.");
+      }
+      const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        email_confirm: true,
+      });
+      if (createErr) throw new Error(createErr.message);
+      targetUser = newUser.user;
+    }
 
     const { error: upsertErr } = await authCtx.supabase.from("employee_access").upsert(
       {
@@ -310,6 +359,7 @@ export interface PlatformUser {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
   role: "Customer" | "Owner" | "Agent" | "Admin";
   status: "Active" | "Suspended" | "Pending";
   joined: string;
@@ -325,7 +375,7 @@ export const getAdminUsers = createServerFn({ method: "GET" })
     // For now we get what's in public schema.
     const { data: profiles } = await authCtx.supabase
       .from("profiles")
-      .select("id, full_name, created_at");
+      .select("id, full_name, phone, created_at");
 
     const { data: roles } = await authCtx.supabase.from("user_roles").select("user_id, role");
 
@@ -345,6 +395,7 @@ export const getAdminUsers = createServerFn({ method: "GET" })
         id: p.id,
         name: p.full_name || "Unknown",
         email: "hidden@example.com", // Email not available in public profile
+        phone: p.phone || "Not provided",
         role: roleStr as PlatformUser["role"],
         status: "Active" as PlatformUser["status"],
         joined: p.created_at,

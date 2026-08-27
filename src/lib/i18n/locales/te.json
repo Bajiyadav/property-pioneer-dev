@@ -1,0 +1,15 @@
+{
+  "hero": {
+    "title": "భారతదేశంలో మీ పరిపూర్ణ ఆస్తిని కనుగొనండి",
+    "subtitle": "కొనుగోలు • అద్దెకు • కమర్షియల్ — అన్నీ ఒకే చోట",
+    "quick_buy": "కొనుగోలు",
+    "quick_buy_desc": "ఆస్తులు",
+    "quick_rent": "అద్దెకు",
+    "quick_rent_desc": "ఇళ్లు",
+    "quick_commercial": "వాణిజ్య",
+    "quick_commercial_desc": "స్థలాలు"
+  },
+  "nav": {
+    "language": "భాష"
+  }
+}

@@ -45,21 +45,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final locationState = ref.read(locationStateProvider);
     final location = locationState.value;
 
-    if (location == null) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _properties = [];
-        });
-      }
-      return;
-    }
-
     try {
       final props = await _propertyService.fetchProperties(
         category: category,
-        city: location.city.isNotEmpty ? location.city : null,
-        locality: location.locality.isNotEmpty ? location.locality : null,
+        city: location?.city.isNotEmpty == true ? location!.city : null,
+        locality: location?.locality.isNotEmpty == true ? location!.locality : null,
       );
 
       if (mounted) {
@@ -149,9 +139,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: const Icon(Icons.dashboard_outlined, color: AppTheme.primaryColor),
                   tooltip: 'My Dashboard',
                   onPressed: () async {
-                    // Bounded so the button can never hang. Staff status comes
-                    // from employee_access, the table the database consults —
-                    // a stale admin value in user_roles opens no console.
                     UserProfile? profile;
                     EmployeeAccess? access;
                     try {
@@ -191,18 +178,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               setState(() => _isMapView = !_isMapView);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => context.go('/search'),
-          ),
         ],
       ),
       body: locationState.when(
         data: (location) {
-          if (location == null) {
-            return _buildLocationGate();
-          }
-          return _buildContent(location, activeCategory);
+          return _buildContent(
+            location ?? const SelectedLocation(city: '', locality: '', state: '', latitude: 0, longitude: 0), 
+            activeCategory
+          );
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (err, st) => Center(child: Text('Error loading location: $err')),
@@ -407,9 +390,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Discovery hero. Leads with the intent ("find a home"), not with
             // Buy/Rent/Commercial — those are a way to narrow a search, not the
             // first decision a visitor should be asked to make.
+            // Discovery hero with Floating SEEDHA and Cards
             SliverToBoxAdapter(
               child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 22),
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 30),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF0F766E), Color(0xFF115E59), Color(0xFF047857)],
@@ -418,85 +402,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Find Your Dream Home',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.6,
-                          height: 1.15),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Verified listings direct from owners. 0% brokerage.',
-                      style: TextStyle(
-                          color: Color(0xFF99F6E4),
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Location — reuses the single locationStateProvider; there
-                    // is no second location state anywhere in this screen.
-                    _locationRow(selectedLocation),
-                    const SizedBox(height: 10),
-
-                    // Search entry. Opens the existing search screen rather than
-                    // holding a second query state here.
-                    _searchField(),
-                    const SizedBox(height: 14),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => context.go('/search'),
-                        icon: const Icon(Icons.search, size: 18),
-                        label: const Text('Search Homes',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900, fontSize: 15)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                    const _FloatingSeedhaText(),
+                    const SizedBox(height: 30),
+                    GridView.count(
+                      crossAxisCount: 3,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 0.85,
+                      children: [
+                        _actionCard(
+                          icon: Icons.business_outlined,
+                          title: 'Buy',
+                          subtitle: 'Properties',
+                          onTap: () {
+                            ref.read(activeCategoryProvider.notifier).state = PropertyCategory.buy;
+                            _loadData();
+                          },
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // The two other primary journeys, given equal weight to search.
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: _actionCard(
-                        icon: Icons.add_home_work_outlined,
-                        title: 'Post Your Property',
-                        subtitle: 'List free, reach buyers directly',
-                        onTap: _onPostPropertyPressed,
-                        emphasised: true,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: _actionCard(
-                        icon: Icons.account_balance_outlined,
-                        title: 'Home Loans',
-                        subtitle: 'Check your EMI',
-                        onTap: () => context.push('/home-loans'),
-                      ),
+                        _actionCard(
+                          icon: Icons.home_outlined,
+                          title: 'Rent',
+                          subtitle: 'Properties',
+                          onTap: () {
+                            ref.read(activeCategoryProvider.notifier).state = PropertyCategory.rent;
+                            _loadData();
+                          },
+                        ),
+                        _actionCard(
+                          icon: Icons.storefront_outlined,
+                          title: 'Comm.',
+                          subtitle: 'Offices',
+                          onTap: () {
+                            ref.read(activeCategoryProvider.notifier).state = PropertyCategory.commercial;
+                            _loadData();
+                          },
+                        ),
+                        _actionCard(
+                          icon: Icons.account_balance_outlined,
+                          title: 'Loans',
+                          subtitle: 'Approval',
+                          onTap: () => context.push('/home-loans'),
+                        ),
+                        _actionCard(
+                          icon: Icons.security_outlined,
+                          title: 'Mgmt',
+                          subtitle: 'Hassle-free',
+                          onTap: () => context.push('/contact'),
+                        ),
+                        _actionCard(
+                          icon: Icons.add_home_work_outlined,
+                          title: 'Post',
+                          subtitle: 'Free Ad',
+                          onTap: _onPostPropertyPressed,
+                          emphasised: true,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -671,3 +634,65 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+class _FloatingSeedhaText extends StatefulWidget {
+  const _FloatingSeedhaText();
+
+  @override
+  State<_FloatingSeedhaText> createState() => _FloatingSeedhaTextState();
+}
+
+class _FloatingSeedhaTextState extends State<_FloatingSeedhaText> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Faster floating animation
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800), // Faster float
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _animation = Tween<double>(begin: -10.0, end: 10.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _animation.value),
+          child: child,
+        );
+      },
+      child: const Text(
+        'SEEDHA',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 32, // Smaller font size
+          fontWeight: FontWeight.w900,
+          letterSpacing: 2.0,
+          shadows: [
+            Shadow(
+              color: Colors.black45,
+              offset: Offset(0, 4),
+              blurRadius: 15,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

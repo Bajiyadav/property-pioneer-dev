@@ -92,8 +92,24 @@ export const Route = createFileRoute("/properties/$id")({
     }
     const canonicalSlug = generatePropertySlug(loaderData);
     const url = getCanonicalUrl(`/properties/${canonicalSlug}`);
-    const title = `${loaderData.title} — ${APP_NAME}`;
-    const description = `${loaderData.bedrooms || 0} BHK in ${loaderData.city} on ${APP_NAME}. View photos, details, and enquire.`;
+
+    // Formatting the title: ₹45 L | 2 BHK Apartment in Kondapur — SEEDHA
+    const formattedPrice = loaderData.price
+      ? formatPrice(loaderData.price, loaderData.listing_type || "sale")
+      : "";
+    const propType = loaderData.property_type
+      ? loaderData.property_type.replace("_", " ")
+      : "Property";
+    const beds = loaderData.bedrooms ? `${loaderData.bedrooms} BHK ` : "";
+    const loc = loaderData.locality
+      ? `${loaderData.locality}, ${loaderData.city}`
+      : loaderData.city;
+    const title = `${formattedPrice ? formattedPrice + " | " : ""}${beds}${propType} in ${loc} — ${APP_NAME}`;
+
+    // Formatting the description: Check out this beautiful 2 BHK Apartment for sale in Kondapur, Hyderabad for ₹45 L. View photos, details, and contact the owner directly on SEEDHA.
+    const forWhat = loaderData.listing_type === "rent" ? "rent" : "sale";
+    const description = `Check out this beautiful ${beds}${propType} for ${forWhat} in ${loc}${formattedPrice ? " for " + formattedPrice : ""}. View photos, details, and contact the owner directly on ${APP_NAME}.`;
+
     const image = loaderData.images?.[0];
     const isPublic = loaderData.is_approved === true || loaderData.status === "available";
     const robots = isPublic ? "index, follow" : "noindex, nofollow";

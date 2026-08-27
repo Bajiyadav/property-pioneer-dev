@@ -54,7 +54,9 @@ export function UserTable({ users }: { users: PlatformUser[] }) {
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-muted-foreground">{u.email}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {u.email} {u.phone ? `• ${u.phone}` : ""}
+              </p>
             </div>
           ),
         },

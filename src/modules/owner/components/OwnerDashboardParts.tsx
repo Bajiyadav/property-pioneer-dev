@@ -104,13 +104,23 @@ export function ListingRows({
               >
                 <Eye className="h-3.5 w-3.5" />
               </Link>
-              <button
-                onClick={onAdd}
+              <Link
+                to="/list-property/wizard"
+                search={{
+                  editId: p.id,
+                  propertyType:
+                    p.property_type === "Office" ||
+                    p.property_type === "Retail" ||
+                    p.property_type === "Land"
+                      ? "Commercial"
+                      : "Residential",
+                  intent: p.listing_type === "sale" ? "Sell" : "Rent",
+                }}
                 aria-label={`Edit ${p.title}`}
                 className="rounded-xl border border-border bg-secondary/50 p-2 text-foreground transition hover:bg-secondary"
               >
                 <FileEdit className="h-3.5 w-3.5" />
-              </button>
+              </Link>
               {onDelete && (
                 <button
                   onClick={() => {

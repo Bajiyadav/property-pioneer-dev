@@ -8,6 +8,7 @@ import { BrandMark } from "@/components/branding/BrandMark";
 import { Breadcrumbs } from "@/modules/dashboard/components/DashboardKit";
 import { displayName, initialsFor } from "@/modules/authentication/services/session";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { requestNotificationPermission } from "@/lib/firebase/fcm";
 
 export interface NavItem {
   id: string;
@@ -80,6 +81,13 @@ export function DashboardLayout({
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [activeTab]);
+
+  // Request push notification permissions on mount if user is logged in
+  useEffect(() => {
+    if (user?.id) {
+      requestNotificationPermission(user.id);
+    }
+  }, [user?.id]);
 
   // Lock background scroll while the mobile drawer is open.
   useEffect(() => {

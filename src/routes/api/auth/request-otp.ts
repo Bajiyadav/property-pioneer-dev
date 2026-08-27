@@ -160,10 +160,14 @@ export const Route = createFileRoute("/api/auth/request-otp")({
           details: { delivered: !error },
         });
 
-        // ENUMERATION-SAFE: the same 200 whether the address exists, was just
-        // created, or the provider hiccuped. The user is told to check their inbox
-        // either way; a real failure surfaces as "no code arrived", not as a
-        // response that reveals account existence.
+        if (error) {
+          // If the provider fails to send the email (e.g. rate limit, SMTP error),
+          // we must inform the client so they don't wait for an email that will never arrive.
+          return jsonResponse({ error: error.message || "Failed to send OTP code." }, 400);
+        }
+
+        // ENUMERATION-SAFE: Since shouldCreateUser is true, this succeeds for both new
+        // and existing users. The user is told to check their inbox.
         return jsonResponse({ ok: true, next }, 200);
       },
     },

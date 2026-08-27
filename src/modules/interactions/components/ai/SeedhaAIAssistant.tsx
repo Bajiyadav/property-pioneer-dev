@@ -139,7 +139,7 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
       {!isOpen && !inline && (
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-full bg-card/95 backdrop-blur border border-teal-600/30 text-teal-700 dark:text-teal-300 shadow-md hover:shadow-lg hover:border-teal-500 active:scale-95 transition-all text-xs font-bold"
+          className="group relative flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-full bg-card/95 backdrop-blur border border-teal-600/30 text-teal-700 dark:text-teal-300 shadow-md hover:shadow-lg hover:border-teal-500 active:scale-95 transition-all text-xs font-bold animate-[bounce_2s_infinite]"
           aria-label="Ask Seedha AI Assistant"
         >
           <div className="relative flex items-center justify-center">

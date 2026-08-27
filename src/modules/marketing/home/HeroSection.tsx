@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
 import { useAuthSession } from "@/hooks/useAuthSession";
+import { motion } from "framer-motion";
+
+import { useTranslation } from "react-i18next";
 
 export function HeroSection({
   query,
@@ -36,6 +39,7 @@ export function HeroSection({
 }) {
   const navigate = useNavigate();
   const { status } = useAuthSession();
+  const { t } = useTranslation();
 
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
@@ -126,17 +130,32 @@ export function HeroSection({
 
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-24 lg:pt-28 flex flex-col items-center text-center">
         {/* Heading */}
-        <h1 className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]">
-          Find Your Perfect Property in India
-        </h1>
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]"
+        >
+          {t("hero.title")}
+        </motion.h1>
 
         {/* Subtitle */}
-        <p className="mt-3 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]">
-          Buy • Rent • Commercial — All in One Place
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+          className="mt-3 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]"
+        >
+          {t("hero.subtitle")}
+        </motion.p>
 
         {/* Search Bar — flat single-row pill matching the reference */}
-        <div className="mt-8 w-full max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="mt-8 w-full max-w-4xl"
+        >
           <TabbedSearchBox
             query={query}
             onQueryChange={onQueryChange}
@@ -145,7 +164,7 @@ export function HeroSection({
             selectedCity={selectedCity}
             onCityChange={setSelectedCity}
           />
-        </div>
+        </motion.div>
 
         {/* Quick Category Action Cards */}
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-4xl">
@@ -159,9 +178,11 @@ export function HeroSection({
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-extrabold text-foreground leading-tight">
-                Buy
+                {t("hero.quick_buy")}
               </span>
-              <span className="block text-xs font-medium text-muted-foreground">Properties</span>
+              <span className="block text-xs font-medium text-muted-foreground">
+                {t("hero.quick_buy_desc")}
+              </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 flex-none transition-colors" />
           </button>
@@ -176,9 +197,11 @@ export function HeroSection({
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-extrabold text-foreground leading-tight">
-                Rent
+                {t("hero.quick_rent")}
               </span>
-              <span className="block text-xs font-medium text-muted-foreground">Properties</span>
+              <span className="block text-xs font-medium text-muted-foreground">
+                {t("hero.quick_rent_desc")}
+              </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 flex-none transition-colors" />
           </button>
@@ -192,11 +215,11 @@ export function HeroSection({
               <Building className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="block text-sm font-extrabold text-foreground leading-tight">
-                Commercial
+              <span className="block text-sm font-extrabold text-foreground leading-tight truncate">
+                {t("hero.quick_commercial")}
               </span>
-              <span className="block text-xs font-medium text-muted-foreground">
-                Offices &amp; Shops
+              <span className="block text-xs font-medium text-muted-foreground truncate">
+                {t("hero.quick_commercial_desc")}
               </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-500 flex-none transition-colors" />

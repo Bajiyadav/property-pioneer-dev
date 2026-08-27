@@ -20,8 +20,56 @@ export interface AdminOverviewStats {
  */
 export async function loadOverview(
   supabase: SupabaseClient<Database>,
+  regions?: string[],
 ): Promise<AdminOverviewStats> {
   const weekAgoStr = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  let qTotalProps = supabase.from("properties").select("*", { count: "exact", head: true });
+  let qApprovedProps = supabase
+    .from("properties")
+    .select("*", { count: "exact", head: true })
+    .eq("is_approved", true);
+  let qFeaturedProps = supabase
+    .from("properties")
+    .select("*", { count: "exact", head: true })
+    .eq("is_featured", true);
+  let qRentProps = supabase
+    .from("properties")
+    .select("*", { count: "exact", head: true })
+    .eq("listing_type", "rent");
+  let qSaleProps = supabase
+    .from("properties")
+    .select("*", { count: "exact", head: true })
+    .eq("listing_type", "sale");
+
+  let qTotalEnq = supabase.from("enquiries").select("*", { count: "exact", head: true });
+  let qRecentEnq = supabase
+    .from("enquiries")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", weekAgoStr);
+
+  let qCitySample = supabase.from("properties").select("city").limit(100);
+
+  if (regions && regions.length > 0) {
+    qTotalProps = qTotalProps.in("region", regions);
+    qApprovedProps = qApprovedProps.in("region", regions);
+    qFeaturedProps = qFeaturedProps.in("region", regions);
+    qRentProps = qRentProps.in("region", regions);
+    qSaleProps = qSaleProps.in("region", regions);
+
+    // For enquiries, we must join on properties to filter by region
+    qTotalEnq = supabase
+      .from("enquiries")
+      .select("*, properties!inner(region)", { count: "exact", head: true })
+      .in("properties.region", regions);
+    qRecentEnq = supabase
+      .from("enquiries")
+      .select("*, properties!inner(region)", { count: "exact", head: true })
+      .gte("created_at", weekAgoStr)
+      .in("properties.region", regions);
+
+    qCitySample = qCitySample.in("region", regions);
+  }
 
   const [
     { count: totalProps },
@@ -34,24 +82,15 @@ export async function loadOverview(
     { count: totalUsers },
     { data: citySample },
   ] = await Promise.all([
-    supabase.from("properties").select("*", { count: "exact", head: true }),
-    supabase.from("properties").select("*", { count: "exact", head: true }).eq("is_approved", true),
-    supabase.from("properties").select("*", { count: "exact", head: true }).eq("is_featured", true),
-    supabase
-      .from("properties")
-      .select("*", { count: "exact", head: true })
-      .eq("listing_type", "rent"),
-    supabase
-      .from("properties")
-      .select("*", { count: "exact", head: true })
-      .eq("listing_type", "sale"),
-    supabase.from("enquiries").select("*", { count: "exact", head: true }),
-    supabase
-      .from("enquiries")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", weekAgoStr),
+    qTotalProps,
+    qApprovedProps,
+    qFeaturedProps,
+    qRentProps,
+    qSaleProps,
+    qTotalEnq,
+    qRecentEnq,
     supabase.from("user_roles").select("*", { count: "exact", head: true }),
-    supabase.from("properties").select("city").limit(100),
+    qCitySample,
   ]);
 
   const cityCounts: Record<string, number> = {};
