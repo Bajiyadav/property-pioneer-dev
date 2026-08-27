@@ -24,7 +24,7 @@ interface ValueCard {
 const VALUE_CARDS: ValueCard[] = [
   {
     title: "0% Brokerage Guarantee",
-    desc: "Never pay 1 to 2 months' rent as broker commission again. Contact owners directly or get free walkthrough assistance from our assigned area agents.",
+    desc: "Never pay 1 to 2 months' rent as broker commission again. Contact owners directly or get free walkthrough assistance from our assigned local area specialists.",
     badge: "0% Commission",
     icon: Lock,
     cta: "Contact Owners Directly",
@@ -33,8 +33,8 @@ const VALUE_CARDS: ValueCard[] = [
     highlight: true,
   },
   {
-    title: "Verified Property Listings",
-    desc: "Every listing is thoroughly inspected on‑site for accurate photos, authentic ownership records, and up‑to‑date amenities—eliminating fake listings and hidden surprises.",
+    title: "100% Physical Verification",
+    desc: "Every listing is thoroughly inspected on‑site for authentic ownership records, genuine HD photos, and verified amenities—eliminating fake listings.",
     badge: "Verified",
     icon: ShieldCheck,
     cta: "See Verified Homes",
@@ -43,10 +43,10 @@ const VALUE_CARDS: ValueCard[] = [
   },
   {
     title: "Local Territory Specialists",
-    desc: "Our micro-market area agents in Kukatpally, Gachibowli, Madhapur, and Kondapur accompany you on site visits and assist with rental agreements.",
+    desc: "Our micro-market area specialists in Kukatpally, Gachibowli, Madhapur, and Kondapur accompany you on site visits and assist with rental agreements.",
     badge: "Local Experts",
     icon: MapPin,
-    cta: "Find Your Area Agent",
+    cta: "Find Your Area Specialist",
     to: "/properties",
     search: SEARCH_DEFAULTS,
   },
@@ -173,7 +173,7 @@ export function WhySeedhaProperties() {
                 </li>
                 <li className="flex items-start gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                  <span>Free Area Agent Site Visit Assistance</span>
+                  <span>Free Area Specialist Site Visit Assistance</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <ShieldCheck className="h-5 w-5 text-primary shrink-0" />

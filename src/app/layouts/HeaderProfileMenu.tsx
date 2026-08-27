@@ -55,9 +55,9 @@ export function HeaderProfileMenu() {
     return (
       <Link
         to="/auth"
-        className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border/80 bg-secondary/50 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:bg-secondary"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/80 hover:bg-secondary/80 px-3 sm:px-4 py-1.5 text-xs font-bold text-foreground shadow-2xs transition-all hover:border-primary/50 hover:shadow-xs active:scale-95"
       >
-        <LogIn className="h-3.5 w-3.5 text-primary" />
+        <LogIn className="h-3.5 w-3.5 text-primary shrink-0" />
         <span>Sign In</span>
       </Link>
     );

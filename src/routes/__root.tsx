@@ -239,10 +239,10 @@ function SiteHeader() {
 
             <Link
               to="/list-property"
-              className="inline-flex shrink-0 items-center gap-1 sm:gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-700 px-2.5 sm:px-4 py-2 text-xs font-semibold text-white shadow-md transition-all hover:from-emerald-500 hover:to-teal-600 hover:shadow-lg hover:scale-105 active:scale-95 ring-1 ring-white/20"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-extrabold text-white shadow-sm transition-all hover:brightness-105 hover:shadow-md active:scale-95 ring-1 ring-emerald-400/30"
             >
               <span className="whitespace-nowrap">Post Property</span>
-              <span className="sr-only sm:not-sr-only sm:inline-block sm:rounded-full sm:bg-white/20 sm:px-1.5 sm:py-0.5 sm:text-[10px] sm:font-bold sm:uppercase sm:text-white">
+              <span className="inline-block rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-black tracking-wider uppercase text-white backdrop-blur-xs">
                 FREE
               </span>
             </Link>

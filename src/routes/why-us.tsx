@@ -92,7 +92,7 @@ function WhyUsPage() {
             <h3 className="text-lg font-bold text-foreground">0% Brokerage Guarantee</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Never pay 1 to 2 months' rent as broker commission again. Contact owners directly or
-              get free walkthrough assistance from our assigned area agents.
+              get free walkthrough assistance from our assigned local area specialists.
             </p>
           </div>
 
@@ -102,7 +102,7 @@ function WhyUsPage() {
             </div>
             <h3 className="text-lg font-bold text-foreground">100% Physical Verification</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Every home listed on our portal undergo physical verification checks for photos,
+              Every home listed on our portal undergoes physical verification checks for photos,
               ownership records, and amenities accuracy. No fake or outdated photos.
             </p>
           </div>
@@ -113,7 +113,7 @@ function WhyUsPage() {
             </div>
             <h3 className="text-lg font-bold text-foreground">Local Territory Specialists</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Our micro-market area agents in Kukatpally, Gachibowli, Madhapur, and Kondapur
+              Our micro-market area specialists in Kukatpally, Gachibowli, Madhapur, and Kondapur
               accompany you on site visits and assist with rental agreements.
             </p>
           </div>
@@ -161,8 +161,8 @@ function WhyUsPage() {
                   Photos &amp; Video Tours
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> Free Area Agent
-                  Site Visit Assistance
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> Free Area
+                  Specialist Site Visit Assistance
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> Online E-Stamping
