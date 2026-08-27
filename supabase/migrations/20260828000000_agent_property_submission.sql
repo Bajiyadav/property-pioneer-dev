@@ -19,7 +19,7 @@ BEGIN
   END IF;
 
   -- Update any properties that have the same phone number and no owner_id
-  UPDATE public.properties
+  UPDATE properties
   SET owner_id = NEW.id
   WHERE owner_id IS NULL
     AND owner_phone = owner_phone_val;
