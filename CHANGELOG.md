@@ -1,3 +1,12 @@
+## v0.88.1 — 2026-08-27
+
+### Fixes
+- fix(auth): correct import path for email service in request-otp (b42077a)
+- fix(auth): deliver login OTP via Resend and support 6-8 digit codes (9f0cc76)
+
+### Documentation
+- docs(config): complete the env template + add a key-rotation checklist (d6f60b9)
+
 ## v0.88.0 — 2026-08-27
 
 ### Features
