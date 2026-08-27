@@ -1,3 +1,8 @@
+## v0.84.0 — 2026-08-27
+
+### Features
+- feat(marketing): polish brand tagline, hero copy, and navigation buttons (7cbced8)
+
 ## v0.83.0 — 2026-08-27
 
 ### Features
