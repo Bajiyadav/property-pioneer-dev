@@ -1,3 +1,17 @@
+## v0.83.0 — 2026-08-27
+
+### Features
+- feat: update hero title and subtitle in English locale (374e400)
+- feat: update landing page copy, remove language switcher, clean sign‑in notice (7cca790)
+
+### Fixes
+- fix(db): adjust update statement in migration for hygiene test compliance (d9310d8)
+
+### Migration notes
+- supabase/migrations/20260828000000_agent_property_submission.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.82.0 — 2026-08-27
 
 ### Features
