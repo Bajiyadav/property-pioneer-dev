@@ -33,7 +33,7 @@ export function AgentPropertySubmission({ onSuccess }: { onSuccess?: () => void 
     };
 
     try {
-      await submitProperty(data);
+      await submitProperty({ data });
       setIsSuccess(true);
       toast.success("Property listed successfully on behalf of owner.");
       if (onSuccess) {

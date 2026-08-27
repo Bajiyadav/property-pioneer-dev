@@ -14,8 +14,7 @@ export const createPropertyListing = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .single();
 
-    const isAgent =
-      userRole?.role === "agent" || userRole?.role === "admin" || userRole?.role === "superadmin";
+    const isAgent = userRole?.role === "agent" || userRole?.role === "admin";
     const isAgentSubmission = isAgent && data.isAgentSubmission;
 
     const { data: property, error } = await supabaseAdmin

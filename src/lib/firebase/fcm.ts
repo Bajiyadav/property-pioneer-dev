@@ -17,7 +17,7 @@ export async function requestNotificationPermission(userId: string) {
 
       if (currentToken) {
         // Save the token to Supabase
-        const { error } = await supabase.from("user_devices").upsert(
+        const { error } = await (supabase.from as any)("user_devices").upsert(
           {
             user_id: userId,
             device_token: currentToken,

@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MailCheck, TriangleAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/branding/BrandMark";
@@ -35,8 +35,12 @@ function AuthCallbackPage() {
   const navigate = useNavigate();
   const [state, setState] = useState<CallbackState>("working");
   const [message, setMessage] = useState("Confirming your account…");
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     let active = true;
 
     const finish = async () => {

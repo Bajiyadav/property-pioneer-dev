@@ -42,8 +42,8 @@ export async function loadOverview(
     .select("*", { count: "exact", head: true })
     .eq("listing_type", "sale");
 
-  let qTotalEnq = supabase.from("enquiries").select("*", { count: "exact", head: true });
-  let qRecentEnq = supabase
+  let qTotalEnq: any = supabase.from("enquiries").select("*", { count: "exact", head: true });
+  let qRecentEnq: any = supabase
     .from("enquiries")
     .select("*", { count: "exact", head: true })
     .gte("created_at", weekAgoStr);
