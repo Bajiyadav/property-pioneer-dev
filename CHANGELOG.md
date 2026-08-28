@@ -1,3 +1,8 @@
+## v0.100.3 — 2026-08-28
+
+### Fixes
+- fix(map): add Google Maps auth error boundary and locality cluster fallback (c09f80f)
+
 ## v0.100.2 — 2026-08-28
 
 ### Fixes
