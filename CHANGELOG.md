@@ -1,3 +1,8 @@
+## v0.96.1 — 2026-08-28
+
+### Fixes
+- fix: enforce location-first homepage flow (9c07b63)
+
 ## v0.96.0 — 2026-08-28
 
 ### Features
