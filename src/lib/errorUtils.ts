@@ -66,22 +66,34 @@ export function parseFriendlyError(error: unknown, fallback?: string): FriendlyE
 
   const normalized = rawMessage.toLowerCase();
 
-  // 1. Network / Offline / Connection Failures
+  // 1. Explicit Offline Indicators
   if (
-    normalized.includes("failed to fetch") ||
-    normalized.includes("fetch failed") ||
-    normalized.includes("networkerror") ||
-    normalized.includes("network request failed") ||
     normalized.includes("err_internet_disconnected") ||
-    normalized.includes("socketexception") ||
-    normalized.includes("econnrefused") ||
-    normalized.includes("offline")
+    normalized === "offline" ||
+    normalized.includes("device is offline")
   ) {
     return {
       title: "No internet connection",
       message: "Please check your internet connection and try again.",
       actionLabel: "Retry",
       isOffline: true,
+    };
+  }
+
+  // 2. Server / Network Connection Failures (Device is online or connection dropped)
+  if (
+    normalized.includes("failed to fetch") ||
+    normalized.includes("fetch failed") ||
+    normalized.includes("networkerror") ||
+    normalized.includes("network request failed") ||
+    normalized.includes("socketexception") ||
+    normalized.includes("econnrefused") ||
+    normalized.includes("connection refused")
+  ) {
+    return {
+      title: "Something went wrong",
+      message: fallback || "We couldn't connect right now. Please try again.",
+      actionLabel: "Try Again",
     };
   }
 

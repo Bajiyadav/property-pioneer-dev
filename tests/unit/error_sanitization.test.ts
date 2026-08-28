@@ -2,13 +2,21 @@ import { describe, it, expect } from "vitest";
 import { parseFriendlyError, getFriendlyErrorMessage } from "../../src/lib/errorUtils";
 
 describe("Seedha Properties Error Sanitizer", () => {
-  it("sanitizes network and offline errors into human-friendly language", () => {
-    const fetchErr = new Error("Failed to fetch");
-    const result = parseFriendlyError(fetchErr);
+  it("sanitizes true offline errors into human-friendly language", () => {
+    const offlineErr = new Error("ERR_INTERNET_DISCONNECTED");
+    const result = parseFriendlyError(offlineErr);
     expect(result.title).toBe("No internet connection");
     expect(result.message).toBe("Please check your internet connection and try again.");
     expect(result.actionLabel).toBe("Retry");
     expect(result.isOffline).toBe(true);
+  });
+
+  it("sanitizes fetch/network connection failures into server connection message", () => {
+    const fetchErr = new Error("Failed to fetch");
+    const result = parseFriendlyError(fetchErr);
+    expect(result.title).toBe("Something went wrong");
+    expect(result.message).toBe("We couldn't connect right now. Please try again.");
+    expect(result.actionLabel).toBe("Try Again");
   });
 
   it("sanitizes timeout errors", () => {

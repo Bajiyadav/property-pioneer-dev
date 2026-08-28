@@ -14,14 +14,25 @@ class SeedhaErrorHandler {
       return fallback ?? "We couldn't connect right now. Please try again.";
     }
 
-    if (error is SocketException || error is HttpException) {
+    final raw = error.toString().toLowerCase();
+
+    // 1. Genuine Offline Indicators
+    if (raw.contains("network is unreachable") ||
+        raw.contains("no address associated with hostname") ||
+        raw.contains("err_internet_disconnected") ||
+        raw == "offline") {
       return "Please check your internet connection and try again.";
     }
 
-    if (error is TimeoutException) {
+    // 2. Request Timeout
+    if (error is TimeoutException ||
+        raw.contains("timeout") ||
+        raw.contains("timed out") ||
+        raw.contains("deadline exceeded")) {
       return "Please try again in a moment.";
     }
 
+    // 3. Authentication Exceptions
     if (error is AuthException) {
       final msg = error.message.toLowerCase();
       if (msg.contains("invalid login credentials") ||
@@ -48,10 +59,12 @@ class SeedhaErrorHandler {
       return "Authentication error. Please try again.";
     }
 
+    // 4. Database Exceptions
     if (error is PostgrestException) {
       return fallback ?? "We couldn't connect right now. Please try again.";
     }
 
+    // 5. Platform / Permission Exceptions
     if (error is PlatformException) {
       if (error.code.contains("PERMISSION") ||
           error.code.contains("DENIED") ||
@@ -60,17 +73,14 @@ class SeedhaErrorHandler {
       }
     }
 
-    final raw = error.toString().toLowerCase();
-
-    if (raw.contains("socketexception") ||
-        raw.contains("network") ||
+    // 6. Server / Connection Failures (Device is online but endpoint is unreachable)
+    if (error is SocketException ||
+        error is HttpException ||
+        raw.contains("socketexception") ||
+        raw.contains("connection refused") ||
         raw.contains("failed to connect") ||
-        raw.contains("offline")) {
-      return "Please check your internet connection and try again.";
-    }
-
-    if (raw.contains("timeout") || raw.contains("timed out")) {
-      return "Please try again in a moment.";
+        raw.contains("failed host lookup")) {
+      return fallback ?? "We couldn't connect right now. Please try again.";
     }
 
     return fallback ?? "We couldn't connect right now. Please try again.";
@@ -80,11 +90,17 @@ class SeedhaErrorHandler {
   static SeedhaStateType getStateType(dynamic error) {
     if (error == null) return SeedhaStateType.serverError;
 
-    if (error is SocketException || error is HttpException) {
+    final raw = error.toString().toLowerCase();
+
+    if (raw.contains("network is unreachable") ||
+        raw.contains("err_internet_disconnected") ||
+        raw == "offline") {
       return SeedhaStateType.noInternet;
     }
 
-    if (error is TimeoutException) {
+    if (error is TimeoutException ||
+        raw.contains("timeout") ||
+        raw.contains("timed out")) {
       return SeedhaStateType.slowNetwork;
     }
 
@@ -95,17 +111,6 @@ class SeedhaErrorHandler {
           msg.contains("unauthorized")) {
         return SeedhaStateType.sessionExpired;
       }
-    }
-
-    final raw = error.toString().toLowerCase();
-    if (raw.contains("socketexception") ||
-        raw.contains("offline") ||
-        raw.contains("failed host lookup")) {
-      return SeedhaStateType.noInternet;
-    }
-
-    if (raw.contains("timeout") || raw.contains("timed out")) {
-      return SeedhaStateType.slowNetwork;
     }
 
     if (raw.contains("session") || raw.contains("jwt expired")) {

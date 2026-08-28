@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState<boolean>(() => {
-    if (typeof navigator !== "undefined") {
+    if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean") {
       return navigator.onLine;
     }
     return true;
@@ -17,6 +17,10 @@ export function useNetworkStatus() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    if (typeof navigator !== "undefined" && typeof navigator.onLine === "boolean") {
+      setIsOnline(navigator.onLine);
+    }
 
     const handleOnline = () => {
       setIsOnline(true);
