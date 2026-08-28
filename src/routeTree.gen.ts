@@ -55,6 +55,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAccessRouteImport } from './routes/_authenticated/admin/access'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin/activity'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
+import { Route as AuthenticatedAdminEnquiriesRouteImport } from './routes/_authenticated/admin/enquiries'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin/moderation'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
@@ -318,6 +319,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminEnquiriesRoute =
+  AuthenticatedAdminEnquiriesRouteImport.update({
+    id: '/enquiries',
+    path: '/enquiries',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminModerationRoute =
   AuthenticatedAdminModerationRouteImport.update({
     id: '/moderation',
@@ -530,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -603,6 +611,7 @@ export interface FileRoutesByTo {
   '/admin/access': typeof AuthenticatedAdminAccessRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -682,6 +691,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/access': typeof AuthenticatedAdminAccessRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -761,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/activity'
     | '/admin/analytics'
+    | '/admin/enquiries'
     | '/admin/moderation'
     | '/admin/users'
     | '/dashboard/admin'
@@ -834,6 +845,7 @@ export interface FileRouteTypes {
     | '/admin/access'
     | '/admin/activity'
     | '/admin/analytics'
+    | '/admin/enquiries'
     | '/admin/moderation'
     | '/admin/users'
     | '/dashboard/admin'
@@ -912,6 +924,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/access'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/enquiries'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/users'
     | '/_authenticated/dashboard/admin'
@@ -1325,6 +1338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/enquiries': {
+      id: '/_authenticated/admin/enquiries'
+      path: '/enquiries'
+      fullPath: '/admin/enquiries'
+      preLoaderRoute: typeof AuthenticatedAdminEnquiriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/moderation': {
       id: '/_authenticated/admin/moderation'
       path: '/moderation'
@@ -1542,6 +1562,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAccessRoute: typeof AuthenticatedAdminAccessRoute
   AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminEnquiriesRoute: typeof AuthenticatedAdminEnquiriesRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1552,6 +1573,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAccessRoute: AuthenticatedAdminAccessRoute,
     AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
     AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+    AuthenticatedAdminEnquiriesRoute: AuthenticatedAdminEnquiriesRoute,
     AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
