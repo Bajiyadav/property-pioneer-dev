@@ -1,3 +1,8 @@
+## v0.101.0 — 2026-08-28
+
+### Features
+- feat(ui): redesign why seedha properties comparison matrix (850ae4b)
+
 ## v0.100.4 — 2026-08-28
 
 ### Fixes
