@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   ShieldCheck,
@@ -13,9 +12,7 @@ import {
 import { toast } from "sonner";
 import { TabbedSearchBox } from "./TabbedSearchBox";
 import heroImg from "@/assets/hero.jpg";
-import { useAuthSession } from "@/hooks/useAuthSession";
 import { motion } from "framer-motion";
-
 import { useTranslation } from "react-i18next";
 
 export function HeroSection({
@@ -38,19 +35,19 @@ export function HeroSection({
   onOpenOwnerWizard?: () => void;
 }) {
   const navigate = useNavigate();
-  const { status } = useAuthSession();
   const { t } = useTranslation();
 
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
 
-    if (!selectedCity) {
+    if (!selectedState || !selectedCity) {
       toast.info("Please select your location to continue.");
       return;
     }
 
     const searchParams = {
       q: "",
+      state: selectedState,
       city: selectedCity,
       listing: params.listing || "",
       type: params.type || "",
@@ -59,67 +56,11 @@ export function HeroSection({
       beds: 0,
     };
 
-    if (status === "guest") {
-      const qs = new URLSearchParams({
-        q: "",
-        city: selectedCity,
-        listing: params.listing || "",
-        type: params.type || "",
-        minPrice: "0",
-        maxPrice: "0",
-        beds: "0",
-      }).toString();
-      navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
-      return;
-    }
-
     navigate({ to: "/properties", search: searchParams });
-  };
-
-  const handleLocalSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const searchParams = {
-      q: query,
-      city: selectedCity,
-      listing: "rent",
-      minPrice: 0,
-      maxPrice: 0,
-      beds: 0,
-    };
-    if (status === "guest") {
-      const qs = new URLSearchParams({
-        q: query,
-        city: selectedCity,
-        listing: "rent",
-        minPrice: "0",
-        maxPrice: "0",
-        beds: "0",
-      }).toString();
-      navigate({ to: "/auth", search: { redirect: `/properties?${qs}` } });
-      return;
-    }
-
-    onSearch(e);
   };
 
   return (
     <section className="relative isolate overflow-hidden">
-      {/*
-        Background photo, shown close to its natural brightness.
-
-        This carried a near-black wash — `from-slate-950/80 via-slate-950/65
-        to-slate-950/90` — which dimmed the room to roughly a fifth of its
-        brightness and made the whole hero read as a dark-mode panel. The photo is
-        of a bright, sunlit living room; hiding that was the point of using it.
-
-        The wash cannot simply be deleted, because every piece of text on top is
-        white and would drop to unreadable over the bright window areas. So
-        legibility now comes from the text itself (a drop shadow, applied below)
-        plus a light scrim, rather than from flattening the image. The scrim is
-        strongest at top and bottom, where it meets the header and the section
-        beneath, and lightest through the middle where the photo is on show.
-      */}
       <div className="absolute inset-0 -z-10">
         <img
           src={heroImg}
@@ -175,7 +116,7 @@ export function HeroSection({
           {/* Buy */}
           <button
             onClick={(e) => handleQuickLink(e, { listing: "sale" })}
-            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
             <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Building2 className="h-5 w-5" />
@@ -194,7 +135,7 @@ export function HeroSection({
           {/* Rent */}
           <button
             onClick={(e) => handleQuickLink(e, { listing: "rent" })}
-            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
             <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Home className="h-5 w-5" />
@@ -213,7 +154,7 @@ export function HeroSection({
           {/* Commercial */}
           <button
             onClick={(e) => handleQuickLink(e, { type: "commercial" })}
-            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
             <div className="h-10 w-10 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Building className="h-5 w-5" />

@@ -129,7 +129,15 @@ function Index() {
     }
     navigate({
       to: "/properties",
-      search: { q, city: selectedCity, listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 },
+      search: {
+        q,
+        state: selectedState,
+        city: selectedCity,
+        listing: "rent",
+        minPrice: 0,
+        maxPrice: 0,
+        beds: 0,
+      },
     });
   };
 

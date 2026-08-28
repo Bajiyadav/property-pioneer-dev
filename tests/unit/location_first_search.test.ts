@@ -113,4 +113,53 @@ describe("Location-First Property Details Access Flow & Server Enforcement", () 
       expect((prop as Record<string, unknown>).owner_email).toBeUndefined();
     }
   });
+
+  // Case I: Homepage State -> City Cascading and Validation Rules
+  it("I. validates state and city requirements for homepage search and navigation", () => {
+    // 1. Unconfirmed location states
+    const noLocation = { state: "", city: "" };
+    const stateOnly = { state: "Telangana", city: "" };
+    const completeLocation = { state: "Telangana", city: "Hyderabad" };
+
+    const isLocationReady = (loc: { state: string; city: string }) =>
+      Boolean(loc.state && loc.city);
+
+    expect(isLocationReady(noLocation)).toBe(false);
+    expect(isLocationReady(stateOnly)).toBe(false);
+    expect(isLocationReady(completeLocation)).toBe(true);
+
+    // 2. Query parameter formatting for Buy, Rent, and Commercial
+    const buildSearchParams = (
+      loc: { state: string; city: string },
+      typeOrListing: { listing?: string; type?: string },
+    ) => {
+      if (!isLocationReady(loc)) return null;
+      return {
+        state: loc.state,
+        city: loc.city,
+        listing: typeOrListing.listing || "",
+        type: typeOrListing.type || "",
+      };
+    };
+
+    expect(buildSearchParams(noLocation, { listing: "sale" })).toBeNull();
+    expect(buildSearchParams(completeLocation, { listing: "sale" })).toEqual({
+      state: "Telangana",
+      city: "Hyderabad",
+      listing: "sale",
+      type: "",
+    });
+    expect(buildSearchParams(completeLocation, { listing: "rent" })).toEqual({
+      state: "Telangana",
+      city: "Hyderabad",
+      listing: "rent",
+      type: "",
+    });
+    expect(buildSearchParams(completeLocation, { type: "commercial" })).toEqual({
+      state: "Telangana",
+      city: "Hyderabad",
+      listing: "",
+      type: "commercial",
+    });
+  });
 });

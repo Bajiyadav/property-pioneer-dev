@@ -11,6 +11,7 @@ import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
 export const Route = createFileRoute("/properties/")({
   validateSearch: (search: Record<string, unknown>): PropertySearchParams => ({
     q: search.q as string | undefined,
+    state: search.state as string | undefined,
     city: search.city as string | undefined,
     locality: search.locality as string | undefined,
     listing: search.listing as string | undefined,
@@ -62,7 +63,7 @@ function PropertiesPage() {
     refetchOnWindowFocus: false,
   });
 
-  // Feeds the customer dashboard's "Recent searches" panel.
+  // Feeds the customer dashboard's "Recent searches" panel and persists location in session
   useEffect(() => {
     recordRecentSearch({
       q: search.q,
@@ -72,6 +73,19 @@ function PropertiesPage() {
       maxPrice: search.maxPrice,
       beds: search.beds,
     });
+
+    if (typeof window !== "undefined") {
+      try {
+        if (search.state) {
+          sessionStorage.setItem("seedha_selected_state", search.state);
+        }
+        if (search.city) {
+          sessionStorage.setItem("seedha_selected_city", search.city);
+        }
+      } catch {
+        // ignore
+      }
+    }
   }, [search]);
 
   const onSearchChange = (patch: Partial<PropertySearchParams>) => {

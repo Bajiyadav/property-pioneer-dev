@@ -681,6 +681,7 @@ export interface PropertyFeed {
  */
 export interface PropertySearchParams {
   q?: string;
+  state?: string;
   city?: string;
   listing?: string;
   minPrice?: number;
