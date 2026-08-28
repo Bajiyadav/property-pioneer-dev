@@ -1,3 +1,8 @@
+## v0.101.1 — 2026-08-28
+
+### Fixes
+- fix(admin): remove mock gross revenue and display real verified listings KPI (4082ce9)
+
 ## v0.101.0 — 2026-08-28
 
 ### Features
