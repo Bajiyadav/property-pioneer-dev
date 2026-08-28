@@ -44,11 +44,13 @@ export function InquiryPhoneModal({
   // the previous hardcoded 1500 was both fabricated and below that floor, so
   // every submission was rejected as "too quick" before the captcha even ran.
   const openedAtRef = useRef<number>(Date.now());
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       openedAtRef.current = Date.now();
       setError(null);
+      setWhatsappUrl(null);
     }
   }, [isOpen]);
 
@@ -104,7 +106,11 @@ export function InquiryPhoneModal({
         body: JSON.stringify(validation.data),
       });
 
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        ok?: boolean;
+        whatsappUrl?: string;
+      };
 
       if (!res.ok) {
         // 403 is a failed or expired challenge. The token is spent either way,
@@ -117,6 +123,9 @@ export function InquiryPhoneModal({
         throw new Error(data.error || "Unable to send your enquiry. Please try again.");
       }
 
+      if (data.whatsappUrl) {
+        setWhatsappUrl(data.whatsappUrl);
+      }
       setIsSuccess(true);
 
       // Save minimal profile to localStorage for future interactions
@@ -143,21 +152,49 @@ export function InquiryPhoneModal({
   if (isSuccess) {
     return (
       <Dialog open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
-        <DialogContent className="sm:max-w-md text-center py-10">
-          <div className="flex justify-center mb-4">
-            <div className="h-16 w-16 bg-emerald-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+        <DialogContent className="sm:max-w-md text-center py-8">
+          <div className="flex justify-center mb-3">
+            <div className="h-14 w-14 bg-emerald-100 dark:bg-emerald-950/60 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-          <DialogTitle className="text-2xl font-black mb-2">Request Sent!</DialogTitle>
-          <DialogDescription className="text-base">
-            The owner of <strong>{propertyTitle}</strong> has received your details and will contact
-            you shortly.
+          <DialogTitle className="text-2xl font-black mb-1">Direct Connection Sent!</DialogTitle>
+
+          {/* Brokerage Saved Pill */}
+          <div className="my-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-extrabold text-amber-700 dark:text-amber-300">
+            <span>🎉 You saved ~₹15,000+ in broker commissions</span>
+          </div>
+
+          <DialogDescription className="text-sm leading-relaxed px-2">
+            The owner of <strong>{propertyTitle}</strong> has received your inquiry directly.
           </DialogDescription>
-          <div className="mt-8">
-            <Button onClick={onClose} className="w-full h-12 rounded-xl text-base font-bold">
-              Continue Browsing
+
+          <div className="mt-6 space-y-3">
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2 transition-all"
+              >
+                <span>Chat Instantly on WhatsApp</span>
+              </a>
+            )}
+
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full h-11 rounded-xl text-sm font-bold"
+            >
+              Continue Browsing Verified Homes
             </Button>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-border/60 text-xs text-muted-foreground">
+            <span>Need dedicated personal help finding a home? </span>
+            <a href="/plans" className="font-bold text-teal-600 hover:underline">
+              Explore Assisted Seeker Plans
+            </a>
           </div>
         </DialogContent>
       </Dialog>

@@ -329,6 +329,36 @@ function OwnerDashboard({ user }: { user: User | null }) {
             />
           </div>
 
+          {/* Owner Monetization & Fast-Track Boost Callout */}
+          <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-card to-amber-500/10 p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-0.5 text-xs font-bold text-amber-800 dark:text-amber-300">
+                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                  <span>Reach Verified Tenants 4x Faster</span>
+                </div>
+                <h3 className="text-base font-extrabold text-foreground">
+                  Upgrade to Fast-Track Promotion &amp; Verified Shield
+                </h3>
+                <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                  Get topmost search ranking, instant SMS/WhatsApp tenant notifications,
+                  pre-screened inquiries, and dedicated relationship manager assistance starting
+                  from just ₹249.
+                </p>
+              </div>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/plans" })}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 px-5 py-2.5 text-xs font-extrabold text-white shadow-md transition-all hover:brightness-110 cursor-pointer active:scale-95"
+                >
+                  <span>Explore Owner Boost Plans</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <TrendAreaChart
