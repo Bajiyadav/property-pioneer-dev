@@ -334,11 +334,8 @@ function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/rental-agreement"
-                  className="hover:text-foreground transition font-semibold text-primary flex items-center gap-1"
-                >
-                  <span>Rent Agreement in Hyderabad</span>
+                <Link to="/rental-agreement" className="hover:text-foreground transition">
+                  Rental Agreement
                 </Link>
               </li>
               <li>
@@ -516,11 +513,8 @@ function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/careers"
-                  className="hover:text-foreground transition font-semibold text-primary"
-                >
-                  Careers (We&apos;re Hiring)
+                <Link to="/careers" className="hover:text-foreground transition">
+                  Careers
                 </Link>
               </li>
               <li>
