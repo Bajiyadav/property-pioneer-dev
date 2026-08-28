@@ -50,16 +50,11 @@ export function CustomErrorBoundary({ error, reset }: { error?: Error; reset?: (
 
         {/* Reference Code & Message */}
         <div className="rounded-2xl border border-border/60 bg-card p-4 text-left font-mono text-[11px] space-y-2">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span>Reference Code:</span>
-            <span className="font-bold text-foreground">{requestId}</span>
-          </div>
-
-          {error?.message && (
-            <p className="text-rose-500 dark:text-rose-400 font-semibold break-words">
-              Error: {error.message}
-            </p>
-          )}
+          <p className="text-foreground font-medium">
+            {isDev && error?.message
+              ? error.message
+              : "We couldn't connect right now. Please try again."}
+          </p>
 
           {isDev && error?.stack && (
             <div className="mt-3 border-t border-border/40 pt-2">

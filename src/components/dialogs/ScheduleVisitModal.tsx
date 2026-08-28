@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar, MapPin, CheckCircle2, Video, Loader2 } from "lucide-react";
 import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
+import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 
 /**
  * Visit request for a property.
@@ -68,7 +69,9 @@ export function ScheduleVisitModal({
     if (result.ok) {
       setSent(true);
     } else {
-      setError(result.error);
+      setError(
+        getFriendlyErrorMessage(result.error, "Your enquiry wasn't sent. Please try again."),
+      );
     }
   };
 

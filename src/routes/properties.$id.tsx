@@ -55,6 +55,7 @@ import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
 import { ScheduleVisitModal } from "@/components/dialogs/ScheduleVisitModal";
 import { EmiCalculatorModal } from "@/components/dialogs/EmiCalculatorModal";
 import { ReportListingModal } from "@/components/dialogs/ReportListingModal";
+import { StateView } from "@/components/feedback/StateView";
 import {
   APP_NAME,
   APP_URL,
@@ -138,33 +139,38 @@ export const Route = createFileRoute("/properties/$id")({
   },
   component: PropertyDetailPage,
   errorComponent: () => (
-    <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-      <h1 className="text-2xl font-semibold text-foreground">Something went wrong</h1>
-      <p className="mt-2 text-muted-foreground">
-        We couldn't load this listing on Seedha Properties.
-      </p>
-      <Link
-        to="/properties"
-        search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-        className="mt-6 inline-block text-sm font-medium text-primary underline"
-      >
-        Back to browse
-      </Link>
+    <div className="mx-auto max-w-2xl px-6 py-20">
+      <StateView
+        type="server_error"
+        title="We couldn't load this property"
+        description="Please check your connection and try again."
+        action={{
+          label: "Retry",
+          onClick: () => {
+            if (typeof window !== "undefined") window.location.reload();
+          },
+          variant: "primary",
+        }}
+        secondaryAction={{
+          label: "Browse Verified Homes",
+          href: "/properties?q=&city=All+India&listing=rent&minPrice=0&maxPrice=0&beds=0",
+          variant: "outline",
+        }}
+      />
     </div>
   ),
   notFoundComponent: () => (
-    <div className="mx-auto max-w-2xl px-6 py-20 text-center">
-      <h1 className="text-2xl font-semibold text-foreground">Listing not found</h1>
-      <p className="mt-2 text-muted-foreground">
-        This home is no longer listed on Seedha Properties.
-      </p>
-      <Link
-        to="/properties"
-        search={{ q: "", city: "", listing: "", minPrice: 0, maxPrice: 0, beds: 0 }}
-        className="mt-6 inline-block text-sm font-medium text-primary underline"
-      >
-        Back to browse
-      </Link>
+    <div className="mx-auto max-w-2xl px-6 py-20">
+      <StateView
+        type="empty"
+        title="This property is no longer available"
+        description="It may have been rented, sold, or unlisted by the owner."
+        action={{
+          label: "Browse Verified Homes",
+          href: "/properties?q=&city=All+India&listing=rent&minPrice=0&maxPrice=0&beds=0",
+          variant: "primary",
+        }}
+      />
     </div>
   ),
 });

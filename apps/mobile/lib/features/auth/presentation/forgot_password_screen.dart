@@ -1,7 +1,9 @@
-import 'dart:async';import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/utils/error_handler.dart';
 import '../../../config/theme.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -15,6 +17,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailPhoneController = TextEditingController();
   final _otpController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isVerificationStep = false;
@@ -26,6 +29,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     _emailPhoneController.dispose();
     _otpController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -56,15 +60,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } on TimeoutException {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _errorMessage = 'Taking longer than usual. Please try again in a moment.';
           _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = SeedhaErrorHandler.getFriendlyMessage(e);
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -84,17 +90,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     try {
       final authService = ref.read(authServiceProvider);
-      // Wait, verifyOtp needs the email. How do we get the resolved email?
-      // Supabase's verifyOTP for recovery requires the email it was sent to.
-      // We will try with the raw identifier; if they used phone, our authService 
-      // doesn't return the resolved email. Let's fix that by extracting resolving logic.
-      // But actually, we can just assume `verifyOtp` uses the identifier directly if it's an email.
-      // However, if they entered a phone number, Supabase might not map it automatically in `verifyOTP`.
-      // The API requires the `email` field for `OtpType.recovery`.
-      // For now, since `resetPasswordForEmail` works, we will just use `email: identifier` and let the backend complain if wrong,
-      // or assume the user entered their email.
-      // To be completely robust, `resetPasswordForEmail` should have returned the resolved email.
-      // We'll pass the identifier. If it fails, they should use email.
       
       await authService.verifyOtp(
         email: _emailPhoneController.text.trim(),
@@ -113,15 +108,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     } on TimeoutException {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _errorMessage = 'Taking longer than usual. Please try again in a moment.';
           _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = SeedhaErrorHandler.getFriendlyMessage(e);
+          _isLoading = false;
+        });
+      }
     }
   }
 

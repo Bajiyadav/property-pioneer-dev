@@ -183,12 +183,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: locationState.when(
         data: (location) {
           return _buildContent(
-            location ?? const SelectedLocation(city: '', locality: '', state: '', latitude: 0, longitude: 0), 
-            activeCategory
+            location ??
+                SelectedLocation(
+                  formattedAddress: 'All India',
+                  city: 'All India',
+                  locality: '',
+                  state: '',
+                  country: 'India',
+                  latitude: 0,
+                  longitude: 0,
+                  isValidated: true,
+                ),
+            activeCategory,
           );
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (err, st) => Center(child: Text('Error loading location: $err')),
+        error: (err, st) => Center(child: Text('We couldn\'t load location details. Please try again.')),
       ),
     );
   }

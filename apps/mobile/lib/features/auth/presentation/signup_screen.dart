@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/utils/error_handler.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -44,11 +45,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       final purePhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
       final formattedPhone = '+91$purePhone';
 
-      // Duplicate Check
-      final isDuplicate = await authService.checkPhoneExists(formattedPhone, purePhone);
-      if (isDuplicate) {
+      final phoneExists = await authService.checkPhoneExists(formattedPhone, purePhone);
+      if (phoneExists) {
         setState(() {
-          _errorMessage = 'This phone number is already registered. Please sign in instead.';
+          _errorMessage = 'An account with this mobile number already exists. Please sign in.';
           _isLoading = false;
         });
         return;
@@ -67,14 +67,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     } on TimeoutException {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Connection is taking too long. Please check your internet connection and try again.';
+          _errorMessage = 'Taking longer than usual. Please try again in a moment.';
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Something went wrong. Please try again.';
+          _errorMessage = SeedhaErrorHandler.getFriendlyMessage(e);
           _isLoading = false;
         });
       }

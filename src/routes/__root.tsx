@@ -29,6 +29,7 @@ import { ExpansionWaitlistModal } from "@/components/dialogs/ExpansionWaitlistMo
 import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { OfflineBanner } from "@/components/feedback/OfflineBanner";
 import "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -174,6 +175,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <OfflineBanner />
         <div className="flex min-h-screen flex-col pb-16 md:pb-0">
           {!isWizardRoute && <SiteHeader />}
           <main className="flex-1">

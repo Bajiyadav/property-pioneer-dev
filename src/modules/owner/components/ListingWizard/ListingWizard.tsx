@@ -21,6 +21,7 @@ import { MobileListingNav } from "./MobileListingNav";
 import { useAdminPropertyStore } from "@/modules/admin/stores/adminPropertyStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { showFriendlyErrorToast } from "@/lib/errorUtils";
 import type { ListingFormData } from "./types";
 import { buildListingPayload } from "./buildListingPayload";
 import { BrandMark } from "@/components/branding/BrandMark";
@@ -198,9 +199,15 @@ export function ListingWizard({ initialData, editProperty }: ListingWizardProps 
     id: editProperty?.id,
     ...(editProperty
       ? {
-          owner_name: (editProperty as any).owner_name || "",
-          owner_phone: (editProperty as any).owner_phone || "",
-          owner_email: (editProperty as any).owner_email || "",
+          owner_name: (editProperty as Record<string, unknown>).owner_name
+            ? String((editProperty as Record<string, unknown>).owner_name)
+            : "",
+          owner_phone: (editProperty as Record<string, unknown>).owner_phone
+            ? String((editProperty as Record<string, unknown>).owner_phone)
+            : "",
+          owner_email: (editProperty as Record<string, unknown>).owner_email
+            ? String((editProperty as Record<string, unknown>).owner_email)
+            : "",
           city: editProperty.city || "",
           locality: editProperty.locality || "",
           address: editProperty.address || "",
@@ -381,12 +388,13 @@ export function ListingWizard({ initialData, editProperty }: ListingWizardProps 
           to: "/list-property/submitted/$id",
           params: { id: propertyId },
         });
-      } else {
-        navigate({ to: "/dashboard/owner", search: { tab: "listings" } });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save listing";
-      toast.error(msg);
+      saveDraft(formData);
+      showFriendlyErrorToast(
+        err,
+        "We couldn't save your changes. Your information is still here. Please try again.",
+      );
     } finally {
       setIsSaving(false);
     }

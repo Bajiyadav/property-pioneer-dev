@@ -33,7 +33,7 @@ class OfflineBanner extends StatelessWidget {
           const SizedBox(width: 10),
           const Expanded(
             child: Text(
-              "You are offline. Showing cached properties.",
+              "No internet connection. Please check your connection and try again.",
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

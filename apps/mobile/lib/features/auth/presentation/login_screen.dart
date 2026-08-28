@@ -10,6 +10,7 @@ import 'package:seedha_properties_mobile/models/employee_access.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
 import 'package:seedha_properties_mobile/services/session_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/utils/error_handler.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -50,12 +51,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Authentication succeeded. Resolve the destination, but never let a slow
       // lookup block navigation: each destination loads and can retry its own
       // data, so a stalled query must not hang the sign-in.
-      //
-      // Staff status comes from `employee_access` — the table the database
-      // itself consults through get_employee_role(). It previously came from
-      // `user_roles`, which grants nothing at the database level, so an account
-      // with a stale admin value there was sent to a console where every query
-      // and the moderation RPC refused it.
       UserProfile? profile;
       EmployeeAccess? access;
       try {
@@ -66,8 +61,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             .refresh(employeeAccessProvider.future)
             .timeout(const Duration(seconds: 16));
       } catch (_) {
-        // Unresolved role must never widen access — SessionRouter falls back to
-        // Home, and each screen surfaces its own Retry.
         access = null;
       }
 
@@ -81,37 +74,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         setState(() {
           _errorMessage =
-              'Connection is taking too long. Please check your internet connection and try again.';
+              'Taking longer than usual. Please try again in a moment.';
         });
       }
     } on AuthException catch (e) {
-      if (mounted) setState(() => _errorMessage = _friendlyAuthError(e));
-    } catch (_) {
       if (mounted) {
-        setState(() => _errorMessage = 'Something went wrong. Please try again.');
+        setState(() => _errorMessage = SeedhaErrorHandler.getFriendlyMessage(e));
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = SeedhaErrorHandler.getFriendlyMessage(e));
       }
     } finally {
-      // _isLoading can NEVER remain true — reset on success, auth error,
-      // timeout, and any unexpected exception.
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  /// Maps a Supabase [AuthException] to a clear, customer-safe message. Wrong
-  /// credentials keep their specific message; anything else becomes a clear
-  /// generic message — never raw technical text, and never mislabeled as
-  /// "invalid password".
-  String _friendlyAuthError(AuthException e) {
-    final msg = e.message.toLowerCase();
-    if (msg.contains('invalid login credentials') ||
-        msg.contains('invalid credentials') ||
-        msg.contains('invalid email or password')) {
-      return 'Invalid email or password.';
-    }
-    if (msg.contains('email not confirmed') || msg.contains('not confirmed')) {
-      return 'Your email is not verified yet. Please verify it and try again.';
-    }
-    return 'We could not sign you in. Please try again.';
   }
 
   @override

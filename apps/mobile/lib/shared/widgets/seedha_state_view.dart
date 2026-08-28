@@ -334,8 +334,8 @@ class SeedhaStateView extends StatelessWidget {
       case SeedhaStateType.noInternet:
         return const _StateDisplayConfig(
           icon: Icons.wifi_off_rounded,
-          title: "You're offline",
-          description: "Check your internet connection and tap retry.",
+          title: "No internet connection",
+          description: "Please check your internet connection and try again.",
           iconColor: Color(0xFFD97706),
           badgeBackgroundColor: Color(0xFFFEF3C7),
           backgroundColor: Color(0xFFFFFBEB),
@@ -345,8 +345,8 @@ class SeedhaStateView extends StatelessWidget {
       case SeedhaStateType.slowNetwork:
         return const _StateDisplayConfig(
           icon: Icons.access_time_rounded,
-          title: "Taking longer than usual...",
-          description: "Your network connection seems slow. Still retrieving data.",
+          title: "Taking longer than usual",
+          description: "Please try again in a moment.",
           iconColor: Color(0xFF0284C7),
           badgeBackgroundColor: Color(0xFFE0F2FE),
           backgroundColor: Color(0xFFF0F9FF),
@@ -357,7 +357,7 @@ class SeedhaStateView extends StatelessWidget {
         return const _StateDisplayConfig(
           icon: Icons.search_off_rounded,
           title: "No properties found",
-          description: "We couldn't find homes matching your criteria. Try adjusting your search filters.",
+          description: "Try changing your location or search filters.",
           iconColor: Colors.grey,
           badgeBackgroundColor: Color(0xFFF3F4F6),
           backgroundColor: Color(0xFFF9FAFB),
@@ -379,7 +379,7 @@ class SeedhaStateView extends StatelessWidget {
         return const _StateDisplayConfig(
           icon: Icons.lock_outline_rounded,
           title: "Session expired",
-          description: "Your session has ended. Please sign in again to continue.",
+          description: "Your session has expired. Please sign in again.",
           iconColor: Color(0xFF4F46E5),
           badgeBackgroundColor: Color(0xFFE0E7FF),
           backgroundColor: Color(0xFFEEF2FF),
@@ -390,7 +390,7 @@ class SeedhaStateView extends StatelessWidget {
         return const _StateDisplayConfig(
           icon: Icons.warning_amber_rounded,
           title: "Something went wrong",
-          description: "We couldn't complete your request right now. Please try again.",
+          description: "We couldn't connect right now. Please try again.",
           iconColor: Color(0xFFE11D48),
           badgeBackgroundColor: Color(0xFFFFE4E6),
           backgroundColor: Color(0xFFFFF1F2),
@@ -422,8 +422,8 @@ class SeedhaStateView extends StatelessWidget {
       case SeedhaStateType.paymentPending:
         return const _StateDisplayConfig(
           icon: Icons.payment_rounded,
-          title: "Payment processing...",
-          description: "Waiting for payment gateway confirmation. Please don't close the app.",
+          title: "Your payment is still being confirmed",
+          description: "Please don't try the payment again until we confirm the previous attempt.",
           iconColor: Color(0xFF0F766E),
           badgeBackgroundColor: Color(0xFFCCFBF1),
           backgroundColor: Color(0xFFF0FDFA),
@@ -444,8 +444,8 @@ class SeedhaStateView extends StatelessWidget {
       case SeedhaStateType.paymentFailed:
         return const _StateDisplayConfig(
           icon: Icons.cancel_outlined,
-          title: "Payment was not completed",
-          description: "Your account was not charged. You can retry anytime.",
+          title: "Payment wasn't completed",
+          description: "Please check your payment method and try again.",
           iconColor: Color(0xFFE11D48),
           badgeBackgroundColor: Color(0xFFFFE4E6),
           backgroundColor: Color(0xFFFFF1F2),

@@ -523,14 +523,9 @@ export function SearchUI({
               <div className="rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
                 <div className="mx-auto flex max-w-md flex-col items-center">
                   <Search className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                  <h3 className="text-xl font-bold text-foreground">
-                    {search.q || search.locality
-                      ? `No properties found in ${search.q || search.locality} yet`
-                      : "No homes match your filters"}
-                  </h3>
+                  <h3 className="text-xl font-bold text-foreground">No properties found</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Try adjusting your search criteria, or explore our active rental hubs in
-                    Hyderabad.
+                    Try changing your location or search filters.
                   </p>
 
                   <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

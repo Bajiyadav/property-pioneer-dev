@@ -74,7 +74,7 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
         ...prev,
         {
           role: "model",
-          text: "I am ready to help! You can search direct-owner properties or list your home with 0% brokerage.",
+          text: "I'm having trouble responding right now. Please try again in a moment.",
         },
       ]);
     } finally {

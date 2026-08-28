@@ -167,8 +167,8 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF0F766E),
+          SnackBar(
+            backgroundColor: const Color(0xFF0F766E),
             content: Text(
               widget.propertyToEdit != null 
                 ? 'Property updated successfully. Your changes are pending approval.'

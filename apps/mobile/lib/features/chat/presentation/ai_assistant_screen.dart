@@ -114,11 +114,11 @@ KEY FACTS:
       setState(() => _messages.add({'role': 'model', 'text': reply}));
     } on TimeoutException {
       if (mounted) {
-        _failWith(query, 'Connection is taking too long. Please try again.');
+        _failWith(query, 'Taking longer than usual. Please try again in a moment.');
       }
     } catch (_) {
       if (mounted) {
-        _failWith(query, "Couldn't reach the assistant. Check your connection.");
+        _failWith(query, "I'm having trouble responding right now. Please try again in a moment.");
       }
     } finally {
       if (mounted) {

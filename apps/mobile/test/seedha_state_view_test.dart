@@ -67,7 +67,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Taking longer than usual...'), findsOneWidget);
+      expect(find.text('Taking longer than usual'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
     });
 
@@ -80,7 +80,7 @@ void main() {
         ),
       );
 
-      expect(find.text('You are offline. Showing cached properties.'), findsOneWidget);
+      expect(find.text('No internet connection. Please check your connection and try again.'), findsOneWidget);
     });
 
     testWidgets('renders property card skeleton without errors', (WidgetTester tester) async {

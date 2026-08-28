@@ -1,24 +1,17 @@
+/**
+ * Seedha Properties — Email Confirmation & Auth Callback Handler
+ */
+
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
-import { MailCheck, TriangleAlert, Loader2 } from "lucide-react";
+import { MailCheck, TriangleAlert, Loader2, LogIn, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/branding/BrandMark";
 import { getDashboardRoute } from "@/config/roles";
 import { resolveRoleForSession } from "@/modules/authentication/services/session";
 import { APP_NAME } from "@/config/app";
+import { toast } from "sonner";
 
-/**
- * Landing page for Supabase email links (confirm signup, magic link, recovery).
- *
- * Supabase can deliver the credential three different ways depending on how the
- * project's email templates and auth flow are configured, so all three are handled:
- *   - PKCE:     ?code=...
- *   - Token:    ?token_hash=...&type=signup
- *   - Implicit: #access_token=...  (consumed by detectSessionInUrl before we run)
- *
- * Without this route the confirmation link had nowhere to land and no account
- * could ever finish activating.
- */
 export const Route = createFileRoute("/auth_/callback")({
   head: () => ({
     meta: [
@@ -34,7 +27,9 @@ type CallbackState = "working" | "error";
 function AuthCallbackPage() {
   const navigate = useNavigate();
   const [state, setState] = useState<CallbackState>("working");
-  const [message, setMessage] = useState("Confirming your account…");
+  const [errorMessage, setErrorMessage] = useState(
+    "This link has expired or has already been used.",
+  );
   const hasRun = useRef(false);
 
   useEffect(() => {
@@ -53,7 +48,7 @@ function AuthCallbackPage() {
       if (errorDescription) {
         if (!active) return;
         setState("error");
-        setMessage(errorDescription);
+        setErrorMessage("This link has expired or has already been used.");
         return;
       }
 
@@ -71,19 +66,19 @@ function AuthCallbackPage() {
           if (error) throw error;
         }
 
-        // Implicit-flow tokens are picked up automatically by detectSessionInUrl,
-        // so by this point a session should exist for every supported variant.
         const { data } = await supabase.auth.getSession();
         if (!active) return;
 
         if (!data.session) {
           setState("error");
-          setMessage("This confirmation link has expired or was already used.");
+          setErrorMessage("This link has expired or has already been used.");
           return;
         }
 
         const role = await resolveRoleForSession(data.session);
         if (!active) return;
+
+        toast.success("Account confirmed successfully! Welcome to Seedha Properties.");
 
         // If this is a password recovery link, direct to auth page to enter new password
         if (type === "recovery") {
@@ -95,12 +90,10 @@ function AuthCallbackPage() {
         // Strip the credential from the address bar before moving on.
         window.history.replaceState({}, "", "/auth/callback");
         navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
-      } catch (err) {
+      } catch (_err) {
         if (!active) return;
         setState("error");
-        setMessage(
-          err instanceof Error ? err.message : "We couldn't confirm this link. Please try again.",
-        );
+        setErrorMessage("This link has expired or has already been used.");
       }
     };
 
@@ -121,26 +114,39 @@ function AuthCallbackPage() {
           </div>
           <h1 className="text-2xl font-extrabold text-foreground">Confirming your account</h1>
           <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> {message}
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verifying your credentials with Seedha
+            Properties…
           </p>
         </div>
       ) : (
         <div className="mt-8 max-w-md space-y-4">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-500/10 text-amber-500">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-amber-500/10 text-amber-500 ring-8 ring-amber-500/5">
             <TriangleAlert className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-foreground">We couldn't confirm that link</h1>
-          <p className="text-xs leading-relaxed text-muted-foreground">{message}</p>
+          <h1 className="text-2xl font-extrabold text-foreground">Confirmation link unavailable</h1>
+          <p className="text-xs leading-relaxed text-muted-foreground">{errorMessage}</p>
           <p className="text-xs text-muted-foreground">
-            Confirmation links are single-use and expire. Request a fresh one from the sign-in page.
+            Confirmation links are single-use and expire for security. You can sign in directly or
+            request a fresh confirmation link.
           </p>
-          <Link
-            to="/auth"
-            search={{ redirect: "" }}
-            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
-          >
-            Back to sign in
-          </Link>
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/auth"
+              search={{ redirect: "" }}
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:brightness-110 active:scale-95"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              <span>Sign In</span>
+            </Link>
+            <Link
+              to="/auth"
+              search={{ redirect: "" }}
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground hover:bg-secondary transition active:scale-95"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              <span>Send New Confirmation Email</span>
+            </Link>
+          </div>
         </div>
       )}
     </div>
