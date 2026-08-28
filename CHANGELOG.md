@@ -1,3 +1,8 @@
+## v0.102.0 — 2026-08-28
+
+### Features
+- feat(admin): add Leads & Enquiries CRM view and enhance visitor identity lookup (d42f6e6)
+
 ## v0.101.4 — 2026-08-28
 
 ### Performance
