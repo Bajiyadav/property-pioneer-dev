@@ -1,3 +1,8 @@
+## v0.104.0 — 2026-08-28
+
+### Features
+- feat(discovery): enable instant 1-click search for Rent, Buy, and Commercial (e58104a)
+
 ## v0.103.1 — 2026-08-28
 
 ### Fixes
