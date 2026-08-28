@@ -1,3 +1,8 @@
+## v0.93.3 — 2026-08-28
+
+### Fixes
+- fix: resolve homepage SSR translations (23f6c88)
+
 ## v0.93.2 — 2026-08-28
 
 ### Fixes
