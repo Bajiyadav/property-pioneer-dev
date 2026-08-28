@@ -1,3 +1,8 @@
+## v0.93.0 — 2026-08-28
+
+### Features
+- feat: improve rental agreements and network error handling (bc26eef)
+
 ## v0.92.0 — 2026-08-28
 
 ### Features
