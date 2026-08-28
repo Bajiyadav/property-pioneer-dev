@@ -1,3 +1,8 @@
+## v0.101.2 — 2026-08-28
+
+### Fixes
+- fix(admin): ensure user_roles admin grant works seamlessly across employee_access (0b06714)
+
 ## v0.101.1 — 2026-08-28
 
 ### Fixes
