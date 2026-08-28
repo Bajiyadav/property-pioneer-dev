@@ -1,3 +1,8 @@
+## v0.93.2 — 2026-08-28
+
+### Fixes
+- fix: eliminate circular SSR chunk split and resolve createMiddleware initialization (da3db22)
+
 ## v0.93.1 — 2026-08-28
 
 ### Fixes
