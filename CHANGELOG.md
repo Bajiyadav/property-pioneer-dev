@@ -1,3 +1,8 @@
+## v0.103.0 — 2026-08-28
+
+### Features
+- feat(admin): track visitor identity, signed-in users and user CRM (e6b71fb)
+
 ## v0.102.0 — 2026-08-28
 
 ### Features
