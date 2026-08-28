@@ -1,3 +1,8 @@
+## v0.106.0 — 2026-08-28
+
+### Features
+- feat(marketplace): add Multi-Photo Drag & Drop uploader and Transparent Rent/Deposit Calculator (9e2a909)
+
 ## v0.105.0 — 2026-08-28
 
 ### Features
