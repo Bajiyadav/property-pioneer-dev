@@ -11,6 +11,7 @@ export interface MapProperty {
   longitude: number;
   title: string;
   price: number;
+  locality?: string;
 }
 
 /**
@@ -27,6 +28,7 @@ export function toMapProperties(
     id: string;
     title: string;
     price: number;
+    locality?: string | null;
     approx_latitude?: number | null;
     approx_longitude?: number | null;
   }>,
@@ -38,7 +40,14 @@ export function toMapProperties(
     const lng = Number(p.approx_longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     if (p.approx_latitude == null || p.approx_longitude == null) continue;
-    out.push({ id: p.id, title: p.title, price: p.price, latitude: lat, longitude: lng });
+    out.push({
+      id: p.id,
+      title: p.title,
+      price: p.price,
+      locality: p.locality || undefined,
+      latitude: lat,
+      longitude: lng,
+    });
   }
   return out;
 }
