@@ -1,3 +1,8 @@
+## v0.101.3 — 2026-08-28
+
+### Fixes
+- fix(map): auto-resolve locality coordinates and add interactive price pins with preview card (00e6a65)
+
 ## v0.101.2 — 2026-08-28
 
 ### Fixes
