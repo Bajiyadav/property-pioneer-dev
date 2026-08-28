@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
+  Calendar,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { type Property, formatPriceCompact } from "@/modules/property/services/propertyQueries";
@@ -26,6 +28,7 @@ import {
   DEFAULT_PROPERTY_COVER,
 } from "@/modules/property/components/PropertyImageBranding";
 import { InquiryPhoneModal } from "@/modules/tenant/components/InquiryPhoneModal";
+import { ScheduleVisitModal } from "@/modules/tenant/components/ScheduleVisitModal";
 import { motion } from "framer-motion";
 
 export function PropertyCard({ property }: { property: Property }) {
@@ -34,6 +37,20 @@ export function PropertyCard({ property }: { property: Property }) {
   const [copied, setCopied] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
+
+  const handleWhatsAppDirect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const sizeStr = property.bedrooms ? `${property.bedrooms} BHK` : "Property";
+    const locStr = property.locality || property.city || "Hyderabad";
+    const text = encodeURIComponent(
+      `Hello! I saw your [${sizeStr} in ${locStr}] on Seedha Properties. Is it available for a visit?`,
+    );
+    const phone = "919876543210";
+    window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+  };
 
   const images =
     Array.isArray(property.images) && property.images.length > 0
@@ -388,30 +405,69 @@ export function PropertyCard({ property }: { property: Property }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center justify-between">
-          <span className="text-[10px] font-bold text-muted-foreground bg-secondary/30 px-2.5 py-1.5 rounded-lg border border-border/20">
-            Direct Owner Listing
-          </span>
+        <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center justify-between gap-2">
+          {/* 1-Click WhatsApp Button */}
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (typeof window !== "undefined" && !localStorage.getItem("supabase.auth.token")) {
-                toast.info("Sign in to unlock direct owner contact without brokerage", {
-                  description: "0% Brokerage — connect directly with verified owners upon login.",
-                  duration: 4000,
-                });
-              }
-              setIsModalOpen(true);
-            }}
-            className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-4.5 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0 cursor-pointer"
+            onClick={handleWhatsAppDirect}
+            title="Chat directly on WhatsApp"
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 px-3 py-2 text-xs font-bold transition-all active:scale-95 cursor-pointer"
           >
-            <span>Get Owner Details</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+            <MessageSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">WhatsApp</span>
           </button>
+
+          {/* Schedule Visit & Get Details Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsVisitModalOpen(true);
+              }}
+              className="inline-flex items-center justify-center gap-1 rounded-xl bg-secondary/80 hover:bg-secondary text-foreground px-3 py-2 text-xs font-bold border border-border/50 transition-all active:scale-95 cursor-pointer"
+            >
+              <Calendar className="h-3.5 w-3.5 text-primary" />
+              <span>Visit</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window !== "undefined" && !localStorage.getItem("supabase.auth.token")) {
+                  toast.info("Sign in to unlock direct owner contact without brokerage", {
+                    description: "0% Brokerage — connect directly with verified owners upon login.",
+                    duration: 4000,
+                  });
+                }
+                setIsModalOpen(true);
+              }}
+              className="group/btn inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-3.5 sm:px-4 py-2 text-xs font-bold text-white transition-all shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0 cursor-pointer"
+            >
+              <span>Contact</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Schedule Free Site Visit Modal */}
+      <ScheduleVisitModal
+        isOpen={isVisitModalOpen}
+        onClose={() => setIsVisitModalOpen(false)}
+        property={{
+          id: property.id,
+          title: property.title || "Property in Hyderabad",
+          locality: property.locality || undefined,
+          city: property.city,
+          price: property.price,
+          listing_type: property.listing_type,
+          bhk_type: property.bedrooms ? `${property.bedrooms} BHK` : undefined,
+        }}
+      />
 
       {/* Phone Inquiry Modal */}
       <InquiryPhoneModal
