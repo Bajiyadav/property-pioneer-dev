@@ -1,3 +1,8 @@
+## v0.95.0 — 2026-08-28
+
+### Features
+- feat: restore location-first homepage experience (a528e85)
+
 ## v0.94.0 — 2026-08-28
 
 ### Features
