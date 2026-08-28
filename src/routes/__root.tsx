@@ -30,7 +30,8 @@ import { AuthProvider } from "@/modules/authentication/context/AuthContext";
 import { ConsentBanner } from "@/modules/legal/components/ConsentBanner";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { OfflineBanner } from "@/components/feedback/OfflineBanner";
-import "@/lib/i18n";
+import i18n from "@/lib/i18n/index";
+import { I18nextProvider } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 /** Bump when the files in public/ that hold the brand icon change. */
@@ -173,22 +174,24 @@ function RootComponent() {
   const isWizardRoute = router.state.location.pathname.startsWith("/list-property/wizard");
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <OfflineBanner />
-        <div className="flex min-h-screen flex-col pb-16 md:pb-0">
-          {!isWizardRoute && <SiteHeader />}
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          {!isWizardRoute && <SiteFooter />}
-          {!isWizardRoute && <MobileBottomNav />}
-        </div>
-        <SeedhaAIAssistant />
-        <Toaster position="top-center" richColors />
-        <ConsentBanner />
-      </AuthProvider>
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <OfflineBanner />
+          <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+            {!isWizardRoute && <SiteHeader />}
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            {!isWizardRoute && <SiteFooter />}
+            {!isWizardRoute && <MobileBottomNav />}
+          </div>
+          <SeedhaAIAssistant />
+          <Toaster position="top-center" richColors />
+          <ConsentBanner />
+        </AuthProvider>
+      </QueryClientProvider>
+    </I18nextProvider>
   );
 }
 

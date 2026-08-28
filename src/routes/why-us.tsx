@@ -222,8 +222,8 @@ function WhyUsPage() {
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>
-                    <strong>Instant Digital</strong> rental agreements &amp; e-stamping in Hyderabad
-                    with Aadhaar E-Sign
+                    <strong>Digital Rental</strong> agreement drafting &amp; customizable tenancy
+                    clauses
                   </span>
                 </li>
               </ul>

@@ -46,16 +46,15 @@ export function ValueAddedServices() {
               </div>
               <h3 className="text-xl font-bold text-foreground">Rental Agreement</h3>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                Draft, stamp, and sign your rental agreement online. 100% legal, secure, and
-                hassle-free with doorstep delivery.
+                Create and manage your rental agreement with a simple guided process.
               </p>
             </div>
             <div className="mt-8">
               <Link
-                to="/why-us"
+                to="/rental-agreement/create"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 group"
               >
-                Learn More
+                Create Rental Agreement
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

@@ -41,29 +41,21 @@ export function TabbedSearchBox({
 
   // Cities filtered to the selected state
   const filteredCities = useMemo(() => {
-    if (!selectedState) return [];
+    if (!selectedState || selectedState === "All India") return [];
     return LIVE_CITIES.filter((c) => c.state === selectedState);
   }, [selectedState]);
-
-  const locationReady = Boolean(selectedState && selectedCity);
 
   const handleStateChange = (newState: string) => {
     onStateChange(newState);
     onCityChange(""); // reset city when state changes
-    onQueryChange(""); // reset locality too
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!locationReady) {
-      toast.error("Please select a state and city first.");
-      return;
-    }
-
     const searchParams = {
-      q: query,
-      city: selectedCity,
+      q: query || "",
+      city: selectedCity || "",
       listing: "",
       minPrice: 0,
       maxPrice: 0,
@@ -72,8 +64,8 @@ export function TabbedSearchBox({
 
     if (status === "guest") {
       const qs = new URLSearchParams({
-        q: query,
-        city: selectedCity,
+        q: query || "",
+        city: selectedCity || "",
         listing: "",
         minPrice: "0",
         maxPrice: "0",
@@ -91,13 +83,13 @@ export function TabbedSearchBox({
       onSubmit={handleSearch}
       className="w-full flex flex-col sm:flex-row items-stretch rounded-2xl sm:rounded-full bg-white shadow-2xl overflow-hidden border border-gray-100/80"
     >
-      {/* ── 1. State ── */}
+      {/* ── 1. Location / State ── */}
       <label className="flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[150px]">
         <MapPin className="h-4 w-4 text-emerald-600 flex-none" />
         <select
           value={selectedState}
           onChange={(e) => handleStateChange(e.target.value)}
-          aria-label="State"
+          aria-label="Location"
           className="bg-transparent text-sm font-semibold text-gray-800 outline-none cursor-pointer flex-1 min-w-0"
         >
           <option value="">Select State</option>
@@ -109,33 +101,38 @@ export function TabbedSearchBox({
         </select>
       </label>
 
-      {/* ── 2. City (filtered by state) ── */}
-      <label className="flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[150px]">
-        <Building2 className="h-4 w-4 text-blue-600 flex-none" />
-        <select
-          value={selectedCity}
-          onChange={(e) => onCityChange(e.target.value)}
-          aria-label="City"
-          disabled={!selectedState}
-          className={`bg-transparent text-sm font-semibold outline-none cursor-pointer flex-1 min-w-0 ${
-            selectedState ? "text-gray-800" : "text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          <option value="">{selectedState ? "Select City" : "Select state first"}</option>
-          {filteredCities.map((c) => (
-            <option key={c.slug} value={c.name}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      {/* ── 2. City (optional, visible when state has cities) ── */}
+      {selectedState && filteredCities.length > 0 && (
+        <label className="flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[150px]">
+          <Building2 className="h-4 w-4 text-blue-600 flex-none" />
+          <select
+            value={selectedCity}
+            onChange={(e) => onCityChange(e.target.value)}
+            aria-label="City"
+            className="bg-transparent text-sm font-semibold text-gray-800 outline-none cursor-pointer flex-1 min-w-0"
+          >
+            <option value="">All Cities</option>
+            {filteredCities.map((c) => (
+              <option key={c.slug} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {/* ── 3. Locality / area / landmark ── */}
       <div className="flex-1 flex items-center gap-2 px-4 py-2 border-b sm:border-b-0 border-gray-100 min-w-0">
         <Home className="h-4 w-4 text-amber-600 flex-none" />
         <GeoapifyAutocomplete
           initialValue={query}
-          placeholder={selectedCity ? `Locality in ${selectedCity}` : "Select state & city first"}
+          placeholder={
+            selectedCity
+              ? `Locality in ${selectedCity}`
+              : selectedState && selectedState !== "All India"
+                ? `Locality in ${selectedState}`
+                : "Search by locality, area or landmark"
+          }
           onSelect={(text, geoData) => {
             onQueryChange(text);
             if (geoData) {
@@ -148,15 +145,10 @@ export function TabbedSearchBox({
         />
       </div>
 
-      {/* ── 4. Search button (disabled until state + city selected) ── */}
+      {/* ── 4. Search button ── */}
       <button
         type="submit"
-        disabled={!locationReady}
-        className={`flex items-center justify-center gap-2 px-7 py-4 sm:py-3.5 font-bold text-sm transition-colors whitespace-nowrap sm:rounded-r-full ${
-          locationReady
-            ? "bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white cursor-pointer"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
+        className="flex items-center justify-center gap-2 px-7 py-4 sm:py-3.5 font-bold text-sm bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white transition-colors whitespace-nowrap sm:rounded-r-full cursor-pointer"
       >
         <Search className="h-4 w-4" />
         <span>Search Properties</span>

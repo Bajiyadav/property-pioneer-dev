@@ -104,7 +104,7 @@ CORE PLATFORM PRINCIPLES:
    - "✓ Owner Verified" / "✓ Verified Owner": Verified identity via Aadhaar, PAN, or Utility/Electricity bills.
    - "✓ Property Verified": Verified property authenticity and documentation.
 5. Key Visitor Tools & Services:
-   - Online Rental Agreements (/rental-agreement): 100% legally valid, government e-stamped agreements with instant Aadhaar E-Sign, stamp duty calculator, and same-day delivery across Hyderabad & India.
+   - Online Rental Agreements (/rental-agreement): 4-step guided rental agreement creation, customizable tenancy terms & standard clauses, instant document preview, PDF download, and browser printing.
    - Schedule Visit: Book in-person walkthroughs or digital video tours directly on any property page.
    - Direct Contact / WhatsApp: Instant connect with property owners without middleman delays.
    - Commute Estimator: Real-time drive times to major tech parks & employment hubs.

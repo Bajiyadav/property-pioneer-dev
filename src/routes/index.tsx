@@ -88,43 +88,39 @@ function Index() {
         onSearch={handleSearchSubmit}
       />
 
-      {Boolean(selectedState && selectedCity) && (
-        <>
-          {/* 2. Real Estate Quote Banner */}
-          <QuoteBanner />
+      {/* 2. Real Estate Quote Banner */}
+      <QuoteBanner />
 
-          {/* 4. Featured Rentals (Hyderabad Focus) */}
-          <FeaturedProperties
-            properties={featured.length > 0 ? featured : properties}
-            isLoading={isLoading}
-          />
+      {/* 4. Featured Rentals (Hyderabad Focus) */}
+      <FeaturedProperties
+        properties={featured.length > 0 ? featured : properties}
+        isLoading={isLoading}
+      />
 
-          {/* 6. Payments & Rent Rewards Banner */}
-          <PaymentsAndRewardsBanner />
+      {/* 6. Payments & Rent Rewards Banner */}
+      <PaymentsAndRewardsBanner />
 
-          {/* 7. What Seedha Properties actually does today */}
-          <div id="why-us">
-            <WhySeedhaProperties />
-          </div>
+      {/* 7. What Seedha Properties actually does today */}
+      <div id="why-us">
+        <WhySeedhaProperties />
+      </div>
 
-          {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
-          <PopularCities onSelectCity={(city) => setActiveCity(city)} />
+      {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
+      <PopularCities onSelectCity={(city) => setActiveCity(city)} />
 
-          {/* 7. Dual-tab How It Works Workflow */}
-          <HowItWorks />
+      {/* 7. Dual-tab How It Works Workflow */}
+      <HowItWorks />
 
-          {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
-          <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
+      {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
+      <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
 
-          {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
-          <FeedbackSection />
+      {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
+      <FeedbackSection />
 
-          {/* 10. Support FAQ Accordion */}
-          <div id="contact">
-            <FAQSection />
-          </div>
-        </>
-      )}
+      {/* 10. Support FAQ Accordion */}
+      <div id="contact">
+        <FAQSection />
+      </div>
 
       {/* Value Added Services - Always visible as an attraction at the bottom */}
       <ValueAddedServices />

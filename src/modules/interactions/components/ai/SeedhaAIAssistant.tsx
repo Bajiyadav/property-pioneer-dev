@@ -109,7 +109,7 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
       prompts: [
         "How does Online Rental Agreement work?",
         "What is the stamp duty in Hyderabad?",
-        "How does Aadhaar E-Sign work?",
+        "Can I download and print my agreement?",
         "Home Loan EMI assistance",
       ],
     },
