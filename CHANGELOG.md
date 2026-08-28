@@ -1,3 +1,8 @@
+## v0.103.1 — 2026-08-28
+
+### Fixes
+- fix(admin): ensure Verify & Approve button synchronizes all verification badges (f856280)
+
 ## v0.103.0 — 2026-08-28
 
 ### Features
