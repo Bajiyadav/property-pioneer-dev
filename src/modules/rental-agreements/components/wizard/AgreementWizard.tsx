@@ -440,6 +440,45 @@ export const AgreementWizard: React.FC<{ initialAgreementId?: string }> = ({
                   className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-primary/20"
                 />
               </div>
+
+              {/* Landlord ID Document Upload */}
+              <div className="space-y-1 sm:col-span-2 pt-1">
+                <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                  <span>Landlord Identity Document (PAN / Aadhaar / Passport)</span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    Optional · JPG, PNG, PDF
+                  </span>
+                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setFormData((p) => ({
+                            ...p,
+                            ownerDetails: {
+                              ...p.ownerDetails,
+                              idDocumentUrl: reader.result as string,
+                            },
+                          }));
+                          toast.success("Landlord ID document attached successfully");
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                  />
+                  {formData.ownerDetails.idDocumentUrl && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                      ✓ Document Attached
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -536,6 +575,39 @@ export const AgreementWizard: React.FC<{ initialAgreementId?: string }> = ({
                       onChange={(e) => updateTenant(idx, "currentAddress", e.target.value)}
                       className="w-full px-3 py-2 rounded-xl bg-background border border-border text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-primary/20"
                     />
+                  </div>
+
+                  {/* Tenant ID Document Upload */}
+                  <div className="space-y-1 sm:col-span-2 pt-1">
+                    <label className="text-[11px] font-bold text-foreground flex items-center justify-between">
+                      <span>Tenant ID Document (Aadhaar / PAN / Voter ID)</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">
+                        Optional · JPG, PNG, PDF
+                      </span>
+                    </label>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              updateTenant(idx, "idDocumentUrl", reader.result as string);
+                              toast.success(`Tenant #${idx + 1} ID document attached`);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                      />
+                      {tenant.idDocumentUrl && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                          ✓ Document Attached
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -640,6 +712,45 @@ export const AgreementWizard: React.FC<{ initialAgreementId?: string }> = ({
                   }
                   className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+
+              {/* Property Document Upload */}
+              <div className="space-y-1 sm:col-span-3 pt-1">
+                <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                  <span>Electricity Bill / Property Ownership Proof</span>
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    Optional · Electricity bill, municipal tax receipt, or deed (JPG, PNG, PDF)
+                  </span>
+                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setFormData((p) => ({
+                            ...p,
+                            propertyDetails: {
+                              ...p.propertyDetails,
+                              ownershipDocumentUrl: reader.result as string,
+                            },
+                          }));
+                          toast.success("Property proof document attached successfully");
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                  />
+                  {formData.propertyDetails.ownershipDocumentUrl && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                      ✓ Document Attached
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -989,30 +1100,39 @@ export const AgreementWizard: React.FC<{ initialAgreementId?: string }> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-card border border-border space-y-0.5">
-                <span className="text-[11px] text-muted-foreground">Monthly Rent</span>
-                <span className="text-sm font-black text-foreground block">
-                  ₹{formData.rentalTerms.monthlyRent.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-card border border-border space-y-0.5">
-                <span className="text-[11px] text-muted-foreground">Security Deposit</span>
-                <span className="text-sm font-black text-foreground block">
-                  ₹{formData.rentalTerms.securityDeposit.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-card border border-border space-y-0.5">
-                <span className="text-[11px] text-muted-foreground">Duration</span>
-                <span className="text-sm font-black text-foreground block">
-                  {formData.rentalTerms.durationMonths} Months
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-card border border-border space-y-0.5">
-                <span className="text-[11px] text-muted-foreground">Start Date</span>
-                <span className="text-sm font-black text-foreground block">
-                  {formData.rentalTerms.startDate}
-                </span>
+            {/* Attached Verification Documents Status */}
+            <div className="p-4 rounded-2xl bg-secondary/30 border border-border space-y-2">
+              <span className="text-xs font-bold text-foreground block">
+                📑 Attached Verification Documents
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`h-2 w-2 rounded-full ${formData.ownerDetails.idDocumentUrl ? "bg-emerald-500" : "bg-muted-foreground/40"}`}
+                  />
+                  <span className="text-muted-foreground">Landlord ID:</span>
+                  <span className="font-semibold text-foreground">
+                    {formData.ownerDetails.idDocumentUrl ? "Attached ✓" : "Not attached"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`h-2 w-2 rounded-full ${formData.tenants[0]?.idDocumentUrl ? "bg-emerald-500" : "bg-muted-foreground/40"}`}
+                  />
+                  <span className="text-muted-foreground">Tenant ID:</span>
+                  <span className="font-semibold text-foreground">
+                    {formData.tenants[0]?.idDocumentUrl ? "Attached ✓" : "Not attached"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className={`h-2 w-2 rounded-full ${formData.propertyDetails.ownershipDocumentUrl ? "bg-emerald-500" : "bg-muted-foreground/40"}`}
+                  />
+                  <span className="text-muted-foreground">Electricity Bill:</span>
+                  <span className="font-semibold text-foreground">
+                    {formData.propertyDetails.ownershipDocumentUrl ? "Attached ✓" : "Not attached"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

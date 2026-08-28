@@ -15,6 +15,7 @@ export const ownerDetailsSchema = z.object({
     .regex(phoneRegex, "Enter a valid 10-digit Indian mobile number (e.g. 9876543210)"),
   email: z.string().trim().email("Enter a valid email address"),
   panOrId: z.string().trim().max(50).optional(),
+  idDocumentUrl: z.string().trim().optional(),
   currentAddress: z.string().trim().min(5, "Address must be at least 5 characters").max(300),
   city: z.string().trim().min(2, "City is required").max(100),
   state: z.string().trim().min(2, "State is required").max(100),
@@ -27,6 +28,7 @@ export const tenantDetailsSchema = z.object({
   phone: z.string().trim().regex(phoneRegex, "Enter a valid 10-digit Indian mobile number"),
   email: z.string().trim().email("Enter a valid email address"),
   panOrId: z.string().trim().max(50).optional(),
+  idDocumentUrl: z.string().trim().optional(),
   currentAddress: z.string().trim().min(5, "Address must be at least 5 characters").max(300),
   city: z.string().trim().min(2, "City is required").max(100),
   state: z.string().trim().min(2, "State is required").max(100),
@@ -52,6 +54,7 @@ export const propertyDetailsSchema = z.object({
   totalAreaSqFt: z.number().int().positive("Area must be greater than 0").max(100000).optional(),
   furnishingStatus: z.enum(["Fully Furnished", "Semi-Furnished", "Unfurnished"]).optional(),
   fittingsAndFixtures: z.string().trim().max(1000).optional(),
+  ownershipDocumentUrl: z.string().trim().optional(),
 });
 
 export const rentalTermsSchema = z

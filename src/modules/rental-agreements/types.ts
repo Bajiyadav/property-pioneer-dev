@@ -22,6 +22,7 @@ export interface OwnerDetails {
   phone: string;
   email: string;
   panOrId?: string;
+  idDocumentUrl?: string;
   currentAddress: string;
   city: string;
   state: string;
@@ -34,6 +35,7 @@ export interface TenantDetails {
   phone: string;
   email: string;
   panOrId?: string;
+  idDocumentUrl?: string;
   currentAddress: string;
   city: string;
   state: string;
@@ -53,6 +55,7 @@ export interface PropertyDetails {
   totalAreaSqFt?: number;
   furnishingStatus?: "Fully Furnished" | "Semi-Furnished" | "Unfurnished";
   fittingsAndFixtures?: string;
+  ownershipDocumentUrl?: string;
 }
 
 export interface RentalTerms {
