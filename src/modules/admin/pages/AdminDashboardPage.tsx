@@ -182,9 +182,9 @@ function AdminDashboard({ user }: { user: User | null }) {
   const isSampleData = feed?.source === "fallback";
 
   const USERS = useMemo(() => adminUsers || [], [adminUsers]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const owners = USERS.filter((u: any) => u.role === "Owner");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const agents = USERS.filter((u: any) => u.role === "Agent");
   /** Genuinely unapproved listings, straight from the service-role view. */
   const pendingApprovals = useMemo(
@@ -234,7 +234,7 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const filteredUsers = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     return USERS.filter((u: any) => {
       if (roleFilter !== "all" && u.role.toLowerCase() !== roleFilter) return false;
       if (!q) return true;
@@ -250,26 +250,16 @@ function AdminDashboard({ user }: { user: User | null }) {
 
   const cityMix = useMemo(() => countBy(properties, (p) => p.city), [properties]);
   const typeMix = useMemo(() => countBy(properties, (p) => p.property_type), [properties]);
-  /*
-   * Empty rather than generated.
-   *
-   * This was built by a seeded pseudo-random generator, producing a
-   * plausible curve from nothing. It was the most deceptive item on the page: it
-   * looked like a measurement, stayed identical across reloads so it read as
-   * stable data, and described no real activity whatsoever. The chart now renders
-   * its empty state until a real series is available.
-   */
-  const signupTrend = useMemo<{ label: string; value: number }[]>(() => [], []);
-  const revenueSeries = useMemo(
+  const verifiedCount = useMemo(
     () =>
-      ["Mar", "Apr", "May", "Jun", "Jul", "Aug"].map((label, i) => ({
-        label,
-        a: 180000 + i * 42000,
-        b: 220000 + i * 38000,
-      })),
-    [],
+      properties.filter(
+        (p) =>
+          p.owner_verification_status === "verified" ||
+          p.property_verification_status === "verified",
+      ).length,
+    [properties],
   );
-  const grossRevenue = revenueSeries.reduce((s, r) => s + r.a, 0);
+  const signupTrend = useMemo<{ label: string; value: number }[]>(() => [], []);
 
   const tabTitle: Record<string, string> = {
     overview: "Platform admin HQ",
@@ -342,11 +332,11 @@ function AdminDashboard({ user }: { user: User | null }) {
                 hint="Needs review"
               />
               <KpiCard
-                label="Gross revenue"
-                value={`₹${(grossRevenue / 100000).toFixed(1)}L`}
-                icon={<DollarSign className="h-4 w-4" />}
+                label="Verified listings"
+                numericValue={verifiedCount}
+                icon={<ShieldCheck className="h-4 w-4" />}
                 accent="purple"
-                trend={{ direction: "up", label: "6-month total" }}
+                trend={{ direction: "up", label: "100% Direct" }}
               />
             </div>
           )}
@@ -824,9 +814,9 @@ function AdminDashboard({ user }: { user: User | null }) {
           <SectionHeader title="Platform reports" subtitle="Revenue, supply, and demand" />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <KpiCard
-              label="Gross revenue"
-              value={`₹${(grossRevenue / 100000).toFixed(1)}L`}
-              icon={<DollarSign className="h-4 w-4" />}
+              label="Verified listings"
+              numericValue={verifiedCount}
+              icon={<ShieldCheck className="h-4 w-4" />}
               accent="purple"
             />
             <KpiCard
@@ -847,20 +837,22 @@ function AdminDashboard({ user }: { user: User | null }) {
             />
             <KpiCard
               label="Active agents"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               numericValue={agents.filter((a: any) => a.status === "Active").length}
               icon={<UserCheck className="h-4 w-4" />}
               accent="amber"
             />
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
-            <DualLineChart
-              title="Revenue vs. target"
-              subtitle="Monthly, ₹"
-              data={revenueSeries}
-              seriesA="Actual"
-              seriesB="Target"
-            />
+            {cityMix.length > 0 ? (
+              <CategoryBarChart
+                title="Listings by City"
+                subtitle="Geographic supply distribution"
+                data={cityMix}
+                valueName="Properties"
+              />
+            ) : (
+              <EmptyState title="No city data" hint="City breakdown appears once listings load." />
+            )}
             {typeMix.length > 0 ? (
               <CategoryBarChart
                 title="Listings by type"
