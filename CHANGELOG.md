@@ -1,3 +1,8 @@
+## v0.100.4 — 2026-08-28
+
+### Fixes
+- fix(property): dynamic sale vs rent labels on property card (38cec9d)
+
 ## v0.100.3 — 2026-08-28
 
 ### Fixes
