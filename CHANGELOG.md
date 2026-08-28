@@ -1,3 +1,8 @@
+## v0.100.2 — 2026-08-28
+
+### Fixes
+- fix(lint): ignore .vercel build directory and format sw file (1e8ca60)
+
 ## v0.100.1 — 2026-08-28
 
 ### Fixes
