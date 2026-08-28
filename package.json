@@ -130,7 +130,7 @@
       "prettier --write"
     ]
   },
-  "version": "0.93.3",
+  "version": "0.94.0",
   "optionalDependencies": {
     "@rolldown/binding-darwin-arm64": "^1.2.5"
   }

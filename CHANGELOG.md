@@ -1,3 +1,8 @@
+## v0.94.0 — 2026-08-28
+
+### Features
+- feat: unify rental agreement experience (83dc453)
+
 ## v0.93.3 — 2026-08-28
 
 ### Fixes
