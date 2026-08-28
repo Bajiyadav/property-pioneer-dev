@@ -11,7 +11,7 @@ firebase.initializeApp({
   projectId: "seedha-properties",
   storageBucket: "seedha-properties.firebasestorage.app",
   messagingSenderId: "233905431391",
-  appId: "1:233905431391:web:b2055cf0a3bf0c0dce8cea"
+  appId: "1:233905431391:web:b2055cf0a3bf0c0dce8cea",
 });
 
 const messaging = firebase.messaging();
