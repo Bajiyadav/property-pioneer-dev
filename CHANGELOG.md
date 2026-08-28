@@ -1,3 +1,8 @@
+## v0.100.0 — 2026-08-28
+
+### Features
+- feat: add document upload and verification attachments to rental agreements (e841191)
+
 ## v0.99.0 — 2026-08-28
 
 ### Features
