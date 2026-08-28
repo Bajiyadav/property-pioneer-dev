@@ -259,6 +259,31 @@ export const updateAdminProperty = createServerFn({ method: "POST" })
       }
     }
 
+    // Automatically synchronize verification flags when approved/verified
+    if (patch.is_approved === true || patch.verification_status === "verified") {
+      (patch as any).owner_verification_status = "verified";
+      (patch as any).property_verification_status = "verified";
+      (patch as any).verification_status = "verified";
+      (patch as any).id_verified = true;
+      (patch as any).verified_by = authCtx.userId;
+      (patch as any).verified_at = patch.verified_at || new Date().toISOString();
+      if (!patch.status) {
+        patch.status = "available";
+      }
+    } else if (
+      patch.is_approved === false ||
+      patch.verification_status === "rejected" ||
+      patch.status === "rejected"
+    ) {
+      (patch as any).owner_verification_status = "rejected";
+      (patch as any).property_verification_status = "rejected";
+      (patch as any).verification_status = "rejected";
+      (patch as any).id_verified = false;
+      (patch as any).verified_by = authCtx.userId;
+      (patch as any).verified_at = new Date().toISOString();
+      patch.status = "rejected";
+    }
+
     const { error } = await supabaseAdmin
       .from("properties")
       .update(patch as Database["public"]["Tables"]["properties"]["Update"])

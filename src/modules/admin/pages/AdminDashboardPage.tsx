@@ -154,6 +154,8 @@ function AdminDashboard({ user }: { user: User | null }) {
     mutationFn: (vars: {
       id: string;
       is_approved?: boolean;
+      status?: "available" | "rented" | "sold" | "rejected" | "pending" | "draft";
+      verification_status?: "pending" | "verified" | "rejected";
       video_status?: "pending" | "approved" | "rejected";
     }) => updateProperty({ data: vars }),
     onSuccess: (_res, vars) => {
@@ -162,7 +164,7 @@ function AdminDashboard({ user }: { user: User | null }) {
       if (vars.video_status) {
         toast.success(`Video tour ${vars.video_status}`);
       } else {
-        toast.success(vars.is_approved ? "Listing approved and published" : "Listing rejected");
+        toast.success(vars.is_approved ? "Listing approved and verified" : "Listing rejected");
       }
     },
     onError: (err) =>
@@ -174,7 +176,12 @@ function AdminDashboard({ user }: { user: User | null }) {
   });
 
   const moderate = (property: { id: string }, approved: boolean) =>
-    moderation.mutate({ id: property.id, is_approved: approved });
+    moderation.mutate({
+      id: property.id,
+      is_approved: approved,
+      status: approved ? "available" : "rejected",
+      verification_status: approved ? "verified" : "rejected",
+    });
   const moderateVideo = (property: { id: string }, status: "approved" | "rejected") =>
     moderation.mutate({ id: property.id, video_status: status });
 
