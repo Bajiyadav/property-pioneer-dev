@@ -20,23 +20,28 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function Step5Photos({ data, updateData }: StepProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatusText, setUploadStatusText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const images = data.images || [];
   const coverIndex = data.cover_image_index ?? 0;
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const processUploadedFiles = async (filesList: File[]) => {
+    if (filesList.length === 0) return;
 
     setIsUploading(true);
     setUploadProgress(10);
-    const files = Array.from(e.target.files);
+    setUploadStatusText(`Preparing ${filesList.length} photo(s)...`);
     const newImages = [...images];
 
     try {
       let uploadedCount = 0;
-      for (const file of files) {
+      for (let i = 0; i < filesList.length; i++) {
+        const file = filesList[i];
+        setUploadStatusText(`Uploading photo ${i + 1} of ${filesList.length}...`);
+
         // Validation: size max 10MB, type image
         if (!file.type.startsWith("image/")) {
           toast.error(`${file.name} is not an image file.`);
@@ -48,7 +53,6 @@ export function Step5Photos({ data, updateData }: StepProps) {
         }
 
         const fileExt = file.name.split(".").pop() || "jpg";
-        const fileName = `owner_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
         let publicUrl = "";
 
         // Use Edge Function for Compression and Watermarking
@@ -56,20 +60,25 @@ export function Step5Photos({ data, updateData }: StepProps) {
         formData.append("file", file, file.name);
         formData.append("bucket", "property-images");
 
-        const { data: uploadData, error: uploadErr } = await supabase.functions.invoke(
-          "process-image",
-          {
-            body: formData,
-          },
-        );
+        try {
+          const { data: uploadData, error: uploadErr } = await supabase.functions.invoke(
+            "process-image",
+            {
+              body: formData,
+            },
+          );
 
-        if (!uploadErr && uploadData?.success) {
-          publicUrl = uploadData.url;
-        } else {
-          console.error("Compression upload failed, falling back to direct upload", uploadErr);
-          // Secondary fallback bucket 'property-media' (uncompressed)
+          if (!uploadErr && uploadData?.success) {
+            publicUrl = uploadData.url;
+          }
+        } catch (fnErr) {
+          console.warn("Process-image function failed, fallback to direct storage", fnErr);
+        }
+
+        // Secondary fallback bucket 'property-media' (uncompressed)
+        if (!publicUrl) {
           const fallbackExt = file.name.split(".").pop() || "jpg";
-          const fallbackName = `owner_fallback_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fallbackExt}`;
+          const fallbackName = `owner_upload_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fallbackExt}`;
 
           const { error: fallbackErr } = await supabase.storage
             .from("property-media")
@@ -87,20 +96,49 @@ export function Step5Photos({ data, updateData }: StepProps) {
           newImages.push(publicUrl);
           uploadedCount++;
         }
-        setUploadProgress(Math.round((uploadedCount / files.length) * 100));
+        setUploadProgress(Math.round(((i + 1) / filesList.length) * 100));
       }
 
       if (uploadedCount > 0) {
         updateData({ images: newImages });
-        toast.success(`${uploadedCount} real photo(s) uploaded successfully!`);
+        toast.success(`Successfully uploaded ${uploadedCount} photo(s)!`);
       }
     } catch (err) {
       console.error("Image upload failed:", err);
-      toast.error("Failed to upload image. Please try again.");
+      toast.error("Failed to upload photos. Please try again.");
     } finally {
       setIsUploading(false);
+      setIsDraggingOver(false);
       setUploadProgress(0);
+      setUploadStatusText("");
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    processUploadedFiles(Array.from(e.target.files));
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDraggingOver) setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processUploadedFiles(Array.from(e.dataTransfer.files));
     }
   };
 
@@ -165,8 +203,17 @@ export function Step5Photos({ data, updateData }: StepProps) {
         </div>
       )}
 
-      {/* Upload Zone */}
-      <div className="bg-card rounded-2xl border-2 border-dashed border-border/80 p-6 sm:p-10 text-center hover:border-primary/50 transition-all bg-background/50">
+      {/* Upload Zone with Drag & Drop */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative rounded-2xl border-2 border-dashed p-6 sm:p-10 text-center transition-all ${
+          isDraggingOver
+            ? "border-primary bg-primary/10 ring-4 ring-primary/20 scale-[1.01]"
+            : "border-border/80 bg-card hover:border-primary/50 bg-background/50"
+        }`}
+      >
         <input
           ref={fileInputRef}
           type="file"
@@ -177,7 +224,11 @@ export function Step5Photos({ data, updateData }: StepProps) {
           disabled={isUploading}
         />
         <div className="flex flex-col items-center justify-center space-y-3">
-          <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+          <div
+            className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-xs transition-colors ${
+              isDraggingOver ? "bg-primary text-white" : "bg-primary/10 text-primary"
+            }`}
+          >
             {isUploading ? (
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
             ) : (
@@ -187,21 +238,57 @@ export function Step5Photos({ data, updateData }: StepProps) {
           <div className="space-y-1">
             <p className="text-sm font-bold text-foreground">
               {isUploading
-                ? `Uploading photos (${uploadProgress}%)...`
-                : "Upload Real Property Photos"}
+                ? uploadStatusText || `Uploading photos (${uploadProgress}%)...`
+                : isDraggingOver
+                  ? "Drop photos here to upload immediately!"
+                  : "Drag & Drop Real Photos Here or Browse"}
             </p>
             <p className="text-xs text-muted-foreground">
-              Supports JPEG, PNG, WebP up to 10MB each
+              Select 5–10 photos at once (JPEG, PNG, WebP up to 10MB each)
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-all shadow-xs cursor-pointer disabled:opacity-50"
-          >
-            {isUploading ? "Uploading..." : "Browse Photos from Device"}
-          </button>
+
+          {/* Real-time Progress Bar */}
+          {isUploading && (
+            <div className="w-full max-w-xs bg-secondary rounded-full h-2 overflow-hidden border border-border/40">
+              <div
+                className="bg-primary h-full transition-all duration-300 rounded-full"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-all shadow-xs cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
+            >
+              <ImagePlus className="h-4 w-4" />
+              <span>{isUploading ? "Uploading..." : "Select Multiple Photos"}</span>
+            </button>
+          </div>
+
+          {/* Suggested Photo Types */}
+          <div className="flex items-center justify-center gap-1.5 flex-wrap pt-2 text-[11px] text-muted-foreground">
+            <span className="font-semibold">Recommended shots:</span>
+            <span className="bg-secondary/70 px-2 py-0.5 rounded-md border border-border/40">
+              🛋️ Living Room
+            </span>
+            <span className="bg-secondary/70 px-2 py-0.5 rounded-md border border-border/40">
+              🛏️ Bedrooms
+            </span>
+            <span className="bg-secondary/70 px-2 py-0.5 rounded-md border border-border/40">
+              🍳 Kitchen
+            </span>
+            <span className="bg-secondary/70 px-2 py-0.5 rounded-md border border-border/40">
+              🚿 Bathrooms
+            </span>
+            <span className="bg-secondary/70 px-2 py-0.5 rounded-md border border-border/40">
+              🏢 Building View
+            </span>
+          </div>
         </div>
       </div>
 

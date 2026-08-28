@@ -60,6 +60,7 @@ import { RoomCard } from "@/modules/property/components/PropertyDisplayAtoms";
 import { PropertyImageBranding } from "@/modules/property/components/PropertyImageBranding";
 import { PropertyWatermark } from "@/modules/property/components/PropertyWatermark";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
+import { RentDepositCalculator } from "@/modules/property/components/RentDepositCalculator";
 import { PropertyBadges } from "@/modules/property/components/PropertyBadges";
 import { PropertyStatus } from "@/modules/property/components/PropertyStatus";
 import { WhatsAppButton } from "@/modules/property/components/WhatsAppButton";
@@ -568,6 +569,14 @@ export function PropertyDetailPage() {
                 {property.description}
               </p>
             </div>
+
+            {/* Transparent Rent & Deposit / Loan Calculator */}
+            <RentDepositCalculator
+              rentPrice={property.price}
+              deposit={estimatedDeposit}
+              locality={property.locality || property.city}
+              isRental={isRental}
+            />
 
             {/* Video Tour Section */}
             {property.video_url && (
