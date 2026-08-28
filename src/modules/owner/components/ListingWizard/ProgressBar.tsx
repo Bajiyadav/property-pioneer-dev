@@ -6,6 +6,7 @@ interface ProgressBarProps {
   totalSteps: number;
   steps: Array<{ id: number; name: string; desc: string; percent?: number }>;
   percentage?: number;
+  strengthScore?: number;
   onStepClick?: (stepId: number) => void;
 }
 
@@ -19,12 +20,16 @@ export function ProgressBar({
   totalSteps,
   steps,
   percentage,
+  strengthScore,
   onStepClick,
 }: ProgressBarProps) {
   const currentPct =
     percentage !== undefined
       ? percentage
       : (STEP_PERCENTAGES[currentStep - 1] ?? Math.round((currentStep / totalSteps) * 100));
+
+  const score = strengthScore ?? Math.min(100, Math.round(currentPct * 0.9 + 10));
+  const scoreLabel = score >= 85 ? "All-Star" : score >= 60 ? "Good Quality" : "Basic";
 
   return (
     <div className="w-full mb-6 sm:mb-8 bg-card rounded-2xl border border-border/70 p-4 sm:p-5 shadow-xs">
@@ -38,9 +43,17 @@ export function ProgressBar({
             {`Step ${currentStep} of ${totalSteps}: ${steps[currentStep - 1]?.name || ""}`}
           </span>
         </div>
-        <div className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-          <span>Direct Owner · 0% Brokerage</span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+            <span>Listing Strength:</span>
+            <strong>
+              {score}% ({scoreLabel})
+            </strong>
+          </span>
+          <div className="text-xs text-muted-foreground font-medium hidden sm:flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>0% Brokerage</span>
+          </div>
         </div>
       </div>
 

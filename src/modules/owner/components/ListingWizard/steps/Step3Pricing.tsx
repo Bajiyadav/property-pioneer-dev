@@ -74,6 +74,39 @@ export function Step3Pricing({ data, updateData }: StepProps) {
         </span>
       </div>
 
+      {/* Smart Locality Rent & Price Benchmark Gauge */}
+      {data.locality && (
+        <div className="rounded-2xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 via-card to-teal-500/5 p-4 sm:p-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-800 dark:text-teal-300">
+                <Sparkles className="h-4 w-4 text-teal-600" />
+                <span>
+                  Locality Pricing Insight ({data.locality}, {data.city || "Hyderabad"})
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isSale
+                  ? `Typical sale rate in ${data.locality}: ₹5,500 – ₹8,500 / sq.ft.`
+                  : `Typical ${data.bhk_type || `${data.bedrooms || 2} BHK`} rent in ${data.locality}: ₹${((data.bedrooms || 2) * 12000).toLocaleString("en-IN")} – ₹${((data.bedrooms || 2) * 17000).toLocaleString("en-IN")} / month.`}
+              </p>
+            </div>
+            {!isSale && data.price === 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const suggested = (data.bedrooms || 2) * 14000;
+                  updateData({ price: suggested, deposit: suggested * 2 });
+                }}
+                className="text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white px-3.5 py-1.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
+              >
+                Apply Market Rent (₹{((data.bedrooms || 2) * 14000).toLocaleString("en-IN")})
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {isSale ? (
         /* SALE PRICING SECTION */
         <div className="bg-card rounded-2xl border border-border/70 p-5 sm:p-7 shadow-sm space-y-6">

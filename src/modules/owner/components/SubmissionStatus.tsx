@@ -210,6 +210,34 @@ export function SubmissionStatus({ propertyId }: { propertyId: string }) {
           </div>
         )}
 
+        {/* Locality Seeker Demand & Fast-Track Boost Card */}
+        <div className="mt-7 rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-card to-amber-500/10 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300">
+              <Sparkles className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <span>Active Seeker Demand in Your Locality</span>
+            </span>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+              High Demand
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            🔥 <strong>18+ verified seekers</strong> are currently searching for verified homes in
+            your area. Upgrade to <strong>Fast-Track Promotion</strong> to notify active seekers and
+            get featured top-slot placement.
+          </p>
+          <div className="pt-1">
+            <Button
+              asChild
+              className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white font-extrabold text-xs shadow-sm hover:brightness-110"
+            >
+              <Link to="/list-property/promote/$id" params={{ id: data.id }}>
+                <Sparkles className="mr-2 h-4 w-4" /> Fast-Track My Listing (₹499)
+              </Link>
+            </Button>
+          </div>
+        </div>
+
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           {(stage === "rejected" || stage === "changes_required" || stage === "draft") && (
             <Button asChild className="rounded-xl">
@@ -218,15 +246,6 @@ export function SubmissionStatus({ propertyId }: { propertyId: string }) {
                 search={{ propertyType: "Residential", intent: "Rent" }}
               >
                 <PencilLine className="mr-2 h-4 w-4" /> Edit listing
-              </Link>
-            </Button>
-          )}
-          {/* Step 9 is offered only once the listing is genuinely in review —
-              never as a condition of publishing. */}
-          {(stage === "submitted" || stage === "under_review") && (
-            <Button asChild className="rounded-xl">
-              <Link to="/list-property/promote/$id" params={{ id: data.id }}>
-                <Sparkles className="mr-2 h-4 w-4" /> Want more visibility?
               </Link>
             </Button>
           )}

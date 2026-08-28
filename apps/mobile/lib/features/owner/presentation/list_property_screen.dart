@@ -373,13 +373,35 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
 
               const SizedBox(height: 20),
 
-              // Title and Description
-              const Text('5. Listing Title & Description *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              // Title and Description with AI Auto-Generator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('5. Title & Description *', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  TextButton.icon(
+                    onPressed: () {
+                      final bhk = _bedsController.text.trim().isNotEmpty ? '${_bedsController.text.trim()} BHK' : 'Spacious';
+                      final type = _propertyType;
+                      final loc = _localityController.text.trim().isNotEmpty ? _localityController.text.trim() : (_selectedCity == 'Other' ? _customCityController.text.trim() : _selectedCity);
+                      final city = _selectedCity == 'Other' ? _customCityController.text.trim() : _selectedCity;
+                      final purpose = _selectedCategory == PropertyCategory.buy ? 'Sale' : 'Rent';
+                      final amenities = _selectedAmenities.take(4).join(', ');
+
+                      setState(() {
+                        _titleController.text = '$bhk $type for $purpose in $loc, $city — Direct Owner';
+                        _descController.text = 'Spacious $bhk $type available for $purpose in $loc, $city. Built-up area of ${_areaController.text.trim()} sq.ft. featuring excellent natural ventilation and modern fittings.\n\nKey Highlights:\n• Amenities: ${amenities.isNotEmpty ? amenities : "24/7 Security, Power Backup, Lift"}\n• Possession: Ready to move / Immediate\n\nLocated in a prime neighborhood with zero broker commission.';
+                      });
+                    },
+                    icon: const Icon(Icons.auto_awesome, size: 16, color: Color(0xFF0F766E)),
+                    label: const Text('✨ Auto-Generate with AI', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F766E))),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Listing Title (e.g. 3 BHK Luxury Flat in Indiranagar) *',
+                  labelText: 'Listing Title (e.g. 3 BHK Flat in Indiranagar) *',
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),
@@ -388,9 +410,10 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _descController,
-                maxLines: 3,
+                maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: 'Detailed Property Description',
+                  hintText: 'Tap "✨ Auto-Generate with AI" or type property details...',
                   border: OutlineInputBorder(),
                   isDense: true,
                 ),

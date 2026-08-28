@@ -73,6 +73,88 @@ export function Step7Review({
         </div>
       )}
 
+      {/* AI Title & Description Generator Card */}
+      <div className="rounded-2xl border-2 border-teal-500/40 bg-gradient-to-br from-teal-500/10 via-card to-teal-500/5 p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-teal-500 text-white shadow-sm">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-foreground">
+                AI Listing Title &amp; Description Generator
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Auto-generate an attractive, high-converting description in 1 click.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const bhk = data.bhk_type || (data.bedrooms ? `${data.bedrooms} BHK` : "Spacious");
+              const pType = data.property_type || "Apartment";
+              const loc = data.locality || data.city || "Prime Location";
+              const city = data.city || "Hyderabad";
+              const furn = (data.furnishing_status || "semi-furnished").replace("-", " ");
+              const facing = data.facing ? `${data.facing} facing` : "well-ventilated";
+              const area = data.area_sqft ? `${data.area_sqft} sq.ft.` : "";
+              const parking = data.parking_covered
+                ? `${data.parking_covered} covered parking`
+                : "parking available";
+              const purpose = data.listing_type === "sale" ? "Sale" : "Rent";
+              const amenitiesList = (data.amenities || []).slice(0, 6).join(", ");
+
+              const generatedTitle = `${bhk} ${pType} for ${purpose} in ${loc}, ${city} — ${furn}`;
+
+              const generatedDesc = `Beautiful and spacious ${bhk} ${pType.toLowerCase()} available for ${purpose.toLowerCase()} in ${loc}, ${city}. ${area ? `This property offers a built-up area of ${area} with ` : ""}${facing} layout and abundant natural lighting throughout the day.
+
+Key Highlights:
+• Furnishing: ${furn} with quality fittings
+• Floor: Floor ${data.exact_floor ?? 1} of ${data.total_floors ?? 5}
+• Parking: ${parking}
+${amenitiesList ? `• Amenities: ${amenitiesList}` : "• Gated community with 24/7 security and water supply"}
+• Available: ${data.available_from ? `From ${data.available_from}` : "Immediate possession"}
+
+Prime location close to major commercial hubs, transit lines, top schools, and shopping centers. 100% direct from verified owner with ZERO broker commission.`;
+
+              updateData?.({
+                title: generatedTitle,
+                description: generatedDesc,
+              });
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>{data.description ? "✨ Regenerate with AI" : "✨ Auto-Generate with AI"}</span>
+          </button>
+        </div>
+
+        {/* Live Editable Title & Description Inputs */}
+        <div className="space-y-3 pt-2">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-foreground">Listing Headline</label>
+            <input
+              type="text"
+              value={data.title || ""}
+              onChange={(e) => updateData?.({ title: e.target.value })}
+              placeholder="e.g. 2 BHK Apartment for Rent in Gachibowli — Semi Furnished"
+              className="w-full h-10 rounded-xl bg-background border border-border px-3 text-xs font-semibold text-foreground focus:ring-2 focus:ring-teal-500/30"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-foreground">Property Description</label>
+            <textarea
+              rows={5}
+              value={data.description || ""}
+              onChange={(e) => updateData?.({ description: e.target.value })}
+              placeholder="Write or click 'Auto-Generate with AI' to build a complete property description..."
+              className="w-full rounded-xl bg-background border border-border p-3 text-xs text-foreground leading-relaxed focus:ring-2 focus:ring-teal-500/30"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Structured Summary Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* 1. Property Details */}
