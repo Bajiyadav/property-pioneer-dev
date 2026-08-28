@@ -40,15 +40,13 @@ export function HeroSection({
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
 
-    if (!selectedState || !selectedCity) {
-      toast.info("Please select your location to continue.");
-      return;
-    }
+    const targetState = selectedState || "Telangana";
+    const targetCity = selectedCity || "Hyderabad";
 
     const searchParams = {
       q: "",
-      state: selectedState,
-      city: selectedCity,
+      state: targetState,
+      city: targetCity,
       listing: params.listing || "",
       type: params.type || "",
       minPrice: 0,
