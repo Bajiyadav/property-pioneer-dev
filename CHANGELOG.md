@@ -1,3 +1,8 @@
+## v0.99.0 — 2026-08-28
+
+### Features
+- feat: AI listing generator, strength meter, pricing gauge and demand card (4b18c02)
+
 ## v0.98.0 — 2026-08-28
 
 ### Features
