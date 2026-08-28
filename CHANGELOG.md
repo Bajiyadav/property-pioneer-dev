@@ -1,3 +1,8 @@
+## v0.96.0 — 2026-08-28
+
+### Features
+- feat: improve home loan experience (c1f1cb0)
+
 ## v0.95.1 — 2026-08-28
 
 ### Fixes
