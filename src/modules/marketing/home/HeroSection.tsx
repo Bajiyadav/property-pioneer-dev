@@ -136,7 +136,7 @@ export function HeroSection({
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl tracking-tight max-w-4xl [text-shadow:0_2px_14px_rgb(2_6_23_/_0.85)]"
         >
-          {t("hero.title")}
+          {t("hero.title", "Find Your Next Home Directly from Verified Owners")}
         </motion.h1>
 
         {/* Subtitle */}
@@ -146,7 +146,10 @@ export function HeroSection({
           transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
           className="mt-3 text-base text-white/90 sm:text-lg max-w-2xl [text-shadow:0_1px_10px_rgb(2_6_23_/_0.8)]"
         >
-          {t("hero.subtitle")}
+          {t(
+            "hero.subtitle",
+            "Direct connections with verified property owners. No brokers, no hidden fees, and zero commissions across Hyderabad.",
+          )}
         </motion.p>
 
         {/* Search Bar — flat single-row pill matching the reference */}
@@ -178,10 +181,10 @@ export function HeroSection({
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-extrabold text-foreground leading-tight">
-                {t("hero.quick_buy")}
+                {t("hero.quick_buy", "Buy")}
               </span>
               <span className="block text-xs font-medium text-muted-foreground">
-                {t("hero.quick_buy_desc")}
+                {t("hero.quick_buy_desc", "Properties")}
               </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 flex-none transition-colors" />
@@ -197,10 +200,10 @@ export function HeroSection({
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-extrabold text-foreground leading-tight">
-                {t("hero.quick_rent")}
+                {t("hero.quick_rent", "Rent")}
               </span>
               <span className="block text-xs font-medium text-muted-foreground">
-                {t("hero.quick_rent_desc")}
+                {t("hero.quick_rent_desc", "Homes")}
               </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 flex-none transition-colors" />
@@ -216,10 +219,10 @@ export function HeroSection({
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-extrabold text-foreground leading-tight truncate">
-                {t("hero.quick_commercial")}
+                {t("hero.quick_commercial", "Commercial")}
               </span>
               <span className="block text-xs font-medium text-muted-foreground truncate">
-                {t("hero.quick_commercial_desc")}
+                {t("hero.quick_commercial_desc", "Spaces")}
               </span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-500 flex-none transition-colors" />
