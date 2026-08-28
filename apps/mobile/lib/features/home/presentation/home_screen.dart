@@ -14,6 +14,7 @@ import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -322,7 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         _actionCard(
                           icon: Icons.home_outlined,
                           title: 'Rent',
-                          subtitle: 'Properties',
+                          subtitle: 'Homes',
                           onTap: () {
                             ref.read(activeCategoryProvider.notifier).state = PropertyCategory.rent;
                             _loadData();
@@ -331,7 +332,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         _actionCard(
                           icon: Icons.storefront_outlined,
                           title: 'Comm.',
-                          subtitle: 'Offices',
+                          subtitle: 'Spaces',
                           onTap: () {
                             ref.read(activeCategoryProvider.notifier).state = PropertyCategory.commercial;
                             _loadData();
@@ -340,19 +341,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         _actionCard(
                           icon: Icons.account_balance_outlined,
                           title: 'Loans',
-                          subtitle: 'Approval',
+                          subtitle: 'Lowest Rates',
                           onTap: () => context.push('/home-loans'),
                         ),
                         _actionCard(
-                          icon: Icons.security_outlined,
-                          title: 'Mgmt',
-                          subtitle: 'Hassle-free',
-                          onTap: () => context.push('/contact'),
+                          icon: Icons.description_outlined,
+                          title: 'Agreement',
+                          subtitle: 'Instant PDF',
+                          onTap: () async {
+                            final uri = Uri.parse('https://seedhaproperties.com/rental-agreement');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            }
+                          },
                         ),
                         _actionCard(
                           icon: Icons.add_home_work_outlined,
-                          title: 'Post',
-                          subtitle: 'Free Ad',
+                          title: 'Post Free',
+                          subtitle: '0% Brokerage',
                           onTap: _onPostPropertyPressed,
                           emphasised: true,
                         ),
