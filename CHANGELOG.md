@@ -1,3 +1,8 @@
+## v0.107.0 — 2026-08-28
+
+### Features
+- feat(mobile): align Flutter home action cards with Buy, Rent, Comm, Loans, Agreement, and Post (879b9cf)
+
 ## v0.106.0 — 2026-08-28
 
 ### Features
