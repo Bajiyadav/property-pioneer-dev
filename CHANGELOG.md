@@ -1,3 +1,8 @@
+## v0.108.0 — 2026-08-28
+
+### Features
+- feat(leads): add 1-click WhatsApp Lead button and Schedule Free Site Visit modal (3f1f71b)
+
 ## v0.107.0 — 2026-08-28
 
 ### Features
