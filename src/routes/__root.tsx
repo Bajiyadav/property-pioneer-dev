@@ -227,27 +227,6 @@ function SiteHeader() {
           >
             <BrandMark responsiveName />
           </Link>
-          {/* Quick Nav Links on Desktop */}
-          <nav className="hidden md:flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-            <Link
-              to="/why-us"
-              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition"
-            >
-              Why Us
-            </Link>
-            <Link
-              to="/rental-agreement"
-              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition"
-            >
-              Rental Agreement
-            </Link>
-            <Link
-              to="/home-loans"
-              className="px-3 py-1.5 rounded-full hover:text-foreground hover:bg-secondary/70 transition"
-            >
-              Home Loans
-            </Link>
-          </nav>
 
           {/*
             User Actions & CTAs

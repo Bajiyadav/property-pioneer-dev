@@ -44,9 +44,14 @@ export function HeroSection({
   const handleQuickLink = (e: React.MouseEvent, params: { listing?: string; type?: string }) => {
     e.preventDefault();
 
+    if (!selectedCity) {
+      toast.info("Please select your location to continue.");
+      return;
+    }
+
     const searchParams = {
       q: "",
-      city: selectedCity || "",
+      city: selectedCity,
       listing: params.listing || "",
       type: params.type || "",
       minPrice: 0,
@@ -57,7 +62,7 @@ export function HeroSection({
     if (status === "guest") {
       const qs = new URLSearchParams({
         q: "",
-        city: selectedCity || "",
+        city: selectedCity,
         listing: params.listing || "",
         type: params.type || "",
         minPrice: "0",
