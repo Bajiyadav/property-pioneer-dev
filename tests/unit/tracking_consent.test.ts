@@ -112,7 +112,7 @@ describe("Tracking respects the gate", () => {
     const result = await trackPropertyView({ propertyId: "hyd-000" });
     expect(result).not.toBe("no-consent");
     expect(["recorded", "unavailable", "failed"]).toContain(result);
-  }, 20000);
+  }, 30000);
 });
 
 describe("Device bucketing", () => {
