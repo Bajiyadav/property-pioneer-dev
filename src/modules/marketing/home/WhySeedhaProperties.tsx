@@ -118,82 +118,154 @@ export function WhySeedhaProperties() {
           })}
         </div>
 
-        {/* Traditional Brokers vs. SEEDHA Properties Comparison */}
+        {/* Ultra-Premium Comparison Matrix: Traditional Brokers vs. SEEDHA Properties */}
         <div className="mt-20">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl font-extrabold text-foreground sm:text-3xl tracking-tight">
-              Traditional Brokers vs. SEEDHA Properties
+          <div className="mx-auto max-w-2xl text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary mb-3">
+              <span>⚡ Direct vs. Middlemen</span>
+            </div>
+            <h3 className="text-2xl font-black text-foreground sm:text-4xl tracking-tight">
+              Why Direct Discovery Beats Brokers
             </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              See why direct discovery saves you thousands of rupees and weeks of frustration
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground">
+              Save an average of{" "}
+              <strong className="text-foreground font-bold">₹35,000 to ₹70,000</strong> on every
+              deal with zero middleman commissions and 100% verified owners.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-            {/* Traditional Brokers */}
-            <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-8 shadow-sm">
-              <h4 className="text-lg font-bold text-rose-600 dark:text-rose-400 mb-6 flex items-center gap-2">
-                Traditional Real Estate Brokers
-              </h4>
-              <ul className="space-y-4 text-sm text-muted-foreground leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>1 to 2 months' rent brokerage charged up front</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>Unverified photos, outdated prices &amp; bait listings</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>Aggressive sales tactics and biased recommendations</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span>No rental agreement drafting or digital stamping support</span>
-                </li>
-              </ul>
+
+          <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto items-stretch">
+            {/* 1. Traditional Brokers Card */}
+            <div className="flex flex-col justify-between rounded-3xl border border-border/80 bg-card/60 backdrop-blur-md p-7 sm:p-9 shadow-sm transition-all duration-300 hover:border-destructive/30">
+              <div>
+                <div className="flex items-center justify-between pb-6 border-b border-border/60">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-rose-500">
+                      The Old Way
+                    </span>
+                    <h4 className="text-xl font-bold text-foreground mt-0.5">
+                      Traditional Brokers
+                    </h4>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 font-bold">
+                    ✕
+                  </div>
+                </div>
+
+                <ul className="mt-6 space-y-4 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 text-xs font-black">
+                      ✕
+                    </span>
+                    <span>
+                      <strong>15 to 30 days rent</strong> charged as upfront broker commission.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 text-xs font-black">
+                      ✕
+                    </span>
+                    <span>Fake photos, unavailable properties, and bait-and-switch tactics.</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 text-xs font-black">
+                      ✕
+                    </span>
+                    <span>
+                      Biased recommendations pushing unwanted listings for higher commission.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-rose-500 text-xs font-black">
+                      ✕
+                    </span>
+                    <span>
+                      Manual paperwork, offline stamp paper running, and hidden fee surprises.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8 rounded-2xl bg-rose-500/5 border border-rose-500/10 p-3.5 text-center">
+                <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  Result: High stress, wasted weeks &amp; heavy financial loss
+                </span>
+              </div>
             </div>
 
-            {/* SEEDHA Properties */}
-            <div className="rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/10 to-primary/5 p-8 shadow-md ring-1 ring-primary/20 relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 bg-primary text-primary-foreground text-[10px] font-black px-6 py-1 rounded-full transform rotate-12 shadow-xs">
-                BEST CHOICE
+            {/* 2. SEEDHA Properties Card */}
+            <div className="relative flex flex-col justify-between rounded-3xl border-2 border-primary bg-gradient-to-b from-primary/10 via-card to-card p-7 sm:p-9 shadow-xl shadow-primary/5 transition-all duration-300">
+              <div className="absolute -top-3.5 right-6 rounded-full bg-primary px-3.5 py-1 text-[11px] font-black uppercase tracking-wider text-primary-foreground shadow-md">
+                ★ Best Choice
               </div>
-              <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                SEEDHA Properties Platform
-              </h4>
-              <ul className="space-y-4 text-sm font-medium text-foreground leading-relaxed">
-                <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    <strong>₹0 Brokerage</strong> for both tenants &amp; buyers
+
+              <div>
+                <div className="flex items-center justify-between pb-6 border-b border-primary/20">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                      The Modern Way
+                    </span>
+                    <h4 className="text-xl font-bold text-foreground mt-0.5">SEEDHA Properties</h4>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/20 text-primary">
+                    <ShieldCheck className="h-6 w-6" />
+                  </div>
+                </div>
+
+                <ul className="mt-6 space-y-4 text-sm text-foreground">
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                      ✓
+                    </span>
+                    <span>
+                      <strong className="text-primary font-bold">₹0 Platform Commission</strong> —
+                      100% free direct owner connections.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                      ✓
+                    </span>
+                    <span>
+                      <strong>100% Verified Listings</strong> with honest photos and verified owner
+                      numbers.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                      ✓
+                    </span>
+                    <span>
+                      <strong>Instant Direct WhatsApp</strong> chat &amp; transparent visit
+                      scheduling.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black">
+                      ✓
+                    </span>
+                    <span>
+                      <strong>Legally Valid Digital Rental Agreements</strong> created &amp; signed
+                      in 5 mins.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-border/60 flex items-center justify-between gap-4">
+                <div>
+                  <span className="block text-[11px] font-semibold text-muted-foreground">
+                    Average Savings
                   </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    <strong>100% Physically Verified</strong> photos &amp; HD video tours
+                  <span className="text-base font-black text-emerald-600 dark:text-emerald-400">
+                    ₹35,000+ / Deal
                   </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Free Local Specialist</strong> site visit &amp; walkthrough assistance
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Guided Drafting</strong> &amp; digital rental agreements in Hyderabad
-                  </span>
-                </li>
-              </ul>
-              <div className="mt-6 pt-4 border-t border-primary/20">
+                </div>
                 <Link
                   to="/rental-agreement"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90"
                 >
-                  <span>Explore Online Rental Agreement Service</span>
+                  <span>Online Agreements</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
