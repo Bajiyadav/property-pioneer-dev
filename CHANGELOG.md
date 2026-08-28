@@ -1,3 +1,8 @@
+## v0.93.1 — 2026-08-28
+
+### Fixes
+- fix: resolve production csrf middleware initialization (6e79077)
+
 ## v0.93.0 — 2026-08-28
 
 ### Features
