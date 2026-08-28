@@ -338,7 +338,7 @@ export function PropertyCard({ property }: { property: Property }) {
               {formatPriceCompact(property.price, property.listing_type)}
             </span>
             <span className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
-              Rent/Month
+              {property.listing_type === "sale" ? "Total Price" : "Rent/Month"}
             </span>
           </div>
           <div className="flex min-w-0 flex-col items-center justify-center border-r border-border/40 px-1 text-center">
@@ -346,12 +346,14 @@ export function PropertyCard({ property }: { property: Property }) {
               data-testid="stat-value"
               className="w-full truncate font-[family-name:var(--font-display)] text-base font-extrabold tabular-nums text-foreground"
             >
-              {estimatedDeposit
-                ? formatPriceCompact(estimatedDeposit, property.listing_type)
-                : "N/A"}
+              {property.listing_type === "sale"
+                ? property.property_type || "Freehold"
+                : estimatedDeposit
+                  ? formatPriceCompact(estimatedDeposit, property.listing_type)
+                  : "N/A"}
             </span>
             <span className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
-              Deposit
+              {property.listing_type === "sale" ? "Property Type" : "Deposit"}
             </span>
           </div>
           <div className="flex min-w-0 flex-col items-center justify-center px-1 text-center">
