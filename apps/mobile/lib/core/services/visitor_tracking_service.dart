@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io' show Platform;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,13 +34,17 @@ class VisitorTrackingService {
           longitude = (data['longitude'] as num?)?.toDouble();
         }
       } catch (e) {
-        print('Failed to fetch visitor IP details: $e');
+        developer.log('Failed to fetch visitor IP details: $e', name: 'VisitorTrackingService');
       }
 
       String platform = 'Mobile';
-      if (Platform.isAndroid) platform = 'Android';
-      else if (Platform.isIOS) platform = 'iOS';
-      else if (Platform.isMacOS) platform = 'macOS';
+      if (Platform.isAndroid) {
+        platform = 'Android';
+      } else if (Platform.isIOS) {
+        platform = 'iOS';
+      } else if (Platform.isMacOS) {
+        platform = 'macOS';
+      }
 
       final user = Supabase.instance.client.auth.currentUser;
 
@@ -57,7 +62,7 @@ class VisitorTrackingService {
 
       await prefs.setBool(_trackedKey, true);
     } catch (e) {
-      print('Visitor tracking error: $e');
+      developer.log('Visitor tracking error: $e', name: 'VisitorTrackingService');
     }
   }
 }

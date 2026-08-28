@@ -82,6 +82,9 @@ export function LegalPage({
           <Link to="/refund-policy" className="text-muted-foreground hover:text-foreground">
             Refund Policy
           </Link>
+          <Link to="/moderation-policy" className="text-muted-foreground hover:text-foreground">
+            Moderation Policy
+          </Link>
         </div>
       </div>
     </div>

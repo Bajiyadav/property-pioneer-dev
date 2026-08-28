@@ -47,7 +47,7 @@ class _ListPropertyScreenState extends ConsumerState<ListPropertyScreen> {
     if (p != null) {
       _selectedCategory = p.listingType == 'sale' ? PropertyCategory.buy : PropertyCategory.rent;
       _titleController.text = p.title;
-      _descController.text = p.description ?? '';
+      _descController.text = p.description;
       _priceController.text = p.price.toStringAsFixed(0);
       _depositController.text = p.deposit?.toStringAsFixed(0) ?? '';
       _bedsController.text = p.bedrooms.toString();

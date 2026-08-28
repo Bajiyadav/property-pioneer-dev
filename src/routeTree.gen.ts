@@ -22,6 +22,7 @@ import { Route as HelpRouteImport } from './routes/help'
 import { Route as HomeLoansRouteImport } from './routes/home-loans'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as LoansRouteImport } from './routes/loans'
+import { Route as ModerationPolicyRouteImport } from './routes/moderation-policy'
 import { Route as MyAgreementsRouteImport } from './routes/my-agreements'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PlansRouteImport } from './routes/plans'
@@ -147,6 +148,11 @@ const ListPropertyRoute = ListPropertyRouteImport.update({
 const LoansRoute = LoansRouteImport.update({
   id: '/loans',
   path: '/loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModerationPolicyRoute = ModerationPolicyRouteImport.update({
+  id: '/moderation-policy',
+  path: '/moderation-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyAgreementsRoute = MyAgreementsRouteImport.update({
@@ -492,6 +498,7 @@ export interface FileRoutesByFullPath {
   '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
+  '/moderation-policy': typeof ModerationPolicyRoute
   '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
@@ -567,6 +574,7 @@ export interface FileRoutesByTo {
   '/help': typeof HelpRoute
   '/home-loans': typeof HomeLoansRoute
   '/loans': typeof LoansRoute
+  '/moderation-policy': typeof ModerationPolicyRoute
   '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
@@ -642,6 +650,7 @@ export interface FileRoutesById {
   '/home-loans': typeof HomeLoansRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
+  '/moderation-policy': typeof ModerationPolicyRoute
   '/my-agreements': typeof MyAgreementsRoute
   '/notifications': typeof NotificationsRoute
   '/plans': typeof PlansRoute
@@ -720,6 +729,7 @@ export interface FileRouteTypes {
     | '/home-loans'
     | '/list-property'
     | '/loans'
+    | '/moderation-policy'
     | '/my-agreements'
     | '/notifications'
     | '/plans'
@@ -795,6 +805,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/home-loans'
     | '/loans'
+    | '/moderation-policy'
     | '/my-agreements'
     | '/notifications'
     | '/plans'
@@ -869,6 +880,7 @@ export interface FileRouteTypes {
     | '/home-loans'
     | '/list-property'
     | '/loans'
+    | '/moderation-policy'
     | '/my-agreements'
     | '/notifications'
     | '/plans'
@@ -947,6 +959,7 @@ export interface RootRouteChildren {
   HomeLoansRoute: typeof HomeLoansRoute
   ListPropertyRoute: typeof ListPropertyRouteWithChildren
   LoansRoute: typeof LoansRoute
+  ModerationPolicyRoute: typeof ModerationPolicyRoute
   MyAgreementsRoute: typeof MyAgreementsRoute
   NotificationsRoute: typeof NotificationsRoute
   PlansRoute: typeof PlansRoute
@@ -1079,6 +1092,13 @@ declare module '@tanstack/react-router' {
       path: '/loans'
       fullPath: '/loans'
       preLoaderRoute: typeof LoansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moderation-policy': {
+      id: '/moderation-policy'
+      path: '/moderation-policy'
+      fullPath: '/moderation-policy'
+      preLoaderRoute: typeof ModerationPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-agreements': {
@@ -1653,6 +1673,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeLoansRoute: HomeLoansRoute,
   ListPropertyRoute: ListPropertyRouteWithChildren,
   LoansRoute: LoansRoute,
+  ModerationPolicyRoute: ModerationPolicyRoute,
   MyAgreementsRoute: MyAgreementsRoute,
   NotificationsRoute: NotificationsRoute,
   PlansRoute: PlansRoute,

@@ -523,7 +523,7 @@ function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/help" className="hover:text-foreground transition">
+                <Link to="/moderation-policy" className="hover:text-foreground transition">
                   Moderation Policy
                 </Link>
               </li>

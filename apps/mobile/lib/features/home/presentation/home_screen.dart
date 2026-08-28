@@ -198,73 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (err, st) => Center(child: Text('We couldn\'t load location details. Please try again.')),
-      ),
-    );
-  }
-
-  Widget _locationRow(SelectedLocation location) {
-    return GestureDetector(
-      onTap: () => context.push('/location-search').then((_) => _loadData()),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.14),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.26)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.location_on, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                location.formattedAddress,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Text('Change',
-                style: TextStyle(
-                    color: Color(0xFF99F6E4),
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _searchField() {
-    return GestureDetector(
-      onTap: () => context.go('/search'),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.search, color: AppTheme.textSecondary, size: 19),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Search by city, locality or landmark',
-                style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+        error: (err, st) => const Center(child: Text('We couldn\'t load location details. Please try again.')),
       ),
     );
   }
@@ -342,53 +276,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // the wizard sets owner_id from the session on submit, and the listing goes
     // into moderation like any other.
     context.push('/post-property');
-  }
-
-  Widget _buildLocationGate() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.location_on_outlined, size: 64, color: AppTheme.primaryColor),
-            const SizedBox(height: 24),
-            const Text(
-              'Choose your location',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Select a city or area to discover verified properties near you with 0% brokerage.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: AppTheme.textSecondary),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => context.push('/location-search').then((_) => _loadData()),
-              icon: const Icon(Icons.search),
-              label: const Text('Select Location'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Listing a property does not depend on having chosen a browsing
-            // location, so the action stays available in this state too.
-            TextButton.icon(
-              onPressed: _onPostPropertyPressed,
-              icon: const Icon(Icons.add_home_work_outlined, size: 18),
-              label: const Text('Post Your Property',
-                  style: TextStyle(fontWeight: FontWeight.w800)),
-              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryColor),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildContent(SelectedLocation selectedLocation, PropertyCategory activeCategory) {

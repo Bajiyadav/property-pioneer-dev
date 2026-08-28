@@ -236,6 +236,39 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
+            // Legal & Platform Policies
+            _menuSection(
+              'Legal & Policies',
+              [
+                _menuTile(
+                  icon: Icons.shield_outlined,
+                  title: 'Legal Hub',
+                  subtitle: 'Terms, Privacy, Cookies, Refund & Moderation Policies',
+                  onTap: () => context.push('/legal'),
+                ),
+                _menuTile(
+                  icon: Icons.currency_rupee_outlined,
+                  title: 'Refund & Cancellation Policy',
+                  subtitle: 'Rules for free features & optional promotion boosts',
+                  onTap: () => context.push('/legal/refunds'),
+                ),
+                _menuTile(
+                  icon: Icons.rule_outlined,
+                  title: 'Content Moderation Policy',
+                  subtitle: 'Listing standards, prohibited content & reporting',
+                  onTap: () => context.push('/legal/moderation'),
+                ),
+                _menuTile(
+                  icon: Icons.cookie_outlined,
+                  title: 'Cookies & Storage Policy',
+                  subtitle: 'Session tokens & location storage inventory',
+                  onTap: () => context.push('/legal/cookies'),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
             // Support & Sign Out
             if (user != null)
               _menuSection(

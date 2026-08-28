@@ -29,6 +29,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           "/terms-of-service",
           "/cookie-policy",
           "/refund-policy",
+          "/moderation-policy",
         ];
         const entries: Array<{ loc: string; lastmod?: string; priority: string }> = staticPaths.map(
           (p) => ({

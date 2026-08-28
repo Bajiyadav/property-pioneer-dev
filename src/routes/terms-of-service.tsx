@@ -130,7 +130,15 @@ function TermsPage() {
               <P>
                 {APP_NAME} applies platform-level automated and staff moderation filters to detect
                 duplicate listings, spam, incomplete submissions, and suspicious postings before or
-                after they appear publicly.
+                after they appear publicly. For detailed submission guidelines and enforcement
+                actions, review our{" "}
+                <Link
+                  to="/moderation-policy"
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Content Moderation Policy
+                </Link>
+                .
               </P>
               <P>
                 <strong>Important Legal Notice:</strong> A "Verified", "Inspected", or "Direct
@@ -493,10 +501,18 @@ function TermsPage() {
               These Terms &amp; Conditions, together with our{" "}
               <Link to="/privacy-policy" className="font-semibold text-primary hover:underline">
                 Privacy Policy
-              </Link>{" "}
-              and{" "}
+              </Link>
+              ,{" "}
+              <Link to="/cookie-policy" className="font-semibold text-primary hover:underline">
+                Cookie Policy
+              </Link>
+              ,{" "}
               <Link to="/refund-policy" className="font-semibold text-primary hover:underline">
                 Refund Policy
+              </Link>
+              , and{" "}
+              <Link to="/moderation-policy" className="font-semibold text-primary hover:underline">
+                Content Moderation Policy
               </Link>
               , constitute the entire agreement between you and {APP_NAME} regarding the use of the
               Platform.

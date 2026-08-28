@@ -22,6 +22,8 @@ import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
 import '../features/loans/presentation/home_loans_screen.dart';
 import '../features/location/presentation/location_search_screen.dart';
+import '../features/profile/presentation/legal_hub_screen.dart';
+import '../features/profile/presentation/legal_policy_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -166,6 +168,37 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/legal',
+      builder: (context, state) => const LegalHubScreen(),
+    ),
+    GoRoute(
+      path: '/legal/terms',
+      builder: (context, state) => const LegalPolicyScreen(policyType: 'terms'),
+    ),
+    GoRoute(
+      path: '/legal/privacy',
+      builder: (context, state) => const LegalPolicyScreen(policyType: 'privacy'),
+    ),
+    GoRoute(
+      path: '/legal/cookies',
+      builder: (context, state) => const LegalPolicyScreen(policyType: 'cookies'),
+    ),
+    GoRoute(
+      path: '/legal/refunds',
+      builder: (context, state) => const LegalPolicyScreen(policyType: 'refunds'),
+    ),
+    GoRoute(
+      path: '/legal/moderation',
+      builder: (context, state) => const LegalPolicyScreen(policyType: 'moderation'),
+    ),
+    GoRoute(
+      path: '/legal/:policy',
+      builder: (context, state) {
+        final policy = state.pathParameters['policy'] ?? 'terms';
+        return LegalPolicyScreen(policyType: policy);
+      },
     ),
   ],
 );

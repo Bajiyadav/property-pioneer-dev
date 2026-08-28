@@ -89,7 +89,7 @@ function PropertiesPage() {
   }, [search]);
 
   const onSearchChange = (patch: Partial<PropertySearchParams>) => {
-    navigate({ search: (prev) => ({ ...prev, ...patch }) as PropertySearchParams });
+    navigate({ search: (prev: PropertySearchParams) => ({ ...prev, ...patch }) });
   };
 
   const locationLabel = search.locality || search.q;
