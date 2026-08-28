@@ -1,3 +1,8 @@
+## v0.101.4 — 2026-08-28
+
+### Performance
+- perf(ai): optimize Seedha AI for ultra-fast, concise, and direct answers (30e289b)
+
 ## v0.101.3 — 2026-08-28
 
 ### Fixes
