@@ -1,3 +1,8 @@
+## v0.97.0 — 2026-08-28
+
+### Features
+- feat: comprehensive legal policies and mobile legal hub update (f977fbd)
+
 ## v0.96.1 — 2026-08-28
 
 ### Fixes
