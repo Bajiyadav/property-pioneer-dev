@@ -58,6 +58,7 @@ import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminEnquiriesRouteImport } from './routes/_authenticated/admin/enquiries'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin/moderation'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes/_authenticated/admin/visitors'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard/admin'
 import { Route as AuthenticatedDashboardAgentRouteImport } from './routes/_authenticated/dashboard/agent'
@@ -336,6 +337,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminVisitorsRoute =
+  AuthenticatedAdminVisitorsRouteImport.update({
+    id: '/visitors',
+    path: '/visitors',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/',
@@ -540,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -614,6 +622,7 @@ export interface FileRoutesByTo {
   '/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -694,6 +703,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/enquiries': typeof AuthenticatedAdminEnquiriesRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/_authenticated/dashboard/agent': typeof AuthenticatedDashboardAgentRoute
   '/_authenticated/dashboard/customer': typeof AuthenticatedDashboardCustomerRoute
@@ -774,6 +784,7 @@ export interface FileRouteTypes {
     | '/admin/enquiries'
     | '/admin/moderation'
     | '/admin/users'
+    | '/admin/visitors'
     | '/dashboard/admin'
     | '/dashboard/agent'
     | '/dashboard/customer'
@@ -848,6 +859,7 @@ export interface FileRouteTypes {
     | '/admin/enquiries'
     | '/admin/moderation'
     | '/admin/users'
+    | '/admin/visitors'
     | '/dashboard/admin'
     | '/dashboard/agent'
     | '/dashboard/customer'
@@ -927,6 +939,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/enquiries'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/users'
+    | '/_authenticated/admin/visitors'
     | '/_authenticated/dashboard/admin'
     | '/_authenticated/dashboard/agent'
     | '/_authenticated/dashboard/customer'
@@ -1359,6 +1372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/visitors': {
+      id: '/_authenticated/admin/visitors'
+      path: '/visitors'
+      fullPath: '/admin/visitors'
+      preLoaderRoute: typeof AuthenticatedAdminVisitorsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/'
@@ -1565,6 +1585,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminEnquiriesRoute: typeof AuthenticatedAdminEnquiriesRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminVisitorsRoute: typeof AuthenticatedAdminVisitorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -1576,6 +1597,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminEnquiriesRoute: AuthenticatedAdminEnquiriesRoute,
     AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+    AuthenticatedAdminVisitorsRoute: AuthenticatedAdminVisitorsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }
 

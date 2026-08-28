@@ -348,43 +348,136 @@ export interface PlatformUser {
   role: "Customer" | "Owner" | "Agent" | "Admin";
   status: "Active" | "Suspended" | "Pending";
   joined: string;
+  lastSignIn?: string | null;
 }
 
 export const getAdminUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<PlatformUser[]> => {
     const authCtx = context as AuthContext;
     const access = await assertEmployee(authCtx);
     await assertAdminStepUp(authCtx, access);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // In a real app we'd paginate this and fetch email from auth schema.
-    // For now we get what's in public schema.
-    const { data: profiles } = await authCtx.supabase
+    // Fetch real auth users from Supabase Auth Admin
+    const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const authUsers = authData?.users || [];
+
+    // Fetch public profiles & roles
+    const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, phone, created_at");
 
-    const { data: roles } = await authCtx.supabase.from("user_roles").select("user_id, role");
+    const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
 
-    if (!profiles) return [];
-
-    return profiles.map((p) => {
-      const userRoles = roles?.filter((r) => r.user_id === p.id) || [];
+    return authUsers.map((u) => {
+      const p = profiles?.find((prof) => prof.id === u.id);
+      const userRoles = roles?.filter((r) => r.user_id === u.id) || [];
+      const metaRole = (u.user_metadata?.role as string) || "";
       const primaryRole =
         userRoles.find((r) => r.role === "admin")?.role ||
+        (metaRole.toLowerCase() === "admin" ? "admin" : null) ||
         userRoles.find((r) => r.role === "agent")?.role ||
         userRoles.find((r) => r.role === "owner")?.role ||
+        metaRole ||
         "customer";
 
-      const roleStr = primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1);
+      const roleNormalized =
+        primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1).toLowerCase();
+      const validRole = (
+        ["Customer", "Owner", "Agent", "Admin"].includes(roleNormalized)
+          ? roleNormalized
+          : "Customer"
+      ) as PlatformUser["role"];
+
+      const displayName =
+        p?.full_name ||
+        u.user_metadata?.full_name ||
+        u.user_metadata?.name ||
+        (u.email ? u.email.split("@")[0] : "User");
+
+      const phone = p?.phone || u.phone || u.user_metadata?.phone || null;
 
       return {
-        id: p.id,
-        name: p.full_name || "Unknown",
-        email: "hidden@example.com", // Email not available in public profile
-        phone: p.phone || "Not provided",
-        role: roleStr as PlatformUser["role"],
-        status: "Active" as PlatformUser["status"],
-        joined: p.created_at,
+        id: u.id,
+        name: displayName,
+        email: u.email || "No email",
+        phone: phone || "Not provided",
+        role: validRole,
+        status: (u.banned_until ? "Suspended" : "Active") as PlatformUser["status"],
+        joined: u.created_at,
+        lastSignIn: u.last_sign_in_at || null,
+      };
+    });
+  });
+
+export interface SiteVisitorRecord {
+  id: string;
+  ip_address: string | null;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  platform: string | null;
+  visited_at: string;
+  user_id: string | null;
+  user_name?: string | null;
+  user_email?: string | null;
+  user_phone?: string | null;
+  user_role?: string | null;
+}
+
+export const getAdminVisitors = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<SiteVisitorRecord[]> => {
+    const authCtx = context as AuthContext;
+    const access = await assertEmployee(authCtx);
+    await assertAdminStepUp(authCtx, access);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: rawVisitors } = (await (supabaseAdmin.from("site_visitors" as any) as any)
+      .select("id, ip_address, city, region, country, platform, visited_at, user_id")
+      .order("visited_at", { ascending: false })
+      .limit(200)) as { data: any[] | null };
+
+    if (!rawVisitors || rawVisitors.length === 0) return [];
+
+    const userIds = Array.from(
+      new Set(rawVisitors.map((v) => v.user_id).filter(Boolean)),
+    ) as string[];
+
+    const authUsersMap = new Map<
+      string,
+      { email?: string; name?: string; phone?: string; role?: string }
+    >();
+    if (userIds.length > 0) {
+      const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+      if (authData?.users) {
+        for (const u of authData.users) {
+          authUsersMap.set(u.id, {
+            email: u.email,
+            name: u.user_metadata?.full_name || u.user_metadata?.name,
+            phone: u.phone || u.user_metadata?.phone,
+            role: u.user_metadata?.role || "customer",
+          });
+        }
+      }
+    }
+
+    return rawVisitors.map((v) => {
+      const u = v.user_id ? authUsersMap.get(v.user_id) : undefined;
+      return {
+        id: v.id,
+        ip_address: v.ip_address,
+        city: v.city,
+        region: v.region,
+        country: v.country,
+        platform: v.platform,
+        visited_at: v.visited_at,
+        user_id: v.user_id,
+        user_name: u?.name || null,
+        user_email: u?.email || null,
+        user_phone: u?.phone || null,
+        user_role: u?.role || null,
       };
     });
   });

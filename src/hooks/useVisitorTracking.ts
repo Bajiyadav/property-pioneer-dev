@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useVisitorTracking() {
   useEffect(() => {
-    async function trackVisitor() {
-      // Prevent multiple tracking calls in a single session
-      if (sessionStorage.getItem("visitor_tracked")) {
+    async function trackVisitor(explicitUserId?: string | null) {
+      const trackingKey = explicitUserId
+        ? `visitor_tracked_${explicitUserId}`
+        : "visitor_tracked_guest";
+      if (sessionStorage.getItem(trackingKey)) {
         return;
       }
 
@@ -17,7 +19,6 @@ export function useVisitorTracking() {
         let latitude = null;
         let longitude = null;
 
-        // Fetch location details from a free GeoIP service
         try {
           const res = await fetch("https://ipapi.co/json/");
           if (res.ok) {
@@ -29,15 +30,16 @@ export function useVisitorTracking() {
             latitude = data.latitude;
             longitude = data.longitude;
           }
-        } catch (e) {
-          console.error("Failed to fetch visitor IP details:", e);
+        } catch {
+          // GeoIP fetch is best effort
         }
 
         const userAgent = navigator.userAgent;
-
-        // Try to get the current authenticated user, if any
-        const { data: authData } = await supabase.auth.getUser();
-        const userId = authData?.user?.id || null;
+        let userId = explicitUserId;
+        if (userId === undefined) {
+          const { data: authData } = await supabase.auth.getUser();
+          userId = authData?.user?.id || null;
+        }
 
         const { error } = await supabase.from("site_visitors" as any).insert({
           ip_address,
@@ -51,16 +53,26 @@ export function useVisitorTracking() {
           user_id: userId,
         });
 
-        if (error) {
-          console.error("Error tracking visitor:", error);
-        } else {
-          sessionStorage.setItem("visitor_tracked", "true");
+        if (!error) {
+          sessionStorage.setItem(trackingKey, "true");
         }
       } catch (err) {
         console.error("Visitor tracking error:", err);
       }
     }
 
+    // Initial page load track
     trackVisitor();
+
+    // Track on auth sign-in state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.id) {
+        trackVisitor(session.user.id);
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 }

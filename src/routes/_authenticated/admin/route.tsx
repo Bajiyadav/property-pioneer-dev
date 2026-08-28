@@ -15,6 +15,7 @@ import {
   LogOut,
   Activity,
   MessageSquare,
+  Globe,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -103,6 +104,7 @@ function AdminLayout({ access }: { access: { role: string; regions: string[] } }
     { name: "Moderation Queue", href: "/admin/moderation", icon: Shield },
     { name: "Leads & Enquiries", href: "/admin/enquiries", icon: MessageSquare },
     { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Site Visitors", href: "/admin/visitors", icon: Globe },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Activity", href: "/admin/activity", icon: Activity },
     ...(access.role === "admin"
