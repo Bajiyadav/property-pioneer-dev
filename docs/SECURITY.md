@@ -33,7 +33,7 @@
 ### 5. Cross-Site Scripting (XSS) & CSRF Protection (**Score: 88/100**)
 
 - **XSS**: React 19 automatically escapes string values rendered in JSX. `PropertyStructuredData` uses `dangerouslySetInnerHTML` for JSON-LD, but only passes JSON-stringified sanitized database values.
-- **CSRF**: `src/start.ts` registers `createCsrfMiddleware` filtering for `serverFn` RPC calls to prevent cross-site request forgery.
+- **CSRF**: TanStack Start natively enforces CSRF protection for `serverFn` RPC mutations to prevent cross-site request forgery.
 
 ### 6. Anti-Abuse & Denial of Service (DoS) Controls (**Score: 92/100**)
 

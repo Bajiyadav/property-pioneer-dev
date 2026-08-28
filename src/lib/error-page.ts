@@ -12,7 +12,7 @@ export function renderErrorPage(error?: unknown): string {
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Seedha Properties — Platform Recovery</title>
+    <title>Seedha Properties — System Interruption</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       :root { --bg: #090d16; --card: #111827; --text: #f9fafb; --muted: #9ca3af; --primary: #10b981; --rose: #f43f5e; }
@@ -31,16 +31,14 @@ export function renderErrorPage(error?: unknown): string {
   </head>
   <body>
     <div class="card">
-      <div class="badge">🚧 Seedha Properties Platform Recovery</div>
-      <h1>System Interruption Resolved</h1>
-      <p>Our engineering team has logged this event. Reference Code: <strong>${requestId}</strong></p>
+      <div class="badge">Seedha Properties</div>
+      <h1>System Interruption</h1>
+      <p>We are experiencing a temporary system interruption. Our engineering team has logged this event. Reference Code: <strong>${requestId}</strong></p>
 
       ${
         isDev && (errorMessage || stackTrace)
           ? `<div class="code-box"><strong>[DEV DIAGNOSTICS]</strong>\nError: ${errorMessage}\n\nStack Trace:\n${stackTrace}</div>`
-          : errorMessage
-            ? `<div class="code-box">Error Summary: ${errorMessage}</div>`
-            : ""
+          : ""
       }
 
       <div class="actions">
@@ -48,7 +46,7 @@ export function renderErrorPage(error?: unknown): string {
         <a class="btn-secondary" href="/">Return to Home</a>
       </div>
 
-      <p class="copyright">© 2022 Seedha Properties. All Rights Reserved.</p>
+      <p class="copyright">© 2026 Seedha Properties. All Rights Reserved.</p>
     </div>
   </body>
 </html>`;
