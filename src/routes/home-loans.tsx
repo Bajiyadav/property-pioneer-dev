@@ -5,12 +5,12 @@ export const Route = createFileRoute("/home-loans")({
   head: () => ({
     meta: [
       {
-        title: "Home Loans & EMI Calculator | Compare Bank Rates | Seedha Properties",
+        title: "Home Loans | Eligibility, EMI Calculator & Lender Options | Seedha Properties",
       },
       {
         name: "description",
         content:
-          "Calculate monthly home loan EMIs, check loan eligibility, and compare benchmark interest rates from SBI, HDFC, ICICI, and Axis Bank with zero processing hassles on Seedha Properties.",
+          "Explore home loans, estimate borrowing limits with our indicative eligibility checker, calculate monthly EMIs, review document checklists, and compare verified Indian bank options on Seedha Properties.",
       },
     ],
   }),

@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
+  Home,
+  Info,
 } from "lucide-react";
 import { calculateFullLoanSchedule, formatINR } from "../utils/loanCalculations";
 
@@ -24,71 +26,193 @@ export function HomeLoanCalculator({
   initialTenure = 20,
   onApplyClick,
 }: Props) {
+  const [usePropertyValueMode, setUsePropertyValueMode] = useState<boolean>(false);
+  const [propertyPrice, setPropertyPrice] = useState<number>(6500000);
+  const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
+
   const [loanAmount, setLoanAmount] = useState<number>(initialAmount);
   const [interestRate, setInterestRate] = useState<number>(initialRate);
   const [tenureYears, setTenureYears] = useState<number>(initialTenure);
   const [showAmortization, setShowAmortization] = useState<boolean>(false);
 
+  // Synchronize loan amount when property price mode is toggled
+  const effectiveLoanAmount = useMemo(() => {
+    if (usePropertyValueMode) {
+      const dp = Math.round((propertyPrice * downPaymentPercent) / 100);
+      return Math.max(100000, propertyPrice - dp);
+    }
+    return loanAmount;
+  }, [usePropertyValueMode, propertyPrice, downPaymentPercent, loanAmount]);
+
   const schedule = useMemo(() => {
-    return calculateFullLoanSchedule(loanAmount, interestRate, tenureYears);
-  }, [loanAmount, interestRate, tenureYears]);
+    return calculateFullLoanSchedule(effectiveLoanAmount, interestRate, tenureYears);
+  }, [effectiveLoanAmount, interestRate, tenureYears]);
 
   const principalPercent = useMemo(() => {
     if (schedule.totalPayment === 0) return 0;
-    return Math.round((loanAmount / schedule.totalPayment) * 100);
-  }, [loanAmount, schedule.totalPayment]);
+    return Math.round((effectiveLoanAmount / schedule.totalPayment) * 100);
+  }, [effectiveLoanAmount, schedule.totalPayment]);
 
   const interestPercent = 100 - principalPercent;
 
   return (
-    <div className="space-y-8 rounded-3xl border border-border bg-card p-6 shadow-sm md:p-8">
-      {/* Controls & Result Grid */}
+    <div className="space-y-8 rounded-3xl border border-border bg-card p-6 shadow-xs md:p-8">
+      {/* Top Controls Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+            <TrendingUp className="h-3.5 w-3.5" />
+            Precise Amortization Calculator
+          </span>
+          <h3 className="mt-2 text-xl font-black text-foreground sm:text-2xl">
+            Home Loan EMI Calculator
+          </h3>
+          <p className="text-xs text-muted-foreground sm:text-sm mt-1">
+            Calculate your monthly reducing EMI, interest payout, and amortization schedule.
+          </p>
+        </div>
+
+        {/* Calculation Mode Toggle */}
+        <div className="flex items-center gap-2 rounded-2xl border border-border bg-secondary/40 p-1">
+          <button
+            onClick={() => setUsePropertyValueMode(false)}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+              !usePropertyValueMode
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            By Loan Amount
+          </button>
+          <button
+            onClick={() => setUsePropertyValueMode(true)}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+              usePropertyValueMode
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            By Property Value
+          </button>
+        </div>
+      </div>
+
+      {/* Calculator Main Grid */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Left Column: Sliders and Inputs */}
+        {/* Left Column: Input Sliders */}
         <div className="space-y-6 lg:col-span-7">
-          {/* Loan Amount */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <IndianRupee className="h-4 w-4 text-primary" />
-                Loan Amount
-              </label>
-              <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 px-3 py-1 text-sm font-bold text-foreground">
-                <span>₹</span>
+          {/* Property Value Mode */}
+          {usePropertyValueMode ? (
+            <div className="space-y-6 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              {/* Property Value */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider">
+                    <Home className="h-4 w-4 text-primary" /> Total Property Value
+                  </label>
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-1 text-sm font-bold text-foreground">
+                    <span>₹</span>
+                    <input
+                      type="number"
+                      min={500000}
+                      max={100000000}
+                      step={100000}
+                      value={propertyPrice}
+                      onChange={(e) => setPropertyPrice(Math.max(0, Number(e.target.value)))}
+                      className="w-28 bg-transparent text-right font-mono font-bold focus:outline-none"
+                    />
+                  </div>
+                </div>
                 <input
-                  type="number"
-                  min={100000}
-                  max={100000000}
-                  step={100000}
-                  value={loanAmount}
-                  onChange={(e) => setLoanAmount(Math.max(0, Number(e.target.value)))}
-                  className="w-28 bg-transparent text-right font-mono font-bold focus:outline-none"
+                  type="range"
+                  min={1000000}
+                  max={50000000}
+                  step={200000}
+                  value={propertyPrice}
+                  onChange={(e) => setPropertyPrice(Number(e.target.value))}
+                  className="h-2 w-full cursor-pointer accent-primary"
+                  aria-label="Property price slider"
                 />
+                <div className="flex justify-between text-[11px] text-muted-foreground">
+                  <span>₹10 Lakh</span>
+                  <span className="font-semibold text-primary">{formatINR(propertyPrice)}</span>
+                  <span>₹5 Crore</span>
+                </div>
+              </div>
+
+              {/* Down Payment Percentage */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider">
+                    <Percent className="h-4 w-4 text-primary" /> Down Payment ({downPaymentPercent}
+                    %)
+                  </label>
+                  <span className="text-xs font-bold text-foreground">
+                    {formatINR(Math.round((propertyPrice * downPaymentPercent) / 100))}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={10}
+                  max={50}
+                  step={5}
+                  value={downPaymentPercent}
+                  onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
+                  className="h-2 w-full cursor-pointer accent-primary"
+                  aria-label="Down payment percentage slider"
+                />
+                <div className="flex justify-between text-[11px] text-muted-foreground">
+                  <span>10% (Min Margin)</span>
+                  <span className="font-semibold text-primary">
+                    Loan: {formatINR(effectiveLoanAmount)}
+                  </span>
+                  <span>50%</span>
+                </div>
               </div>
             </div>
-            <input
-              type="range"
-              min={500000}
-              max={50000000}
-              step={100000}
-              value={loanAmount}
-              onChange={(e) => setLoanAmount(Number(e.target.value))}
-              className="h-2 w-full cursor-pointer accent-primary"
-              aria-label="Loan Amount Slider"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>₹5 Lakh</span>
-              <span className="font-semibold text-primary">{formatINR(loanAmount)}</span>
-              <span>₹5 Crore</span>
+          ) : (
+            /* Direct Loan Amount Mode */
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider">
+                  <IndianRupee className="h-4 w-4 text-primary" /> Loan Amount
+                </label>
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 px-3 py-1 text-sm font-bold text-foreground">
+                  <span>₹</span>
+                  <input
+                    type="number"
+                    min={100000}
+                    max={100000000}
+                    step={100000}
+                    value={loanAmount}
+                    onChange={(e) => setLoanAmount(Math.max(0, Number(e.target.value)))}
+                    className="w-28 bg-transparent text-right font-mono font-bold focus:outline-none"
+                  />
+                </div>
+              </div>
+              <input
+                type="range"
+                min={500000}
+                max={50000000}
+                step={100000}
+                value={loanAmount}
+                onChange={(e) => setLoanAmount(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer accent-primary"
+                aria-label="Loan amount slider"
+              />
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>₹5 Lakh</span>
+                <span className="font-semibold text-primary">{formatINR(loanAmount)}</span>
+                <span>₹5 Crore</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Interest Rate */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <Percent className="h-4 w-4 text-primary" />
-                Interest Rate (p.a.)
+              <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider">
+                <Percent className="h-4 w-4 text-primary" /> Interest Rate (% p.a.)
               </label>
               <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 px-3 py-1 text-sm font-bold text-foreground">
                 <input
@@ -97,7 +221,7 @@ export function HomeLoanCalculator({
                   max={16}
                   step={0.05}
                   value={interestRate}
-                  onChange={(e) => setInterestRate(Math.max(0, Number(e.target.value)))}
+                  onChange={(e) => setInterestRate(Math.max(0.1, Number(e.target.value)))}
                   className="w-16 bg-transparent text-right font-mono font-bold focus:outline-none"
                 />
                 <span>%</span>
@@ -111,11 +235,11 @@ export function HomeLoanCalculator({
               value={interestRate}
               onChange={(e) => setInterestRate(Number(e.target.value))}
               className="h-2 w-full cursor-pointer accent-primary"
-              aria-label="Interest Rate Slider"
+              aria-label="Interest rate slider"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-[11px] text-muted-foreground">
               <span>7.5%</span>
-              <span className="font-semibold text-primary">{interestRate}% p.a.</span>
+              <span className="font-semibold text-primary">{interestRate.toFixed(2)}% p.a.</span>
               <span>15.0%</span>
             </div>
           </div>
@@ -123,9 +247,8 @@ export function HomeLoanCalculator({
           {/* Loan Tenure */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <Calendar className="h-4 w-4 text-primary" />
-                Loan Tenure (Years)
+              <label className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-wider">
+                <Calendar className="h-4 w-4 text-primary" /> Loan Tenure (Years)
               </label>
               <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 px-3 py-1 text-sm font-bold text-foreground">
                 <input
@@ -148,23 +271,26 @@ export function HomeLoanCalculator({
               value={tenureYears}
               onChange={(e) => setTenureYears(Number(e.target.value))}
               className="h-2 w-full cursor-pointer accent-primary"
-              aria-label="Loan Tenure Slider"
+              aria-label="Loan tenure slider"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-[11px] text-muted-foreground">
               <span>1 Year</span>
-              <span className="font-semibold text-primary">{tenureYears} Years</span>
+              <span className="font-semibold text-primary">
+                {tenureYears} Years ({tenureYears * 12} Months)
+              </span>
               <span>30 Years</span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Output Summary Card */}
-        <div className="flex flex-col justify-between rounded-2xl border border-primary/20 bg-primary/5 p-6 lg:col-span-5">
+        <div className="flex flex-col justify-between rounded-3xl border border-primary/20 bg-primary/5 p-6 lg:col-span-5 space-y-6">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
               <TrendingUp className="h-3.5 w-3.5" />
-              Monthly Repayment
+              Estimated Monthly Repayment
             </span>
+
             <div className="mt-3">
               <p className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
                 ₹{schedule.monthlyEmi.toLocaleString("en-IN")}
@@ -191,19 +317,19 @@ export function HomeLoanCalculator({
             </div>
 
             {/* Metrics Breakdown */}
-            <div className="mt-6 space-y-3 divide-y divide-border/60 text-sm">
+            <div className="mt-6 space-y-3 divide-y divide-border/60 text-xs sm:text-sm">
               <div className="flex items-center justify-between pt-2">
-                <span className="text-muted-foreground">Principal Amount</span>
-                <span className="font-bold text-foreground">{formatINR(loanAmount)}</span>
+                <span className="text-muted-foreground">Principal Loan Amount</span>
+                <span className="font-bold text-foreground">{formatINR(effectiveLoanAmount)}</span>
               </div>
               <div className="flex items-center justify-between pt-2">
-                <span className="text-muted-foreground">Total Interest Payable</span>
+                <span className="text-muted-foreground">Estimated Total Interest</span>
                 <span className="font-bold text-rose-600 dark:text-rose-400">
                   {formatINR(schedule.totalInterest)}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-2">
-                <span className="font-bold text-foreground">Total Amount Payable</span>
+                <span className="font-bold text-foreground">Total Repayment (P + I)</span>
                 <span className="font-extrabold text-foreground">
                   {formatINR(schedule.totalPayment)}
                 </span>
@@ -211,13 +337,17 @@ export function HomeLoanCalculator({
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-border/60">
+          <div className="space-y-3 pt-4 border-t border-border/60">
             {onApplyClick ? (
               <button
                 onClick={() =>
-                  onApplyClick({ amount: loanAmount, tenure: tenureYears, rate: interestRate })
+                  onApplyClick({
+                    amount: effectiveLoanAmount,
+                    tenure: tenureYears,
+                    rate: interestRate,
+                  })
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary/90 active:scale-[0.98]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 active:scale-[0.98]"
               >
                 <ShieldCheck className="h-4 w-4" />
                 Apply for Loan with this EMI
@@ -225,25 +355,34 @@ export function HomeLoanCalculator({
             ) : (
               <a
                 href="#loan-inquiry-section"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary/90 active:scale-[0.98]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 active:scale-[0.98]"
               >
                 <ShieldCheck className="h-4 w-4" />
                 Get Pre-Approved Loan Offer
               </a>
             )}
+
+            <div className="flex items-start gap-2 text-[10px] text-muted-foreground leading-relaxed">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>
+                <strong>EMI Disclaimer:</strong> EMI is an indicative mathematical estimate. Actual
+                EMI may differ based on the lender's applicable rate, fees, loan structure, and
+                final sanction terms.
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Amortization Schedule Accordion */}
-      <div className="border-t border-border pt-6">
+      {/* Year-by-Year Amortization Schedule Accordion */}
+      <div className="border-t border-border/60 pt-6">
         <button
           onClick={() => setShowAmortization(!showAmortization)}
-          className="flex w-full items-center justify-between rounded-xl bg-secondary/40 p-4 text-left font-bold text-foreground transition hover:bg-secondary/60"
+          className="flex w-full items-center justify-between rounded-2xl bg-secondary/40 p-4 text-left font-bold text-foreground transition hover:bg-secondary/60"
         >
-          <span className="flex items-center gap-2 text-sm">
+          <span className="flex items-center gap-2 text-xs sm:text-sm">
             <PieChart className="h-4 w-4 text-primary" />
-            Year-by-Year Amortization Schedule & Balance Repayment
+            Year-by-Year Amortization Schedule & Principal/Interest Breakdown
           </span>
           {showAmortization ? (
             <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -258,10 +397,10 @@ export function HomeLoanCalculator({
               <thead className="bg-muted/60 text-muted-foreground uppercase tracking-wider font-semibold">
                 <tr>
                   <th className="px-4 py-3">Year</th>
-                  <th className="px-4 py-3">Principal (₹)</th>
-                  <th className="px-4 py-3">Interest (₹)</th>
+                  <th className="px-4 py-3">Principal Paid (₹)</th>
+                  <th className="px-4 py-3">Interest Paid (₹)</th>
                   <th className="px-4 py-3">Total Payment (₹)</th>
-                  <th className="px-4 py-3">Balance (₹)</th>
+                  <th className="px-4 py-3">Remaining Balance (₹)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60 font-mono">
