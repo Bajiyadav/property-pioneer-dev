@@ -1,3 +1,8 @@
+## v0.95.1 — 2026-08-28
+
+### Fixes
+- fix: normalize footer rental agreement and careers styling (d0b2c49)
+
 ## v0.95.0 — 2026-08-28
 
 ### Features
