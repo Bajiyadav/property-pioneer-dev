@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildListingPayload } from "@/modules/owner/components/ListingWizard/buildListingPayload";
 import { isOwnerVerified, isPropertyVerified } from "@/modules/property/services/propertyService";
+import type { Property } from "@/modules/property/services/propertyQueries";
 
 function generateWhatsAppOutreachUrl(phone: string, message: string): string {
   const cleanPhone = phone.replace(/\D/g, "");
@@ -32,6 +33,7 @@ describe("Phase 1: End-to-End Multi-Persona Marketplace Audit", () => {
           "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
           "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
         ],
+        title: "GLS Homes 2 BHK Apartment in Kondapur",
         description:
           "Spacious 2 BHK East facing apartment in Kondapur near Botanical Garden with 24/7 water and security.",
       };
@@ -51,7 +53,7 @@ describe("Phase 1: End-to-End Multi-Persona Marketplace Audit", () => {
   // 2. ADMIN & AGENT PERSONA TEST
   describe("2. Admin & Agent Persona: Listing Verification & WhatsApp Outreach", () => {
     it("allows admin to inspect, highlight, and verify owner property", () => {
-      const pendingProperty = {
+      const pendingProperty: Property = {
         id: "prop-kondapur-201",
         title: "GLS Homes 2 BHK Apartment in Kondapur",
         description: "High quality apartment",
@@ -64,8 +66,8 @@ describe("Phase 1: End-to-End Multi-Persona Marketplace Audit", () => {
         is_featured: true,
         city: "Hyderabad",
         price: 32000,
-        listing_type: "rent",
-        status: "active",
+        listing_type: "rent" as const,
+        status: "available" as const,
         is_approved: true,
         owner_verification_status: "verified",
         property_verification_status: "verified",

@@ -14,7 +14,7 @@ const mockInitialData: ListingFormData = {
   bathrooms: 2,
   balconies: 1,
   area_sqft: 1200,
-  furnishing: "semi-furnished",
+  furnishing_status: "semi-furnished",
   property_age: "1-5 Years",
   total_floors: 5,
   exact_floor: 2,
@@ -26,8 +26,8 @@ const mockInitialData: ListingFormData = {
   owner_name: "Rao Baji",
   owner_phone: "9876543210",
   price: 25000,
-  maintenance_charges: 2000,
-  security_deposit: 50000,
+  maintenance: 2000,
+  deposit: 50000,
   available_from: "2026-09-01",
   rent_negotiable: false,
   amenities: ["Power Backup", "Lift", "Security"],
@@ -37,6 +37,8 @@ const mockInitialData: ListingFormData = {
   visit_time_slots: ["Morning", "Evening"],
   contact_preference: "all",
   owner_declaration: true,
+  title: "2 BHK Apartment in Madhapur",
+  description: "Spacious apartment in Madhapur",
 };
 
 const steps = [

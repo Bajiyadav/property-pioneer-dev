@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import i18n from "@/lib/i18n/index";
+import i18n from "@/lib/i18n";
 
 describe("i18n Synchronous SSR and Client Resolution", () => {
   it("initializes synchronously without waiting for async timer callbacks", () => {

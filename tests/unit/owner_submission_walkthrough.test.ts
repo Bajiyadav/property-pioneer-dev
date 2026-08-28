@@ -15,7 +15,7 @@ describe("20-Step Owner Property Submission Flow Verification", () => {
 
   it("1-3. Step 0 Auth Gate appears BEFORE any property form when unauthenticated", () => {
     // Unauthenticated state simulation
-    const guestStatus = "guest";
+    const guestStatus: string = "guest";
     expect(guestStatus).not.toBe("authenticated");
     // Verify that unauthenticated visitors are gated before step 1
     const requiresAuthBeforeWizard = guestStatus !== "authenticated";

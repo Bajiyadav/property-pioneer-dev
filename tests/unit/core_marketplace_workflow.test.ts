@@ -42,6 +42,7 @@ describe("Core Marketplace Workflow Verification", () => {
         furnishing_status: "unfurnished" as const,
         amenities: [],
         images: [],
+        title: "",
         description: "",
       };
 
@@ -78,6 +79,7 @@ describe("Core Marketplace Workflow Verification", () => {
           "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
           "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
         ],
+        title: "Spacious 3 BHK Luxury Flat in Indiranagar",
         description:
           "Spacious 3 BHK luxury flat for rent in prime Indiranagar with modular kitchen and modern amenities.",
       };
