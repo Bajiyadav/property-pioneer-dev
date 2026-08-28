@@ -1,3 +1,8 @@
+## v0.98.0 — 2026-08-28
+
+### Features
+- feat: customer and owner monetization flow, savings transparency, and boost suite (4d9124f)
+
 ## v0.97.0 — 2026-08-28
 
 ### Features
