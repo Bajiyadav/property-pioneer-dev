@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { APIProvider, Map, AdvancedMarker, useMap } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, AdvancedMarker, InfoWindow, useMap } from "@vis.gl/react-google-maps";
+import { Link } from "@tanstack/react-router";
 import type { MapProperty } from "./propertyMapData";
 
 interface PropertyMapProps {
@@ -39,10 +40,6 @@ const MapUpdater = ({
     });
 
     return () => {
-      // listener.remove() rather than google.maps.event.removeListener(...):
-      // the `google` global is only typed when @types/google.maps is installed,
-      // and it is not. The listener handle exposes remove() itself, so this does
-      // the same job with no ambient global and no extra dependency.
       listener.remove();
     };
   }, [map, onBoundsChanged]);
@@ -52,10 +49,10 @@ const MapUpdater = ({
 
 export function PropertyMap({ properties, onBoundsChanged }: PropertyMapProps) {
   const [mapError, setMapError] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(null);
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   useEffect(() => {
-    // Intercept Google Maps authentication/quota failures gracefully
     const originalAuthFailure = (window as unknown as { gm_authFailure?: () => void })
       .gm_authFailure;
     (window as unknown as { gm_authFailure?: () => void }).gm_authFailure = () => {
@@ -73,7 +70,7 @@ export function PropertyMap({ properties, onBoundsChanged }: PropertyMapProps) {
   // If no API key or Google Maps auth failed, render high-aesthetic fallback
   if (!apiKey || mapError) {
     return (
-      <div className="relative flex h-[400px] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-card p-6 text-center shadow-inner">
+      <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-inner">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] opacity-15 [background-size:16px_16px]" />
         <div className="relative z-10 max-w-md space-y-3">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -106,12 +103,12 @@ export function PropertyMap({ properties, onBoundsChanged }: PropertyMapProps) {
             City).
           </p>
           <div className="flex flex-wrap justify-center gap-2 pt-2">
-            {Array.from(new Set(properties.map((p) => p.locality).filter(Boolean)))
-              .slice(0, 5)
+            {Array.from(new Set(properties.map((p) => p.locality || p.city).filter(Boolean)))
+              .slice(0, 6)
               .map((loc) => (
                 <span
                   key={loc}
-                  className="rounded-full bg-secondary/80 px-2.5 py-1 text-xs font-semibold text-foreground border border-border/60"
+                  className="rounded-full bg-secondary/80 px-3 py-1 text-xs font-semibold text-foreground border border-border/60"
                 >
                   📍 {loc}
                 </span>
@@ -122,47 +119,74 @@ export function PropertyMap({ properties, onBoundsChanged }: PropertyMapProps) {
     );
   }
 
-  // Use DEMO_MAP_ID for prototyping or a real one later
   const MAP_ID = "DEMO_MAP_ID";
 
   return (
-    <div style={{ height: "400px", width: "100%" }}>
+    <div className="relative h-full min-h-[500px] w-full overflow-hidden rounded-3xl">
       <APIProvider apiKey={apiKey} onError={() => setMapError(true)}>
         <Map
-          defaultCenter={{ lat: 17.4065, lng: 78.4772 }} // Default Hyderabad
-          defaultZoom={11}
+          defaultCenter={{ lat: 17.4483, lng: 78.3915 }} // Centered on Hyderabad IT Corridor
+          defaultZoom={12}
           mapId={MAP_ID}
           internalUsageAttributionIds={["gmp_git_agentskills_v1"]}
+          className="h-full w-full"
         >
           <MapUpdater onBoundsChanged={onBoundsChanged} />
+
           {properties.map((prop) => {
-            // Obfuscate by rounding coordinates to 3 decimal places (approx 110m)
             const approxLat = Math.round(prop.latitude * 1000) / 1000;
             const approxLng = Math.round(prop.longitude * 1000) / 1000;
+            const formattedPrice =
+              prop.price >= 100000
+                ? `₹${(prop.price / 100000).toFixed(1)}L`
+                : `₹${(prop.price / 1000).toFixed(0)}K`;
 
             return (
               <AdvancedMarker
                 key={prop.id}
                 position={{ lat: approxLat, lng: approxLng }}
-                title={prop.title + " (Approximate Location)"}
+                title={prop.title}
+                onClick={() => setSelectedProperty(prop)}
               >
-                <div
-                  style={{
-                    width: "60px",
-                    height: "60px",
-                    backgroundColor: "rgba(16, 185, 129, 0.4)", // Emerald 500 with opacity
-                    border: "2px solid rgba(16, 185, 129, 0.8)",
-                    borderRadius: "50%",
-                    transform: "translate(-50%, -50%)", // Center on the coordinate
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backdropFilter: "blur(2px)",
-                  }}
-                ></div>
+                <button
+                  type="button"
+                  className="group flex items-center gap-1 rounded-full border border-primary/40 bg-card px-2.5 py-1 text-xs font-black text-foreground shadow-md transition-all hover:scale-110 hover:bg-primary hover:text-primary-foreground"
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span>{formattedPrice}</span>
+                </button>
               </AdvancedMarker>
             );
           })}
+
+          {selectedProperty && (
+            <InfoWindow
+              position={{
+                lat: selectedProperty.latitude,
+                lng: selectedProperty.longitude,
+              }}
+              onCloseClick={() => setSelectedProperty(null)}
+            >
+              <div className="max-w-[200px] p-1 text-foreground">
+                <h5 className="font-bold text-xs line-clamp-1">{selectedProperty.title}</h5>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  📍 {selectedProperty.locality || selectedProperty.city || "Hyderabad"}
+                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="font-black text-xs text-primary">
+                    ₹{selectedProperty.price.toLocaleString("en-IN")}
+                  </span>
+                  <Link
+                    to="/properties/$id"
+                    params={{ id: selectedProperty.id }}
+                    className="rounded-md bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground hover:bg-primary/90"
+                  >
+                    View
+                  </Link>
+                </div>
+              </div>
+            </InfoWindow>
+          )}
         </Map>
       </APIProvider>
     </div>
