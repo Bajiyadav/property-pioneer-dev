@@ -42,9 +42,16 @@ export default defineConfig(({ command }) => ({
       "react-dom",
       "react/jsx-runtime",
       "react/jsx-dev-runtime",
+      "@tanstack/react-start",
+      "@tanstack/start-client-core",
+      "@tanstack/start-server-core",
       "@tanstack/react-query",
       "@tanstack/query-core",
     ],
+  },
+
+  ssr: {
+    noExternal: [/@tanstack\//],
   },
 
   optimizeDeps: {
@@ -61,6 +68,14 @@ export default defineConfig(({ command }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Never chunk server-side runtime modules into browser vendor chunks
+          if (
+            id.includes("/server") ||
+            id.includes("@tanstack/react-start") ||
+            id.includes("@tanstack/start-")
+          ) {
+            return;
+          }
           if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
             return "react-vendor";
           }
