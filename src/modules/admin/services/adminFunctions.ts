@@ -49,9 +49,7 @@ async function getEmployeeAccess(context: AuthContext): Promise<EmployeeAccess |
     };
   }
 
-  if (error && !isMissingTable(error)) return null;
-  if (!error) return null; // table exists, caller simply has no row
-
+  // Fallback: Check if the user holds the admin role in user_roles
   const { data: roleRow } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -59,7 +57,7 @@ async function getEmployeeAccess(context: AuthContext): Promise<EmployeeAccess |
     .eq("role", "admin")
     .maybeSingle();
 
-  // Global scope: without the table there is no regional data to narrow to.
+  // Global scope: without employee_access row there is no regional narrowing.
   return roleRow ? { role: "admin" as EmployeeRole, regions: [] } : null;
 }
 
