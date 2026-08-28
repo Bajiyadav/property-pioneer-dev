@@ -1,3 +1,8 @@
+## v0.92.0 — 2026-08-28
+
+### Features
+- feat: implement unified user-friendly network & error handling across web and mobile (2fd32b9)
+
 ## v0.91.0 — 2026-08-27
 
 ### Features
