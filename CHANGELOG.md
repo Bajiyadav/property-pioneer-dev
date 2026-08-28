@@ -1,3 +1,8 @@
+## v0.100.1 — 2026-08-28
+
+### Fixes
+- fix(types): include tests in tsconfig and resolve test typing fixtures (97eeba9)
+
 ## v0.100.0 — 2026-08-28
 
 ### Features
