@@ -1,3 +1,8 @@
+## v0.105.0 — 2026-08-28
+
+### Features
+- feat(home): add Home Loans and Rental Agreement cards to homepage quick actions (9147c63)
+
 ## v0.104.0 — 2026-08-28
 
 ### Features
