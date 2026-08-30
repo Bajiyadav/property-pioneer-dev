@@ -27,7 +27,26 @@ import { RATE_LIMIT_CONFIG, rateLimitExceededResponse } from "@/lib/rateLimitCon
  * text; it never sees a credential.
  */
 
-const GEMINI_MODELS = ["gemini-1.5-flash", "gemini-flash-latest"] as const;
+// Verified against the provider's ListModels API — both are GA and support
+// :streamGenerateContent. gemini-2.5-flash is a faster, higher-quality successor
+// to 1.5-flash; gemini-flash-latest tracks the latest stable Flash as a fallback.
+const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-flash-latest"] as const;
+
+/**
+ * Concise, production generation config. `maxOutputTokens` caps worst-case
+ * latency (concierge answers are short); a low temperature keeps the tone stable
+ * and grounded; `thinkingConfig.thinkingBudget: 0` turns off 2.5-flash "thinking"
+ * so the first token streams immediately. The prompt is unchanged — this only
+ * bounds the generation, it never enlarges the request.
+ */
+const GENERATION_CONFIG = {
+  temperature: 0.4,
+  maxOutputTokens: 512,
+  thinkingConfig: { thinkingBudget: 0 },
+} as const;
+
+/** Abort a Gemini request that hasn't completed within this budget (ms). */
+const GEMINI_TIMEOUT_MS = 15000;
 
 /** Shape accepted from the client — prompt content only, never a key. */
 interface ChatRequest {
@@ -145,30 +164,118 @@ export const Route = createFileRoute("/api/ai/chat")({
           return jsonResponse({ unconfigured: true }, 200);
         }
 
+        const encoder = new TextEncoder();
+
+        // Try each model in turn, but only until a stream successfully OPENS.
+        // Once bytes are flowing we commit to that model (we can't fall back
+        // mid-stream), so the fallback covers connection/availability failures.
         for (const model of GEMINI_MODELS) {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+
+          let upstream: Response;
           try {
-            const res = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+            upstream = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents }),
+                body: JSON.stringify({ contents, generationConfig: GENERATION_CONFIG }),
+                signal: controller.signal,
               },
             );
-            if (!res.ok) continue;
-            const data = (await res.json()) as {
-              candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-            };
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!text) continue;
-
-            await recordAudit({ event: "ai.chat", outcome: "success", ip, userAgent });
-            return jsonResponse({ text });
           } catch {
-            // Try the next model rather than failing on the first transport error.
+            // Network error or the 15s abort fired before headers — try next model.
+            clearTimeout(timeout);
+            continue;
           }
+
+          if (!upstream.ok || !upstream.body) {
+            clearTimeout(timeout);
+            continue;
+          }
+
+          // Commit to this model. Transform Gemini's SSE deltas into a plain-text
+          // stream for the browser. The key stays server-side; the client only
+          // ever receives generated text.
+          const upstreamBody = upstream.body;
+          const stream = new ReadableStream<Uint8Array>({
+            async start(streamCtrl) {
+              const reader = upstreamBody.getReader();
+              const decoder = new TextDecoder();
+              let buffer = "";
+              let sawText = false;
+              let failed = false;
+
+              try {
+                for (;;) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  buffer += decoder.decode(value, { stream: true });
+
+                  let nl: number;
+                  while ((nl = buffer.indexOf("\n")) >= 0) {
+                    const line = buffer.slice(0, nl).trim();
+                    buffer = buffer.slice(nl + 1);
+                    if (!line.startsWith("data:")) continue;
+                    const payload = line.slice(5).trim();
+                    if (!payload || payload === "[DONE]") continue;
+                    try {
+                      const obj = JSON.parse(payload) as {
+                        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+                      };
+                      const delta = obj.candidates?.[0]?.content?.parts?.[0]?.text;
+                      if (delta) {
+                        sawText = true;
+                        streamCtrl.enqueue(encoder.encode(delta));
+                      }
+                    } catch {
+                      // Partial/malformed SSE line — ignore and wait for more bytes.
+                    }
+                  }
+                }
+              } catch {
+                // Upstream aborted (timeout) or a transport error mid-stream.
+                failed = true;
+              } finally {
+                clearTimeout(timeout);
+              }
+
+              // Audit AFTER the text is delivered but BEFORE closing: reliable
+              // (no dangling promise that a serverless runtime could drop) while
+              // staying off the user's response path — the answer already streamed.
+              await recordAudit({
+                event: "ai.chat",
+                outcome: !failed && sawText ? "success" : "error",
+                ip,
+                userAgent,
+              });
+
+              if (failed) {
+                // Signal the client so an incomplete answer falls back locally,
+                // rather than presenting a truncated stream as a finished reply.
+                streamCtrl.error(new Error("gemini_stream_incomplete"));
+              } else {
+                streamCtrl.close();
+              }
+            },
+            cancel() {
+              clearTimeout(timeout);
+              controller.abort();
+            },
+          });
+
+          return new Response(stream, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
+              "X-Accel-Buffering": "no",
+            },
+          });
         }
 
+        // Every model failed to open a stream within the timeout.
         await recordAudit({ event: "ai.chat", outcome: "error", ip, userAgent });
         // Never forward the upstream error body — it can echo the request URL,
         // which carries the key as a query parameter.

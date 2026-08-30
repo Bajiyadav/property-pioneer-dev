@@ -225,7 +225,9 @@ export async function runRAGPipeline(
   userQuery: string,
   callProxyFn: (
     contents: Array<{ role: string; parts: Array<{ text: string }> }>,
+    onToken?: (accumulated: string) => void,
   ) => Promise<string | null>,
+  onToken?: (accumulated: string) => void,
 ): Promise<RAGResponse> {
   const start = performance.now();
 
@@ -320,7 +322,9 @@ STRICT GROUNDING & ANTI-HALLUCINATION RULES:
   ];
 
   const tGemini = performance.now();
-  let answer = await callProxyFn(contents);
+  // Streams raw tokens to the UI via onToken as they arrive; the returned value
+  // is the complete raw answer, which is grounding-validated below before use.
+  let answer = await callProxyFn(contents, onToken);
   const geminiMs = Math.round(performance.now() - tGemini);
 
   const validIds = new Set(retrieval.properties.map((p) => p.id));

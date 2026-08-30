@@ -5,6 +5,7 @@ import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import {
   GUEST_SESSION,
+  isEmailVerified,
   resolveRoleForSession,
   type ResolvedSession,
 } from "@/modules/authentication/services/session";
@@ -148,6 +149,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const applySession = useCallback(async (session: Session | null, event?: string) => {
     if (!session?.user) {
+      setState({ ...GUEST_SESSION, status: "guest" });
+      return;
+    }
+
+    // Email verification is REQUIRED to count as authenticated. This is the
+    // single app-wide gate that distinguishes an UNVERIFIED user from a VERIFIED
+    // one: a session whose account has completed no verification (OTP, phone, or
+    // OAuth) can never reach protected features, no matter how it was obtained
+    // (a Supabase config change, a magic link, or any future bypass).
+    if (!isEmailVerified(session.user)) {
       setState({ ...GUEST_SESSION, status: "guest" });
       return;
     }

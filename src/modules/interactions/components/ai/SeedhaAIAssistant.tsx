@@ -48,27 +48,54 @@ export const SeedhaAIAssistant: React.FC<SeedhaAIAssistantProps> = ({
     if (!text || isLoading) return;
 
     const userMsg: AIMessage = { role: "user", text };
+    const history = messages; // conversation before this turn
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
-    try {
-      const responseText = await askSeedhaAI(text, messages, mode);
-      const newMessages: AIMessage[] = [
-        ...messages,
-        userMsg,
-        { role: "model", text: responseText },
-      ];
-      setMessages(newMessages);
-
-      if (mode === "tenant" && onProfileComplete && newMessages.length >= 4) {
-        // Try extracting preferences
-        extractTenantPreferences(newMessages).then((extracted) => {
+    // Tenant preference extraction is an INDEPENDENT LLM call that also captures
+    // the phone number (which the local regex extractor cannot), so it is kept —
+    // but fired in PARALLEL with the answer instead of after it, and it never
+    // blocks or delays the visible response.
+    if (mode === "tenant" && onProfileComplete && history.length >= 2) {
+      void extractTenantPreferences([...history, userMsg])
+        .then((extracted) => {
           if (extracted.city && extracted.locality && extracted.bhk && extracted.phone) {
             onProfileComplete(extracted);
           }
+        })
+        .catch(() => {
+          /* best-effort; never surface an extraction failure to the user */
         });
-      }
+    }
+
+    let streaming = false;
+    try {
+      const finalText = await askSeedhaAI(text, history, mode, (partial) => {
+        // First streamed chunk: drop the "thinking" indicator and reveal text.
+        if (!streaming) {
+          streaming = true;
+          setIsLoading(false);
+          setMessages((prev) => [...prev, { role: "model", text: partial }]);
+        } else {
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = { role: "model", text: partial };
+            return next;
+          });
+        }
+      });
+
+      // Replace the streamed raw text with the final grounding-validated answer
+      // (sanitizeAndGroundResponse runs inside the pipeline before this resolves,
+      // so streaming never bypasses grounding). If nothing streamed — a local
+      // greeting/incomplete reply, or an unconfigured/fallback path — append it.
+      setMessages((prev) => {
+        if (!streaming) return [...prev, { role: "model", text: finalText }];
+        const next = [...prev];
+        next[next.length - 1] = { role: "model", text: finalText };
+        return next;
+      });
     } catch {
       setMessages((prev) => [
         ...prev,

@@ -29,6 +29,19 @@ export const GUEST_SESSION: ResolvedSession = {
 };
 
 /**
+ * True only when the account has completed at least one real verification —
+ * email confirmation (the signup OTP screen), phone confirmation, or an OAuth
+ * provider sign-in, each of which sets a confirmation timestamp on the user. An
+ * unverified email/password signup has none of these set and returns false, so
+ * it can never be treated as authenticated. This is the single source of truth
+ * the AuthContext uses to distinguish an UNVERIFIED user from a VERIFIED one.
+ */
+export function isEmailVerified(user: User | null): boolean {
+  if (!user) return false;
+  return Boolean(user.email_confirmed_at || user.phone_confirmed_at || user.confirmed_at);
+}
+
+/**
  * The persona the user picked at sign-up.
  *
  * Presentation only — onboarding copy, analytics, "what did they come here to

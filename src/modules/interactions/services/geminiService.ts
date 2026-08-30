@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from "@/integrations/supabase/client";
 import {
   type KnowledgeChunk,
@@ -336,6 +335,7 @@ export async function retrieveStructuredProperties(
 
 async function callAiProxy(
   contents: Array<{ role: string; parts: Array<{ text: string }> }>,
+  onToken?: (accumulated: string) => void,
 ): Promise<string | null> {
   try {
     const res = await fetch("/api/ai/chat", {
@@ -344,9 +344,34 @@ async function callAiProxy(
       body: JSON.stringify({ contents }),
     });
     if (!res.ok) return null;
-    const data = (await res.json()) as { text?: string; unconfigured?: boolean };
-    if (data.unconfigured) return null;
-    return data.text ?? null;
+
+    // The server streams a plain-text body on success and returns JSON only for
+    // the unconfigured / error states — so branch on the content type.
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = (await res.json()) as { text?: string; unconfigured?: boolean };
+      if (data.unconfigured) return null;
+      if (data.text) onToken?.(data.text);
+      return data.text ?? null;
+    }
+
+    if (!res.body) return null;
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+    // A thrown read (the server aborted an incomplete/timed-out stream) is
+    // treated as a failure so the caller falls back to its grounded local
+    // response — the UI never keeps a half-generated answer as final.
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      if (chunk) {
+        accumulated += chunk;
+        onToken?.(accumulated);
+      }
+    }
+    return accumulated.length > 0 ? accumulated : null;
   } catch (error) {
     console.warn("[geminiService] AI proxy unreachable:", error);
     return null;
@@ -357,8 +382,14 @@ export async function askSeedhaAI(
   userQuery: string,
   history: AIMessage[] = [],
   mode: "general" | "tenant" = "general",
+  onToken?: (accumulated: string) => void,
 ): Promise<string> {
-  const result: RAGResponse = await runRAGPipeline(userQuery, callAiProxy);
+  // history/mode are accepted for API compatibility; the grounded pipeline is
+  // single-turn by design. onToken streams raw tokens to the UI as they arrive;
+  // the resolved value is the final, grounding-validated answer.
+  void history;
+  void mode;
+  const result: RAGResponse = await runRAGPipeline(userQuery, callAiProxy, onToken);
   return result.answer;
 }
 

@@ -8,7 +8,6 @@ export default defineConfig({
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
   test: {
-    environment: "node",
     include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
     // These suites authenticate as four real QA accounts and sign out with
     // `scope: "global"`, which revokes that user's sessions everywhere. Two

@@ -93,6 +93,7 @@ function createSupabaseClient() {
       storage: typeof window !== "undefined" ? cookieStorage : undefined,
       persistSession: true,
       autoRefreshToken: true,
+      detectSessionInUrl: true,
     },
   });
 }
