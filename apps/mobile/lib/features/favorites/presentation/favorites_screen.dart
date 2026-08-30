@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
+import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
+import 'package:seedha_properties_mobile/utils/error_handler.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -18,22 +20,13 @@ class FavoritesScreen extends ConsumerWidget {
       ),
       body: favPropsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (err, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                const SizedBox(height: 12),
-                const Text('Failed to load saved properties', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(favoritePropertiesProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+        error: (err, stack) => SeedhaStateView(
+          type: SeedhaErrorHandler.getStateType(err),
+          title: SeedhaErrorHandler.getFriendlyMessage(err),
+          primaryAction: StateActionConfig(
+            label: 'Retry',
+            icon: Icons.refresh,
+            onPressed: () => ref.refresh(favoritePropertiesProvider),
           ),
         ),
         data: (properties) {
