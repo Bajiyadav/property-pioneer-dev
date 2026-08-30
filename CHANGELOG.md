@@ -1,3 +1,8 @@
+## v0.113.0 — 2026-08-30
+
+### Features
+- feat(mobile): integrate SeedhaStateView and friendly fallbacks across all mobile screens (df8319c)
+
 ## v0.112.0 — 2026-08-30
 
 ### Features
