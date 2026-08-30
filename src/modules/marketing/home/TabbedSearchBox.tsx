@@ -56,13 +56,15 @@ export function TabbedSearchBox({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const targetState = selectedState || "Telangana";
-    const targetCity = selectedCity || "Hyderabad";
+    if (!selectedState || !selectedCity) {
+      toast.info("Please select your State and City to search properties.");
+      return;
+    }
 
     const searchParams = {
       q: query || "",
-      state: targetState,
-      city: targetCity,
+      state: selectedState,
+      city: selectedCity,
       listing: "",
       minPrice: 0,
       maxPrice: 0,
