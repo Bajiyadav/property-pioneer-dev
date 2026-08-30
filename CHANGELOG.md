@@ -1,3 +1,14 @@
+## v0.109.0 — 2026-08-30
+
+### Features
+- feat: update hero section action cards and direct owner connect (924c4a2)
+
+### Migration notes
+- supabase/migrations/20260830000000_create_loan_enquiries.sql
+- supabase/migrations/20260830010000_property_visits_agent_assignment.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.108.0 — 2026-08-28
 
 ### Features
