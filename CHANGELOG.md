@@ -1,3 +1,8 @@
+## v0.109.1 — 2026-08-30
+
+### Fixes
+- fix: remove location gate modal from homepage (d8ec79f)
+
 ## v0.109.0 — 2026-08-30
 
 ### Features
