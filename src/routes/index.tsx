@@ -11,7 +11,6 @@ import {
 } from "@/config/app";
 
 import { HeroSection } from "@/modules/marketing/home/HeroSection";
-import { LocationGate } from "@/modules/property/components/LocationGate";
 import { QuoteBanner } from "@/modules/marketing/home/QuoteBanner";
 import { FeaturedProperties } from "@/modules/marketing/home/FeaturedProperties";
 import { PaymentsAndRewardsBanner } from "@/modules/marketing/home/PaymentsAndRewardsBanner";
@@ -142,75 +141,63 @@ function Index() {
   };
 
   return (
-    // State and city are compulsory: nothing on the homepage renders until both
-    // are chosen. The gate writes through the same handlers the hero uses, so
-    // the selection it captures is the one the rest of the page already reads.
-    <LocationGate
-      selectedState={selectedState}
-      selectedCity={selectedCity}
-      onConfirm={(state, city) => {
-        handleStateChange(state);
-        handleCityChange(city);
-      }}
-    >
-      <div className="min-h-screen bg-background text-foreground">
-        {/* 1. Hero Section */}
-        <HeroSection
-          query={q}
-          onQueryChange={setQ}
-          selectedState={selectedState}
-          setSelectedState={handleStateChange}
-          selectedCity={selectedCity}
-          setSelectedCity={handleCityChange}
-          onSearch={handleSearchSubmit}
-        />
+    <div className="min-h-screen bg-background text-foreground">
+      {/* 1. Hero Section */}
+      <HeroSection
+        query={q}
+        onQueryChange={setQ}
+        selectedState={selectedState}
+        setSelectedState={handleStateChange}
+        selectedCity={selectedCity}
+        setSelectedCity={handleCityChange}
+        onSearch={handleSearchSubmit}
+      />
 
-        {isLocationConfirmed && (
-          <>
-            {/* 2. Real Estate Quote Banner */}
-            <QuoteBanner />
+      {isLocationConfirmed && (
+        <>
+          {/* 2. Real Estate Quote Banner */}
+          <QuoteBanner />
 
-            {/* 4. Featured Rentals */}
-            <FeaturedProperties
-              properties={featured.length > 0 ? featured : properties}
-              isLoading={isLoading}
-            />
+          {/* 4. Featured Rentals */}
+          <FeaturedProperties
+            properties={featured.length > 0 ? featured : properties}
+            isLoading={isLoading}
+          />
 
-            {/* 6. Payments & Rent Rewards Banner */}
-            <PaymentsAndRewardsBanner />
+          {/* 6. Payments & Rent Rewards Banner */}
+          <PaymentsAndRewardsBanner />
 
-            {/* 7. What Seedha Properties actually does today */}
-            <div id="why-us">
-              <WhySeedhaProperties />
-            </div>
+          {/* 7. What Seedha Properties actually does today */}
+          <div id="why-us">
+            <WhySeedhaProperties />
+          </div>
 
-            {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
-            <PopularCities onSelectCity={(city) => setActiveCity(city)} />
+          {/* 6. Live market + expansion roadmap (Interactive City Modal) */}
+          <PopularCities onSelectCity={(city) => setActiveCity(city)} />
 
-            {/* 7. Dual-tab How It Works Workflow */}
-            <HowItWorks />
+          {/* 7. Dual-tab How It Works Workflow */}
+          <HowItWorks />
 
-            {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
-            <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
+          {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
+          <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
 
-            {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
-            <FeedbackSection />
+          {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
+          <FeedbackSection />
 
-            {/* 10. Support FAQ Accordion */}
-            <div id="contact">
-              <FAQSection />
-            </div>
-          </>
-        )}
+          {/* 10. Support FAQ Accordion */}
+          <div id="contact">
+            <FAQSection />
+          </div>
+        </>
+      )}
 
-        {/* Value Added Services */}
-        <ValueAddedServices />
+      {/* Value Added Services */}
+      <ValueAddedServices />
 
-        {/* ======================================= */}
-        {/* INTERACTIVE MODALS                      */}
-        {/* ======================================= */}
-        <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
-      </div>
-    </LocationGate>
+      {/* ======================================= */}
+      {/* INTERACTIVE MODALS                      */}
+      {/* ======================================= */}
+      <CityExpansionModal data={activeCity} onClose={() => setActiveCity(null)} />
+    </div>
   );
 }
