@@ -608,14 +608,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.wifi_off_outlined, size: 48, color: Colors.grey),
+                              const Icon(Icons.wifi_off_rounded, size: 56, color: Color(0xFFD97706)),
                               const SizedBox(height: 12),
-                              Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const Text(
+                                'No internet connection',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Please check your internet connection and try again.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey, fontSize: 13),
+                              ),
                               const SizedBox(height: 16),
-                              ElevatedButton(
+                              ElevatedButton.icon(
                                 onPressed: _executeSearch,
-                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F766E), foregroundColor: Colors.white),
-                                child: const Text('Retry Search'),
+                                icon: const Icon(Icons.refresh, size: 16),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0F766E),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                label: const Text('Retry Search', style: TextStyle(fontWeight: FontWeight.bold)),
                               ),
                             ],
                           ),

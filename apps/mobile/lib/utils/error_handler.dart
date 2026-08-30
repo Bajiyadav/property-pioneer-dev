@@ -16,12 +16,25 @@ class SeedhaErrorHandler {
 
     final raw = error.toString().toLowerCase();
 
-    // 1. Genuine Offline Indicators
-    if (raw.contains("network is unreachable") ||
+    // 1. Genuine Offline & Network Indicators
+    if (error is SocketException ||
+        error is HttpException ||
+        raw.contains("network is unreachable") ||
         raw.contains("no address associated with hostname") ||
         raw.contains("err_internet_disconnected") ||
+        raw.contains("socketexception") ||
+        raw.contains("failed host lookup") ||
+        raw.contains("clientexception") ||
+        raw.contains("connection refused") ||
+        raw.contains("connection reset") ||
+        raw.contains("handshakeexception") ||
+        raw.contains("os error") ||
+        raw.contains("errno = 7") ||
+        raw.contains("errno = 101") ||
+        raw.contains("network error") ||
+        raw.contains("failed to connect") ||
         raw == "offline") {
-      return "Please check your internet connection and try again.";
+      return "No internet connection. Please check your network and try again.";
     }
 
     // 2. Request Timeout
@@ -29,7 +42,7 @@ class SeedhaErrorHandler {
         raw.contains("timeout") ||
         raw.contains("timed out") ||
         raw.contains("deadline exceeded")) {
-      return "Please try again in a moment.";
+      return "Connection timed out. Please try again.";
     }
 
     // 3. Authentication Exceptions
@@ -61,7 +74,7 @@ class SeedhaErrorHandler {
 
     // 4. Database Exceptions
     if (error is PostgrestException) {
-      return fallback ?? "We couldn't connect right now. Please try again.";
+      return fallback ?? "We couldn't load the details right now. Please try again.";
     }
 
     // 5. Platform / Permission Exceptions
@@ -73,16 +86,6 @@ class SeedhaErrorHandler {
       }
     }
 
-    // 6. Server / Connection Failures (Device is online but endpoint is unreachable)
-    if (error is SocketException ||
-        error is HttpException ||
-        raw.contains("socketexception") ||
-        raw.contains("connection refused") ||
-        raw.contains("failed to connect") ||
-        raw.contains("failed host lookup")) {
-      return fallback ?? "We couldn't connect right now. Please try again.";
-    }
-
     return fallback ?? "We couldn't connect right now. Please try again.";
   }
 
@@ -92,8 +95,22 @@ class SeedhaErrorHandler {
 
     final raw = error.toString().toLowerCase();
 
-    if (raw.contains("network is unreachable") ||
+    if (error is SocketException ||
+        error is HttpException ||
+        raw.contains("network is unreachable") ||
+        raw.contains("no address associated with hostname") ||
         raw.contains("err_internet_disconnected") ||
+        raw.contains("socketexception") ||
+        raw.contains("failed host lookup") ||
+        raw.contains("clientexception") ||
+        raw.contains("connection refused") ||
+        raw.contains("connection reset") ||
+        raw.contains("handshakeexception") ||
+        raw.contains("os error") ||
+        raw.contains("errno = 7") ||
+        raw.contains("errno = 101") ||
+        raw.contains("network error") ||
+        raw.contains("failed to connect") ||
         raw == "offline") {
       return SeedhaStateType.noInternet;
     }

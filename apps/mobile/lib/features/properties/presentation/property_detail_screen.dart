@@ -14,7 +14,6 @@ import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/services/enquiry_service.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
-import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -35,7 +34,6 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
   List<Property> _similarProperties = [];
   bool _isLoading = true;
   bool _hasError = false;
-  bool _errorIsTimeout = false;
   int _currentImageIndex = 0;
   VideoPlayerController? _videoController;
 
@@ -55,7 +53,6 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     setState(() {
       _isLoading = true;
       _hasError = false;
-      _errorIsTimeout = false;
     });
     try {
       final prop = await _propertyService.getPropertyById(widget.propertyId);
@@ -94,7 +91,6 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
       if (mounted) {
         setState(() {
           _hasError = true;
-          _errorIsTimeout = e is TimeoutException;
           _isLoading = false;
         });
       }
@@ -384,17 +380,45 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
 
     if (_hasError) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Property Details')),
-        body: SeedhaStateView(
-          type: _errorIsTimeout ? SeedhaStateType.slowNetwork : SeedhaStateType.serverError,
-          title: _errorIsTimeout ? 'Taking longer than usual' : 'Unable to load this property',
-          description: _errorIsTimeout
-              ? 'The request timed out. Please check your connection and try again.'
-              : 'Please check your connection and try again.',
-          primaryAction: StateActionConfig(
-            label: 'Retry',
-            icon: Icons.refresh,
-            onPressed: _loadProperty,
+        appBar: AppBar(
+          title: const Text('Property Details'),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF0F172A),
+          elevation: 0,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.wifi_off_rounded, size: 64, color: Color(0xFFD97706)),
+                const SizedBox(height: 16),
+                const Text(
+                  'No internet connection',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Please check your network and try again.',
+                  style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: _loadProperty,
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
