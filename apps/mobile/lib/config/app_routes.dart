@@ -21,6 +21,7 @@ import '../features/splash/presentation/splash_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
 import '../features/loans/presentation/home_loans_screen.dart';
+import '../features/agreements/presentation/rental_agreement_form_screen.dart';
 import '../features/location/presentation/location_search_screen.dart';
 import '../features/profile/presentation/legal_hub_screen.dart';
 import '../features/profile/presentation/legal_policy_screen.dart';
@@ -105,6 +106,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/home-loans',
       builder: (context, state) => const HomeLoansScreen(),
+    ),
+    GoRoute(
+      path: '/rental-agreement',
+      builder: (context, state) => const RentalAgreementFormScreen(),
+    ),
+    GoRoute(
+      path: '/create-agreement',
+      builder: (context, state) => const RentalAgreementFormScreen(),
     ),
     GoRoute(
       path: '/location-search',

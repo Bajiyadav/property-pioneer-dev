@@ -11,7 +11,6 @@ import 'package:seedha_properties_mobile/features/location/providers/location_pr
 import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
 import 'package:seedha_properties_mobile/features/home/providers/home_providers.dart';
 import 'package:seedha_properties_mobile/models/listing_counts.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -600,14 +599,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           iconColor: const Color(0xFFE11D48),
                           iconBgColor: const Color(0xFFFFE4E6),
                           badge: 'POPULAR',
-                          onTap: () async {
-                            final uri = Uri.parse(
-                                'https://seedhaproperties.com/rental-agreement');
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri,
-                                  mode: LaunchMode.externalApplication);
-                            }
-                          },
+                          onTap: () => context.push('/rental-agreement'),
                         ),
                         _actionCard(
                           icon: Icons.add_home_work_rounded,
