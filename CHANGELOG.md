@@ -1,3 +1,8 @@
+## v0.110.0 — 2026-08-30
+
+### Features
+- feat: make state and city selection strictly compulsory (99bcf74)
+
 ## v0.109.1 — 2026-08-30
 
 ### Fixes
