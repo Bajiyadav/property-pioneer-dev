@@ -6,7 +6,6 @@ import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
 import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/shared/widgets/seedha_state_view.dart';
-import 'package:geolocator/geolocator.dart';
 
 class LocationSearchScreen extends ConsumerStatefulWidget {
   const LocationSearchScreen({super.key});
@@ -80,43 +79,23 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
     });
 
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('Location permission is not required. You can search for your city or area manually.');
-        }
-      }
+      final loc = await ref
+          .read(locationStateProvider.notifier)
+          .detectAndSetCurrentLocation();
 
-      if (permission == LocationPermission.deniedForever) {
-        throw Exception('Location permissions are permanently denied, we cannot request permissions. You can search for your city or area manually.');
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
-      );
-
-      // We have coordinates. In a real app we'd reverse-geocode them to a city/locality via Geoapify.
-      // For now, we fall back to manual search because we haven't implemented reverse geocoding to keep it minimal, 
-      // but let's just make a mock SelectedLocation with coordinates to satisfy the location gate.
-      final loc = SelectedLocation(
-        formattedAddress: 'Current Location',
-        city: 'Current City',
-        locality: 'Current Locality',
-        state: 'State',
-        country: 'India',
-        latitude: position.latitude,
-        longitude: position.longitude,
-        isValidated: true,
-      );
-
-      await ref.read(locationStateProvider.notifier).setLocation(loc);
       if (mounted) {
-        if (context.canPop()) {
-          context.pop();
+        if (loc != null) {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
         } else {
-          context.go('/');
+          setState(() {
+            _isLoading = false;
+            _errorMessage =
+                'Unable to detect GPS position. Please check location permissions or select an area below.';
+          });
         }
       }
     } catch (e) {

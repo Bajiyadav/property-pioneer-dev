@@ -13,7 +13,32 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { scheduleVisit, VISIT_SLOTS } from "@/modules/property/services/visitService";
+
+/**
+ * Resolves a friendly picker label ("Tomorrow", "This Saturday") to an ISO date.
+ *
+ * The labels used to be sent to the database verbatim, into a `date` column
+ * that cannot parse them.
+ */
+function isoDateForOption(option: string): string {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+
+  if (option === "Tomorrow") {
+    date.setDate(date.getDate() + 1);
+  } else if (option === "This Saturday" || option === "This Sunday") {
+    const target = option === "This Saturday" ? 6 : 0;
+    // 1..7 days ahead, so "this Saturday" on a Saturday means the next one
+    // rather than a booking for the hour the visitor is standing in.
+    const delta = (target - date.getDay() + 7) % 7 || 7;
+    date.setDate(date.getDate() + delta);
+  }
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
 
 interface ScheduleVisitModalProps {
   isOpen: boolean;
@@ -33,7 +58,9 @@ interface ScheduleVisitModalProps {
 
 export function ScheduleVisitModal({ isOpen, onClose, property }: ScheduleVisitModalProps) {
   const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("11:00 AM - 01:00 PM");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<(typeof VISIT_SLOTS)[number]>(
+    VISIT_SLOTS[0],
+  );
   const [tenantName, setTenantName] = useState("");
   const [tenantPhone, setTenantPhone] = useState("");
   const [notes, setNotes] = useState("");
@@ -50,9 +77,9 @@ export function ScheduleVisitModal({ isOpen, onClose, property }: ScheduleVisitM
   ];
 
   const timeSlots = [
-    { label: "Morning", time: "10:00 AM - 12:00 PM", icon: "🌅" },
-    { label: "Afternoon", time: "02:00 PM - 04:00 PM", icon: "☀️" },
-    { label: "Evening", time: "05:00 PM - 07:00 PM", icon: "🌆" },
+    { label: "Morning", time: VISIT_SLOTS[0], icon: "🌅" },
+    { label: "Afternoon", time: VISIT_SLOTS[1], icon: "☀️" },
+    { label: "Evening", time: VISIT_SLOTS[2], icon: "🌆" },
   ];
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -70,42 +97,43 @@ export function ScheduleVisitModal({ isOpen, onClose, property }: ScheduleVisitM
 
     setIsSubmitting(true);
 
-    try {
-      // Record visit inquiry in property_visits database
-      const visitPayload = {
-        property_id: property.id,
-        visitor_name: tenantName.trim(),
-        visitor_email: `${cleanPhone}@tenant.seedha.in`,
-        visitor_phone: cleanPhone,
-        preferred_date: selectedDate,
-        preferred_time_slot: selectedTimeSlot,
-        notes: notes || "Requested via Seedha Instant Visit Booking",
-        status: "requested" as const,
-      };
+    const result = await scheduleVisit({
+      propertyId: property.id,
+      name: tenantName.trim(),
+      phone: cleanPhone,
+      preferredDate: isoDateForOption(selectedDate),
+      preferredSlot: selectedTimeSlot,
+      visitType: "in_person",
+      notes: notes || "Requested via Seedha Instant Visit Booking",
+    });
 
-      const { error } = await supabase.from("property_visits").insert(visitPayload);
-      if (error) {
-        console.warn("Direct visit insert warning:", error);
-      }
+    setIsSubmitting(false);
 
-      setIsBooked(true);
-      toast.success("Site visit scheduled successfully!", {
-        description: "The verified homeowner has been notified to confirm your walkthrough.",
-      });
-    } catch (err) {
-      console.error("Booking error:", err);
-      // Still show success to tenant so experience is never blocked
-      setIsBooked(true);
-    } finally {
-      setIsSubmitting(false);
+    if (!result.ok) {
+      // This used to console.warn the failure and show "scheduled successfully"
+      // anyway, so a visitor was told a homeowner had been notified when
+      // nothing had been stored at all.
+      toast.error(result.error);
+      return;
     }
+
+    setIsBooked(true);
+    toast.success("Site visit scheduled successfully!", {
+      description: "The verified homeowner has been notified to confirm your walkthrough.",
+    });
   };
 
   const handleWhatsAppConfirm = () => {
     const text = encodeURIComponent(
       `Namaste! I have scheduled a site visit for "${property.title}" on ${selectedDate} (${selectedTimeSlot}) via Seedha Properties. Looking forward to meeting you. - ${tenantName}`,
     );
-    const phone = (property.owner_phone || "919876543210").replace(/\D/g, "");
+    // No fallback number. This used to default to a hardcoded 919876543210,
+    // which sent a stranger's visit details to whoever owns that number.
+    const phone = (property.owner_phone ?? "").replace(/\D/g, "");
+    if (phone.length < 10) {
+      toast.error("This owner has not shared a WhatsApp number. They will call you instead.");
+      return;
+    }
     window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
   };
 

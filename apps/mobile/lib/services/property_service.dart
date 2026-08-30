@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
 import '../models/property.dart';
+import '../models/listing_counts.dart';
 import 'supabase_service.dart';
 
 class PropertyService {
@@ -50,28 +51,10 @@ class PropertyService {
     int offset = 0,
   }) async {
     try {
-      var query = _client
-          .from('properties')
-          .select(publicPropertyColumns)
-          .or('status.eq.available,status.eq.Available,status.is.null');
-
-      // Category filter
-      if (category == PropertyCategory.rent) {
-        query = query.ilike('listing_type', '%rent%');
-      } else if (category == PropertyCategory.buy) {
-        query = query.or('listing_type.ilike.%sale%,listing_type.ilike.%buy%');
-      } else if (category == PropertyCategory.commercial) {
-        // Commercial properties can be rented or purchased
-        query = query.or(
-          'property_type.ilike.%commercial%,'
-          'property_type.ilike.%office%,'
-          'property_type.ilike.%shop%,'
-          'property_type.ilike.%showroom%,'
-          'property_type.ilike.%warehouse%,'
-          'property_type.ilike.%building%,'
-          'property_type.ilike.%land%',
-        );
-      }
+      var query = _publishedInCategory(
+        _client.from('properties').select(publicPropertyColumns),
+        category,
+      );
 
       // City filter
       if (city != null && city.isNotEmpty && city != 'All' && city != 'All India') {
@@ -133,6 +116,85 @@ class PropertyService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Narrows [query] to the *published* listings of [category].
+  ///
+  /// Shared by [fetchProperties] and [fetchListingCounts] so the number shown
+  /// on a home action card is produced by exactly the same predicate as the
+  /// results that card leads to. Keeping two copies of this in step by hand is
+  /// how a card comes to advertise inventory the search screen cannot show.
+  static PostgrestFilterBuilder<T> _publishedInCategory<T>(
+    PostgrestFilterBuilder<T> query,
+    PropertyCategory category,
+  ) {
+    final published =
+        query.or('status.eq.available,status.eq.Available,status.is.null');
+
+    switch (category) {
+      case PropertyCategory.rent:
+        return published.ilike('listing_type', '%rent%');
+      case PropertyCategory.buy:
+        return published.or('listing_type.ilike.%sale%,listing_type.ilike.%buy%');
+      case PropertyCategory.commercial:
+        // Commercial properties can be rented or purchased.
+        return published.or(
+          'property_type.ilike.%commercial%,'
+          'property_type.ilike.%office%,'
+          'property_type.ilike.%shop%,'
+          'property_type.ilike.%showroom%,'
+          'property_type.ilike.%warehouse%,'
+          'property_type.ilike.%building%,'
+          'property_type.ilike.%land%',
+        );
+    }
+  }
+
+  /// Live count of published listings for every home-screen category.
+  ///
+  /// Counts are issued in parallel and each failure is contained to its own
+  /// entry: one rejected or slow count leaves the remaining cards their real
+  /// numbers instead of blanking the whole row. A category that fails is
+  /// omitted from the result rather than reported as zero, so its card falls
+  /// back to static wording instead of claiming an empty marketplace.
+  Future<ListingCounts> fetchListingCounts({String? city}) async {
+    final entries = await Future.wait<MapEntry<PropertyCategory, int>?>(
+      PropertyCategory.values.map((category) async {
+        try {
+          return MapEntry(category, await _countInCategory(category, city));
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    return ListingCounts({
+      for (final entry in entries)
+        if (entry != null) entry.key: entry.value,
+    });
+  }
+
+  Future<int> _countInCategory(PropertyCategory category, String? city) async {
+    var query = _publishedInCategory(
+      _client.from('properties').select('id'),
+      category,
+    );
+
+    if (city != null &&
+        city.isNotEmpty &&
+        city != 'All' &&
+        city != 'All India') {
+      query = query.ilike('city', '%$city%');
+    }
+
+    // `count` honours filters but ignores modifiers, so `limit(1)` holds the
+    // row payload to a single id while still counting the whole match set.
+    final response = await query
+        .limit(1)
+        .count(CountOption.exact)
+        .timeout(AppConstants.networkTimeout);
+
+    return response.count;
   }
 
   /// Realtime WebSocket stream for instant updates when properties change.

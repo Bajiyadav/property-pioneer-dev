@@ -5,6 +5,7 @@ import '../config/constants.dart';
 import '../services/auth_service.dart';
 import '../services/property_service.dart';
 import '../services/enquiry_service.dart';
+import '../services/loan_enquiry_service.dart';
 import '../services/favorites_service.dart';
 import '../models/property.dart';
 import '../models/employee_access.dart';
@@ -14,6 +15,8 @@ import '../features/location/providers/location_providers.dart';
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 final propertyServiceProvider = Provider<PropertyService>((ref) => PropertyService());
 final enquiryServiceProvider = Provider<EnquiryService>((ref) => EnquiryService());
+final loanEnquiryServiceProvider =
+    Provider<LoanEnquiryService>((ref) => LoanEnquiryService());
 final favoritesServiceProvider = Provider<FavoritesService>((ref) => FavoritesService());
 
 // Stream of auth changes

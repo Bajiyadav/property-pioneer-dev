@@ -8,8 +8,6 @@ import {
   Home,
   Building,
   ChevronRight,
-  FileText,
-  Landmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TabbedSearchBox } from "./TabbedSearchBox";
@@ -111,15 +109,15 @@ export function HeroSection({
           />
         </motion.div>
 
-        {/* Quick Category Action Cards — 6 Key Real Estate Pillars */}
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 w-full max-w-5xl">
+        {/* Quick Category Action Cards — 4 Core Real Estate Pillars */}
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 w-full max-w-4xl">
           {/* Buy */}
           <button
             onClick={(e) => handleQuickLink(e, { listing: "sale" })}
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
+            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-blue-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <Building2 className="h-4 w-4" />
+            <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Building2 className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight">
@@ -134,10 +132,10 @@ export function HeroSection({
           {/* Rent */}
           <button
             onClick={(e) => handleQuickLink(e, { listing: "rent" })}
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
+            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-amber-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <Home className="h-4 w-4" />
+            <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Home className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight">
@@ -152,10 +150,10 @@ export function HeroSection({
           {/* Commercial */}
           <button
             onClick={(e) => handleQuickLink(e, { type: "commercial" })}
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
+            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-cyan-500/50 hover:shadow-lg transition-all active:scale-95 group text-left cursor-pointer"
           >
-            <div className="h-9 w-9 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <Building className="h-4 w-4" />
+            <div className="h-10 w-10 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Building className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
@@ -167,49 +165,13 @@ export function HeroSection({
             </div>
           </button>
 
-          {/* Rental Agreement */}
-          <Link
-            to="/rental-agreement"
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-indigo-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
-          >
-            <div className="h-9 w-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <FileText className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
-                Agreement
-              </span>
-              <span className="block text-[11px] font-medium text-muted-foreground truncate">
-                Instant PDF
-              </span>
-            </div>
-          </Link>
-
-          {/* Home Loans */}
-          <Link
-            to="/home-loans"
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-white/40 hover:border-rose-500/50 hover:shadow-lg transition-all active:scale-95 group text-left"
-          >
-            <div className="h-9 w-9 rounded-xl bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <Landmark className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
-                Home Loans
-              </span>
-              <span className="block text-[11px] font-medium text-muted-foreground truncate">
-                Lowest Rates
-              </span>
-            </div>
-          </Link>
-
           {/* Post Property (High-contrast CTA) */}
           <Link
             to="/list-property"
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
-            <div className="h-9 w-9 rounded-xl bg-white/20 text-white flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
-              <Sparkles className="h-4 w-4 text-amber-300" />
+            <div className="h-10 w-10 rounded-xl bg-white/20 text-white flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <Sparkles className="h-5 w-5 text-amber-300" />
             </div>
             <div className="flex-1 min-w-0">
               <span className="block text-xs sm:text-sm font-extrabold leading-tight truncate">

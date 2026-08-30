@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Calendar, MapPin, CheckCircle2, Video, Loader2 } from "lucide-react";
-import { submitEnquiry } from "@/modules/enquiry/services/enquiryService";
+import { scheduleVisit, VISIT_SLOTS } from "@/modules/property/services/visitService";
 import { getFriendlyErrorMessage } from "@/lib/errorUtils";
 
 /**
@@ -31,9 +31,9 @@ export function ScheduleVisitModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [visitType, setVisitType] = useState<"in_person" | "video">("in_person");
+  const [visitType, setVisitType] = useState<"in_person" | "video_call">("in_person");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("10:00 AM");
+  const [time, setTime] = useState<(typeof VISIT_SLOTS)[number]>(VISIT_SLOTS[0]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   /** Honeypot — a real user never sees or fills this. */
@@ -55,14 +55,17 @@ export function ScheduleVisitModal({
     setError("");
     setSubmitting(true);
 
-    const visitLabel = visitType === "in_person" ? "in-person visit" : "video tour";
-    const result = await submitEnquiry({
+    // Was writing the visit into `enquiries` as a sentence. It now goes to
+    // property_visits with the date and slot in real columns, like every other
+    // visit surface, so an owner sees one queue rather than three.
+    const result = await scheduleVisit({
       propertyId,
       name,
       phone,
-      message: `Visit request: ${visitLabel} on ${date} at ${time}. Please confirm if this slot works.`,
+      preferredDate: date,
+      preferredSlot: time,
+      visitType,
       company,
-      elapsedMs: Date.now() - openedAt.current,
     });
 
     setSubmitting(false);
@@ -131,9 +134,9 @@ export function ScheduleVisitModal({
               </button>
               <button
                 type="button"
-                onClick={() => setVisitType("video")}
+                onClick={() => setVisitType("video_call")}
                 className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition ${
-                  visitType === "video"
+                  visitType === "video_call"
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-background text-foreground"
                 }`}
@@ -163,13 +166,14 @@ export function ScheduleVisitModal({
                 <select
                   id="visit-time"
                   value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  onChange={(e) => setTime(e.target.value as (typeof VISIT_SLOTS)[number])}
                   className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs outline-none focus:border-primary"
                 >
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="02:00 PM">02:00 PM</option>
-                  <option value="05:00 PM">05:00 PM</option>
-                  <option value="07:00 PM">07:00 PM</option>
+                  {VISIT_SLOTS.map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>

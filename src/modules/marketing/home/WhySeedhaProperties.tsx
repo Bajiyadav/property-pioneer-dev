@@ -245,8 +245,7 @@ export function WhySeedhaProperties() {
                       ✓
                     </span>
                     <span>
-                      <strong>Legally Valid Digital Rental Agreements</strong> created &amp; signed
-                      in 5 mins.
+                      <strong>Direct Owner Negotiations</strong> without any middleman markups.
                     </span>
                   </li>
                 </ul>
@@ -262,10 +261,10 @@ export function WhySeedhaProperties() {
                   </span>
                 </div>
                 <Link
-                  to="/rental-agreement"
+                  to="/properties"
                   className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-xs transition hover:bg-primary/90"
                 >
-                  <span>Online Agreements</span>
+                  <span>Explore Properties</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>

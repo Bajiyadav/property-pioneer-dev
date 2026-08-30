@@ -111,7 +111,9 @@ export async function listAgentVisits(agentId: string): Promise<AgentVisit[]> {
   const { data, error } = await db
     .from("property_visits")
     .select(
-      "id,property_id,visitor_name,visitor_phone,preferred_date,preferred_time_slot,status,created_at",
+      // visit_date / visit_time are the real column names; the AgentVisit
+      // interface keeps its own vocabulary and is mapped below.
+      "id,property_id,visitor_name,visitor_phone,visit_date,visit_time,status,created_at",
     )
     .eq("agent_id", agentId)
     .order("created_at", { ascending: false })
@@ -134,8 +136,8 @@ export async function listAgentVisits(agentId: string): Promise<AgentVisit[]> {
     propertyTitle: titles.get(r.property_id) ?? "Listing",
     visitorName: r.visitor_name,
     visitorPhone: r.visitor_phone,
-    preferredDate: r.preferred_date,
-    preferredTimeSlot: r.preferred_time_slot,
+    preferredDate: r.visit_date,
+    preferredTimeSlot: r.visit_time,
     status: r.status,
     createdAt: r.created_at,
   }));

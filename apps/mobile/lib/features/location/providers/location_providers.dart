@@ -16,9 +16,27 @@ class LocationStateNotifier extends StateNotifier<AsyncValue<SelectedLocation?>>
   Future<void> _init() async {
     try {
       final loc = await _locationService.getSavedLocation();
-      state = AsyncValue.data(loc);
+      if (loc != null) {
+        state = AsyncValue.data(loc);
+      } else {
+        // Automatically attempt to fetch current GPS location silently
+        final currentLoc = await _locationService.getCurrentLocation(requestPermission: false);
+        state = AsyncValue.data(currentLoc);
+      }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<SelectedLocation?> detectAndSetCurrentLocation() async {
+    try {
+      final loc = await _locationService.getCurrentLocation(requestPermission: true);
+      if (loc != null) {
+        state = AsyncValue.data(loc);
+      }
+      return loc;
+    } catch (_) {
+      return null;
     }
   }
 

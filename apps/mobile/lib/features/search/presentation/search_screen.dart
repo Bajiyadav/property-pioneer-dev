@@ -418,13 +418,59 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<PropertyCategory>(activeCategoryProvider, (previous, next) {
+      if (previous != next) {
+        _executeSearch();
+      }
+    });
+
+    ref.listen(locationStateProvider, (previous, next) {
+      if (previous != next) {
+        _executeSearch();
+      }
+    });
+
     final activeCategory = ref.watch(activeCategoryProvider);
     final locationState = ref.watch(locationStateProvider);
     final activeCity = locationState.value?.city ?? 'All India';
 
+    String screenTitle;
+    switch (activeCategory) {
+      case PropertyCategory.buy:
+        screenTitle = 'Buy Properties';
+        break;
+      case PropertyCategory.rent:
+        screenTitle = 'Rent Homes';
+        break;
+      case PropertyCategory.commercial:
+        screenTitle = 'Commercial Spaces';
+        break;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Properties', style: TextStyle(fontWeight: FontWeight.bold)),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+                onPressed: () => context.pop(),
+              )
+            : null,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(screenTitle,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+            Text(
+              activeCity,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F766E),
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.tune, color: Color(0xFF0F766E)),

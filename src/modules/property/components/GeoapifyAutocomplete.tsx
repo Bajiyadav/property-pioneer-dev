@@ -9,6 +9,7 @@ interface GeoapifyFeature {
     lat: number;
     lon: number;
     city?: string;
+    state?: string;
     suburb?: string;
     neighbourhood?: string;
     county?: string;
@@ -131,6 +132,7 @@ export function GeoapifyAutocomplete({
       lat: p.lat,
       lon: p.lon,
       city: p.city || p.county || "",
+      state: p.state,
       locality: p.suburb || p.neighbourhood || "",
       placeId: p.place_id,
     };

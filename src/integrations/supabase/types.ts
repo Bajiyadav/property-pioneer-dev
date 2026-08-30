@@ -591,18 +591,23 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Mirrors 20260818140100_recover_agent_workflow_tables.sql, which is the
+      // migration that actually creates this table. The previous definition
+      // described columns that migration never creates (preferred_date,
+      // preferred_time_slot, visitor_id, owner_id, agent_id), so TypeScript
+      // was validating writes against a shape the database does not have.
       property_visits: {
         Row: {
           id: string;
           property_id: string;
-          visitor_id: string | null;
+          user_id: string | null;
           visitor_name: string;
-          visitor_email: string;
           visitor_phone: string;
-          preferred_date: string;
-          preferred_time_slot: string;
-          status: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
-          owner_id: string | null;
+          visitor_email: string | null;
+          visit_type: string;
+          visit_date: string;
+          visit_time: string;
+          status: string;
           agent_id: string | null;
           notes: string | null;
           created_at: string;
@@ -611,14 +616,14 @@ export type Database = {
         Insert: {
           id?: string;
           property_id: string;
-          visitor_id?: string | null;
+          user_id?: string | null;
           visitor_name: string;
-          visitor_email: string;
           visitor_phone: string;
-          preferred_date: string;
-          preferred_time_slot: string;
-          status?: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
-          owner_id?: string | null;
+          visitor_email?: string | null;
+          visit_type?: string;
+          visit_date: string;
+          visit_time?: string;
+          status?: string;
           agent_id?: string | null;
           notes?: string | null;
           created_at?: string;
@@ -627,14 +632,14 @@ export type Database = {
         Update: {
           id?: string;
           property_id?: string;
-          visitor_id?: string | null;
+          user_id?: string | null;
           visitor_name?: string;
-          visitor_email?: string;
           visitor_phone?: string;
-          preferred_date?: string;
-          preferred_time_slot?: string;
-          status?: "requested" | "confirmed" | "rescheduled" | "completed" | "cancelled";
-          owner_id?: string | null;
+          visitor_email?: string | null;
+          visit_type?: string;
+          visit_date?: string;
+          visit_time?: string;
+          status?: string;
           agent_id?: string | null;
           notes?: string | null;
           created_at?: string;

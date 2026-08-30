@@ -1,6 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:seedha_properties_mobile/models/emi_estimate.dart';
+import 'package:seedha_properties_mobile/models/lender_rate.dart';
+import 'package:seedha_properties_mobile/features/loans/presentation/emi_calculator_sheet.dart';
+import 'package:seedha_properties_mobile/features/loans/presentation/loan_callback_sheet.dart';
 
 class HomeLoansScreen extends StatefulWidget {
   const HomeLoansScreen({super.key});
@@ -11,7 +14,7 @@ class HomeLoansScreen extends StatefulWidget {
 
 class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProviderStateMixin {
   double _loanAmount = 5000000; // 50 Lakhs default
-  double _interestRate = 8.5; // 8.5% p.a.
+  late double _interestRate = defaultInterestRate;
   double _tenureYears = 20; // 20 years default
 
   late TabController _tabController;
@@ -34,124 +37,31 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
     super.dispose();
   }
 
-  int get _monthlyEmi {
-    if (_loanAmount <= 0 || _tenureYears <= 0) return 0;
-    if (_interestRate <= 0) return (_loanAmount / (_tenureYears * 12)).round();
+  EmiEstimate get _estimate => calculateEmi(
+        principal: _loanAmount,
+        annualRatePercent: _interestRate,
+        tenureMonths: (_tenureYears * 12).round(),
+      );
 
-    final r = _interestRate / 12 / 100;
-    final n = _tenureYears * 12;
-    final factor = pow(1 + r, n);
-    final emi = (_loanAmount * r * factor) / (factor - 1);
-    return emi.round();
-  }
+  int get _monthlyEmi => _estimate.monthlyEmi;
+  int get _totalPayment => _estimate.totalPayment;
+  int get _totalInterest => _estimate.totalInterest;
 
-  int get _totalPayment => (_monthlyEmi * _tenureYears * 12).round();
-  int get _totalInterest => max(0, _totalPayment - _loanAmount.round());
+  String _formatCompactINR(double amount) => formatCompactInr(amount);
 
-  String _formatCompactINR(double amount) {
-    if (amount >= 10000000) {
-      final cr = amount / 10000000;
-      return '₹${cr.toStringAsFixed(cr % 1 == 0 ? 0 : 2)} Cr';
-    }
-    if (amount >= 100000) {
-      final l = amount / 100000;
-      return '₹${l.toStringAsFixed(l % 1 == 0 ? 0 : 2)} L';
-    }
-    return _currencyFormat.format(amount);
-  }
-
+  /// Opens the call-back form, carrying the calculator's current state.
+  ///
+  /// This used to build its own form that validated the phone number, showed a
+  /// success message and then discarded the lead — nothing was ever written.
+  /// It now goes through [LoanCallBackSheet], which persists to
+  /// `public.loan_enquiries` and only reports success once the row is stored.
   void _showInquirySheet() {
-    final nameCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(ctx).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Home Loan Assistance',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Get connected with top bank mortgage officers for instant pre-approval and best interest rates.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneCtrl,
-                keyboardType: TextInputType.phone,
-                maxLength: 10,
-                decoration: InputDecoration(
-                  labelText: 'Mobile Number',
-                  prefixText: '+91 ',
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () {
-                    if (phoneCtrl.text.length < 10) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please enter valid 10-digit phone number')),
-                      );
-                      return;
-                    }
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Request received! Our loan advisor will call you shortly.'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  },
-                  child: const Text('Request Free Call Back', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        ),
-      ),
+    showLoanCallBackSheet(
+      context,
+      loanAmount: _loanAmount,
+      interestRate: _interestRate,
+      tenureMonths: (_tenureYears * 12).round(),
+      monthlyEmi: _monthlyEmi,
     );
   }
 
@@ -275,21 +185,21 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
 
                 // Interest Rate Slider
                 Text(
-                  'Interest Rate: ${_interestRate.toStringAsFixed(1)}% p.a.',
+                  'Interest Rate: ${_interestRate.toStringAsFixed(2)}% p.a.',
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 Slider(
                   value: _interestRate,
-                  min: 7.5,
-                  max: 15.0,
-                  divisions: 75,
+                  min: minInterestRate,
+                  max: maxInterestRate,
+                  divisions: 90,
                   onChanged: (val) => setState(() => _interestRate = val),
                 ),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('7.5%', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                    Text('15.0%', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    Text('12.0%', style: TextStyle(fontSize: 11, color: Colors.grey)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -301,15 +211,15 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
                 ),
                 Slider(
                   value: _tenureYears,
-                  min: 1,
-                  max: 30,
-                  divisions: 29,
+                  min: minTenureYears.toDouble(),
+                  max: maxTenureYears.toDouble(),
+                  divisions: maxTenureYears - minTenureYears,
                   onChanged: (val) => setState(() => _tenureYears = val),
                 ),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('1 Year', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    Text('5 Years', style: TextStyle(fontSize: 11, color: Colors.grey)),
                     Text('30 Years', style: TextStyle(fontSize: 11, color: Colors.grey)),
                   ],
                 ),
@@ -336,11 +246,7 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
           ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildBankCard('State Bank of India (SBI)', '8.50% - 9.45%', '0.35%', 'Zero Prepayment Penalty', Colors.blue),
-              _buildBankCard('HDFC Bank', '8.75% - 9.65%', '0.50%', 'Instant Digital Approval', Colors.red),
-              _buildBankCard('ICICI Bank', '8.75% - 9.80%', '0.50%', 'Express 3-step Sanction', Colors.orange),
-              _buildBankCard('Axis Bank', '8.90% - 9.85%', '1.00%', '12 EMI Waiver on Timely Payment', Colors.purple),
-              _buildBankCard('Bank of Baroda', '8.40% - 9.30%', 'Nil', 'Lowest Benchmark Rate', Colors.amber[800]!),
+              ...lenderRates.map(_buildBankCard),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -350,7 +256,7 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
                   border: Border.all(color: Colors.grey.withOpacity(0.2)),
                 ),
                 child: const Text(
-                  'Disclaimer: Interest rates and terms shown are indicative based on publicly available data as of August 2026. Final approval, processing fees, and interest rates are subject to individual credit assessment and bank sanction.',
+                  'Disclaimer: $lenderRatesDisclaimer',
                   style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.4),
                 ),
               ),
@@ -362,7 +268,13 @@ class _HomeLoansScreenState extends State<HomeLoansScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildBankCard(String name, String rates, String fee, String highlight, Color color) {
+  Widget _buildBankCard(LenderRate lender) {
+    final name = lender.name;
+    final rates = lender.rateRange;
+    final fee = lender.processingFee;
+    final highlight = lender.highlight;
+    final color = lender.accent;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

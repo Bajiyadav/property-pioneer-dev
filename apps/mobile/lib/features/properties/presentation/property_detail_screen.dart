@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:seedha_properties_mobile/features/loans/presentation/emi_calculator_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
@@ -101,12 +101,18 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     }
   }
 
+  /// "Tue, 02 Sep 2026" — unambiguous for a date a customer and an owner both
+  /// have to act on, unlike a bare numeric format that reads differently in
+  /// different conventions.
+  static String _formatVisitDate(DateTime date) =>
+      DateFormat('EEE, dd MMM yyyy').format(date);
+
   void _showEnquiryDialog(BuildContext context, {bool isScheduleVisit = false}) {
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
     final messageCtrl = TextEditingController();
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
-    String selectedTimeSlot = '10:00 AM - 12:00 PM';
+    String selectedTimeSlot = 'Morning (9 AM - 12 PM)';
     bool submitting = false;
 
     showModalBottomSheet(
@@ -165,14 +171,48 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                 ),
                 if (isScheduleVisit) ...[
                   const SizedBox(height: 14),
+                  const Text('Preferred Visit Date:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  // Without this the date was fixed at "tomorrow" and the
+                  // customer had no way to change it, so every visit request
+                  // reaching an owner asked for the same day.
+                  InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final picked = await showDatePicker(
+                        context: ctx,
+                        initialDate: selectedDate,
+                        // Today is allowed; a visit cannot be booked into the
+                        // past, and a 60-day horizon keeps the lead actionable.
+                        firstDate: DateTime(now.year, now.month, now.day),
+                        lastDate: now.add(const Duration(days: 60)),
+                      );
+                      if (picked != null) {
+                        setModalState(() => selectedDate = picked);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        prefixIcon: Icon(Icons.calendar_month_outlined),
+                      ),
+                      child: Text(
+                        _formatVisitDate(selectedDate),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   const Text('Preferred Visit Slot:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     initialValue: selectedTimeSlot,
                     items: const [
-                      DropdownMenuItem(value: '10:00 AM - 12:00 PM', child: Text('10:00 AM - 12:00 PM (Morning)')),
-                      DropdownMenuItem(value: '02:00 PM - 04:00 PM', child: Text('02:00 PM - 04:00 PM (Afternoon)')),
-                      DropdownMenuItem(value: '05:00 PM - 07:00 PM', child: Text('05:00 PM - 07:00 PM (Evening)')),
+                      DropdownMenuItem(value: 'Morning (9 AM - 12 PM)', child: Text('Morning (9 AM - 12 PM)')),
+                      DropdownMenuItem(value: 'Afternoon (12 PM - 4 PM)', child: Text('Afternoon (12 PM - 4 PM)')),
+                      DropdownMenuItem(value: 'Evening (4 PM - 7 PM)', child: Text('Evening (4 PM - 7 PM)')),
                     ],
                     onChanged: (val) {
                       if (val != null) setModalState(() => selectedTimeSlot = val);
@@ -213,6 +253,8 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                               final EnquiryResult result = isScheduleVisit
                                   ? await _enquiryService.scheduleVisit(
                                       propertyId: widget.propertyId,
+                                      customerName: nameCtrl.text.trim(),
+                                      customerPhone: phoneCtrl.text.trim(),
                                       date: selectedDate,
                                       timeSlot: selectedTimeSlot,
                                       notes: messageCtrl.text.trim(),
@@ -516,34 +558,46 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  InkWell(
-                    onTap: () => context.push('/loans'),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0284C7).withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.2)),
+                  // Only on sale listings: a home-loan EMI is meaningless
+                  // against a monthly rent, and this banner used to render on
+                  // every listing regardless of type.
+                  if (property.isSale) ...[
+                    const SizedBox(height: 6),
+                    InkWell(
+                      onTap: () => showEmiCalculatorSheet(
+                        context,
+                        propertyPrice: property.price,
+                        propertyTitle: property.title,
+                        propertyId: property.id,
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.account_balance_outlined, size: 14, color: Color(0xFF0284C7)),
-                          SizedBox(width: 6),
-                          Text(
-                            'Home Loans from 8.40% p.a. • Calculate EMI →',
-                            style: TextStyle(
-                              color: Color(0xFF0284C7),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0284C7).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF0284C7).withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.account_balance_outlined, size: 14, color: Color(0xFF0284C7)),
+                            const SizedBox(width: 6),
+                            Text(
+                              // Quoted from the lender table rather than typed
+                              // in, so the headline rate cannot outlive it.
+                              'Home Loans from ${defaultInterestRate.toStringAsFixed(2)}% p.a. • Calculate EMI →',
+                              style: const TextStyle(
+                                color: Color(0xFF0284C7),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 8),
                   Text(
                     property.title,
@@ -787,7 +841,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
         ],
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -798,36 +852,68 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showEnquiryDialog(context, isScheduleVisit: true),
-                icon: const Icon(Icons.calendar_month_outlined, size: 18),
-                label: const Text('Schedule Visit', style: TextStyle(fontWeight: FontWeight.bold)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF0F766E),
-                  side: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SafeArea(
+          child: Row(
+            children: [
+              // 1-Click WhatsApp Direct Chat
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF25D366),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF25D366).withValues(alpha: 0.35),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () => _openWhatsApp(context, property),
+                  tooltip: 'Chat with Owner on WhatsApp',
+                  icon: const Icon(Icons.chat_bubble_outline,
+                      color: Colors.white, size: 22),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _showEnquiryDialog(context, isScheduleVisit: false),
-                icon: const Icon(Icons.send, size: 18),
-                label: const Text('Send Enquiry', style: TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F766E),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      _showEnquiryDialog(context, isScheduleVisit: true),
+                  icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                  label: const Text('Schedule Visit',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 12.5)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0F766E),
+                    side: const BorderSide(
+                        color: Color(0xFF0F766E), width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      _showEnquiryDialog(context, isScheduleVisit: false),
+                  icon: const Icon(Icons.phone_in_talk_outlined, size: 16),
+                  label: const Text('Contact Owner',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 12.5)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

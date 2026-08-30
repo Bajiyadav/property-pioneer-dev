@@ -6,6 +6,9 @@ import '../config/constants.dart';
 import '../models/enquiry.dart';
 import '../models/visit.dart';
 import 'supabase_service.dart';
+import 'visit_message.dart';
+
+export 'visit_message.dart' show kScheduledVisitMarker;
 
 /// Why an enquiry write did not go through. The screen needs to tell a timeout
 /// ("try again") apart from a validation problem ("fix this field") apart from
@@ -59,11 +62,6 @@ class EnquiryResult {
     }
   }
 }
-
-/// Marker that turns an `enquiries` row into a scheduled-visit row. Kept as the
-/// existing storage shape on purpose — moving visits onto `property_visits`
-/// would be a data migration, not a Phase 3 fix.
-const String kScheduledVisitMarker = '[SCHEDULED VISIT]';
 
 class EnquiryService {
   final SupabaseClient _client;
@@ -184,6 +182,8 @@ class EnquiryService {
 
   Future<EnquiryResult> scheduleVisit({
     required String propertyId,
+    required String customerName,
+    required String customerPhone,
     required DateTime date,
     required String timeSlot,
     String? notes,
@@ -210,18 +210,28 @@ class EnquiryService {
       );
     }
 
+    final name = customerName.trim();
+    final phone = customerPhone.trim();
+
+    if (name.isEmpty) {
+      return EnquiryResult.failure(
+        EnquiryFailureReason.invalidInput,
+        'Please enter your name.',
+      );
+    }
+    if (phone.replaceAll(RegExp(r'\D'), '').length < 10) {
+      return EnquiryResult.failure(
+        EnquiryFailureReason.invalidInput,
+        'Please enter a valid 10-digit phone number.',
+      );
+    }
+
     final formattedDate = '${date.year}-'
         '${date.month.toString().padLeft(2, '0')}-'
         '${date.day.toString().padLeft(2, '0')}';
 
-    final phone = user?.userMetadata?['phone'] as String? ?? '';
-    final fullName =
-        user?.userMetadata?['full_name'] as String? ?? 'Verified Customer';
-
-    final slotMessage = '$kScheduledVisitMarker\n'
-        'Date: $formattedDate\n'
-        'Slot: ${timeSlot.trim()}\n'
-        'Notes: ${notes?.trim().isNotEmpty == true ? notes!.trim() : 'None'}';
+    final slotMessage =
+        buildVisitMessage(date: date, timeSlot: timeSlot, notes: notes);
 
     final fingerprint = 'visit:$userId:$propertyId:$formattedDate:$timeSlot';
     if (_submittedFingerprints.contains(fingerprint)) {
@@ -237,7 +247,12 @@ class EnquiryService {
           .insert(<String, dynamic>{
             'property_id': propertyId,
             'user_id': userId,
-            'name': fullName,
+            // The name and phone the customer actually typed on the sheet.
+            // These used to be read from auth metadata instead, so an owner
+            // received "Verified Customer" with a blank number and had no way
+            // to call back — while the customer had filled both fields in and
+            // been required to.
+            'name': name,
             'phone': phone,
             'email': user?.email,
             'message': slotMessage,
@@ -281,8 +296,8 @@ class EnquiryService {
         name: map['name'] as String? ?? '',
         phone: map['phone'] as String? ?? '',
         visitType: 'in_person',
-        visitDate: _visitDateFromMessage(map['message'] as String?) ?? createdAt,
-        visitTime: _visitSlotFromMessage(map['message'] as String?) ??
+        visitDate: visitDateFromMessage(map['message'] as String?) ?? createdAt,
+        visitTime: visitSlotFromMessage(map['message'] as String?) ??
             'Morning / Afternoon',
         status: map['status'] as String? ?? 'pending',
         createdAt: createdAt,
@@ -346,17 +361,4 @@ class EnquiryService {
         .toList();
   }
 
-  static DateTime? _visitDateFromMessage(String? message) {
-    if (message == null) return null;
-    final match = RegExp(r'Date:\s*(\d{4}-\d{2}-\d{2})').firstMatch(message);
-    if (match == null) return null;
-    return DateTime.tryParse(match.group(1)!);
-  }
-
-  static String? _visitSlotFromMessage(String? message) {
-    if (message == null) return null;
-    final match = RegExp(r'Slot:\s*(.+)').firstMatch(message);
-    final slot = match?.group(1)?.trim();
-    return (slot == null || slot.isEmpty) ? null : slot;
-  }
 }

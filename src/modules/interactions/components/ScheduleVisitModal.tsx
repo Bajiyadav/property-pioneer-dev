@@ -2,6 +2,8 @@ import { useState } from "react";
 import { X, Calendar as CalendarIcon, Video, MapPin, CheckCircle2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useInteractionStore } from "@/modules/interactions/stores/interactionStore";
+import { scheduleVisit, VISIT_SLOTS } from "@/modules/property/services/visitService";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 interface ScheduleVisitModalProps {
   isOpen: boolean;
@@ -21,17 +23,57 @@ export function ScheduleVisitModal({
   tenantId,
 }: ScheduleVisitModalProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(addDays(new Date(), 1));
-  const [selectedTime, setSelectedTime] = useState<string>("10:00 AM");
+  const [selectedTime, setSelectedTime] = useState<(typeof VISIT_SLOTS)[number]>(VISIT_SLOTS[0]);
   const [visitMode, setVisitMode] = useState<"In-person walkthrough" | "Live video tour">(
     "In-person walkthrough",
   );
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const bookVisit = useInteractionStore((s) => s.bookVisit);
+  const { user } = useAuthSession();
+
+  // Seeded from the session where possible, but always editable: this metadata
+  // is self-asserted and frequently empty, and an owner cannot call back a
+  // visitor whose number never got captured.
+  const [name, setName] = useState<string>(
+    (user?.user_metadata?.full_name as string | undefined) ?? "",
+  );
+  const [phone, setPhone] = useState<string>(
+    (user?.user_metadata?.phone as string | undefined) ?? user?.phone ?? "",
+  );
 
   if (!isOpen) return null;
 
-  const handleBook = () => {
+  const handleBook = async () => {
+    if (submitting) return;
+    setError("");
+    setSubmitting(true);
+
+    const isoDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
+    // Awaited, and the result is read. This used to be a `void fetch(...)`
+    // whose errors were swallowed, followed by an unconditional success screen
+    // — and the endpoint it called only wrote an audit line, never a visit.
+    const result = await scheduleVisit({
+      propertyId,
+      name: name.trim(),
+      phone: phone.trim(),
+      preferredDate: isoDate,
+      preferredSlot: selectedTime,
+      visitType: visitMode === "Live video tour" ? "video_call" : "in_person",
+    });
+
+    setSubmitting(false);
+
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+
+    // Local interaction state is updated only once the visit is really stored,
+    // so the tenant's booking list cannot show a visit the owner never got.
     bookVisit({
       propertyId,
       propertyTitle,
@@ -41,27 +83,16 @@ export function ScheduleVisitModal({
       when: `${format(selectedDate, "MMM d, yyyy")} · ${selectedTime}`,
     });
 
-    void fetch(`/api/public/properties/${propertyId}/schedule-visit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        preferredDate: format(selectedDate, "yyyy-MM-dd"),
-        preferredTime: selectedTime,
-        mode: visitMode,
-      }),
-    }).catch(() => {
-      // Background audit logging error fallback
-    });
-
     setIsSuccess(true);
   };
 
   const handleClose = () => {
     setIsSuccess(false);
+    setError("");
     onClose();
   };
 
-  const availableTimes = ["10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"];
+  const availableTimes = VISIT_SLOTS;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -103,6 +134,41 @@ export function ScheduleVisitModal({
             </p>
 
             <div className="mt-6 space-y-5">
+              {/* Who is visiting — the owner needs this to confirm */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="visit-name"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                  >
+                    Your Name
+                  </label>
+                  <input
+                    id="visit-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-secondary/50 p-3 text-sm text-foreground outline-none focus:border-primary"
+                    placeholder="Full name"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="visit-phone"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                  >
+                    Mobile Number
+                  </label>
+                  <input
+                    id="visit-phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    inputMode="tel"
+                    className="w-full rounded-xl border border-border bg-secondary/50 p-3 text-sm text-foreground outline-none focus:border-primary"
+                    placeholder="10-digit mobile"
+                  />
+                </div>
+              </div>
+
               {/* Visit Mode */}
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -161,7 +227,7 @@ export function ScheduleVisitModal({
                   })}
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {availableTimes.map((time) => (
                     <button
                       key={time}
@@ -179,13 +245,22 @@ export function ScheduleVisitModal({
               </div>
             </div>
 
+            {error && (
+              <p className="mt-4 text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            )}
+
             <div className="mt-8">
               <button
                 onClick={handleBook}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-lg transition hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98]"
+                disabled={submitting}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-lg transition hover:scale-[1.02] hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60"
               >
-                <CalendarIcon className="h-4 w-4" /> Request{" "}
-                {visitMode.includes("video") ? "Video Tour" : "Visit"}
+                <CalendarIcon className="h-4 w-4" />{" "}
+                {submitting
+                  ? "Requesting…"
+                  : `Request ${visitMode.includes("video") ? "Video Tour" : "Visit"}`}
               </button>
             </div>
           </>

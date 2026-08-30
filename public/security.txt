@@ -1,0 +1,8 @@
+# Seedha Properties Security Policy (RFC 9116)
+Contact: mailto:security@seedhaproperties.com
+Contact: mailto:bajibaddela128@gmail.com
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en, te, hi
+Canonical: https://seedhaproperties.com/.well-known/security.txt
+Policy: https://seedhaproperties.com/terms
+Acknowledgments: https://seedhaproperties.com/

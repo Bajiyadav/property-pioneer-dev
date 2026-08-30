@@ -8,6 +8,7 @@ import {
 } from "@/lib/security.server";
 import { RATE_LIMIT_CONFIG, rateLimitExceededResponse } from "@/lib/rateLimitConfig.server";
 import { supabase } from "@/integrations/supabase/client";
+import { visitRequestSchema } from "@/modules/property/services/visitService";
 
 async function countRecentVisitRequests(ip: string, sinceIso: string): Promise<number> {
   const { count } = await supabase
@@ -53,35 +54,87 @@ export const Route = createFileRoute("/api/public/properties/$id/schedule-visit"
           );
         }
 
-        let body: {
-          preferredDate?: string;
-          preferredTime?: string;
-          name?: string;
-          phone?: string;
-          mode?: string;
-        } = {};
-
+        let raw: unknown;
         try {
-          body = await request.json();
+          raw = await request.json();
         } catch {
           return jsonResponse({ error: "Invalid request body format." }, 400);
         }
 
-        // Validate preferredDate: must be a valid future or today date
-        if (body.preferredDate) {
-          const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-          if (!dateRegex.test(body.preferredDate)) {
-            return jsonResponse({ error: "Invalid date format. Expected YYYY-MM-DD." }, 400);
-          }
-          const parsed = new Date(`${body.preferredDate}T00:00:00Z`);
-          if (isNaN(parsed.getTime())) {
-            return jsonResponse({ error: "Invalid date value." }, 400);
-          }
-          const today = new Date();
-          today.setUTCHours(0, 0, 0, 0);
-          if (parsed < today) {
-            return jsonResponse({ error: "Visit date cannot be in the past." }, 400);
-          }
+        // The date/slot/name/phone are validated by the same schema the client
+        // uses, so a rejected field reads the same on both sides.
+        const parsed = visitRequestSchema.safeParse({
+          ...(raw as Record<string, unknown>),
+          propertyId,
+        });
+        if (!parsed.success) {
+          return jsonResponse(
+            { error: parsed.error.issues[0]?.message ?? "Please check the details you entered." },
+            400,
+          );
+        }
+        const input = parsed.data;
+
+        // Honeypot: a filled `company` field means a bot. Answer 200 so the bot
+        // learns nothing, but store nothing.
+        if (input.company) {
+          return jsonResponse({ ok: true });
+        }
+
+        const parsedDate = new Date(`${input.preferredDate}T00:00:00Z`);
+        if (isNaN(parsedDate.getTime())) {
+          return jsonResponse({ error: "Invalid date value." }, 400);
+        }
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        if (parsedDate < today) {
+          return jsonResponse({ error: "Visit date cannot be in the past." }, 400);
+        }
+
+        // A missing service-role key must surface as a clean 503, not as an
+        // unhandled throw that renders the full-page recovery shell.
+        let db: Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
+        try {
+          const mod = await import("@/integrations/supabase/client.server");
+          // Touch the proxy so a missing env var throws here, inside the guard.
+          void mod.supabaseAdmin.from;
+          db = mod.supabaseAdmin;
+        } catch (err) {
+          console.error("[visit] admin client unavailable", err);
+          return jsonResponse(
+            { error: "Visit booking is temporarily unavailable. Please call the owner directly." },
+            503,
+          );
+        }
+
+        // Column names are those 20260818140100 actually creates. This endpoint
+        // previously recorded an audit event and no visit row at all, so an
+        // owner never saw the request the visitor was told had been sent.
+        const { data: inserted, error: insertError } = await db
+          .from("property_visits")
+          .insert({
+            property_id: propertyId,
+            visitor_name: input.name,
+            visitor_phone: input.phone,
+            visit_type: input.visitType,
+            visit_date: input.preferredDate,
+            visit_time: input.preferredSlot,
+            notes: input.notes ?? null,
+          })
+          .select("id")
+          .maybeSingle();
+
+        if (insertError) {
+          console.error("[visit] insert failed", insertError);
+          await recordAudit({
+            event: "visit.error",
+            outcome: "error",
+            ip,
+            userAgent,
+            subjectType: "property",
+            subjectId: propertyId,
+          });
+          return jsonResponse({ error: "Could not schedule your visit." }, 500);
         }
 
         await recordAudit({
@@ -91,14 +144,15 @@ export const Route = createFileRoute("/api/public/properties/$id/schedule-visit"
           subjectType: "property",
           subjectId: propertyId,
           details: {
-            preferredDate: body.preferredDate,
-            preferredTime: body.preferredTime,
-            mode: body.mode || "In-person walkthrough",
+            preferredDate: input.preferredDate,
+            preferredSlot: input.preferredSlot,
+            visitType: input.visitType,
           },
         });
 
         return jsonResponse({
           ok: true,
+          visitId: inserted?.id,
           message: "Visit request submitted successfully. The owner will confirm your appointment.",
         });
       },
