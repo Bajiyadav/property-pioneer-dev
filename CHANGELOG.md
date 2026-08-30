@@ -1,3 +1,8 @@
+## v0.112.0 — 2026-08-30
+
+### Features
+- feat(mobile): display clean friendly No Internet UI instead of technical error strings (fae1e3a)
+
 ## v0.111.0 — 2026-08-30
 
 ### Features
