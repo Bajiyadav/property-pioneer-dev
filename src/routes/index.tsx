@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchProperties } from "@/modules/property/services/propertyQueries";
 import {
   APP_NAME,
@@ -54,26 +54,20 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const [selectedState, setSelectedState] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        return sessionStorage.getItem("seedha_selected_state") || "";
-      } catch {
-        return "";
-      }
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
+  // Restore saved location in useEffect to ensure 100% hydration match between SSR and Client
+  useEffect(() => {
+    try {
+      const savedState = sessionStorage.getItem("seedha_selected_state");
+      const savedCity = sessionStorage.getItem("seedha_selected_city");
+      if (savedState) setSelectedState(savedState);
+      if (savedCity) setSelectedCity(savedCity);
+    } catch {
+      // Storage unavailable in restricted iframe/private mode
     }
-    return "";
-  });
-  const [selectedCity, setSelectedCity] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        return sessionStorage.getItem("seedha_selected_city") || "";
-      } catch {
-        return "";
-      }
-    }
-    return "";
-  });
+  }, []);
 
   const handleStateChange = (state: string) => {
     setSelectedState(state);
