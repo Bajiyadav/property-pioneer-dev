@@ -16,6 +16,17 @@ import { useLocationStore } from "@/modules/property/store/locationStore";
  * The user MUST select at least a state + city before search and
  * property navigation activate.
  */
+const POPULAR_QUICK_CITIES = [
+  { name: "Hyderabad", state: "Telangana" },
+  { name: "Bengaluru", state: "Karnataka" },
+  { name: "Mumbai", state: "Maharashtra" },
+  { name: "Pune", state: "Maharashtra" },
+  { name: "Visakhapatnam", state: "Andhra Pradesh" },
+  { name: "Vijayawada", state: "Andhra Pradesh" },
+  { name: "Chennai", state: "Tamil Nadu" },
+  { name: "Delhi NCR", state: "Delhi NCR" },
+];
+
 export function TabbedSearchBox({
   query,
   onQueryChange,
@@ -44,6 +55,12 @@ export function TabbedSearchBox({
   const handleStateChange = (newState: string) => {
     onStateChange(newState);
     onCityChange(""); // reset city when state changes
+  };
+
+  const handleSelectQuickCity = (city: string, state: string) => {
+    onStateChange(state);
+    onCityChange(city);
+    toast.success(`Location set to ${city}, ${state}`);
   };
 
   const handleResetLocation = () => {
@@ -75,7 +92,7 @@ export function TabbedSearchBox({
   };
 
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-2.5">
       {/* Location Status Indicator */}
       <div className="flex items-center justify-between px-2 text-xs">
         {locationReady ? (
@@ -90,8 +107,8 @@ export function TabbedSearchBox({
           </div>
         ) : (
           <div className="flex items-center gap-1.5 text-amber-300 font-semibold drop-shadow-sm">
-            <MapPin className="h-3.5 w-3.5" />
-            <span>Select your location to continue</span>
+            <MapPin className="h-3.5 w-3.5 animate-bounce" />
+            <span>Choose your State & City to view direct-owner properties</span>
           </div>
         )}
 
@@ -107,12 +124,17 @@ export function TabbedSearchBox({
         )}
       </div>
 
+      {/* Main Search Pill */}
       <form
         onSubmit={handleSearch}
-        className="w-full flex flex-col sm:flex-row items-stretch rounded-2xl sm:rounded-full bg-white shadow-2xl overflow-hidden border border-gray-100/80"
+        className={`w-full flex flex-col sm:flex-row items-stretch rounded-2xl sm:rounded-full bg-white shadow-2xl overflow-hidden border transition-all duration-300 ${
+          !locationReady ? "border-amber-400 ring-4 ring-amber-400/20" : "border-gray-100/80"
+        }`}
       >
         {/* ── 1. Location / State ── */}
-        <label className="flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[150px]">
+        <label
+          className={`flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[160px] ${!selectedState ? "bg-amber-50/50" : ""}`}
+        >
           <MapPin className="h-4 w-4 text-emerald-600 flex-none" />
           <select
             value={selectedState}
@@ -120,7 +142,7 @@ export function TabbedSearchBox({
             aria-label="Location"
             className="bg-transparent text-sm font-semibold text-gray-800 outline-none cursor-pointer flex-1 min-w-0"
           >
-            <option value="">Select State</option>
+            <option value="">1. Select State *</option>
             {STATES.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -130,7 +152,9 @@ export function TabbedSearchBox({
         </label>
 
         {/* ── 2. City (filtered by state) ── */}
-        <label className="flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[150px]">
+        <label
+          className={`flex items-center gap-2 px-4 py-3.5 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer sm:min-w-[160px] ${selectedState && !selectedCity ? "bg-emerald-50/50 ring-2 ring-emerald-500/30" : ""}`}
+        >
           <Building2 className="h-4 w-4 text-blue-600 flex-none" />
           <select
             value={selectedCity}
@@ -138,10 +162,10 @@ export function TabbedSearchBox({
             aria-label="City"
             disabled={!selectedState}
             className={`bg-transparent text-sm font-semibold outline-none cursor-pointer flex-1 min-w-0 ${
-              selectedState ? "text-gray-800" : "text-gray-400 cursor-not-allowed"
+              selectedState ? "text-gray-800 font-bold" : "text-gray-400 cursor-not-allowed"
             }`}
           >
-            <option value="">{selectedState ? "Select City" : "Select state first"}</option>
+            <option value="">{selectedState ? "2. Select City *" : "Select state first"}</option>
             {filteredCities.map((c) => (
               <option key={c.slug} value={c.name}>
                 {c.name}
@@ -155,7 +179,7 @@ export function TabbedSearchBox({
           <Home className="h-4 w-4 text-amber-600 flex-none" />
           <GeoapifyAutocomplete
             initialValue={query}
-            placeholder={selectedCity ? `Locality in ${selectedCity}` : "Select state & city first"}
+            placeholder={selectedCity ? `Locality in ${selectedCity}` : "Optional locality/area"}
             onSelect={(text, geoData) => {
               onQueryChange(text);
               if (geoData) {
@@ -182,6 +206,25 @@ export function TabbedSearchBox({
           <span>Search Properties</span>
         </button>
       </form>
+
+      {/* ── Fast 1-Tap Popular Cities Bar ── */}
+      {!locationReady && (
+        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 px-1">
+          <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider mr-1">
+            ⚡ Quick Pick:
+          </span>
+          {POPULAR_QUICK_CITIES.map((c) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => handleSelectQuickCity(c.name, c.state)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 hover:bg-white text-white hover:text-emerald-950 text-xs font-semibold backdrop-blur-md border border-white/30 transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"
+            >
+              <span>{c.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
