@@ -1,3 +1,8 @@
+## v0.113.1 — 2026-08-31
+
+### Fixes
+- fix(ssr): resolve hydration mismatch in homepage location state (4a18f1b)
+
 ## v0.113.0 — 2026-08-30
 
 ### Features
