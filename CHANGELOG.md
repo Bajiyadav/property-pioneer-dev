@@ -1,3 +1,8 @@
+## v0.114.0 — 2026-08-31
+
+### Features
+- feat(home): add 1-tap quick pick cities and prominent location prompt (15030b1)
+
 ## v0.113.1 — 2026-08-31
 
 ### Fixes
