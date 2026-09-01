@@ -47,6 +47,15 @@ function AuthCallbackPage() {
       const errorDescription = params.get("error_description") ?? hash.get("error_description");
       if (errorDescription) {
         if (!active) return;
+        const { data: existing } = await supabase.auth.getSession();
+        if (existing?.session) {
+          const role = await resolveRoleForSession(existing.session);
+          if (!active) return;
+          toast.info("You are already signed in!");
+          window.history.replaceState({}, "", "/auth/callback");
+          navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
+          return;
+        }
         setState("error");
         setErrorMessage("This link has expired or has already been used.");
         return;
@@ -92,6 +101,15 @@ function AuthCallbackPage() {
         navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
       } catch (_err) {
         if (!active) return;
+        const { data: existing } = await supabase.auth.getSession();
+        if (existing?.session) {
+          const role = await resolveRoleForSession(existing.session);
+          if (!active) return;
+          toast.info("You are already signed in!");
+          window.history.replaceState({}, "", "/auth/callback");
+          navigate({ to: getDashboardRoute(role), search: { tab: "overview" }, replace: true });
+          return;
+        }
         setState("error");
         setErrorMessage("This link has expired or has already been used.");
       }
