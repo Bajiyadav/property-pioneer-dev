@@ -121,24 +121,26 @@ export function KpiCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-xs font-semibold text-muted-foreground">{label}</span>
+    <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+      <div className="flex items-start justify-between gap-1.5">
+        <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground truncate">
+          {label}
+        </span>
         <span
-          className={`grid h-9 w-9 flex-none place-items-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-sm ${accents[accent]}`}
+          className={`grid h-7 w-7 sm:h-9 sm:w-9 flex-none place-items-center rounded-xl sm:rounded-2xl transition-all duration-300 group-hover:scale-110 ${accents[accent]}`}
         >
           {icon}
         </span>
       </div>
 
-      <p className="mt-3 font-[family-name:var(--font-display)] text-2xl font-black tabular-nums text-foreground">
+      <p className="mt-2 sm:mt-3 font-[family-name:var(--font-display)] text-xl sm:text-2xl font-black tabular-nums text-foreground">
         {value ?? animated.toLocaleString("en-IN")}
       </p>
 
-      <div className="mt-1 flex items-center gap-1.5">
+      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
         {trend && (
           <span
-            className={`inline-flex items-center gap-0.5 text-[11px] font-bold ${
+            className={`inline-flex items-center gap-0.5 text-[10px] sm:text-[11px] font-bold ${
               trend.direction === "up"
                 ? "text-emerald-600 dark:text-emerald-400"
                 : "text-rose-600 dark:text-rose-400"
@@ -152,7 +154,9 @@ export function KpiCard({
             {trend.label}
           </span>
         )}
-        {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
+        {hint && (
+          <span className="text-[10px] sm:text-[11px] text-muted-foreground truncate">{hint}</span>
+        )}
       </div>
     </div>
   );
@@ -453,20 +457,20 @@ export function QuickActions({
   }[];
 }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-6">
       {actions.map((a) => (
         <button
           key={a.id}
           onClick={a.onClick}
-          className="group flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+          className="group flex flex-col sm:flex-row items-start gap-2.5 rounded-2xl border border-border/60 bg-card p-3 sm:p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md active:scale-95"
         >
-          <span className="grid h-9 w-9 flex-none place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-200 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md">
+          <span className="grid h-8 w-8 sm:h-9 sm:w-9 flex-none place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-200 group-hover:scale-105 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-md">
             {a.icon}
           </span>
-          <span className="min-w-0">
-            <span className="block text-xs font-bold text-foreground">{a.label}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-bold text-foreground leading-tight">{a.label}</span>
             {a.hint && (
-              <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground">
+              <span className="mt-0.5 block text-[10px] sm:text-[11px] leading-snug text-muted-foreground truncate">
                 {a.hint}
               </span>
             )}

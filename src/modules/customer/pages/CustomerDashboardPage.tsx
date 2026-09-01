@@ -297,14 +297,14 @@ function CustomerDashboard({ user }: { user: User | null }) {
           </div>
 
           {/* Property Management (Lease to Us) Guaranteed Rent Banner */}
-          <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/80 via-emerald-900/60 to-teal-950/80 p-6 shadow-md text-white relative overflow-hidden">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/80 via-emerald-900/60 to-teal-950/80 p-4 sm:p-6 shadow-md text-white relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
               <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 border border-emerald-400/30">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-bold text-emerald-300 border border-emerald-400/30">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   PROPERTY MANAGEMENT • GUARANTEED RENT
                 </div>
-                <h3 className="text-xl font-bold text-white sm:text-2xl">
+                <h3 className="text-lg font-bold text-white sm:text-2xl">
                   Have a Property? Lease It Directly to Us
                 </h3>
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
@@ -315,7 +315,7 @@ function CustomerDashboard({ user }: { user: User | null }) {
               </div>
               <button
                 onClick={() => navigate({ to: "/list-property" })}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-3 text-xs sm:text-sm font-extrabold shadow-sm transition-all hover:scale-105 shrink-0"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 px-5 py-3 text-xs sm:text-sm font-extrabold shadow-sm transition-all hover:scale-105 shrink-0"
               >
                 Lease Your Property to Us
                 <ArrowRight className="h-4 w-4" />

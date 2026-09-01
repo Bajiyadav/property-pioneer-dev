@@ -210,16 +210,54 @@ export function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background md:flex-row">
       {/* Mobile top bar */}
-      <div className="flex items-center justify-between border-b border-border/40 bg-card p-4 md:hidden">
-        <BrandMark size="sm" />
-        <button
-          onClick={() => setMobileMenuOpen((v) => !v)}
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={mobileMenuOpen}
-          className="rounded-xl border border-border bg-secondary p-2 text-foreground"
-        >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+      <div className="sticky top-0 z-30 flex flex-col border-b border-border/40 bg-card/95 backdrop-blur-md md:hidden">
+        <div className="flex items-center justify-between p-3.5 sm:p-4">
+          <BrandMark size="sm" />
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-2.5 py-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-3 w-3" /> Live
+            </span>
+            <button
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+              className="rounded-xl border border-border bg-secondary p-2 text-foreground active:scale-95"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Horizontal Quick-Scroll Tabs */}
+        <div className="flex overflow-x-auto px-3 pb-2.5 pt-0.5 gap-1.5 no-scrollbar scroll-smooth">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all active:scale-95 ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/30"
+                    : "bg-secondary/70 text-muted-foreground hover:text-foreground hover:bg-secondary border border-border/40"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span
+                    className={`rounded-full px-1.5 py-0.2 text-[9px] font-extrabold ${
+                      isActive ? "bg-white/20 text-white" : "bg-primary/15 text-primary"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Desktop sidebar */}
@@ -246,19 +284,19 @@ export function DashboardLayout({
       )}
 
       {/* Main column */}
-      <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-8">
-        <header className="mb-8 border-b border-border/40 pb-6">
+      <main className="min-w-0 flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8">
+        <header className="mb-4 sm:mb-8 border-b border-border/40 pb-4 sm:pb-6">
           <Breadcrumbs trail={[meta.name, activeLabel]} />
-          <div className="mt-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="mt-2.5 sm:mt-3 flex flex-col justify-between gap-3 sm:gap-4 sm:flex-row sm:items-center">
             <div className="min-w-0">
-              <h1 className="font-[family-name:var(--font-display)] text-2xl font-extrabold text-foreground sm:text-3xl">
+              <h1 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
                 {title}
               </h1>
-              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
+              <p className="mt-0.5 sm:mt-1 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
             </div>
-            <div className="flex flex-none flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {headerAction}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-3.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-3.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-4 w-4" /> Live
               </span>
             </div>
