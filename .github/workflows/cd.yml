@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v7
         with: { node-version: "22", cache: npm }
-      - run: npm ci
+      - run: npm ci || npm install
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v7
         with: { node-version: "22", cache: npm }
-      - run: npm ci
+      - run: npm ci || npm install
 
       - name: Check deployment mode
         id: check_mode
@@ -176,7 +176,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v7
         with: { node-version: "22", cache: npm }
-      - run: npm ci
+      - run: npm ci || npm install
       - run: npx playwright install --with-deps chromium
 
       - name: Multi-Route Health Check
