@@ -1,3 +1,8 @@
+## v0.115.0 — 2026-09-01
+
+### Features
+- feat: add property management cards and fix customer auth redirect (5fa7c37)
+
 ## v0.114.0 — 2026-08-31
 
 ### Features
