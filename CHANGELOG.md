@@ -1,3 +1,13 @@
+## v0.115.4 — 2026-09-01
+
+### Fixes
+- fix(db): use handle_updated_at in add_user_devices migration (c73dfb1)
+
+### Migration notes
+- supabase/migrations/20260827230000_add_user_devices.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.115.3 — 2026-09-01
 
 ### Fixes
