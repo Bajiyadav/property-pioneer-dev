@@ -9,8 +9,7 @@ import 'package:seedha_properties_mobile/services/session_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
-import 'package:seedha_properties_mobile/features/home/providers/home_providers.dart';
-import 'package:seedha_properties_mobile/models/listing_counts.dart';
+import 'package:seedha_properties_mobile/features/home/presentation/widgets/home_category_cards.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -72,6 +71,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  String? _selectedState;
+  String? _selectedCity;
+
+  void _onStateChanged(String? state) {
+    setState(() {
+      _selectedState = state;
+      // The chosen city belongs to the previous state, so it cannot survive it.
+      _selectedCity = null;
+    });
+  }
+
+  void _onCityChanged(String? city) {
+    if (city == null) return;
+    setState(() => _selectedCity = city);
+    // Writes through the same notifier every other surface reads, so a city
+    // chosen here is the city search and listings use.
+    _onCitySelected(city);
+  }
+
   void _onCategorySelected(PropertyCategory category) {
     ref.read(activeCategoryProvider.notifier).state = category;
     context.push('/search');
@@ -105,154 +123,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     context.push('/post-property');
-  }
-
-  String _categorySubtitle(
-    ListingCounts counts,
-    PropertyCategory category, {
-    required String noun,
-    required String fallback,
-  }) {
-    final count = counts[category];
-    if (count == null || count <= 0) return fallback;
-    return '${formatListingCount(count)} $noun';
-  }
-
-  Widget _actionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    Color? iconColor,
-    Color? iconBgColor,
-    String? badge,
-    bool emphasised = false,
-  }) {
-    final effectiveIconColor =
-        iconColor ?? (emphasised ? Colors.white : AppTheme.primaryColor);
-    final effectiveIconBgColor = iconBgColor ??
-        (emphasised
-            ? Colors.white.withValues(alpha: 0.22)
-            : AppTheme.primaryColor.withValues(alpha: 0.08));
-
-    return Container(
-      decoration: BoxDecoration(
-        color: emphasised ? null : Colors.white,
-        gradient: emphasised
-            ? const LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: emphasised
-              ? const Color(0xFFFBBF24)
-              : Colors.white.withValues(alpha: 0.9),
-          width: emphasised ? 1.5 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (emphasised ? const Color(0xFFD97706) : Colors.black)
-                .withValues(alpha: emphasised ? 0.28 : 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(7.5),
-                      decoration: BoxDecoration(
-                        color: effectiveIconBgColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: effectiveIconColor,
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            height: 1.15,
-                            letterSpacing: -0.2,
-                            color: emphasised
-                                ? Colors.white
-                                : AppTheme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w500,
-                            height: 1.15,
-                            color: emphasised
-                                ? Colors.white.withValues(alpha: 0.9)
-                                : AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                if (badge != null)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color:
-                            emphasised ? Colors.white : const Color(0xFFEF4444),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        badge,
-                        style: TextStyle(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          color: emphasised
-                              ? const Color(0xFFD97706)
-                              : Colors.white,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildTrustPillar({
@@ -327,9 +197,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ? currentLocation!.city
             : 'All India');
 
-    final listingCountsAsync = ref.watch(liveListingCountsProvider);
-    final listingCounts = listingCountsAsync.value ?? const ListingCounts.empty();
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -371,8 +238,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Home header only. AppConstants.appName is still "Seedha
+                // Properties" and is what every other screen, the splash and
+                // the store listing show — renaming those is a brand decision,
+                // not a screen change.
                 Text(
-                  AppConstants.appName,
+                  'Seedha Deals',
                   style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 17,
@@ -446,7 +317,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(locationStateProvider);
-          ref.invalidate(liveListingCountsProvider);
         },
         color: AppTheme.primaryColor,
         child: SingleChildScrollView(
@@ -454,175 +324,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Section with Floating Brand & 6 Action Cards
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 28, 16, 26),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF0F766E),
-                      Color(0xFF115E59),
-                      Color(0xFF047857)
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+              // Location + categories, per the approved home design.
+              //
+              // The teal hero band that stood here (floating brand plus an
+              // inline search preview) is gone: the design leads with the
+              // location choice, and Search remains a bottom-nav destination.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: LocationPickerCard(
+                  selectedState: _selectedState,
+                  selectedCity: _selectedCity,
+                  onStateChanged: _onStateChanged,
+                  onCityChanged: _onCityChanged,
+                  onDetectLocation: _isLocating ? null : _onUseCurrentLocation,
                 ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: Column(
+                  // Without stretch, a Column centres its children and each
+                  // card shrinks to its own content — so the row of categories
+                  // rendered at three different widths.
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const _FloatingSeedhaText(),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'India\'s Direct Owner Property Network',
-                      style: TextStyle(
-                        color: Color(0xFFCCFBF1),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
-                      textAlign: TextAlign.center,
+                    CategoryHeroCard(
+                      title: 'Buy',
+                      subtitle: 'Find your dream home',
+                      icon: Icons.business_outlined,
+                      onTap: () => _onCategorySelected(PropertyCategory.buy),
                     ),
-                    const SizedBox(height: 18),
-
-                    // Quick Search Bar preview -> taps to Search
-                    GestureDetector(
-                      onTap: () => context.push('/search'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                    const SizedBox(height: 12),
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: CategoryCard(
+                              title: 'Rent',
+                              subtitle: 'Find a home that fits your needs',
+                              icon: Icons.home_outlined,
+                              onTap: () =>
+                                  _onCategorySelected(PropertyCategory.rent),
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.search,
-                                color: Color(0xFF0F766E), size: 22),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Search apartments, villas, offices in $displayCity...',
-                                style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: CategoryCard(
+                              title: 'Commercial',
+                              subtitle: 'Find the right space',
+                              icon: Icons.storefront_outlined,
+                              onTap: () => _onCategorySelected(
+                                  PropertyCategory.commercial),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.tune,
-                                  color: Color(0xFF64748B), size: 16),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    // 6 Action Cards in a 3x2 Grid for Mobile
-                    GridView.count(
-                      crossAxisCount: 3,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 0.94,
-                      children: [
-                        _actionCard(
-                          icon: Icons.business_outlined,
-                          title: 'Buy',
-                          subtitle: _categorySubtitle(
-                            listingCounts,
-                            PropertyCategory.buy,
-                            noun: 'Listings',
-                            fallback: 'Properties',
+                    const SizedBox(height: 12),
+                    CategoryCard(
+                      title: 'Property Management',
+                      subtitle: 'Complete management for your properties',
+                      icon: Icons.settings_outlined,
+                      // No dedicated Property Management screen exists yet; the
+                      // previous "Lease to Us" card used this same handler.
+                      onTap: _onPostPropertyPressed,
+                    ),
+                    const SizedBox(height: 12),
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: CategoryCard(
+                              title: 'Home Loans',
+                              subtitle: 'Lowest Rates',
+                              icon: Icons.account_balance_outlined,
+                              badge: 'LOW EMI',
+                              onTap: () => context.push('/home-loans'),
+                            ),
                           ),
-                          iconColor: const Color(0xFF0F766E),
-                          iconBgColor: const Color(0xFFCCFBF1),
-                          onTap: () => _onCategorySelected(PropertyCategory.buy),
-                        ),
-                        _actionCard(
-                          icon: Icons.home_outlined,
-                          title: 'Rent',
-                          subtitle: _categorySubtitle(
-                            listingCounts,
-                            PropertyCategory.rent,
-                            noun: 'Homes',
-                            fallback: 'Homes',
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: CategoryCard(
+                              title: 'Agreement',
+                              subtitle: 'Instant PDF',
+                              icon: Icons.description_outlined,
+                              badge: 'POPULAR',
+                              onTap: () => context.push('/rental-agreement'),
+                            ),
                           ),
-                          iconColor: const Color(0xFF2563EB),
-                          iconBgColor: const Color(0xFFDBEAFE),
-                          onTap: () => _onCategorySelected(PropertyCategory.rent),
-                        ),
-                        _actionCard(
-                          icon: Icons.storefront_outlined,
-                          title: 'Comm.',
-                          subtitle: _categorySubtitle(
-                            listingCounts,
-                            PropertyCategory.commercial,
-                            noun: 'Spaces',
-                            fallback: 'Spaces',
-                          ),
-                          iconColor: const Color(0xFF7C3AED),
-                          iconBgColor: const Color(0xFFEDE9FE),
-                          onTap: () =>
-                              _onCategorySelected(PropertyCategory.commercial),
-                        ),
-                        _actionCard(
-                          icon: Icons.account_balance_outlined,
-                          title: 'Loans',
-                          subtitle: 'Lowest Rates',
-                          iconColor: const Color(0xFF0284C7),
-                          iconBgColor: const Color(0xFFE0F2FE),
-                          badge: 'LOW EMI',
-                          onTap: () => context.push('/home-loans'),
-                        ),
-                        _actionCard(
-                          icon: Icons.description_outlined,
-                          title: 'Agreement',
-                          subtitle: 'Instant PDF',
-                          iconColor: const Color(0xFFE11D48),
-                          iconBgColor: const Color(0xFFFFE4E6),
-                          badge: 'POPULAR',
-                          onTap: () => context.push('/rental-agreement'),
-                        ),
-                        _actionCard(
-                          icon: Icons.shield_outlined,
-                          title: 'Lease to Us',
-                          subtitle: 'Guaranteed Rent',
-                          badge: 'HOT',
-                          iconColor: const Color(0xFF059669),
-                          iconBgColor: const Color(0xFFD1FAE5),
-                          onTap: _onPostPropertyPressed,
-                        ),
-                        _actionCard(
-                          icon: Icons.add_home_work_rounded,
-                          title: 'Post Free',
-                          subtitle: '0% Brokerage',
-                          badge: 'FREE',
-                          emphasised: true,
-                          onTap: _onPostPropertyPressed,
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Kept deliberately: the owner-side entry point, and the
+                    // only supply-side action on the home screen.
+                    CategoryCard(
+                      title: 'Post Property Free',
+                      subtitle: 'List your property at 0% brokerage',
+                      icon: Icons.add_home_work_rounded,
+                      badge: 'FREE',
+                      emphasised: true,
+                      onTap: _onPostPropertyPressed,
                     ),
                   ],
                 ),
               ),
+
 
               // Location Selector Bar with "Near by" detection
               Padding(

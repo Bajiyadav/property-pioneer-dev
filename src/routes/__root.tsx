@@ -233,17 +233,6 @@ function SiteHeader() {
           */}
           <div className="flex min-w-0 shrink items-center gap-1 sm:gap-2.5">
             <Link
-              to="/list-property"
-              className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 transition-all active:scale-95"
-            >
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Lease to Us</span>
-              <span className="rounded-full bg-emerald-600 text-white px-1.5 py-0.2 text-[9px] font-extrabold">
-                RENT
-              </span>
-            </Link>
-
-            <Link
               to="/favorites"
               aria-label="Saved Properties"
               className="hidden sm:flex p-1.5 sm:p-2.5 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/80 border border-transparent hover:border-border/60 transition-all active:scale-95"

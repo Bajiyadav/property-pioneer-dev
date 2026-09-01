@@ -96,13 +96,41 @@ export async function recordAudit(entry: AuditEvent): Promise<void> {
  * Returns `true` when the CAPTCHA is not configured in local development,
  * so the platform runs smoothly until the secret is provisioned.
  */
+/**
+ * Whether this process is serving production traffic.
+ *
+ * Vercel sets VERCEL_ENV on every deployment and is authoritative when present;
+ * NODE_ENV covers self-hosted and local runs. Vitest sets neither to
+ * "production", so the test suite exercises the development path.
+ */
+function isProductionRuntime(): boolean {
+  const vercelEnv = process.env.VERCEL_ENV;
+  if (vercelEnv) return vercelEnv === "production";
+  return process.env.NODE_ENV === "production";
+}
+
 export async function verifyTurnstile(
   token: string | undefined,
   ip: string,
   expectedAction?: string,
 ): Promise<{ ok: boolean; configured: boolean; reason?: string }> {
   const secret = process.env.TURNSTILE_SECRET || process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return { ok: true, configured: false };
+  if (!secret) {
+    // Fail closed in production. A missing secret used to return ok:true, so a
+    // deployment that lost this variable silently served every public form with
+    // no CAPTCHA at all and no error anywhere to notice it by.
+    //
+    // Development and test keep the documented permissive behaviour, so a local
+    // checkout without Cloudflare credentials still works.
+    if (isProductionRuntime()) {
+      console.error(
+        "[turnstile] TURNSTILE_SECRET is not configured in production — " +
+          "refusing to accept unverified submissions",
+      );
+      return { ok: false, configured: false, reason: "not-configured" };
+    }
+    return { ok: true, configured: false };
+  }
   if (!token || typeof token !== "string" || token.length === 0 || token.length > 4096) {
     return { ok: false, configured: true, reason: "missing-token" };
   }

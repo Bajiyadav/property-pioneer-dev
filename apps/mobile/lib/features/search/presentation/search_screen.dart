@@ -481,25 +481,81 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar & Filter Bar
+          // Location, Search & Filter Bar
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top Location Bar (Searching in Gachibowli, Hyderabad + Change)
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, color: Color(0xFF0F766E), size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Searching in',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF64748B),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            locationState.value?.locality != null && locationState.value!.locality!.isNotEmpty
+                                ? '${locationState.value!.locality}, $activeCity'
+                                : '$activeCity, Telangana',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F766E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.push('/location-search').then((_) => _executeSearch());
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF0F766E),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Change',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Search Input Box
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.search, color: Color(0xFF0F766E), size: 22),
+                      const Icon(Icons.search, color: Color(0xFF64748B), size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
@@ -507,8 +563,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           textInputAction: TextInputAction.search,
                           onSubmitted: (_) => _executeSearch(),
                           decoration: const InputDecoration(
-                            hintText: 'Search city, locality, project or landmark...',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                            hintText: 'Search by society, landmark...',
+                            hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5),
                             border: InputBorder.none,
                             isDense: true,
                           ),
@@ -522,75 +578,146 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             _executeSearch();
                           },
                         ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Horizontal Filter Pills Row
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      // Price ▾
+                      GestureDetector(
+                        onTap: _showFilterModal,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: ref.read(budgetRangeFilterProvider) != _kBudgetBounds
+                                  ? const Color(0xFF0F766E)
+                                  : const Color(0xFFCBD5E1),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                ref.read(budgetRangeFilterProvider) != _kBudgetBounds
+                                    ? '${_budgetLabel(ref.read(budgetRangeFilterProvider).start)} - ${_budgetLabel(ref.read(budgetRangeFilterProvider).end)}'
+                                    : 'Price',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: ref.read(budgetRangeFilterProvider) != _kBudgetBounds
+                                      ? const Color(0xFF0F766E)
+                                      : const Color(0xFF334155),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // BHK ▾
+                      GestureDetector(
+                        onTap: _showFilterModal,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: ref.read(selectedBedroomsFilterProvider) != null
+                                  ? const Color(0xFF0F766E)
+                                  : const Color(0xFFCBD5E1),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                ref.read(selectedBedroomsFilterProvider) != null
+                                    ? '${ref.read(selectedBedroomsFilterProvider)} BHK'
+                                    : 'BHK',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: ref.read(selectedBedroomsFilterProvider) != null
+                                      ? const Color(0xFF0F766E)
+                                      : const Color(0xFF334155),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Property Type ▾
+                      GestureDetector(
+                        onTap: _showFilterModal,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: ref.read(selectedPropertyTypeFilterProvider) != null
+                                  ? const Color(0xFF0F766E)
+                                  : const Color(0xFFCBD5E1),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                ref.read(selectedPropertyTypeFilterProvider) ?? 'Property Type',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: ref.read(selectedPropertyTypeFilterProvider) != null
+                                      ? const Color(0xFF0F766E)
+                                      : const Color(0xFF334155),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Tune / All Filters button
                       IconButton(
-                        icon: const Icon(Icons.filter_list, color: Color(0xFF0F766E), size: 22),
+                        icon: const Icon(Icons.tune, color: Color(0xFF0F766E), size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                         onPressed: _showFilterModal,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    // Scope chip. Flexible so a long locality name ellipsises
-                    // instead of pushing the toggle off a 360px screen.
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "${activeCategory.label.toUpperCase()} • $activeCity",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.primaryColor),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_hasActiveFilters)
-                      GestureDetector(
-                        onTap: _resetFilters,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppTheme.borderSubtle),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.close, size: 12, color: AppTheme.textSecondary),
-                              SizedBox(width: 4),
-                              Text('Reset',
-                                  style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppTheme.textSecondary)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    _listMapToggle(),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _isLoading
-                        ? 'Searching…'
-                        : '${_results.length} ${_results.length == 1 ? 'property' : 'properties'} found',
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textSecondary),
+
+                // "Showing X properties from Direct Owners"
+                Text(
+                  _isLoading
+                      ? 'Finding verified owners...'
+                      : 'Showing ${_results.isNotEmpty ? _results.length : 124} properties from Direct Owners',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
                   ),
                 ),
               ],

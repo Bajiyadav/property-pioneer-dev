@@ -3,24 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:seedha_properties_mobile/config/constants.dart';
 
-const _availableStates = [
-  'Telangana',
-  'Andhra Pradesh',
-  'Karnataka',
-  'Maharashtra',
-  'Tamil Nadu',
-  'Delhi NCR',
-];
-
-const _citiesByState = <String, List<String>>{
-  'Telangana': ['Hyderabad', 'Secunderabad', 'Warangal', 'Nizamabad'],
-  'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati'],
-  'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi', 'Mangaluru'],
-  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
-  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
-  'Delhi NCR': ['Delhi', 'Gurugram', 'Noida', 'Faridabad'],
-};
+// State and city lists now live in AppConstants so the home screen pickers and
+// this form stay in step.
+const _availableStates = AppConstants.operatingStates;
+const _citiesByState = AppConstants.citiesByState;
 
 class RentalAgreementFormScreen extends ConsumerStatefulWidget {
   const RentalAgreementFormScreen({super.key});

@@ -21,6 +21,8 @@ dist-ssr
 # put a 64MB file under public/, where Vite copies it into .output/public and
 # blew the 15MB client bundle budget in CI.
 public/downloads/
+*.apk
+public/*.apk
 
 # Wrangler / Cloudflare
 .wrangler/

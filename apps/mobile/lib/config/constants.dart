@@ -40,6 +40,28 @@ class AppConstants {
   static const String founderTitle = 'Chartered Accountant (ICAI) & Founder';
   
   static const String defaultCity = 'All India';
+  /// States Seedha operates in, and the cities live within each.
+  ///
+  /// Lifted out of the rental-agreement form so the home screen's State → City
+  /// pickers and the agreement form cannot drift apart on which cities exist.
+  static const List<String> operatingStates = [
+    'Telangana',
+    'Andhra Pradesh',
+    'Karnataka',
+    'Maharashtra',
+    'Tamil Nadu',
+    'Delhi NCR',
+  ];
+
+  static const Map<String, List<String>> citiesByState = {
+    'Telangana': ['Hyderabad', 'Secunderabad', 'Warangal', 'Nizamabad'],
+    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati'],
+    'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi', 'Mangaluru'],
+    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
+    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
+    'Delhi NCR': ['Delhi', 'Gurugram', 'Noida', 'Faridabad'],
+  };
+
   static const List<String> topMetroCities = [
     'All India',
     'Bengaluru',
