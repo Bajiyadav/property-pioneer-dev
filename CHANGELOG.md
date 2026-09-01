@@ -1,3 +1,8 @@
+## v0.115.3 — 2026-09-01
+
+### Fixes
+- fix(cd): add --include-all to supabase db push (2164b5b)
+
 ## v0.115.2 — 2026-09-01
 
 ### Fixes
