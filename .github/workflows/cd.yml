@@ -92,7 +92,7 @@ jobs:
         if: env.skip != 'true'
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-        run: supabase db push --db-url "$SUPABASE_DB_URL"
+        run: supabase db push --include-all --db-url "$SUPABASE_DB_URL"
 
       # `supabase db push` only reads supabase/migrations/*.sql — it does not
       # recurse. Anything filed under a subdirectory is invisible to it and will
