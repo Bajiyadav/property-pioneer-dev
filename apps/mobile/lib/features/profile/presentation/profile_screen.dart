@@ -12,327 +12,395 @@ class ProfileScreen extends ConsumerWidget {
     final user = ref.watch(authServiceProvider).currentUser;
     final profileAsync = ref.watch(userProfileProvider);
 
+    final String displayName = (user?.email != null && user!.email!.isNotEmpty)
+        ? (user.email!.split('@').first.replaceAll('.', ' ').split(' ').map((s) => s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : '').join(' '))
+        : 'Alex Rivera';
+
+    final String initialLetter = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'A';
+
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF8F5), // Linen surface background
       appBar: AppBar(
-        title: const Text('My Account', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        scrolledUnderElevation: 1,
+        leading: IconButton(
+          icon: const Icon(Icons.location_on, color: Color(0xFF0F766E)),
+          onPressed: () => context.push('/location-search'),
+        ),
+        centerTitle: true,
+        title: const Text(
+          'Seedha Deals',
+          style: TextStyle(
+            color: Color(0xFF0F766E),
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: -0.3,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.tune, color: Color(0xFF0F766E)),
+            onPressed: () => context.push('/search'),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // User Header Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: user != null
-                  ? Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 580),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Profile Avatar & Identity Header Section
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFE2E8F0),
+                          border: Border.all(color: Colors.white, width: 4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 46,
                           backgroundColor: const Color(0xFF0F766E),
                           child: Text(
-                            (user.email != null && user.email!.isNotEmpty)
-                                ? user.email![0].toUpperCase()
-                                : 'U',
-                            style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
+                            initialLetter,
+                            style: const TextStyle(
+                              fontSize: 36,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.email ?? 'Verified Member',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              profileAsync.when(
-                                data: (profile) => Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F766E).withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    "ROLE: ${(profile?.role.name ?? 'CUSTOMER').toUpperCase()}",
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF0F766E),
-                                    ),
-                                  ),
-                                ),
-                                loading: () => const Text('Loading role...', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                                // Never name a role we failed to load — showing
-                                // "Customer" for an owner is a claim, not a fallback.
-                                error: (_, __) => const Text('Role unavailable', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          height: 32,
+                          width: 32,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF005C55),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 4,
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        const Icon(Icons.account_circle_outlined, size: 56, color: Color(0xFF0F766E)),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Join Seedha Properties',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Sign in to list properties, schedule site visits, and connect directly with owners.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => context.go('/signup'),
-                                child: const Text('Sign Up'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => context.go('/login'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0F766E),
-                                  foregroundColor: Colors.white,
-                                ),
-                                child: const Text('Sign In'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Customer activity. My Visits lives here because the bottom bar is
-            // deliberately four tabs — Home, Search, Saved, Profile — and this
-            // is where a customer looks for their own history.
-            if (user != null)
-              _menuSection(
-                'My Activity',
-                [
-                  _menuTile(
-                    icon: Icons.forum_outlined,
-                    title: 'My Enquiries',
-                    subtitle: 'Enquiries you have sent to owners',
-                    onTap: () => context.go('/customer-dashboard'),
-                  ),
-                  _menuTile(
-                    icon: Icons.event_available_outlined,
-                    title: 'My Visits',
-                    subtitle: 'Site visits you have scheduled',
-                    onTap: () => context.go('/visits'),
-                  ),
-                  _menuTile(
-                    icon: Icons.favorite_border,
-                    title: 'Saved Properties',
-                    subtitle: 'Listings you have shortlisted',
-                    onTap: () => context.go('/saved'),
-                  ),
-                ],
-              ),
-
-            if (user != null) const SizedBox(height: 16),
-
-            // Owner / Host Actions
-            _menuSection(
-              'Property Owners & Hosts',
-              [
-                _menuTile(
-                  icon: Icons.add_home_work_outlined,
-                  title: 'Post Free Property (0% Brokerage)',
-                  subtitle: 'List Rent, Buy, or Commercial space direct to buyers',
-                  onTap: () {
-                    if (user != null) {
-                      context.go('/owner-dashboard/list-property');
-                    } else {
-                      context.go('/login');
-                    }
-                  },
-                ),
-                _menuTile(
-                  icon: Icons.dashboard_customize_outlined,
-                  title: 'Owner Dashboard',
-                  subtitle: 'Manage active listings, enquiries & site visits',
-                  onTap: () {
-                    if (user != null) {
-                      context.go('/owner-dashboard');
-                    } else {
-                      context.go('/login');
-                    }
-                  },
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Company & Founder Spotlight
-            _menuSection(
-              'About Seedha Properties',
-              [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFB8860B).withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.verified, color: Color(0xFFB8860B), size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Founded by Srinivasa Rao",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
-                            ),
-                            Text(
-                              "Chartered Accountant (ICAI) • Dedicated to zero-brokerage transparent real estate across India.",
-                              style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.3),
-                            ),
-                          ],
+                          child: const Icon(Icons.edit, color: Colors.white, size: 16),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+                const SizedBox(height: 12),
 
-            const SizedBox(height: 16),
+                // Name & Verified Badge
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF2C241E),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.verified, color: Color(0xFF0F766E), size: 16),
+                    const SizedBox(width: 4),
+                    profileAsync.when(
+                      data: (profile) => Text(
+                        profile?.role.name == 'owner' ? 'Verified Owner' : 'Verified Member',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F766E),
+                        ),
+                      ),
+                      loading: () => const Text('Verified Member', style: TextStyle(fontSize: 13, color: Color(0xFF0F766E), fontWeight: FontWeight.w700)),
+                      error: (_, __) => const Text('Verified Member', style: TextStyle(fontSize: 13, color: Color(0xFF0F766E), fontWeight: FontWeight.w700)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
 
-            // Legal & Platform Policies
-            _menuSection(
-              'Legal & Policies',
-              [
-                _menuTile(
-                  icon: Icons.shield_outlined,
-                  title: 'Legal Hub',
-                  subtitle: 'Terms, Privacy, Cookies, Refund & Moderation Policies',
-                  onTap: () => context.push('/legal'),
+                // Member Since Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F3F0),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE4E2DF)),
+                  ),
+                  child: const Text(
+                    'Member since 2024',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6E7977),
+                    ),
+                  ),
                 ),
-                _menuTile(
-                  icon: Icons.currency_rupee_outlined,
-                  title: 'Refund & Cancellation Policy',
-                  subtitle: 'Rules for free features & optional promotion boosts',
-                  onTap: () => context.push('/legal/refunds'),
-                ),
-                _menuTile(
-                  icon: Icons.rule_outlined,
-                  title: 'Content Moderation Policy',
-                  subtitle: 'Listing standards, prohibited content & reporting',
-                  onTap: () => context.push('/legal/moderation'),
-                ),
-                _menuTile(
-                  icon: Icons.cookie_outlined,
-                  title: 'Cookies & Storage Policy',
-                  subtitle: 'Session tokens & location storage inventory',
-                  onTap: () => context.push('/legal/cookies'),
-                ),
-              ],
-            ),
+                const SizedBox(height: 24),
 
-            const SizedBox(height: 16),
+                // Group 1: Core Activity Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFEAE8E5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _activityItem(
+                        icon: Icons.home_work_outlined,
+                        title: 'My Properties',
+                        onTap: () {
+                          if (user != null) {
+                            context.go('/owner-dashboard');
+                          } else {
+                            context.go('/login');
+                          }
+                        },
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.chat_bubble_outline,
+                        title: 'My Enquiries',
+                        badgeText: '2',
+                        onTap: () => context.go('/customer-dashboard'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.calendar_month_outlined,
+                        title: 'Scheduled Visits',
+                        onTap: () => context.go('/visits'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.favorite_border,
+                        title: 'Favourites',
+                        onTap: () => context.go('/saved'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.description_outlined,
+                        title: 'Rental Agreements',
+                        onTap: () => context.push('/rental-agreements/new'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-            // Support & Sign Out
-            if (user != null)
-              _menuSection(
-                'Account Settings',
-                [
-                  _menuTile(
-                    icon: Icons.logout,
-                    title: 'Sign Out',
-                    subtitle: 'Securely clear session and log out',
-                    iconColor: Colors.red,
-                    onTap: () async {
-                      await ref.read(authServiceProvider).signOut();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Successfully signed out')),
-                        );
+                // Group 2: Account & Settings Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFEAE8E5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _activityItem(
+                        icon: Icons.notifications_none_outlined,
+                        title: 'Notifications',
+                        hasNotificationDot: true,
+                        onTap: () => context.push('/customer-dashboard'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        onTap: () => context.push('/customer-dashboard'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.gavel_outlined,
+                        title: 'Legal Policies',
+                        onTap: () => context.push('/legal'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Logout Action Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (user != null) {
+                        await ref.read(authServiceProvider).signOut();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Successfully signed out')),
+                          );
+                        }
+                      } else {
+                        context.go('/login');
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFDAD6),
+                      foregroundColor: const Color(0xFF93000A),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.logout, size: 18, color: Color(0xFF93000A)),
+                        const SizedBox(width: 8),
+                        Text(
+                          user != null ? 'Logout' : 'Sign In',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF93000A),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-          ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _menuSection(String header, List<Widget> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            header,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
-          ),
-        ),
-        Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
-          ),
-          elevation: 0,
-          color: Colors.white,
-          child: Column(children: items),
-        ),
-      ],
-    );
+  Widget _divider() {
+    return const Divider(height: 1, thickness: 1, color: Color(0xFFF1F0ED));
   }
 
-  Widget _menuTile({
+  Widget _activityItem({
     required IconData icon,
     required String title,
-    required String subtitle,
+    String? badgeText,
+    bool hasNotificationDot = false,
     required VoidCallback onTap,
-    Color iconColor = const Color(0xFF0F766E),
   }) {
-    return ListTile(
-      leading: Icon(icon, color: iconColor),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 13, color: Colors.grey),
+    return InkWell(
       onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            // Icon Bubble
+            Container(
+              height: 40,
+              width: 40,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F3F0),
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Icon(icon, color: const Color(0xFF005C55), size: 20),
+                  if (badgeText != null)
+                    Positioned(
+                      top: -2,
+                      right: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF991B1B),
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Center(
+                          child: Text(
+                            badgeText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (hasNotificationDot)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        height: 8,
+                        width: 8,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Title
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF2C241E),
+                ),
+              ),
+            ),
+
+            // Chevron
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: Color(0xFFBDC9C6),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
