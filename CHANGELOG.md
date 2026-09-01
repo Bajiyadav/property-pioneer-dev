@@ -1,3 +1,8 @@
+## v0.115.1 — 2026-09-01
+
+### Fixes
+- fix(deps): sync package-lock.json for CI pre-deploy gate (2e8baf3)
+
 ## v0.115.0 — 2026-09-01
 
 ### Features
