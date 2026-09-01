@@ -1,3 +1,13 @@
+## v0.116.0 — 2026-09-01
+
+### Features
+- feat(mobile): update verified owner UI and remove header button (2561b38)
+
+### Migration notes
+- supabase/migrations/20260901000000_security_hardening_rls.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.115.6 — 2026-09-01
 
 ### Fixes
