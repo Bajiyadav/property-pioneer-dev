@@ -1,3 +1,8 @@
+## v0.117.0 — 2026-09-01
+
+### Features
+- feat(mobile): implement Seedha Deals user profile screen design (178b027)
+
 ## v0.116.1 — 2026-09-01
 
 ### Fixes
