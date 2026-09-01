@@ -79,6 +79,7 @@ export function HeaderProfileMenu() {
   return (
     <div className="relative" ref={menuRef}>
       <button
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 rounded-full border border-border/80 bg-secondary/50 p-1 pr-3 transition hover:border-primary hover:bg-secondary focus:outline-none"
         aria-label="User profile menu"
@@ -242,6 +243,7 @@ export function HeaderProfileMenu() {
             />
 
             <button
+              type="button"
               onClick={handleLogout}
               className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition mt-1"
             >

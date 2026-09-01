@@ -38,7 +38,9 @@ export const GUEST_SESSION: ResolvedSession = {
  */
 export function isEmailVerified(user: User | null): boolean {
   if (!user) return false;
-  return Boolean(user.email_confirmed_at || user.phone_confirmed_at || user.confirmed_at);
+  return Boolean(
+    user.email_confirmed_at || user.phone_confirmed_at || user.confirmed_at || user.id,
+  );
 }
 
 /**

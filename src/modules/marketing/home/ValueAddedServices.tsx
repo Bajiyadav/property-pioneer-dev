@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Landmark, FileText, ArrowRight } from "lucide-react";
+import { Landmark, FileText, Building2, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export function ValueAddedServices() {
   return (
@@ -10,11 +10,62 @@ export function ValueAddedServices() {
             More than just property discovery
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Explore our additional services designed to make your real estate journey seamless.
+            Explore our end-to-end solutions designed to make your real estate journey seamless and
+            rewarding.
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
+          {/* Property Management (Lease to Us) Card */}
+          <div className="flex flex-col justify-between rounded-3xl bg-secondary/40 p-8 shadow-sm ring-1 ring-border/80 transition-all hover:shadow-lg hover:ring-emerald-500/40 dark:hover:ring-emerald-400/40 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 transform translate-x-3 -translate-y-2">
+              <span className="inline-flex items-center gap-1 rounded-bl-2xl rounded-tr-3xl bg-emerald-600 px-3.5 py-1 text-xs font-bold text-white shadow-sm">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                GUARANTEED RENT
+              </span>
+            </div>
+
+            <div>
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 mb-6">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground">Property Management</h3>
+              <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
+                Lease Your Home Directly to Us
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                We take your property on rent and provide 100% hands-free management. Receive fixed,
+                on-time rent every month with zero vacancy risk while we take care of verified
+                tenants and full home upkeep.
+              </p>
+
+              <ul className="mt-4 space-y-2 text-xs text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <span>Guaranteed rent payout on the 1st of every month</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <span>Zero vacancy loss & verified tenant placement</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <span>Regular physical inspections & maintenance</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-border/50">
+              <Link
+                to="/list-property"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 group"
+              >
+                Lease Your Home to Us
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+
           {/* Home Loans Card */}
           <div className="flex flex-col justify-between rounded-3xl bg-secondary/30 p-8 shadow-sm ring-1 ring-border transition-all hover:shadow-md hover:ring-blue-500/30 dark:hover:ring-blue-400/30">
             <div>
@@ -22,12 +73,15 @@ export function ValueAddedServices() {
                 <Landmark className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Home Loans</h3>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Compare and apply for home loans from top banks. Get the lowest interest rates and
-                exclusive processing fee waivers.
+              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                Lowest Interest & Quick Approval
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Compare and apply for home loans from top partner banks. Get competitive interest
+                rates, streamlined documentation, and exclusive processing fee waivers.
               </p>
             </div>
-            <div className="mt-8">
+            <div className="mt-8 pt-4 border-t border-border/50">
               <Link
                 to="/home-loans"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 group"
@@ -45,11 +99,16 @@ export function ValueAddedServices() {
                 <FileText className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Rental Agreement</h3>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Create and manage your rental agreement with a simple guided process.
+              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mt-1">
+                Instant Digital Stamping & Signatures
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Draft, customize, and execute legally binding e-stamped rental agreements online
+                with Aadhaar eSign, instant downloadable PDF delivery, and statutory clause
+                compliance.
               </p>
             </div>
-            <div className="mt-8">
+            <div className="mt-8 pt-4 border-t border-border/50">
               <Link
                 to="/rental-agreement/create"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 group"

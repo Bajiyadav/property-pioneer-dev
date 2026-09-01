@@ -111,8 +111,8 @@ export function HeroSection({
           />
         </motion.div>
 
-        {/* Quick Category Action Cards — 4 Core Real Estate Pillars */}
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 w-full max-w-4xl">
+        {/* Quick Category Action Cards — 5 Core Real Estate Pillars */}
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5 w-full max-w-5xl">
           {/* Buy */}
           <button
             onClick={(e) => handleQuickLink(e, { listing: "sale" })}
@@ -167,10 +167,30 @@ export function HeroSection({
             </div>
           </button>
 
+          {/* Property Management (Lease to Us - Guaranteed Rent) */}
+          <Link
+            to="/list-property"
+            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-emerald-500/40 hover:border-emerald-500 hover:shadow-lg transition-all active:scale-95 group text-left relative overflow-hidden"
+          >
+            <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
+                  Property Mgmt
+                </span>
+              </div>
+              <span className="block text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">
+                Lease to Us
+              </span>
+            </div>
+          </Link>
+
           {/* Post Property (High-contrast CTA) */}
           <Link
             to="/list-property"
-            className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
+            className="col-span-2 sm:col-span-1 flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md text-white border border-emerald-400/40 hover:shadow-lg transition-all active:scale-95 group text-left"
           >
             <div className="h-10 w-10 rounded-xl bg-white/20 text-white flex items-center justify-center flex-none group-hover:scale-105 transition-transform">
               <Sparkles className="h-5 w-5 text-amber-300" />

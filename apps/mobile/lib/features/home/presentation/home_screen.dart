@@ -602,6 +602,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           onTap: () => context.push('/rental-agreement'),
                         ),
                         _actionCard(
+                          icon: Icons.shield_outlined,
+                          title: 'Lease to Us',
+                          subtitle: 'Guaranteed Rent',
+                          badge: 'HOT',
+                          iconColor: const Color(0xFF059669),
+                          iconBgColor: const Color(0xFFD1FAE5),
+                          onTap: _onPostPropertyPressed,
+                        ),
+                        _actionCard(
                           icon: Icons.add_home_work_rounded,
                           title: 'Post Free',
                           subtitle: '0% Brokerage',
@@ -811,6 +820,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 10),
                     _buildTrustPillar(
+                      icon: Icons.home_work_outlined,
+                      title: 'Property Management (Lease to Us)',
+                      description:
+                          'Lease your home directly to us. Receive guaranteed monthly rent with zero vacancy downtime while we handle verified tenants & full maintenance.',
+                      iconColor: const Color(0xFF059669),
+                      iconBgColor: const Color(0xFFD1FAE5),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTrustPillar(
                       icon: Icons.assignment_turned_in_outlined,
                       title: 'Instant Legal Rental Agreements',
                       description:
@@ -823,6 +841,115 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
 
               const SizedBox(height: 20),
+
+              // Property Management: Lease to Us Card
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF064E3B), Color(0xFF065F46)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF064E3B).withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.shield_outlined,
+                                color: Colors.white, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'GUARANTEED RENT • 100% HANDS-FREE',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 9,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Lease Your Property to Us',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'We take your home on rent and pay you fixed monthly payouts on the 1st of every month. Enjoy zero vacancy risk while we handle verified tenants, agreements, and complete home care.',
+                        style: TextStyle(
+                          color: Color(0xFFD1FAE5),
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _onPostPropertyPressed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF065F46),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Lease Your Home to Us',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
 
               // Owner Post Property Free Banner
               Padding(

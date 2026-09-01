@@ -169,18 +169,23 @@ function Index() {
           {/* 8. Owner CTA Banner (Triggers Multi-Step Wizard) */}
           <OwnerCTA onOpenWizard={() => navigate({ to: "/list-property" })} />
 
-          {/* 9. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
+          {/* 9. Value Added Services (Property Management, Home Loans, Rental Agreements) */}
+          <ValueAddedServices />
+
+          {/* 10. We Value Your Feedback Section (Studio Shodwe + Radiant Thank You) */}
           <FeedbackSection />
 
-          {/* 10. Support FAQ Accordion */}
+          {/* 11. Support FAQ Accordion */}
           <div id="contact">
             <FAQSection />
           </div>
         </>
       )}
 
-      {/* Value Added Services */}
-      <ValueAddedServices />
+      {!isLocationConfirmed && (
+        /* Value Added Services for unselected location */
+        <ValueAddedServices />
+      )}
 
       {/* ======================================= */}
       {/* INTERACTIVE MODALS                      */}
