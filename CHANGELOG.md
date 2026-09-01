@@ -1,3 +1,8 @@
+## v0.116.1 — 2026-09-01
+
+### Fixes
+- fix(dashboard): optimize customer dashboard layout for mobile devices (578e864)
+
 ## v0.116.0 — 2026-09-01
 
 ### Features
