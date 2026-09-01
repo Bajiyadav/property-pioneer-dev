@@ -1,3 +1,8 @@
+## v0.115.5 — 2026-09-01
+
+### Fixes
+- fix(cd): update verified routes in health check (c765716)
+
 ## v0.115.4 — 2026-09-01
 
 ### Fixes
