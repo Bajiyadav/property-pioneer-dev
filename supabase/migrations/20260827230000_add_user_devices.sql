@@ -10,8 +10,9 @@ CREATE TABLE public.user_devices (
 );
 
 -- Add updated_at trigger
+DROP TRIGGER IF EXISTS handle_user_devices_updated_at ON public.user_devices;
 CREATE TRIGGER handle_user_devices_updated_at BEFORE UPDATE ON public.user_devices
-  FOR EACH ROW EXECUTE PROCEDURE public.moddatetime (updated_at);
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
 -- Enable RLS
 ALTER TABLE public.user_devices ENABLE ROW LEVEL SECURITY;
