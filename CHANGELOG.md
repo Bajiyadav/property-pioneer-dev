@@ -1,3 +1,8 @@
+## v0.115.2 — 2026-09-01
+
+### Fixes
+- fix(ci): add npm install fallback to CD workflow (b7ccfe0)
+
 ## v0.115.1 — 2026-09-01
 
 ### Fixes
