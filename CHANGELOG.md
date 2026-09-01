@@ -1,3 +1,8 @@
+## v0.115.6 — 2026-09-01
+
+### Fixes
+- fix(auth): redirect already authenticated users from callback to dashboard (ea5438b)
+
 ## v0.115.5 — 2026-09-01
 
 ### Fixes
