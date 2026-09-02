@@ -74,3 +74,8 @@ scratch/
 # Throwaway QA/debug scripts run from the repo root (need node_modules to resolve)
 .check*.mjs
 .visualqa*.mjs
+
+# Java build outputs
+backend-java/target/
+*.class
+*.jar
