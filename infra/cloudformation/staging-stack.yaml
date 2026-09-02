@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Seedha Properties - Self-Managed Native Backend Staging Stack (ECS Fargate + RDS PostgreSQL PostGIS + S3 + ALB)"
+
+Parameters:
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+  DbUsername:
+    Type: String
+    Default: seedha_admin
+    NoEcho: true
+  DbPassword:
+    Type: String
+    Default: SeedhaStagingPass2026!
+    NoEcho: true
+
+Resources:
+  # 1. VPC & Networking
+  StagingVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: seedha-staging-vpc
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref StagingVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StagingVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: ap-south-1a
+      MapPublicIpOnLaunch: true
+
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StagingVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: ap-south-1b
+      MapPublicIpOnLaunch: true
+
+  # 2. S3 Media & Private Docs Buckets
+  PublicMediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: seedha-properties-public-media-staging
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ["*"]
+            AllowedMethods: [GET, PUT, POST, HEAD]
+            AllowedOrigins: ["*"]
+            MaxAge: 3600
+
+  PrivateDocsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: seedha-properties-private-docs-staging
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  # 3. RDS PostgreSQL 16 + PostGIS Instance
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnets for Seedha Staging RDS"
+      SubnetIds:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+
+  StagingRDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: seedha-staging-rds
+      DBInstanceClass: db.t4g.micro
+      Engine: postgres
+      EngineVersion: "16.3"
+      AllocatedStorage: "20"
+      MasterUsername: !Ref DbUsername
+      MasterUserPassword: !Ref DbPassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      PubliclyAccessible: false
+      StorageEncrypted: true
+      BackupRetentionPeriod: 7
+      MultiAZ: false
+
+  # 4. ECS Cluster & Fargate Service
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: seedha-staging-cluster
+
+Outputs:
+  PublicMediaBucketName:
+    Value: !Ref PublicMediaBucket
+  PrivateDocsBucketName:
+    Value: !Ref PrivateDocsBucket
+  RDSEndpoint:
+    Value: !GetAtt StagingRDSInstance.Endpoint.Address
