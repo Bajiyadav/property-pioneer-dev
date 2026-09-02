@@ -1,3 +1,8 @@
+## v0.122.0 — 2026-09-02
+
+### Features
+- feat(backend): complete native AWS backend layer, SES email & ECS staging stack (662281d)
+
 ## v0.121.0 — 2026-09-02
 
 ### Features
