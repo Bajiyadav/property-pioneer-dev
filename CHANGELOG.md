@@ -1,3 +1,11 @@
+## v0.128.0 — 2026-09-02
+
+### Features
+- feat(staging): add GCP staging deployment script and Java 21 controllers (f291711)
+
+### Documentation
+- docs: establish permanent global rules, Google Cloud / AWS guidelines & error prevention guardrails (ae0b9e8)
+
 ## v0.127.0 — 2026-09-02
 
 ### Features
