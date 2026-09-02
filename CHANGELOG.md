@@ -1,3 +1,12 @@
+## v0.123.0 — 2026-09-02
+
+### Features
+- feat(security): implement XSS defense, DI container, structured logging & least-privilege AWS SGs (50dc81e)
+
+### Documentation
+- docs: standardize all documentation references to Seedha Properties (5b36186)
+- docs: comprehensively update project documentation (2c399f3)
+
 ## v0.122.0 — 2026-09-02
 
 ### Features
