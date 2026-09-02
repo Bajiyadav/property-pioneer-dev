@@ -1,3 +1,8 @@
+## v0.126.0 — 2026-09-02
+
+### Features
+- feat(java): add complete business controllers, entities and repositories matching API v2 (678fee5)
+
 ## v0.125.0 — 2026-09-02
 
 ### Features
