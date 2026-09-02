@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v2/auth").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/properties").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/properties/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v2/stats/location").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v2/home-loans").permitAll()
                 // All other write and private endpoints require valid Bearer token
                 .anyRequest().authenticated()

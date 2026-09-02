@@ -24,6 +24,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/lib/api-client";
 import {
   fetchPropertyFeed,
   formatPrice,
@@ -104,6 +105,14 @@ function CustomerDashboard({ user }: { user: User | null }) {
     queryKey: ["customer", "my_visits", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
+      try {
+        const response = await apiClient.visits.list();
+        if (response?.ok && Array.isArray(response.data)) {
+          return response.data;
+        }
+      } catch {
+        // Fallback to direct client if API endpoint is unreachable
+      }
       const { data, error } = await (supabase.from as any)("visit_schedules")
         .select("*, properties(title, city, locality, address)")
         .eq("customer_id", user.id)

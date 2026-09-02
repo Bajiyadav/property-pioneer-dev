@@ -302,3 +302,4 @@ class NativeApiClient {
 }
 
 export const nativeApi = new NativeApiClient();
+export const apiClient = nativeApi;
