@@ -20,6 +20,7 @@ import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as HomeLoansRouteImport } from './routes/home-loans'
+import { Route as LatencyTestRouteImport } from './routes/latency-test'
 import { Route as ListPropertyRouteImport } from './routes/list-property'
 import { Route as LoansRouteImport } from './routes/loans'
 import { Route as ModerationPolicyRouteImport } from './routes/moderation-policy'
@@ -70,6 +71,8 @@ import { Route as ApiAuthLoginNotificationRouteImport } from './routes/api/auth/
 import { Route as ApiAuthRequestOtpRouteImport } from './routes/api/auth/request-otp'
 import { Route as ApiAuthRequestPasswordResetRouteImport } from './routes/api/auth/request-password-reset'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
+import { Route as ApiV2AuthRouteImport } from './routes/api/v2/auth'
+import { Route as ApiV2PropertiesRouteImport } from './routes/api/v2/properties'
 import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
@@ -140,6 +143,11 @@ const HelpRoute = HelpRouteImport.update({
 const HomeLoansRoute = HomeLoansRouteImport.update({
   id: '/home-loans',
   path: '/home-loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LatencyTestRoute = LatencyTestRouteImport.update({
+  id: '/latency-test',
+  path: '/latency-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListPropertyRoute = ListPropertyRouteImport.update({
@@ -406,6 +414,16 @@ const ApiPublicEnquiriesRoute = ApiPublicEnquiriesRouteImport.update({
   path: '/api/public/enquiries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV2AuthRoute = ApiV2AuthRouteImport.update({
+  id: '/api/v2/auth',
+  path: '/api/v2/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2PropertiesRoute = ApiV2PropertiesRouteImport.update({
+  id: '/api/v2/properties',
+  path: '/api/v2/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
   id: '/api/webhooks/stripe',
   path: '/api/webhooks/stripe',
@@ -510,6 +528,7 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/home-loans': typeof HomeLoansRoute
+  '/latency-test': typeof LatencyTestRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
   '/moderation-policy': typeof ModerationPolicyRoute
@@ -558,6 +577,8 @@ export interface FileRoutesByFullPath {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -589,6 +610,7 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/home-loans': typeof HomeLoansRoute
+  '/latency-test': typeof LatencyTestRoute
   '/loans': typeof LoansRoute
   '/moderation-policy': typeof ModerationPolicyRoute
   '/my-agreements': typeof MyAgreementsRoute
@@ -633,6 +655,8 @@ export interface FileRoutesByTo {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -666,6 +690,7 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/help': typeof HelpRoute
   '/home-loans': typeof HomeLoansRoute
+  '/latency-test': typeof LatencyTestRoute
   '/list-property': typeof ListPropertyRouteWithChildren
   '/loans': typeof LoansRoute
   '/moderation-policy': typeof ModerationPolicyRoute
@@ -714,6 +739,8 @@ export interface FileRoutesById {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
+  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -747,6 +774,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/help'
     | '/home-loans'
+    | '/latency-test'
     | '/list-property'
     | '/loans'
     | '/moderation-policy'
@@ -795,6 +823,8 @@ export interface FileRouteTypes {
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/v2/auth'
+    | '/api/v2/properties'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -826,6 +856,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/help'
     | '/home-loans'
+    | '/latency-test'
     | '/loans'
     | '/moderation-policy'
     | '/my-agreements'
@@ -870,6 +901,8 @@ export interface FileRouteTypes {
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/v2/auth'
+    | '/api/v2/properties'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -902,6 +935,7 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/help'
     | '/home-loans'
+    | '/latency-test'
     | '/list-property'
     | '/loans'
     | '/moderation-policy'
@@ -950,6 +984,8 @@ export interface FileRouteTypes {
     | '/api/auth/request-otp'
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
+    | '/api/v2/auth'
+    | '/api/v2/properties'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -983,6 +1019,7 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   HelpRoute: typeof HelpRoute
   HomeLoansRoute: typeof HomeLoansRoute
+  LatencyTestRoute: typeof LatencyTestRoute
   ListPropertyRoute: typeof ListPropertyRouteWithChildren
   LoansRoute: typeof LoansRoute
   ModerationPolicyRoute: typeof ModerationPolicyRoute
@@ -1011,6 +1048,8 @@ export interface RootRouteChildren {
   ApiAuthRequestOtpRoute: typeof ApiAuthRequestOtpRoute
   ApiAuthRequestPasswordResetRoute: typeof ApiAuthRequestPasswordResetRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
+  ApiV2AuthRoute: typeof ApiV2AuthRoute
+  ApiV2PropertiesRoute: typeof ApiV2PropertiesRoute
   ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
   CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
@@ -1104,6 +1143,13 @@ declare module '@tanstack/react-router' {
       path: '/home-loans'
       fullPath: '/home-loans'
       preLoaderRoute: typeof HomeLoansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/latency-test': {
+      id: '/latency-test'
+      path: '/latency-test'
+      fullPath: '/latency-test'
+      preLoaderRoute: typeof LatencyTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/list-property': {
@@ -1456,6 +1502,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEnquiriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v2/auth': {
+      id: '/api/v2/auth'
+      path: '/api/v2/auth'
+      fullPath: '/api/v2/auth'
+      preLoaderRoute: typeof ApiV2AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/properties': {
+      id: '/api/v2/properties'
+      path: '/api/v2/properties'
+      fullPath: '/api/v2/properties'
+      preLoaderRoute: typeof ApiV2PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/webhooks/stripe': {
       id: '/api/webhooks/stripe'
       path: '/api/webhooks/stripe'
@@ -1715,6 +1775,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   HelpRoute: HelpRoute,
   HomeLoansRoute: HomeLoansRoute,
+  LatencyTestRoute: LatencyTestRoute,
   ListPropertyRoute: ListPropertyRouteWithChildren,
   LoansRoute: LoansRoute,
   ModerationPolicyRoute: ModerationPolicyRoute,
@@ -1743,6 +1804,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthRequestOtpRoute: ApiAuthRequestOtpRoute,
   ApiAuthRequestPasswordResetRoute: ApiAuthRequestPasswordResetRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
+  ApiV2AuthRoute: ApiV2AuthRoute,
+  ApiV2PropertiesRoute: ApiV2PropertiesRoute,
   ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
   CommercialCityLocalityRoute: CommercialCityLocalityRoute,
