@@ -1,3 +1,8 @@
+## v0.118.0 — 2026-09-02
+
+### Features
+- feat(perf): add Supabase latency test suite and interactive benchmark route (088342f)
+
 ## v0.117.0 — 2026-09-01
 
 ### Features
