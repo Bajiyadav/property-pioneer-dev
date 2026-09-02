@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 
-const BASE_URL = process.env.BENCHMARK_TARGET || "http://localhost:8080";
+const BASE_URL = process.env.BENCHMARK_TARGET || "http://localhost:5173";
 const CONCURRENCY = Number(process.env.CONCURRENCY) || 20;
 const TOTAL_REQUESTS = Number(process.env.TOTAL_REQUESTS) || 100;
 
