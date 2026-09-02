@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Seedha Properties - Self-Managed Native Backend Staging Stack (ECS Fargate + RDS PostgreSQL PostGIS + S3 + ALB)"
+Description: "Seedha Properties - Secure Self-Managed Native Backend Staging Stack (ECS Fargate + RDS PostgreSQL PostGIS + S3 + ALB + Least-Privilege Security Groups)"
 
 Parameters:
   VpcCIDR:
@@ -35,6 +35,7 @@ Resources:
       VpcId: !Ref StagingVPC
       InternetGatewayId: !Ref InternetGateway
 
+  # Public Subnets (for ALB)
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -42,6 +43,9 @@ Resources:
       CidrBlock: 10.0.1.0/24
       AvailabilityZone: ap-south-1a
       MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: seedha-staging-public-a
 
   PublicSubnetB:
     Type: AWS::EC2::Subnet
@@ -50,8 +54,81 @@ Resources:
       CidrBlock: 10.0.2.0/24
       AvailabilityZone: ap-south-1b
       MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: seedha-staging-public-b
 
-  # 2. S3 Media & Private Docs Buckets
+  # Private Subnets (for RDS & ECS Tasks)
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StagingVPC
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: ap-south-1a
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: seedha-staging-private-a
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StagingVPC
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: ap-south-1b
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: seedha-staging-private-b
+
+  # 2. Least-Privilege Security Groups
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ALB Security Group - Public Ingress 80/443"
+      VpcId: !Ref StagingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ECS Fargate Security Group - Ingress strictly from ALB"
+      VpcId: !Ref StagingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "RDS PostgreSQL Security Group - Ingress strictly from ECS"
+      VpcId: !Ref StagingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 10.0.0.0/16
+
+  # 3. S3 Media & Private Docs Buckets
   PublicMediaBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -82,14 +159,14 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-  # 3. RDS PostgreSQL 16 + PostGIS Instance
+  # 4. RDS PostgreSQL 16 + PostGIS Instance (Private Subnet Group)
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: "Subnets for Seedha Staging RDS"
+      DBSubnetGroupDescription: "Private Subnets for Seedha Staging RDS"
       SubnetIds:
-        - !Ref PublicSubnetA
-        - !Ref PublicSubnetB
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
 
   StagingRDSInstance:
     Type: AWS::RDS::DBInstance
@@ -102,12 +179,14 @@ Resources:
       MasterUsername: !Ref DbUsername
       MasterUserPassword: !Ref DbPassword
       DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
       PubliclyAccessible: false
       StorageEncrypted: true
       BackupRetentionPeriod: 7
       MultiAZ: false
 
-  # 4. ECS Cluster & Fargate Service
+  # 5. ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
