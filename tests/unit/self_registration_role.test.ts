@@ -71,14 +71,18 @@ describe("user_metadata is not an authority", () => {
 describe.skipIf(!canRun)("Role resolution ignores metadata against the real database", () => {
   it("keeps a customer a customer even when their metadata claims owner", async () => {
     const customer = accountFor("customer");
-    const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const { data: auth, error } = await client.auth.signInWithPassword({
       email: customer.email,
       password: customer.password,
     });
     expect(error).toBeNull();
+    if (auth.session) {
+      await client.auth.setSession({
+        access_token: auth.session.access_token,
+        refresh_token: auth.session.refresh_token,
+      });
+    }
 
     // Supabase accepts this write — the account holder owns their metadata.
     const { error: updateError } = await client.auth.updateUser({ data: { role: "owner" } });
