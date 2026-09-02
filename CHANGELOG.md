@@ -1,3 +1,8 @@
+## v0.124.0 — 2026-09-02
+
+### Features
+- feat(java): scaffold Java 21 / Spring Boot 3 enterprise backend for 10M+ scalability (5a43313)
+
 ## v0.123.0 — 2026-09-02
 
 ### Features
