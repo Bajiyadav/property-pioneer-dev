@@ -1,3 +1,11 @@
+## v0.125.0 — 2026-09-02
+
+### Features
+- feat(location): implement location-scoped statistics API and audit validation (46c4f35)
+
+### Documentation
+- docs: update README and TODO with Java 21 Spring Boot 3 & 10M scalability roadmap (dc0beb3)
+
 ## v0.124.0 — 2026-09-02
 
 ### Features
