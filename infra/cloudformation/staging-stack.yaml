@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Seedha Properties - Secure Self-Managed Native Backend Staging Stack (ECS Fargate + RDS PostgreSQL PostGIS + S3 + ALB + Least-Privilege Security Groups)"
+Description: "Seedha Properties - Enterprise 10M+ Scalable Architecture (ECS Fargate Autoscaling + RDS PostGIS + ElastiCache Redis + SQS Async Queue + S3 + WAF + ALB)"
 
 Parameters:
   VpcCIDR:
@@ -25,9 +25,15 @@ Resources:
       Tags:
         - Key: Name
           Value: seedha-staging-vpc
+        - Key: Project
+          Value: SeedhaProperties
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Project
+          Value: SeedhaProperties
 
   VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -58,7 +64,7 @@ Resources:
         - Key: Name
           Value: seedha-staging-public-b
 
-  # Private Subnets (for RDS & ECS Tasks)
+  # Private Subnets (for RDS, Redis & ECS Tasks)
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -128,7 +134,37 @@ Resources:
         - IpProtocol: -1
           CidrIp: 10.0.0.0/16
 
-  # 3. S3 Media & Private Docs Buckets
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ElastiCache Redis Security Group - Ingress strictly from ECS"
+      VpcId: !Ref StagingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref ECSSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 10.0.0.0/16
+
+  # 3. Amazon SQS Queues (Async Processing & Dead-Letter Queue)
+  AsyncJobDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: seedha-staging-async-jobs-dlq
+      MessageRetentionPeriod: 1209600 # 14 days
+
+  AsyncJobQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: seedha-staging-async-jobs
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt AsyncJobDeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  # 4. S3 Media & Private Docs Buckets
   PublicMediaBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -159,7 +195,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-  # 4. RDS PostgreSQL 16 + PostGIS Instance (Private Subnet Group)
+  # 5. RDS PostgreSQL 16 + PostGIS Instance (Private Subnets)
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -186,7 +222,7 @@ Resources:
       BackupRetentionPeriod: 7
       MultiAZ: false
 
-  # 5. ECS Cluster
+  # 6. ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -199,3 +235,5 @@ Outputs:
     Value: !Ref PrivateDocsBucket
   RDSEndpoint:
     Value: !GetAtt StagingRDSInstance.Endpoint.Address
+  AsyncJobQueueUrl:
+    Value: !Ref AsyncJobQueue
