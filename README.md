@@ -28,24 +28,26 @@ _India's Zero-Brokerage, Direct-Owner Real Estate Marketplace Platform._
 4. [Mandatory Location-First UX Architecture](#4-mandatory-location-first-ux-architecture)
 5. [Web Application Architecture](#5-web-application-architecture)
 6. [Flutter Mobile Application](#6-flutter-mobile-application)
-7. [Native Backend Architecture (v2)](#7-native-backend-architecture-v2)
-8. [Database Schema & PostGIS Implementation](#8-database-schema--postgis-implementation)
-9. [Authentication & Session Management](#9-authentication--session-management)
-10. [S3 Object Storage & Media Pipeline](#10-s3-object-storage--media-pipeline)
-11. [Target AWS Cloud Architecture](#11-target-aws-cloud-architecture)
-12. [Docker & Containerization](#12-docker--containerization)
-13. [API Documentation Reference (`/api/v2/*`)](#13-api-documentation-reference-apiv2)
-14. [Security Architecture & Authorization Matrix](#14-security-architecture--authorization-matrix)
-15. [Performance Benchmarking & Latency Guidelines](#15-performance-benchmarking--latency-guidelines)
-16. [Test Suite & Quality Assurance](#16-test-suite--quality-assurance)
-17. [Local Development Setup](#17-local-development-setup)
-18. [AWS Staging & Production Deployment Roadmap](#18-aws-staging--production-deployment-roadmap)
-19. [Backup, Disaster Recovery & Rollback Procedure](#19-backup-disaster-recovery--rollback-procedure)
-20. [Observability & Monitoring](#20-observability--monitoring)
-21. [Legal, Compliance & Policy Framework](#21-legal-compliance--policy-framework)
-22. [Repository Structure](#22-repository-structure)
-23. [Master Roadmap & Pending Milestones](#23-master-roadmap--pending-milestones)
-24. [Strict Project Constraints](#24-strict-project-constraints)
+7. [Native Backend Architecture (TypeScript v2 & Java 21 Spring Boot 3)](#7-native-backend-architecture-typescript-v2--java-21-spring-boot-3)
+8. [Java 21 / Spring Boot 3 Enterprise Backend (`backend-java/`)](#8-java-21--spring-boot-3-enterprise-backend-backend-java)
+9. [Database Schema & PostGIS Implementation](#9-database-schema--postgis-implementation)
+10. [Distributed Caching (Redis/Valkey) & SQS Async Architecture](#10-distributed-caching-redisvalkey--sqs-async-architecture)
+11. [Authentication & Session Management](#11-authentication--session-management)
+12. [S3 Object Storage & Media Pipeline](#12-s3-object-storage--media-pipeline)
+13. [Target AWS Cloud Architecture (10M+ Scalability)](#13-target-aws-cloud-architecture-10m-scalability)
+14. [Docker & Containerization](#14-docker--containerization)
+15. [API Documentation Reference (`/api/v2/*`)](#15-api-documentation-reference-apiv2)
+16. [Security Architecture & Authorization Matrix](#16-security-architecture--authorization-matrix)
+17. [Performance Benchmarking & Load Testing](#17-performance-benchmarking--load-testing)
+18. [Test Suite & Quality Assurance](#18-test-suite--quality-assurance)
+19. [Local Development Setup](#17-local-development-setup)
+20. [AWS Staging & Production Deployment Roadmap](#18-aws-staging--production-deployment-roadmap)
+21. [Backup, Disaster Recovery & Rollback Procedure](#19-backup-disaster-recovery--rollback-procedure)
+22. [Observability & Monitoring](#20-observability--monitoring)
+23. [Legal, Compliance & Policy Framework](#21-legal-compliance--policy-framework)
+24. [Repository Structure](#22-repository-structure)
+25. [Master Roadmap & Pending Milestones](#23-master-roadmap--pending-milestones)
+26. [Strict Project Constraints](#24-strict-project-constraints)
 
 ---
 
@@ -219,28 +221,59 @@ The mobile application is located in `apps/mobile/` and provides a cross-platfor
 
 ---
 
-## 7. Native Backend Architecture (v2)
+## 7. Native Backend Architecture (TypeScript v2 & Java 21 Spring Boot 3)
 
-The native backend runs inside the same high-performance Node.js runtime as TanStack Start / Nitro, executing direct SQL queries against PostgreSQL.
+Seedha Properties provides a dual-backend architecture:
 
-```
-src/server/
-├── db.ts       # postgres.js connection pool, SSL configuration, and query timing diagnostics
-├── cache.ts    # In-memory LRU cache with TTL and key-prefix invalidation
-├── auth.ts     # bcryptjs password hashing and jose Web Crypto JWT signing & verification
-├── storage.ts  # AWS S3 client, MIME validation, file size guards, and pre-signed URL generator
-└── email.ts    # AWS SES transactional email dispatcher with pre-built HTML templates
-```
+1. **TypeScript Native Backend (`src/server/`)**: High-performance Node.js/Nitro native layer executing direct SQL with `postgres.js`.
+2. **Java 21 / Spring Boot 3 Enterprise Backend (`backend-java/`)**: Enterprise-grade Spring Boot 3 microservice designed for multi-million concurrent user scalability.
 
-### Core Technologies
-
-- **PostgreSQL Pool**: `postgres` (`v3.4.7`) with tagged template literals (automatic SQL injection prevention).
-- **Security & Tokens**: `jose` (`v6.1.3`) for standards-compliant JWT signing and `bcryptjs` for password salting.
-- **In-Memory Caching**: Low-overhead LRU cache with sub-millisecond memory lookups for public listing feeds.
+Both backends share identical `/api/v2/*` REST contracts, allowing seamless switching and validation.
 
 ---
 
-## 8. Database Schema & PostGIS Implementation
+## 8. Java 21 / Spring Boot 3 Enterprise Backend (`backend-java/`)
+
+The Java backend provides a robust, strictly typed, enterprise architecture built on **Java 21 LTS** and **Spring Boot 3.3.x**.
+
+```
+backend-java/
+├── pom.xml                                 # Java 21, Spring Boot 3, Hibernate Spatial, JJWT, AWS SDK 2.x
+├── src/main/resources/application.yml      # Multi-environment config (PostgreSQL, Redis, S3, SQS)
+└── src/main/java/com/seedha/properties/
+    ├── SeedhaPropertiesApplication.java     # Application entrypoint (@EnableCaching, @EnableAsync)
+    ├── config/
+    │   └── SecurityConfig.java             # Stateless Spring Security with JWT filter & CORS whitelist
+    ├── security/
+    │   ├── JwtTokenProvider.java           # HS256 HMAC token generation & validation
+    │   ├── JwtAuthenticationFilter.java    # OncePerRequest filter with WebAuthenticationDetails
+    │   └── UserPrincipal.java              # UserDetails implementation for context identity
+    ├── entity/
+    │   ├── User.java                       # User credentials, roles, and profile
+    │   └── Property.java                   # PostGIS spatial point entity with location & filter attributes
+    ├── repository/
+    │   ├── UserRepository.java             # Spring Data JPA User repository
+    │   └── PropertyRepository.java         # PostGIS native ST_DWithin spatial radius & location search
+    ├── dto/
+    │   ├── AuthRequest.java & AuthResponse.java # Exact JSON contract matching /api/v2/auth
+    │   ├── ApiResponse.java                # Standard generic JSON wrapper
+    │   └── PresignUploadRequest.java       # S3 pre-signed upload metadata DTO
+    ├── service/
+    │   ├── AuthService.java                # BCrypt password hashing & JWT authentication service
+    │   ├── StorageService.java            # AWS S3 Pre-signed PUT/GET engine (5-min TTL)
+    │   └── CacheService.java              # Redis / Valkey distributed cache with in-memory fallback
+    ├── controller/
+    │   ├── AuthController.java             # Matches /api/v2/auth (signup, login, session, logout)
+    │   ├── PropertyController.java         # Matches /api/v2/properties and /api/v2/properties/manage
+    │   ├── MediaController.java            # Matches /api/v2/media/presign-upload & presign-download
+    │   └── HealthController.java           # /api/health probe for ALB health checks
+    └── exception/
+        └── GlobalExceptionHandler.java     # Sanitized production error handler
+```
+
+---
+
+## 9. Database Schema & PostGIS Implementation
 
 The database schema is defined idempotently in [`scripts/migrations/001_initial_schema.sql`](scripts/migrations/001_initial_schema.sql) and is ready for PostgreSQL 16 with PostGIS 3.4+.
 

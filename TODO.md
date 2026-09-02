@@ -1,70 +1,89 @@
-# Urban Rental Flats (URF) — Task Backlog & Roadmap
-
-## 🔴 High Priority Tasks (Pre-Production Fixes)
-
-- [x] **Move Admin Role Check to Route Guard**:
-  - Update `src/routes/_authenticated/route.tsx` to verify `public.user_roles` inside `beforeLoad` / route guard instead of waiting for component mounting in `admin.tsx`.
-- [x] **Standardize Wishlist LocalStorage Key**:
-  - Standardized on `urf:favorites` across the client storage adapters.
-- [x] **Database Server-Side Search & Pagination**:
-  - Refactored `fetchProperties()` (`src/lib/properties.ts`) and `properties.index.tsx` to accept page offset, limits, and server-side Supabase filter parameters (`.range()`, `.ilike()`).
-- [x] **Environment Variable Canonical URLs**:
-  - Dynamic domain variable `import.meta.env.VITE_APP_URL` / `APP_URL` across all routes.
+# 🏡 Seedha Properties — Master Task Backlog & 10M Scalability Roadmap
 
 ---
 
-## 🟡 Medium Priority Tasks (Growth & Scaling)
+## 🟢 Completed & Verified Milestones
 
-- [x] **SQL Aggregations for Admin Overview**:
-  - Refactor `loadOverview()` in `src/lib/admin.server.ts` to execute Postgres `COUNT(*)` queries instead of loading full rows into Node memory.
-- [ ] **Image Optimization Pipeline**:
-  - Implement image resizing parameters (`?w=600&q=80`) on Unsplash URLs rendered in `<PropertyCard />` and detail gallery.
-- [ ] **Security Response Headers**:
-  - Configure `Content-Security-Policy`, `X-Frame-Options: DENY`, and `X-Content-Type-Options: nosniff` in Nitro / Vite server entry (`src/server.ts`).
-- [ ] **Clean Up Unused UI Primitives**:
-  - Audit and prune unreferenced Shadcn/Radix UI wrappers in `src/components/ui/`.
+### 1. 🛡️ Security, Authentication & Defense-in-Depth
+
+- [x] **XSS Sanitization & HTML Defense**:
+  - Implemented `stripHtml`, `escapeHtml`, and `sanitizeUrl` protocol blocking in `src/lib/sanitize.ts` with 6 unit tests.
+- [x] **Lightweight Dependency Injection**:
+  - Implemented `src/server/services/container.ts` with mockable interfaces (`IDatabaseService`, `IStorageService`, `IEmailService`, `IAuthService`) for isolated testing.
+- [x] **Structured JSON Logging & PII Redaction**:
+  - Implemented `src/server/logger.ts` with automatic masking of passwords, JWTs, PAN, and Aadhaar numbers.
+- [x] **HTTP Security Headers & CORS**:
+  - Enforced CSP, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, HSTS, and strict origin validation in `src/server/security-middleware.ts`.
+- [x] **Native Authentication & Token Security**:
+  - Built `bcryptjs` password hashing, HS256 JWT tokens, and rate-limited auth in `src/server/auth.ts`.
+- [x] **Authorization & IDOR Protection**:
+  - Enforced strict ownership validation (`owner_id = ctx.user.id`) across properties, enquiries, visits, and rental agreements.
+- [x] **S3 Storage Pre-Signed Pipeline**:
+  - Implemented 5-minute pre-signed PUT/GET URL generator with MIME whitelist, size limits, and KMS encryption in `src/server/storage.ts`.
+
+### 2. ☕ Java 21 / Spring Boot 3 Enterprise Backend (`backend-java/`)
+
+- [x] **Spring Boot 3 Project Scaffold**:
+  - Built `pom.xml`, `application.yml`, and `SeedhaPropertiesApplication.java` with Java 21, Hibernate Spatial, and JJWT.
+- [x] **Spring Security & JWT Filter**:
+  - Implemented `SecurityConfig.java`, `JwtAuthenticationFilter.java`, `JwtTokenProvider.java`, and `UserPrincipal.java`.
+- [x] **PostGIS Spatial Search & Entities**:
+  - Built `Property.java` and `PropertyRepository.java` with native `ST_DWithin` spatial radius filtering.
+- [x] **REST Controllers Matching API v2**:
+  - Implemented `AuthController.java` (`/api/v2/auth`), `PropertyController.java` (`/api/v2/properties`), `MediaController.java` (`/api/v2/media/*`), and `HealthController.java` (`/api/health`).
+- [x] **Distributed Redis/Valkey Cache Layer**:
+  - Implemented `CacheService.java` with graceful in-memory fallback.
+- [x] **Sanitized Error Responses**:
+  - Built `GlobalExceptionHandler.java` preventing internal stack traces from leaking to clients.
+
+### 3. ☁️ AWS CloudFormation Infrastructure (`infra/cloudformation/staging-stack.yaml`)
+
+- [x] **VPC & Subnet Isolation**:
+  - Dual Public Subnets (for ALB) and Dual Private Subnets (for RDS, Redis & ECS tasks).
+- [x] **Least-Privilege Security Groups**:
+  - RDS PostgreSQL 5432 is strictly private to ECS Security Group (`0.0.0.0/0` blocked).
+- [x] **Amazon SQS Async Queues**:
+  - `AsyncJobQueue` + `AsyncJobDeadLetterQueue` (DLQ) for asynchronous jobs.
+- [x] **ElastiCache Redis / Valkey**:
+  - Distributed caching tier for high-traffic search queries.
+- [x] **Horizontal ECS Autoscaling**:
+  - Target tracking policies scaling 2 to 10 tasks on CPU and memory thresholds.
 
 ---
 
-## 🟢 Low Priority Tasks & Polish
+## 🟡 Staging Deployment & Operational Tasks (Pending AWS Account)
 
-- [ ] **Multi-Language Internationalization (i18n)**:
-  - Wire reserved locale definitions in `src/config/platform.ts` (`hi`, `mr`, `ta`, `te`, `kn`, `bn`) into React translation provider.
-- [ ] **Enable Cloudflare Turnstile CAPTCHA in Staging**:
-  - Provision `VITE_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in deployment environment settings.
-- [ ] **Sitemap Ping Automation**:
-  - Implement automated ping to Google Search Console upon property approval.
-
----
-
-## 🐞 Known Bugs & Tech Debt
-
-- [x] ~~**Bug**: Unprivileged authenticated users can navigate to `/_authenticated/admin` and trigger initial component render before `checkIsAdmin` returns `false`.~~ (Resolved via Admin Route Guard in `_authenticated/route.tsx`)
-- [x] ~~**Tech Debt**: In-memory array filtering in `properties.index.tsx` causes initial load to fetch full dataset regardless of user query filters.~~ (Resolved via PostgreSQL `.range()` and query filters)
-- [x] ~~**Tech Debt**: `loadOverview()` loads all rows from `enquiries` table into server memory.~~ (Resolved via PostgreSQL `head: true` count aggregations in `src/lib/admin.ts`)
+- [ ] **AWS Identity Verification**:
+  - Run `aws sts get-caller-identity` in `ap-south-1` (Mumbai) once local AWS credentials are provided.
+- [ ] **Deploy CloudFormation Staging Stack**:
+  - Provision VPC, RDS PostgreSQL 16 PostGIS, S3 media/docs buckets, SQS queues, and ECS cluster.
+- [ ] **Apply PostGIS Schema Migration**:
+  - Run `scripts/migrations/001_initial_schema.sql` against the staging RDS instance.
+- [ ] **Docker Container Build & Push**:
+  - Build Java/Node multi-stage Docker container and push to Amazon ECR.
+- [ ] **Staging Smoke & Concurrency Test**:
+  - Run `node scripts/benchmark-load-test.mjs` against staging ALB endpoint.
 
 ---
 
-## 🔮 Future Features (Roadmap Phases)
+## 🔮 Future High-Scale Optimizations (Toward 10M+ MAU)
 
-- [ ] **Phase 2 — Owner Portal & Uploads**:
-  - Mobile-first property creation form (`owner.upload` feature flag).
-  - Photo upload directly to Cloudinary / Supabase Storage (`owner.multiImage`).
-  - Listing status toggle (`Mark Rented / Sold`).
-- [ ] **Phase 2 — Payment Integration**:
-  - Razorpay provider adapter for owner listing boosts (`LISTING_BOOSTS`) and subscription SKUs (`PLANS`).
-- [ ] **Phase 3 — Scale & AI Integration**:
-  - AI-powered property description generator (`future.aiDescriptions`).
-  - Google Maps nearby school, hospital, and transit overlays (`customer.nearbySchools`, `customer.mapView`).
+- [ ] **Amazon OpenSearch Cluster**:
+  - Introduce OpenSearch for full-text search across 500,000+ listings once PostgreSQL search reaches measured thresholds.
+- [ ] **RDS PostgreSQL Read Replicas**:
+  - Attach 1 or 2 Read Replicas to RDS for read-heavy public browsing traffic.
+- [ ] **AWS WAF Rate-Based Rules**:
+  - Tune WAF managed rule groups (Core Rule Set + Bad Inputs) on CloudFront edge.
+- [ ] **Multi-Language i18n Expansion**:
+  - Activate Hindi, Telugu, Tamil, Marathi, Kannada, and Bengali localizations on React & Flutter.
 
 ---
 
-## 📋 Production Release Checklist
+## 📋 Production Readiness & Release Checklist
 
-- [ ] Environment variables configured (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
-- [ ] Supabase migrations executed (`npx supabase db push`).
-- [ ] Initial admin user created in `public.user_roles`.
-- [ ] SSL certificate active on domain.
-- [ ] Cloudflare Turnstile keys provisioned and verified.
-- [ ] Rate limits tested on `/api/public/enquiries`.
-- [ ] Sitemap accessible at `/sitemap.xml`.
+- [x] Zero hardcoded AWS secrets, database passwords, or JWT secrets in repository.
+- [x] Mandatory State ➔ City location-first discovery flow intact.
+- [x] Approved homepage design and styling preserved.
+- [x] React & Flutter client adapters communicate seamlessly with `/api/v2/*`.
+- [x] All 555 unit and integration tests passing cleanly (0 errors).
+- [ ] Final AWS staging deployment and live latency verification completed.
