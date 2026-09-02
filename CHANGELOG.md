@@ -1,3 +1,8 @@
+## v0.121.0 — 2026-09-02
+
+### Features
+- feat(storage): implement S3 pre-signed upload & download module with strict security guards (6b51178)
+
 ## v0.120.0 — 2026-09-02
 
 ### Features
