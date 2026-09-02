@@ -72,7 +72,13 @@ import { Route as ApiAuthRequestOtpRouteImport } from './routes/api/auth/request
 import { Route as ApiAuthRequestPasswordResetRouteImport } from './routes/api/auth/request-password-reset'
 import { Route as ApiPublicEnquiriesRouteImport } from './routes/api/public/enquiries'
 import { Route as ApiV2AuthRouteImport } from './routes/api/v2/auth'
+import { Route as ApiV2EnquiriesRouteImport } from './routes/api/v2/enquiries'
+import { Route as ApiV2FavoritesRouteImport } from './routes/api/v2/favorites'
+import { Route as ApiV2HomeLoansRouteImport } from './routes/api/v2/home-loans'
+import { Route as ApiV2NotificationsRouteImport } from './routes/api/v2/notifications'
 import { Route as ApiV2PropertiesRouteImport } from './routes/api/v2/properties'
+import { Route as ApiV2RentalAgreementsRouteImport } from './routes/api/v2/rental-agreements'
+import { Route as ApiV2VisitsRouteImport } from './routes/api/v2/visits'
 import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
@@ -84,6 +90,9 @@ import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
 import { Route as ApiDevEmailPreviewTypeRouteImport } from './routes/api/dev/email-preview.$type'
 import { Route as ApiPublicPropertiesLocationAccessRouteImport } from './routes/api/public/properties.location-access'
+import { Route as ApiV2MediaPresignDownloadRouteImport } from './routes/api/v2/media/presign-download'
+import { Route as ApiV2MediaPresignUploadRouteImport } from './routes/api/v2/media/presign-upload'
+import { Route as ApiV2PropertiesManageRouteImport } from './routes/api/v2/properties/manage'
 import { Route as ListPropertyPromoteIdCheckoutRouteImport } from './routes/list-property.promote.$id.checkout'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
 import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/public/properties.$id.report'
@@ -419,9 +428,39 @@ const ApiV2AuthRoute = ApiV2AuthRouteImport.update({
   path: '/api/v2/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV2EnquiriesRoute = ApiV2EnquiriesRouteImport.update({
+  id: '/api/v2/enquiries',
+  path: '/api/v2/enquiries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2FavoritesRoute = ApiV2FavoritesRouteImport.update({
+  id: '/api/v2/favorites',
+  path: '/api/v2/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2HomeLoansRoute = ApiV2HomeLoansRouteImport.update({
+  id: '/api/v2/home-loans',
+  path: '/api/v2/home-loans',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2NotificationsRoute = ApiV2NotificationsRouteImport.update({
+  id: '/api/v2/notifications',
+  path: '/api/v2/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV2PropertiesRoute = ApiV2PropertiesRouteImport.update({
   id: '/api/v2/properties',
   path: '/api/v2/properties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2RentalAgreementsRoute = ApiV2RentalAgreementsRouteImport.update({
+  id: '/api/v2/rental-agreements',
+  path: '/api/v2/rental-agreements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2VisitsRoute = ApiV2VisitsRouteImport.update({
+  id: '/api/v2/visits',
+  path: '/api/v2/visits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
@@ -480,6 +519,22 @@ const ApiPublicPropertiesLocationAccessRoute =
     path: '/api/public/properties/location-access',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV2MediaPresignDownloadRoute =
+  ApiV2MediaPresignDownloadRouteImport.update({
+    id: '/api/v2/media/presign-download',
+    path: '/api/v2/media/presign-download',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV2MediaPresignUploadRoute = ApiV2MediaPresignUploadRouteImport.update({
+  id: '/api/v2/media/presign-upload',
+  path: '/api/v2/media/presign-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV2PropertiesManageRoute = ApiV2PropertiesManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => ApiV2PropertiesRoute,
+} as any)
 const ListPropertyPromoteIdCheckoutRoute =
   ListPropertyPromoteIdCheckoutRouteImport.update({
     id: '/checkout',
@@ -578,7 +633,13 @@ export interface FileRoutesByFullPath {
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/v2/auth': typeof ApiV2AuthRoute
-  '/api/v2/properties': typeof ApiV2PropertiesRoute
+  '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
+  '/api/v2/favorites': typeof ApiV2FavoritesRoute
+  '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
+  '/api/v2/notifications': typeof ApiV2NotificationsRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
+  '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
+  '/api/v2/visits': typeof ApiV2VisitsRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -592,6 +653,9 @@ export interface FileRoutesByFullPath {
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
+  '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
+  '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -656,7 +720,13 @@ export interface FileRoutesByTo {
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/v2/auth': typeof ApiV2AuthRoute
-  '/api/v2/properties': typeof ApiV2PropertiesRoute
+  '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
+  '/api/v2/favorites': typeof ApiV2FavoritesRoute
+  '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
+  '/api/v2/notifications': typeof ApiV2NotificationsRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
+  '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
+  '/api/v2/visits': typeof ApiV2VisitsRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -670,6 +740,9 @@ export interface FileRoutesByTo {
   '/rent/$city': typeof RentCityIndexRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
+  '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
+  '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -740,7 +813,13 @@ export interface FileRoutesById {
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
   '/api/v2/auth': typeof ApiV2AuthRoute
-  '/api/v2/properties': typeof ApiV2PropertiesRoute
+  '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
+  '/api/v2/favorites': typeof ApiV2FavoritesRoute
+  '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
+  '/api/v2/notifications': typeof ApiV2NotificationsRoute
+  '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
+  '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
+  '/api/v2/visits': typeof ApiV2VisitsRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -754,6 +833,9 @@ export interface FileRoutesById {
   '/rent/$city/': typeof RentCityIndexRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
+  '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
+  '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
@@ -824,7 +906,13 @@ export interface FileRouteTypes {
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
     | '/api/v2/auth'
+    | '/api/v2/enquiries'
+    | '/api/v2/favorites'
+    | '/api/v2/home-loans'
+    | '/api/v2/notifications'
     | '/api/v2/properties'
+    | '/api/v2/rental-agreements'
+    | '/api/v2/visits'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -838,6 +926,9 @@ export interface FileRouteTypes {
     | '/rent/$city/'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
+    | '/api/v2/media/presign-download'
+    | '/api/v2/media/presign-upload'
+    | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -902,7 +993,13 @@ export interface FileRouteTypes {
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
     | '/api/v2/auth'
+    | '/api/v2/enquiries'
+    | '/api/v2/favorites'
+    | '/api/v2/home-loans'
+    | '/api/v2/notifications'
     | '/api/v2/properties'
+    | '/api/v2/rental-agreements'
+    | '/api/v2/visits'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -916,6 +1013,9 @@ export interface FileRouteTypes {
     | '/rent/$city'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
+    | '/api/v2/media/presign-download'
+    | '/api/v2/media/presign-upload'
+    | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -985,7 +1085,13 @@ export interface FileRouteTypes {
     | '/api/auth/request-password-reset'
     | '/api/public/enquiries'
     | '/api/v2/auth'
+    | '/api/v2/enquiries'
+    | '/api/v2/favorites'
+    | '/api/v2/home-loans'
+    | '/api/v2/notifications'
     | '/api/v2/properties'
+    | '/api/v2/rental-agreements'
+    | '/api/v2/visits'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -999,6 +1105,9 @@ export interface FileRouteTypes {
     | '/rent/$city/'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
+    | '/api/v2/media/presign-download'
+    | '/api/v2/media/presign-upload'
+    | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
@@ -1049,7 +1158,13 @@ export interface RootRouteChildren {
   ApiAuthRequestPasswordResetRoute: typeof ApiAuthRequestPasswordResetRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
   ApiV2AuthRoute: typeof ApiV2AuthRoute
-  ApiV2PropertiesRoute: typeof ApiV2PropertiesRoute
+  ApiV2EnquiriesRoute: typeof ApiV2EnquiriesRoute
+  ApiV2FavoritesRoute: typeof ApiV2FavoritesRoute
+  ApiV2HomeLoansRoute: typeof ApiV2HomeLoansRoute
+  ApiV2NotificationsRoute: typeof ApiV2NotificationsRoute
+  ApiV2PropertiesRoute: typeof ApiV2PropertiesRouteWithChildren
+  ApiV2RentalAgreementsRoute: typeof ApiV2RentalAgreementsRoute
+  ApiV2VisitsRoute: typeof ApiV2VisitsRoute
   ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
   CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
@@ -1059,6 +1174,8 @@ export interface RootRouteChildren {
   RentCityIndexRoute: typeof RentCityIndexRoute
   ApiDevEmailPreviewTypeRoute: typeof ApiDevEmailPreviewTypeRoute
   ApiPublicPropertiesLocationAccessRoute: typeof ApiPublicPropertiesLocationAccessRoute
+  ApiV2MediaPresignDownloadRoute: typeof ApiV2MediaPresignDownloadRoute
+  ApiV2MediaPresignUploadRoute: typeof ApiV2MediaPresignUploadRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
   ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
@@ -1509,11 +1626,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV2AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v2/enquiries': {
+      id: '/api/v2/enquiries'
+      path: '/api/v2/enquiries'
+      fullPath: '/api/v2/enquiries'
+      preLoaderRoute: typeof ApiV2EnquiriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/favorites': {
+      id: '/api/v2/favorites'
+      path: '/api/v2/favorites'
+      fullPath: '/api/v2/favorites'
+      preLoaderRoute: typeof ApiV2FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/home-loans': {
+      id: '/api/v2/home-loans'
+      path: '/api/v2/home-loans'
+      fullPath: '/api/v2/home-loans'
+      preLoaderRoute: typeof ApiV2HomeLoansRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/notifications': {
+      id: '/api/v2/notifications'
+      path: '/api/v2/notifications'
+      fullPath: '/api/v2/notifications'
+      preLoaderRoute: typeof ApiV2NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v2/properties': {
       id: '/api/v2/properties'
       path: '/api/v2/properties'
       fullPath: '/api/v2/properties'
       preLoaderRoute: typeof ApiV2PropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/rental-agreements': {
+      id: '/api/v2/rental-agreements'
+      path: '/api/v2/rental-agreements'
+      fullPath: '/api/v2/rental-agreements'
+      preLoaderRoute: typeof ApiV2RentalAgreementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/visits': {
+      id: '/api/v2/visits'
+      path: '/api/v2/visits'
+      fullPath: '/api/v2/visits'
+      preLoaderRoute: typeof ApiV2VisitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/webhooks/stripe': {
@@ -1592,6 +1751,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/properties/location-access'
       preLoaderRoute: typeof ApiPublicPropertiesLocationAccessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/media/presign-download': {
+      id: '/api/v2/media/presign-download'
+      path: '/api/v2/media/presign-download'
+      fullPath: '/api/v2/media/presign-download'
+      preLoaderRoute: typeof ApiV2MediaPresignDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/media/presign-upload': {
+      id: '/api/v2/media/presign-upload'
+      path: '/api/v2/media/presign-upload'
+      fullPath: '/api/v2/media/presign-upload'
+      preLoaderRoute: typeof ApiV2MediaPresignUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/properties/manage': {
+      id: '/api/v2/properties/manage'
+      path: '/manage'
+      fullPath: '/api/v2/properties/manage'
+      preLoaderRoute: typeof ApiV2PropertiesManageRouteImport
+      parentRoute: typeof ApiV2PropertiesRoute
     }
     '/list-property/promote/$id/checkout': {
       id: '/list-property/promote/$id/checkout'
@@ -1763,6 +1943,18 @@ const RentalAgreementRouteWithChildren = RentalAgreementRoute._addFileChildren(
   RentalAgreementRouteChildren,
 )
 
+interface ApiV2PropertiesRouteChildren {
+  ApiV2PropertiesManageRoute: typeof ApiV2PropertiesManageRoute
+}
+
+const ApiV2PropertiesRouteChildren: ApiV2PropertiesRouteChildren = {
+  ApiV2PropertiesManageRoute: ApiV2PropertiesManageRoute,
+}
+
+const ApiV2PropertiesRouteWithChildren = ApiV2PropertiesRoute._addFileChildren(
+  ApiV2PropertiesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1805,7 +1997,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthRequestPasswordResetRoute: ApiAuthRequestPasswordResetRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
   ApiV2AuthRoute: ApiV2AuthRoute,
-  ApiV2PropertiesRoute: ApiV2PropertiesRoute,
+  ApiV2EnquiriesRoute: ApiV2EnquiriesRoute,
+  ApiV2FavoritesRoute: ApiV2FavoritesRoute,
+  ApiV2HomeLoansRoute: ApiV2HomeLoansRoute,
+  ApiV2NotificationsRoute: ApiV2NotificationsRoute,
+  ApiV2PropertiesRoute: ApiV2PropertiesRouteWithChildren,
+  ApiV2RentalAgreementsRoute: ApiV2RentalAgreementsRoute,
+  ApiV2VisitsRoute: ApiV2VisitsRoute,
   ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
   CommercialCityLocalityRoute: CommercialCityLocalityRoute,
@@ -1816,6 +2014,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDevEmailPreviewTypeRoute: ApiDevEmailPreviewTypeRoute,
   ApiPublicPropertiesLocationAccessRoute:
     ApiPublicPropertiesLocationAccessRoute,
+  ApiV2MediaPresignDownloadRoute: ApiV2MediaPresignDownloadRoute,
+  ApiV2MediaPresignUploadRoute: ApiV2MediaPresignUploadRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,
   ApiPublicPropertiesIdSaveRoute: ApiPublicPropertiesIdSaveRoute,
