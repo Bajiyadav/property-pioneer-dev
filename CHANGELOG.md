@@ -1,3 +1,8 @@
+## v0.127.0 — 2026-09-02
+
+### Features
+- feat(docker): add production multi-stage Dockerfile for Java 21 Spring Boot backend (9bcfc8e)
+
 ## v0.126.0 — 2026-09-02
 
 ### Features
