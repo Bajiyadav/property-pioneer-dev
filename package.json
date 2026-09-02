@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:latency": "node scripts/test-supabase-latency.mjs",
+    "benchmark": "node scripts/benchmark-concurrency.mjs",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
