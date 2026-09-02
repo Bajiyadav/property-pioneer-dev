@@ -1,3 +1,8 @@
+## v0.120.0 — 2026-09-02
+
+### Features
+- feat(staging): add RDS PostgreSQL DDL, native endpoints, and concurrency benchmark (e55cc25)
+
 ## v0.119.0 — 2026-09-02
 
 ### Features
