@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Pre-Launch Verification & Operations Checklist
+# Seedha Properties — Pre-Launch Verification & Operations Checklist
 
 > **Author**: Senior QA Engineer, DevOps Lead, & Product Manager  
 > **Launch Target**: Production Go-Live Readiness Verification
@@ -51,7 +51,7 @@
 ### Section D: Operational & Customer Support Readiness
 
 - [ ] Emergency escalation channel setup on Slack/Discord for production downtime.
-- [ ] Customer support email (`support@urbanrentalflats.com`) active.
+- [ ] Customer support email (`support@seedhaproperties.com`) active.
 - [ ] WhatsApp Business number configured for automated inquiry forwarding.
 
 ---

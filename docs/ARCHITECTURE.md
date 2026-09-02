@@ -1,8 +1,8 @@
-# Urban Rental Flats (URF) — Platform Architecture
+# Seedha Properties — Platform Architecture
 
 ## High-Level Architecture
 
-Urban Rental Flats is designed as a full-stack, modular, API-first platform built on **TanStack Start** (React 19 + Vite 8 + Nitro) and **Supabase** (Postgres + Auth).
+Seedha Properties is designed as a full-stack, modular, API-first platform built on **TanStack Start** (React 19 + Vite 8 + Nitro) and **Supabase** (Postgres + Auth).
 
 ```mermaid
 graph TD

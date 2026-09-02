@@ -1,4 +1,4 @@
-# Urban Properties — Final Production Validation
+# Seedha Properties — Final Production Validation
 
 Commit `pending` · database `iyttetfaavokzyexvqam` · https://property-pioneer-dev.vercel.app
 

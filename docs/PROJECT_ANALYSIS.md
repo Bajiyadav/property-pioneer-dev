@@ -1,8 +1,8 @@
-# Urban Rental Flats (URF) — Complete Project Analysis
+# Seedha Properties — Complete Project Analysis
 
 ## Executive Summary
 
-Urban Rental Flats (URF) is an API-first, modular real-estate platform built on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row-Level Security + Auth). The application serves anonymous home seekers looking for rental or purchase properties across India, while providing an authenticated dashboard for platform administrators to manage property approvals, customer enquiries, and security audit logs.
+Seedha Properties is an API-first, modular real-estate platform built on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row-Level Security + Auth). The application serves anonymous home seekers looking for rental or purchase properties across India, while providing an authenticated dashboard for platform administrators to manage property approvals, customer enquiries, and security audit logs.
 
 The architecture emphasizes security baseline primitives (rate-limiting, honeypots, Turnstile CAPTCHA, least-privilege column-level database grants) and modular extension (feature switchboard with ~100+ reserved capabilities across 10 domains).
 

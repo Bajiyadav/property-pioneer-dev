@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==============================================================================
-# Urban Properties — GitHub Branch Protection Configuration Script
+# Seedha Properties — GitHub Branch Protection Configuration Script
 #
 # Configures strict production delivery rules on the 'main' branch:
 #  - Requires Pull Request reviews before merging

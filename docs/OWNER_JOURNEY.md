@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Property Owner Journey & Listing Management Audit
+# Seedha Properties — Property Owner Journey & Listing Management Audit
 
 > **Author**: Senior Product Manager & Real Estate Domain Expert  
 > **Target Persona**: Property Owner (Individual Flat Owners, Independent House Owners, Multi-unit Landlords in Tier-2/3 India)

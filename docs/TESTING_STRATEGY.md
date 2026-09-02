@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Comprehensive Testing Strategy
+# Seedha Properties — Comprehensive Testing Strategy
 
 > **Document Type:** Quality Assurance & Test Engineering Framework  
 > **Repository:** `property-pioneer-dev`  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document details the multi-layered testing strategy for Urban Rental Flats (URF). The goal is to achieve **85%+ code coverage** on core business logic, **100% coverage** on security/authorization primitives, and ensure **zero-regression deployments** via automated CI/CD pipelines.
+This document details the multi-layered testing strategy for Seedha Properties. The goal is to achieve **85%+ code coverage** on core business logic, **100% coverage** on security/authorization primitives, and ensure **zero-regression deployments** via automated CI/CD pipelines.
 
 ```
        +---------------------------------------+
@@ -181,7 +181,7 @@ export const options = {
 };
 
 export default function () {
-  const res = http.get("https://staging.urbanrentalflats.com/properties");
+  const res = http.get("https://staging.seedhaproperties.com/properties");
   check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }

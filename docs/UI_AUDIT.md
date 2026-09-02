@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — UI Component & Design System Audit
+# Seedha Properties — UI Component & Design System Audit
 
 > **Author**: Senior UX Designer & Staff Frontend Architect  
 > **Constraint Checklist**:

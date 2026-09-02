@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Enterprise Risk Register
+# Seedha Properties — Enterprise Risk Register
 
 > **Document Type:** Comprehensive Technical & Operational Risk Assessment  
 > **Repository:** `property-pioneer-dev`  
@@ -8,7 +8,7 @@
 
 ## Executive Overview
 
-This Risk Register identifies, analyzes, and establishes mitigation strategies for all technical, security, operational, financial, and product risks associated with Urban Rental Flats (URF).
+This Risk Register identifies, analyzes, and establishes mitigation strategies for all technical, security, operational, financial, and product risks associated with Seedha Properties.
 
 Risk Severity is computed using the standard matrix: **Severity = Impact x Probability**.
 

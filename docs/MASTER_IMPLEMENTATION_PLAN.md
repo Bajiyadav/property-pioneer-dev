@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Master Implementation Plan
+# Seedha Properties — Master Implementation Plan
 
 > **Document Type:** Production Readiness Implementation Plan  
 > **Repository:** `property-pioneer-dev`  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Urban Rental Flats (URF) is an API-first, security-hardened real estate rental platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row/Column-Level Security + Auth).
+Seedha Properties is an API-first, security-hardened real estate rental platform engineered on **TanStack Start** (Vite + React 19 SSR) and **Supabase** (Postgres + Row/Column-Level Security + Auth).
 
 This Master Implementation Plan serves as the definitive technical roadmap transitioning URF from its current MVP state to an enterprise-grade production platform capable of scaling to over 1,000,000 active users.
 

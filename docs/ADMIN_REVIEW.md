@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Admin Governance, Security & Audit Log Review
+# Seedha Properties — Admin Governance, Security & Audit Log Review
 
 > **Author**: Staff Software Architect & Security Engineer  
 > **Route Audited**: `src/routes/_authenticated/admin.tsx`  

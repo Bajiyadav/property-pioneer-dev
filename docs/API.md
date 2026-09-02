@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — API & Server Functions Reference
+# Seedha Properties — API & Server Functions Reference
 
 ## REST API Endpoints
 

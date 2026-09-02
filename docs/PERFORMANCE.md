@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Performance & Core Web Vitals Analysis
+# Seedha Properties — Performance & Core Web Vitals Analysis
 
 ## Executive Performance Summary
 

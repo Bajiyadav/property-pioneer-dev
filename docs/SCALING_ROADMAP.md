@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Multi-Tier Scaling Roadmap
+# Seedha Properties — Multi-Tier Scaling Roadmap
 
 > **Document Type:** Infrastructure & Architecture Scaling Blueprint  
 > **Repository:** `property-pioneer-dev`  
@@ -8,7 +8,7 @@
 
 ## Executive Overview
 
-This document outlines the architectural evolution required to scale Urban Rental Flats (URF) seamlessly from its initial launch to serving over 1,000,000 active daily users while maintaining sub-100ms response times and 99.99% system availability.
+This document outlines the architectural evolution required to scale Seedha Properties seamlessly from its initial launch to serving over 1,000,000 active daily users while maintaining sub-100ms response times and 99.99% system availability.
 
 ---
 

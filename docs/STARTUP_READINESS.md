@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Infrastructure & Startup Scaling Strategy
+# Seedha Properties — Infrastructure & Startup Scaling Strategy
 
 > **Author**: Staff Systems Architect & DevOps Lead  
 > **Infrastructure Target**: Scaling from 1,000 to 1,000,000 Monthly Active Users (MAU)  

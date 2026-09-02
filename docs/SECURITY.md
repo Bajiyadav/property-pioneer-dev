@@ -1,9 +1,9 @@
-# Urban Rental Flats (URF) — Security Review & Audit Report
+# Seedha Properties — Security Review & Audit Report
 
 ## Executive Security Summary
 
 - **Overall Security Score**: **88 / 100**
-- **Audit Target**: Urban Rental Flats (URF) Platform Codebase
+- **Audit Target**: Seedha Properties Platform Codebase
 - **Status**: Passed Baseline Audit — Zero Critical SQL Injection or Unauthenticated Data Leakage Vulnerabilities Found.
 
 ---

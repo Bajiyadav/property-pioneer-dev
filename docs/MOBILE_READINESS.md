@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — React Native / Mobile App Architecture Roadmap
+# Seedha Properties — React Native / Mobile App Architecture Roadmap
 
 > **Author**: Staff Mobile Architect & Lead Full-Stack Engineer  
 > **Target Technology**: Expo / React Native (iOS & Android Monorepo)  

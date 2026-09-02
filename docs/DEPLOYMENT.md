@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Deployment & Operations Guide
+# Seedha Properties — Deployment & Operations Guide
 
 ## Development Environment Setup
 

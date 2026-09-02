@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Final System Evaluation & Executive Summary
+# Seedha Properties — Final System Evaluation & Executive Summary
 
 ## Platform Health & Quality Scores
 
@@ -122,7 +122,7 @@
 46. Implement Sentry error tracking for client-side and server-side runtime errors.
 47. Add PostHog / Mixpanel product analytics tracking user search conversion funnels.
 48. Configure Cloudflare Web Application Firewall (WAF) rules blocking known bot user agents.
-49. Implement franchise multi-tenant domain mapping (`city.urbanrentalflats.com`).
+49. Implement franchise multi-tenant domain mapping (`city.seedhaproperties.com`).
 50. Prepare API specification export for native iOS and Android mobile apps.
 
 ---

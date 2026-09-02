@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Complete Product Review & Health Report
+# Seedha Properties — Complete Product Review & Health Report
 
 > **Author**: CTO, Principal Product Manager, & Real Estate Domain Expert  
 > **Date**: August 2026  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Urban Rental Flats (URF) is positioning itself to disrupt the Indian real estate rental ecosystem by targeting the underserved Tier-2 and Tier-3 urban centers. While incumbents like NoBroker, MagicBricks, and 99acres dominate Tier-1 metros (Bengaluru, Mumbai, NCR), their search filters, pricing models, and trust mechanics fail to address local Tier-2/3 rental dynamics—such as bachelor discrimination, local broker dominance, lack of digitized documentation, and heavy reliance on WhatsApp/phone communication.
+Seedha Properties is positioning itself to disrupt the Indian real estate rental ecosystem by targeting the underserved Tier-2 and Tier-3 urban centers. While incumbents like NoBroker, MagicBricks, and 99acres dominate Tier-1 metros (Bengaluru, Mumbai, NCR), their search filters, pricing models, and trust mechanics fail to address local Tier-2/3 rental dynamics—such as bachelor discrimination, local broker dominance, lack of digitized documentation, and heavy reliance on WhatsApp/phone communication.
 
 This audit evaluates the platform across **15 core product surfaces** for User Experience, Accessibility, Mobile Responsiveness, Conversion Rate Optimization (CRO), Performance, Trust Signals, SEO, Security, and Scalability.
 

@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Development Sprint Plan
+# Seedha Properties — Development Sprint Plan
 
 > **Document Type:** Execution Sprint Schedule & Deliverables  
 > **Repository:** `property-pioneer-dev`  

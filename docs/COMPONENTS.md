@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — React Component Hierarchy & Documentation
+# Seedha Properties — React Component Hierarchy & Documentation
 
 ## Complete Component Tree
 
@@ -45,7 +45,7 @@ RootShell (src/routes/__root.tsx)
 
 ### 1. `BrandMark` (`src/components/BrandMark.tsx`)
 
-- **Purpose**: Displays the official Urban Rental Flats logo and name with responsive size presets.
+- **Purpose**: Displays the official Seedha Properties logo and name with responsive size presets.
 - **Props**:
   - `size?: "sm" | "md" | "lg"` (default: `"md"`)
   - `responsiveName?: boolean` (hides text on small mobile viewports)

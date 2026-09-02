@@ -1,8 +1,8 @@
-# Urban Rental Flats (URF) — Authentication & Security Architecture
+# Seedha Properties — Authentication & Security Architecture
 
 ## Authentication Overview
 
-Urban Rental Flats utilizes **Supabase Auth** for identity management. Users authenticate via Email and Password, receiving a signed JSON Web Token (JWT) that is stored client-side in browser `localStorage` and attached to server function calls.
+Seedha Properties utilizes **Supabase Auth** for identity management. Users authenticate via Email and Password, receiving a signed JSON Web Token (JWT) that is stored client-side in browser `localStorage` and attached to server function calls.
 
 ---
 

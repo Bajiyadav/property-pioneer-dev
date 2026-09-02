@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Tier-2/3 SEO & Local Growth Engine Strategy
+# Seedha Properties — Tier-2/3 SEO & Local Growth Engine Strategy
 
 > **Author**: Lead SEO Specialist & Growth Marketer  
 > **Primary Acquisition Strategy**: Programmatic Tier-2/3 City SEO, WhatsApp Viral Loops, & Hyper-Local Community Growth
@@ -37,7 +37,7 @@ To capture Google Rich Snippets and Carousel cards, every property page injects 
     "@type": "RealEstateListing",
     "name": "Spacious 2 BHK Flat in Malviya Nagar",
     "description": "2 BHK rental flat with modern amenities in Jaipur",
-    "url": "https://urbanrentalflats.com/properties/prop-123",
+    "url": "https://seedhaproperties.com/properties/prop-123",
     "datePosted": "2026-08-01",
     "price": "18000",
     "priceCurrency": "INR",
@@ -63,7 +63,7 @@ export const getOgImageUrl = (title?: string, price?: number) => {
   const params = new URLSearchParams();
   if (title) params.set("title", title);
   if (price) params.set("price", `₹${price.toLocaleString("en-IN")}`);
-  return `https://urbanrentalflats.com/api/og?${params.toString()}`;
+  return `https://seedhaproperties.com/api/og?${params.toString()}`;
 };
 ```
 

@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Production Readiness Checklist
+# Seedha Properties — Production Readiness Checklist
 
 > **Document Type:** Pre-Launch & Operational Production Audit Checklist  
 > **Repository:** `property-pioneer-dev`  
@@ -142,7 +142,7 @@
 - [ ] `VITE_SUPABASE_PUBLISHABLE_KEY`: Valid publishable API key configured.
 - [ ] `SUPABASE_URL`: Server-side Supabase URL configured.
 - [ ] `SUPABASE_SERVICE_ROLE_KEY`: Secret service role key set in server environment ONLY (never exposed to client).
-- [ ] `VITE_APP_URL`: Production canonical domain URL set (`https://urbanrentalflats.com`).
+- [ ] `VITE_APP_URL`: Production canonical domain URL set (`https://seedhaproperties.com`).
 - [ ] `VITE_TURNSTILE_SITE_KEY`: Production Cloudflare Turnstile site key configured.
 - [ ] `TURNSTILE_SECRET_KEY`: Production Turnstile secret key set in server environment.
 

@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — End-to-End Customer Journey Blueprint
+# Seedha Properties — End-to-End Customer Journey Blueprint
 
 > **Author**: Senior Product Manager & UX Architect  
 > **Target Persona**: Tenant / Rent Seeker (Students, Young Professionals, Families in Tier-2/3 India)

@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — User Experience (UX) & Friction Audit
+# Seedha Properties — User Experience (UX) & Friction Audit
 
 > **Author**: Senior UX Designer & Product Manager  
 > **Focus Area**: Real Estate Rental Friction, Micro-interactions, & Tier-2/3 Indian User Psychology
@@ -50,7 +50,7 @@ Renters and property owners in Tier-2/3 Indian markets (e.g. Jaipur, Lucknow, In
 
 - **Current Behavior**: Pops open a modal asking for Name, Email, Phone, and Message.
 - **UX Improvement**: Offer two distinct one-tap action buttons:
-  - 🟢 **WhatsApp Instant Chat**: Pre-fills message `"Hi, I am interested in your property [Property Title] on Urban Rental Flats. Is it available?"`
+  - 🟢 **WhatsApp Instant Chat**: Pre-fills message `"Hi, I am interested in your property [Property Title] on Seedha Properties. Is it available?"`
   - 📞 **Request Callback**: Sends instant SMS notification to the owner.
 
 ---

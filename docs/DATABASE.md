@@ -1,4 +1,4 @@
-# Urban Rental Flats (URF) — Database Specification & Schema
+# Seedha Properties — Database Specification & Schema
 
 ## Entity-Relationship (ER) Diagram
 
