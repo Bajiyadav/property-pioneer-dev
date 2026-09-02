@@ -1,3 +1,8 @@
+## v0.119.0 — 2026-09-02
+
+### Features
+- feat(backend): implement standalone high-performance native backend modules (ef31c88)
+
 ## v0.118.0 — 2026-09-02
 
 ### Features
