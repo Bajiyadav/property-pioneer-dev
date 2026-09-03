@@ -1,0 +1,174 @@
+name: Mobile iOS Cloud Build
+
+# iOS counterpart to "Mobile APK Cloud Build" (mobile-build.yml).
+#
+# Why this is a separate workflow, and why it does not just mirror Android:
+#  * iOS builds need a macOS runner and Xcode; Android runs on ubuntu.
+#  * The Android workflow gates the build on the web Vitest suite (`npm test`),
+#    which is currently red because of the external Supabase egress-quota
+#    incident — so that job fails before it ever builds the APK. This workflow
+#    deliberately does NOT couple the iOS build to the web test suite; it runs
+#    the mobile analyzer and mobile tests, which are the checks that actually
+#    concern the Flutter app.
+#  * The repo tracks only apps/mobile/android; ios/ (like web/macos/…) is
+#    .gitignored and generated per-build, so this workflow scaffolds it the same
+#    way the Android job scaffolds a missing android/.
+#
+# It produces an UNSIGNED release build. It never publishes to the App Store and
+# never needs Apple credentials to run. Producing a signed .ipa additionally
+# requires the signing material listed under "Signing" below — until those
+# secrets exist, the signed path is skipped and reported as REQUIRES OWNER ACTION.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/mobile-ios.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+# Least privilege: the job only reads the repo and uploads an artifact.
+permissions:
+  contents: read
+
+jobs:
+  build-ios:
+    name: Build iOS Release (unsigned)
+    # macOS 14 ships Xcode 15 / iOS 17 SDK, which satisfies the Flutter
+    # toolchain pinned by this project.
+    runs-on: macos-14
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Verify Flutter & Dart
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Scaffold Native iOS Runner (if absent)
+        working-directory: apps/mobile
+        run: |
+          # ios/ is intentionally .gitignored (only android/ is tracked), so a
+          # fresh checkout has no Runner project — generate it, matching the
+          # Android job's `flutter create` fallback. Uses the same org as Android
+          # so the bundle id is com.seedhaproperties.seedhaPropertiesMobile
+          # (iOS bundle ids cannot contain underscores).
+          if [ ! -d "ios" ]; then
+            echo "Generating native iOS Runner…"
+            flutter create . \
+              --org com.seedhaproperties \
+              --project-name seedha_properties_mobile \
+              --platforms=ios
+          fi
+
+      - name: Declare iOS Permission Usage Descriptions
+        working-directory: apps/mobile
+        run: |
+          # The app crashes on iOS if it touches the camera, photo library or
+          # location without a usage-description string. These three, and only
+          # these three, correspond to features the app actually uses:
+          #   camera + photo library -> image_picker (KYC + property photos)
+          #   location when in use   -> geolocator (location-first search)
+          # No microphone / always-location / contacts keys are added, because
+          # the app does not use those APIs.
+          PLIST="ios/Runner/Info.plist"
+          PB=/usr/libexec/PlistBuddy
+
+          set_or_add() {
+            local key="$1" value="$2"
+            if $PB -c "Print :$key" "$PLIST" >/dev/null 2>&1; then
+              $PB -c "Set :$key $value" "$PLIST"
+            else
+              $PB -c "Add :$key string $value" "$PLIST"
+            fi
+          }
+
+          set_or_add "CFBundleDisplayName" "Seedha Properties"
+          set_or_add "NSCameraUsageDescription" "Seedha Properties uses the camera so you can photograph your property listings and capture KYC/ownership documents."
+          set_or_add "NSPhotoLibraryUsageDescription" "Seedha Properties needs access to your photos so you can attach property images and upload identity or ownership documents."
+          set_or_add "NSLocationWhenInUseUsageDescription" "Seedha Properties uses your location to show properties near you and speed up city selection."
+
+          echo "Configured usage descriptions:"
+          for k in CFBundleDisplayName NSCameraUsageDescription NSPhotoLibraryUsageDescription NSLocationWhenInUseUsageDescription; do
+            printf '  %s = %s\n' "$k" "$($PB -c "Print :$k" "$PLIST")"
+          done
+
+      - name: Install Mobile Dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Run Flutter Static Analysis
+        working-directory: apps/mobile
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run Mobile Unit & Widget Tests
+        working-directory: apps/mobile
+        run: flutter test
+
+      - name: Determine Whether Apple Signing Is Available
+        id: signing
+        run: |
+          # A signed build is attempted only when the owner has provided the
+          # signing material as repository secrets. Absent that, CI produces an
+          # unsigned build — no fake certificates, no disabled security.
+          if [ -n "${{ secrets.IOS_DIST_CERTIFICATE_BASE64 }}" ] \
+             && [ -n "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "Apple signing material detected — a signed archive step could run."
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No Apple signing secrets configured. Building UNSIGNED. Signed .ipa/App Store export is REQUIRES OWNER ACTION."
+          fi
+
+      - name: Build iOS App (release, unsigned)
+        working-directory: apps/mobile
+        run: |
+          # --no-codesign builds Runner.app without any certificate, which is the
+          # maximum safe artifact CI can produce without Apple credentials. This
+          # compiles the full app, runs CocoaPods, and validates the Xcode build —
+          # it just does not sign or package an installable .ipa.
+          flutter build ios --release --no-codesign \
+            --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
+            --dart-define=API_BASE_URL=https://seedhaproperties.com/api \
+            --dart-define=GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+
+      - name: Verify & Package Unsigned App
+        working-directory: apps/mobile
+        run: |
+          APP_PATH="build/ios/iphoneos/Runner.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: Expected build output not found at $APP_PATH"
+            exit 1
+          fi
+          SIZE=$(du -sh "$APP_PATH" | awk '{print $1}')
+          echo "SUCCESS: Built $APP_PATH (Size: $SIZE)"
+          # Zip the .app so the artifact keeps its bundle structure.
+          ( cd build/ios/iphoneos && zip -qr "$GITHUB_WORKSPACE/Runner-unsigned.zip" Runner.app )
+
+      - name: Upload Unsigned iOS Build Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: seedha-properties-ios-unsigned
+          path: Runner-unsigned.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Pipeline Summary
+        run: |
+          echo "🍏 Seedha Properties iOS build & test pipeline completed."
+          echo "Artifact: seedha-properties-ios-unsigned (UNSIGNED Runner.app)."
+          echo "Signed .ipa and App Store distribution: REQUIRES OWNER ACTION (see workflow header)."
