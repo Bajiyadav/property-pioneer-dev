@@ -1,3 +1,8 @@
+## v0.130.0 — 2026-09-03
+
+### Features
+- feat(mobile): align LocationPickerCard and property cards with Stitch home layout (4c1ee0b)
+
 ## v0.129.0 — 2026-09-03
 
 ### Features
