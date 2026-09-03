@@ -45,6 +45,17 @@ public class StoredFile {
     @Column(name = "status", nullable = false, length = 50)
     private String status = "ACTIVE";
 
+    /**
+     * Malware scan state: PENDING, CLEAN, INFECTED, or NOT_SCANNED. Defaults to
+     * NOT_SCANNED so a file is never assumed safe. A private file is only served
+     * when this is CLEAN, or when scan enforcement is off (no scanner deployed).
+     */
+    @Column(name = "scan_status", nullable = false, length = 30)
+    private String scanStatus = "NOT_SCANNED";
+
+    @Column(name = "scanned_at")
+    private OffsetDateTime scannedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
@@ -106,6 +117,10 @@ public class StoredFile {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getScanStatus() { return scanStatus; }
+    public void setScanStatus(String scanStatus) { this.scanStatus = scanStatus; }
+    public OffsetDateTime getScannedAt() { return scannedAt; }
+    public void setScannedAt(OffsetDateTime scannedAt) { this.scannedAt = scannedAt; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }

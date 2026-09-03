@@ -5,6 +5,7 @@ import com.seedha.properties.entity.StoredFile;
 import com.seedha.properties.repository.StoredFileRepository;
 import com.seedha.properties.security.UserPrincipal;
 import com.seedha.properties.service.FileSecurityValidator;
+import com.seedha.properties.service.MalwareScanService;
 import com.seedha.properties.service.SecurityAuditService;
 import com.seedha.properties.service.StorageService;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +29,22 @@ public class FileController {
     private final StoredFileRepository storedFileRepository;
     private final FileSecurityValidator fileValidator;
     private final SecurityAuditService auditService;
+    private final MalwareScanService malwareScanService;
+    private final boolean scanRequiredForPrivate;
 
     public FileController(StorageService storageService,
                           StoredFileRepository storedFileRepository,
                           FileSecurityValidator fileValidator,
-                          SecurityAuditService auditService) {
+                          SecurityAuditService auditService,
+                          MalwareScanService malwareScanService,
+                          @org.springframework.beans.factory.annotation.Value(
+                                  "${seedha.files.scan.require-for-private:false}") boolean scanRequiredForPrivate) {
         this.storageService = storageService;
         this.storedFileRepository = storedFileRepository;
         this.fileValidator = fileValidator;
         this.auditService = auditService;
+        this.malwareScanService = malwareScanService;
+        this.scanRequiredForPrivate = scanRequiredForPrivate;
     }
 
     @PostMapping("/upload")
@@ -63,16 +71,42 @@ public class FileController {
             byte[] fileBytes = file.getBytes();
             fileValidator.validateMagicBytes(fileBytes, file.getContentType(), file.getOriginalFilename());
 
-            // 3. Compute SHA-256 Checksum
+            // 3. Malware scan while the bytes are in hand. INFECTED is always
+            //    rejected. When no scanner is reachable the file is recorded as
+            //    PENDING; for private folders that is refused outright when
+            //    scan enforcement is on, so a sensitive document is never
+            //    trusted before it has been scanned.
+            MalwareScanService.ScanResult scan = malwareScanService.scan(fileBytes);
+            String scanStatus;
+            switch (scan.verdict()) {
+                case CLEAN -> scanStatus = "CLEAN";
+                case INFECTED -> {
+                    auditService.logSecurityEvent("FILE_MALWARE_DETECTED", currentUser.getId(), null, null,
+                            String.format("{\"folder\":\"%s\",\"signature\":\"%s\"}",
+                                    folder, scan.signature()));
+                    return ResponseEntity.status(422)
+                            .body(ApiResponse.error("File rejected: failed malware scan."));
+                }
+                default -> scanStatus = "PENDING";
+            }
+
+            // 4. Compute SHA-256 Checksum
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(fileBytes);
             String sha256 = HexFormat.of().formatHex(hashBytes);
 
             FileSecurityValidator.FolderRule rule = fileValidator.getRule(folder);
             boolean isPrivate = rule.isPrivate();
+
+            if (isPrivate && scanRequiredForPrivate && !"CLEAN".equals(scanStatus)) {
+                auditService.logSecurityEvent("FILE_SCAN_UNAVAILABLE_BLOCKED", currentUser.getId(), null, null,
+                        String.format("{\"folder\":\"%s\"}", folder));
+                return ResponseEntity.status(503)
+                        .body(ApiResponse.error("Uploads are temporarily unavailable: document scanning is offline."));
+            }
             String objectKey = fileValidator.generateSafeObjectKey(folder, currentUser.getId(), file.getOriginalFilename(), entityId);
 
-            // 4. Save metadata
+            // 5. Save metadata
             StoredFile storedFile = new StoredFile(
                     currentUser.getId(),
                     folder.toLowerCase(),
@@ -85,6 +119,10 @@ public class FileController {
                     entityId,
                     sha256
             );
+            storedFile.setScanStatus(scanStatus);
+            if ("CLEAN".equals(scanStatus)) {
+                storedFile.setScannedAt(java.time.OffsetDateTime.now());
+            }
             StoredFile saved = storedFileRepository.save(storedFile);
 
             auditService.logSecurityEvent("FILE_DIRECT_UPLOAD_SUCCESS", currentUser.getId(), null, null,

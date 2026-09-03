@@ -47,6 +47,14 @@ seedha:
     previous-keys: ${JWT_PREVIOUS_KEYS:}
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
+  files:
+    scan:
+      require-for-private: ${FILES_SCAN_REQUIRE_PRIVATE:false}
+    clamav:
+      enabled: ${CLAMAV_ENABLED:false}
+      host: ${CLAMAV_HOST:localhost}
+      port: ${CLAMAV_PORT:3310}
+      timeout-ms: ${CLAMAV_TIMEOUT_MS:10000}
   aws:
     region: ${AWS_REGION:ap-south-1}
     public-bucket: ${S3_PUBLIC_MEDIA_BUCKET:seedha-properties-public-media-staging}
@@ -64,9 +72,26 @@ seedha:
 
 logging:
   pattern:
-    console: '{"service":"seedha-java-backend","timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","thread":"%t","logger":"%c","message":"%m"}%n'
+    console: '{"service":"seedha-java-backend","timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","thread":"%t","correlation_id":"%X{correlationId:-}","logger":"%c","message":"%m"}%n'
   level:
     root: INFO
     com.seedha.properties: INFO
     org.springframework.web: INFO
     org.springframework.security: WARN
+
+# ── Observability: health probes + metrics (Task 11) ──────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

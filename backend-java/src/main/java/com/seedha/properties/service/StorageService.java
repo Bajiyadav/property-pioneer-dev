@@ -14,7 +14,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryption;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import jakarta.annotation.PreDestroy;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +43,7 @@ public class StorageService {
     private final PropertyRepository propertyRepository;
     private final RentalAgreementRepository rentalAgreementRepository;
     private final SecurityAuditService auditService;
+    private final S3Presigner presigner;
 
     // In-memory rate limiting: max operations per user per 15 minutes window
     private final Map<UUID, List<Long>> uploadRateLimitMap = new ConcurrentHashMap<>();
@@ -61,6 +71,63 @@ public class StorageService {
         this.propertyRepository = propertyRepository;
         this.rentalAgreementRepository = rentalAgreementRepository;
         this.auditService = auditService;
+
+        S3Presigner built = null;
+        try {
+            // Default credential chain: the ECS task role in staging/production,
+            // ambient credentials locally. No AWS keys are read from config.
+            built = S3Presigner.builder().region(Region.of(awsRegion)).build();
+        } catch (RuntimeException ex) {
+            log.warn("S3 presigner unavailable; media endpoints refuse until AWS credentials are configured");
+        }
+        this.presigner = built;
+    }
+
+    @PreDestroy
+    public void closePresigner() {
+        if (presigner != null) {
+            presigner.close();
+        }
+    }
+
+    /** True when this deployment can actually sign an S3 URL. */
+    public boolean isConfigured() {
+        return presigner != null;
+    }
+
+    /**
+     * A real pre-signed PUT. Replaces a hand-built query string that carried
+     * X-Amz-Algorithm and X-Amz-Expires but NO X-Amz-Signature — a URL S3 would
+     * reject, and worse, one that looked plausible enough to hide that uploads
+     * could never actually work.
+     */
+    private String presignPut(String bucket, String objectKey, String contentType, boolean isPrivate, int ttlSeconds) {
+        requirePresigner();
+        PutObjectRequest.Builder put = PutObjectRequest.builder()
+                .bucket(bucket).key(objectKey).contentType(contentType);
+        if (isPrivate) {
+            put.serverSideEncryption(ServerSideEncryption.AES256);
+        }
+        return presigner.presignPutObject(PutObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofSeconds(ttlSeconds))
+                        .putObjectRequest(put.build())
+                        .build())
+                .url().toString();
+    }
+
+    private String presignGet(String bucket, String objectKey, int ttlSeconds) {
+        requirePresigner();
+        return presigner.presignGetObject(GetObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofSeconds(ttlSeconds))
+                        .getObjectRequest(GetObjectRequest.builder().bucket(bucket).key(objectKey).build())
+                        .build())
+                .url().toString();
+    }
+
+    private void requirePresigner() {
+        if (presigner == null) {
+            throw new IllegalStateException("Object storage is not configured on this deployment");
+        }
     }
 
     @Transactional
@@ -87,10 +154,9 @@ public class StorageService {
         String objectKey = fileValidator.generateSafeObjectKey(req.getFolder(), currentUserId, req.getFileName(), req.getEntityId());
         String targetBucket = isPrivate ? privateBucket : publicBucket;
 
-        // 5. Generate S3 Pre-signed PUT URL (5-minute TTL / 300 seconds)
+        // 5. Real pre-signed PUT (short TTL). Server-side encryption for private docs.
         int expiresInSeconds = 300;
-        String uploadUrl = String.format("https://%s.s3.%s.amazonaws.com/%s?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=%d",
-                targetBucket, awsRegion, objectKey, expiresInSeconds);
+        String uploadUrl = presignPut(targetBucket, objectKey, req.getContentType(), isPrivate, expiresInSeconds);
 
         // 6. Public URL (strictly omitted for private documents)
         String publicUrl = null;
@@ -205,10 +271,9 @@ public class StorageService {
             throw new AccessDeniedException("Forbidden: You are not authorized to access this private document");
         }
 
-        // 3. Generate Pre-signed GET URL (5-minute TTL / 300 seconds)
+        // 3. Real pre-signed GET (short TTL).
         int expiresInSeconds = 300;
-        String downloadUrl = String.format("https://%s.s3.%s.amazonaws.com/%s?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=%d",
-                privateBucket, awsRegion, objectKey, expiresInSeconds);
+        String downloadUrl = presignGet(privateBucket, objectKey, expiresInSeconds);
 
         auditService.logSecurityEvent("FILE_PRESIGN_DOWNLOAD_SUCCESS", currentUserId, null, null,
                 String.format("{\"folder\":\"%s\",\"object_key\":\"%s\"}", folder, objectKey));

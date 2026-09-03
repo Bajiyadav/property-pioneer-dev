@@ -65,24 +65,44 @@ object. It exists because a key string alone cannot answer "who owns this",
 - **Orphan cleanup**: a `PENDING_UPLOAD` row older than the 5-minute URL life had
   no upload behind it. `idx_stored_files_pending` is the index for that sweep.
 
-## Malware scanning — NOT IMPLEMENTED
+## Malware scanning — implemented, OFF by default
 
-**No malware scanning runs today.** `scan_status` defaults to `NOT_SCANNED` and
-nothing in the platform may treat a file as clean on the strength of that value.
+A real ClamAV scanner is wired. It is **disabled until clamd is deployed**, and
+nothing treats a file as safe until the scanner has actually returned `CLEAN`.
 
-The column exists so a scanner can be added without touching the storage design.
-The intended integration, when it is built:
+- `MalwareScanService` is the contract. Its verdicts keep the honest distinction
+  that matters: `UNAVAILABLE` (no scanner) and `ERROR` (scan failed) are **not**
+  `CLEAN`.
+- `ClamAvScanService` speaks clamd's INSTREAM protocol over TCP. Self-hosted and
+  free — chosen over a paid SaaS scanner. Enabled by
+  `seedha.files.clamav.enabled=true`. The socket transport is injected in tests,
+  so framing and verdict parsing are unit-tested without a running daemon
+  (`MalwareScanTests`).
 
-1. Client PUTs to the pre-signed URL.
-2. An S3 `ObjectCreated` event enqueues the key.
-3. A worker scans it (ClamAV in the async worker is the free option; a managed
-   scanner is the paid one) and writes `scan_status` = `CLEAN` | `INFECTED`.
-4. `INFECTED` sets `status` = `QUARANTINED`; download pre-signing refuses
-   anything not `CLEAN`.
+**The pipeline, for the direct-upload route** (`POST /api/v2/files/upload`):
 
-Step 4 is the only part that changes existing code, and it is one condition in
-`MediaController.getPresignDownloadUrl`.
+```
+UPLOAD → validate (MIME + extension + size)
+       → magic-byte inspection
+       → MALWARE SCAN (bytes in hand)
+          ├─ INFECTED  → 422, audited, nothing stored
+          ├─ CLEAN     → scan_status = CLEAN, stored
+          └─ UNAVAILABLE/ERROR
+               ├─ private folder + seedha.files.scan.require-for-private=true
+               │      → 503, refused (fail closed)
+               └─ otherwise → scan_status = PENDING, stored for async re-scan
+```
 
-Magic-byte validation is likewise **not** performed: the client uploads straight
-to S3, so no byte of the file passes through the application. It belongs in the
-same post-upload worker as the scanner.
+- `stored_files.scan_status` defaults to `NOT_SCANNED` and never silently
+  becomes `CLEAN`.
+- `seedha.files.scan.require-for-private` (default `false`) is the fail-closed
+  switch. Turn it on once clamd is deployed.
+
+**Detection is never claimed to be complete.** ClamAV catches known signatures;
+it is a layer, not a guarantee.
+
+**The presigned direct-to-S3 route** does not route bytes through the app, so
+scanning there is an async post-upload step: an S3 `ObjectCreated` event enqueues
+the key, a worker scans and writes `scan_status`, and `INFECTED` flips `status`
+to `QUARANTINED`. That worker is the remaining piece — the schema, the service
+and the config are in place for it.
