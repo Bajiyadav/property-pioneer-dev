@@ -1,3 +1,8 @@
+## v0.130.1 — 2026-09-03
+
+### Refactoring
+- refactor: stack Property above shield icon and Management below in bottom nav (47fb104)
+
 ## v0.130.0 — 2026-09-03
 
 ### Features
