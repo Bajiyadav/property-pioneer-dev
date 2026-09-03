@@ -1,3 +1,8 @@
+## v0.143.0 — 2026-09-03
+
+### Features
+- feat(mobile): implement real notifications screen with user scoping and safe navigation (a079e06)
+
 ## v0.142.3 — 2026-09-03
 
 ### Fixes
