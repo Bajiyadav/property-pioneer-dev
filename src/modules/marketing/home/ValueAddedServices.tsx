@@ -18,8 +18,8 @@ export function ValueAddedServices() {
         <div className="mx-auto mt-12 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
           {/* Property Management (Lease to Us) Card */}
           <div className="flex flex-col justify-between rounded-3xl bg-secondary/40 p-8 shadow-sm ring-1 ring-border/80 transition-all hover:shadow-lg hover:ring-emerald-500/40 dark:hover:ring-emerald-400/40 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 transform translate-x-3 -translate-y-2">
-              <span className="inline-flex items-center gap-1 rounded-bl-2xl rounded-tr-3xl bg-emerald-600 px-3.5 py-1 text-xs font-bold text-white shadow-sm">
+            <div className="absolute top-4 right-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 dark:bg-emerald-500 px-3 py-1 text-[11px] font-extrabold text-white shadow-md">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 GUARANTEED RENT
               </span>
@@ -31,10 +31,10 @@ export function ValueAddedServices() {
               </div>
               <h3 className="text-xl font-bold text-foreground">Property Management</h3>
               <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                Lease Your Home Directly to Us
+                Guaranteed Rent & Full Upkeep
               </p>
               <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                We take your property on rent and provide 100% hands-free management. Receive fixed,
+                We manage your property and provide 100% hands-free operations. Receive fixed,
                 on-time rent every month with zero vacancy risk while we take care of verified
                 tenants and full home upkeep.
               </p>
@@ -60,7 +60,7 @@ export function ValueAddedServices() {
                 to="/list-property"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 group"
               >
-                Lease Your Home to Us
+                Explore Property Management
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>

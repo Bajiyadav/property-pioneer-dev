@@ -82,6 +82,11 @@ export function GeoapifyAutocomplete({
     setIsLoading(true);
     try {
       const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+      if (!apiKey || apiKey === "mock" || apiKey === "undefined") {
+        setIsLoading(false);
+        return;
+      }
+
       const apiUrl =
         import.meta.env.VITE_GEOAPIFY_API_URL || "https://api.geoapify.com/v1/geocode/autocomplete";
 

@@ -91,6 +91,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onCategorySelected(PropertyCategory category) {
+    if (_selectedState == null || _selectedCity == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select your State and City above first to explore properties.'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
     ref.read(activeCategoryProvider.notifier).state = category;
     context.push('/search');
   }
@@ -384,8 +394,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 12),
                     CategoryCard(
                       title: 'Property Management',
-                      subtitle: 'Complete management for your properties',
-                      icon: Icons.settings_outlined,
+                      subtitle: 'Guaranteed rent • 100% hands-free management',
+                      badge: 'GUARANTEED RENT',
+                      icon: Icons.shield_outlined,
                       // No dedicated Property Management screen exists yet; the
                       // previous "Lease to Us" card used this same handler.
                       onTap: _onPostPropertyPressed,
@@ -630,9 +641,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 10),
                     _buildTrustPillar(
                       icon: Icons.home_work_outlined,
-                      title: 'Property Management (Lease to Us)',
+                      title: 'Property Management',
                       description:
-                          'Lease your home directly to us. Receive guaranteed monthly rent with zero vacancy downtime while we handle verified tenants & full maintenance.',
+                          'Guaranteed monthly rent with zero vacancy downtime while we handle verified tenants & full maintenance.',
                       iconColor: const Color(0xFF059669),
                       iconBgColor: const Color(0xFFD1FAE5),
                     ),
@@ -651,7 +662,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // Property Management: Lease to Us Card
+              // Property Management Guaranteed Rent Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -709,7 +720,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 const Text(
-                                  'Lease Your Property to Us',
+                                  'Property Management',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w800,
@@ -723,7 +734,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'We take your home on rent and pay you fixed monthly payouts on the 1st of every month. Enjoy zero vacancy risk while we handle verified tenants, agreements, and complete home care.',
+                        'We manage your home and pay you fixed monthly payouts on the 1st of every month. Enjoy zero vacancy risk while we handle verified tenants, agreements, and complete home care.',
                         style: TextStyle(
                           color: Color(0xFFD1FAE5),
                           fontSize: 12,
@@ -745,7 +756,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             elevation: 0,
                           ),
                           child: const Text(
-                            'Lease Your Home to Us',
+                            'Explore Property Management',
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 13,

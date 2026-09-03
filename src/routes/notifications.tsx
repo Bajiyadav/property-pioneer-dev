@@ -89,7 +89,7 @@ const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-export function NotificationsPage() {
+function NotificationsPage() {
   const [filter, setFilter] = useState<string>("all");
   const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
 
@@ -224,5 +224,3 @@ export function NotificationsPage() {
     </div>
   );
 }
-
-export default NotificationsPage;

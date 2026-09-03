@@ -274,9 +274,8 @@ function SiteFooter() {
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
             <BrandMark size="sm" />
             <p className="mt-3.5 max-w-sm text-xs text-muted-foreground leading-relaxed">
-              <strong>{BRAND.tagline}</strong> — Connect directly with genuine property owners
-              across India. No platform commission, no middlemen, and every listing moderated before
-              it goes live.
+              <strong>Zero Brokerage. 100% Verified.</strong> Connect directly with verified
+              property owners across India — 0% commission, zero middlemen.
             </p>
 
             {/* Verified Trust Badges */}
@@ -341,6 +340,11 @@ function SiteFooter() {
               <li>
                 <Link to="/home-loans" className="hover:text-foreground transition">
                   Home Loans &amp; EMI
+                </Link>
+              </li>
+              <li>
+                <Link to="/list-property" className="hover:text-foreground transition">
+                  Property Management
                 </Link>
               </li>
             </ul>

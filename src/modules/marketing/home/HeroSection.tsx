@@ -167,7 +167,7 @@ export function HeroSection({
             </div>
           </button>
 
-          {/* Property Management (Lease to Us - Guaranteed Rent) */}
+          {/* Property Management (Guaranteed Rent) */}
           <Link
             to="/list-property"
             className="flex items-center sm:flex-col sm:items-start lg:flex-row lg:items-center gap-2.5 p-3.5 rounded-2xl bg-white/95 dark:bg-slate-900/90 shadow-md backdrop-blur-md border border-emerald-500/40 hover:border-emerald-500 hover:shadow-lg transition-all active:scale-95 group text-left relative overflow-hidden"
@@ -176,13 +176,11 @@ export function HeroSection({
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
-                  Property Mgmt
-                </span>
-              </div>
-              <span className="block text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 truncate">
-                Lease to Us
+              <span className="block text-xs sm:text-sm font-extrabold text-foreground leading-tight truncate">
+                Management
+              </span>
+              <span className="block text-[11px] font-medium text-muted-foreground truncate">
+                Guaranteed Rent
               </span>
             </div>
           </Link>
