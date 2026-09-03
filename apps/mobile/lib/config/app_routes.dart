@@ -26,6 +26,7 @@ import '../features/profile/presentation/legal_hub_screen.dart';
 import '../features/profile/presentation/legal_policy_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/payments/presentation/payments_screen.dart';
+import '../features/services/presentation/services_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -128,6 +129,14 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/pay',
       builder: (context, state) => const PaymentsScreen(),
+    ),
+    GoRoute(
+      path: '/services',
+      builder: (context, state) => const ServicesScreen(),
+    ),
+    GoRoute(
+      path: '/home-services',
+      builder: (context, state) => const ServicesScreen(),
     ),
     GoRoute(
       path: '/location-search',

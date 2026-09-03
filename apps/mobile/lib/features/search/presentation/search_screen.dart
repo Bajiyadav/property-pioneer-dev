@@ -8,6 +8,8 @@ import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_map_view.dart';
+import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
+import 'package:seedha_properties_mobile/features/home/presentation/widgets/home_category_cards.dart';
 import 'package:latlong2/latlong.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -114,6 +116,114 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     ref.read(budgetRangeFilterProvider.notifier).state = _kBudgetBounds;
     _searchController.clear();
     _executeSearch();
+  }
+
+  void _showLocationPickerModal() {
+    String? tempState = ref.read(locationStateProvider).value?.state;
+    String? tempCity = ref.read(locationStateProvider).value?.city;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalContext, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                  20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCBD5E1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Select State & City',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Direct-owner properties are strictly scoped by state and city.',
+                    style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      final loc = await ref.read(locationStateProvider.notifier).detectAndSetCurrentLocation();
+                      if (loc != null) {
+                        _executeSearch();
+                      }
+                    },
+                    icon: const Icon(Icons.my_location_rounded, size: 18),
+                    label: const Text('Use Current Location (GPS)'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F766E),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 46),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  LocationPickerCard(
+                    selectedState: tempState,
+                    selectedCity: tempCity,
+                    onStateChanged: (s) {
+                      setModalState(() {
+                        tempState = s;
+                        tempCity = null;
+                      });
+                    },
+                    onCityChanged: (c) {
+                      if (c != null && tempState != null) {
+                        ref.read(locationStateProvider.notifier).setLocation(
+                              SelectedLocation(
+                                formattedAddress: '$c, $tempState',
+                                city: c,
+                                locality: '',
+                                state: tempState!,
+                                country: 'India',
+                                latitude: 0,
+                                longitude: 0,
+                                isValidated: true,
+                              ),
+                            );
+                        Navigator.pop(ctx);
+                        _executeSearch();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showFilterModal() {
@@ -524,7 +634,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTopPills(),
-                  _buildTaglineAndCategoryTabs(activeCategory),
+                  _buildTaglineAndCategoryTabs(activeCategory, activeCity, locationState.value?.state ?? ''),
                   _buildSearchBar(),
                   _buildLookingForTenantsBanner(),
                   const SizedBox(height: 8),
@@ -702,10 +812,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          // Home
+          // Home (Services)
           Expanded(
             child: GestureDetector(
-              onTap: () => context.go('/'),
+              onTap: () => context.push('/services'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -716,7 +826,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.home_outlined, size: 18, color: Color(0xFF475569)),
+                    Icon(Icons.cleaning_services_outlined, size: 18, color: Color(0xFF475569)),
                     SizedBox(width: 6),
                     Text(
                       'Home',
@@ -766,20 +876,63 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildTaglineAndCategoryTabs(PropertyCategory activeCategory) {
+  Widget _buildTaglineAndCategoryTabs(PropertyCategory activeCategory, String activeCity, String activeState) {
+    final locationLabel = (activeCity.isNotEmpty && activeCity != 'All India')
+        ? (activeState.isNotEmpty ? '$activeCity, $activeState' : activeCity)
+        : 'Select State & City';
+
     return Column(
       children: [
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         const Text(
           '100% Owner Properties | Zero Brokerage',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13.5,
             fontWeight: FontWeight.w700,
             color: Color(0xFF334155),
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
+
+        // State & City Selector Pill
+        GestureDetector(
+          onTap: _showLocationPickerModal,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFCBD5E1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.location_on_rounded, size: 15, color: Color(0xFFE11D48)),
+                const SizedBox(width: 6),
+                Text(
+                  locationLabel,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.keyboard_arrow_down_rounded, size: 17, color: Color(0xFF64748B)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
         // Buy | Rent | Commercial Tabs
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -792,7 +945,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
       ],
     );
   }
