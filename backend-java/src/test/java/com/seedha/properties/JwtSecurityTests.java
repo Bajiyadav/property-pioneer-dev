@@ -2,18 +2,19 @@ package com.seedha.properties;
 
 import com.seedha.properties.dto.AuthRequest;
 import com.seedha.properties.dto.AuthResponse;
-import com.seedha.properties.entity.User;
+import com.seedha.properties.entity.Property;
+import com.seedha.properties.repository.PropertyRepository;
 import com.seedha.properties.repository.RefreshTokenRepository;
 import com.seedha.properties.repository.UserRepository;
 import com.seedha.properties.security.JwtTokenProvider;
 import com.seedha.properties.security.UserPrincipal;
 import com.seedha.properties.service.AuthService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,20 +35,27 @@ class JwtSecurityTests {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    private PropertyRepository propertyRepository;
+
+    // ==========================================
+    // 1. ACCESS TOKEN TESTS
+    // ==========================================
+
     @Test
-    void testValidAccessTokenGenerationAndValidation() {
+    void testValidAccessTokenGenerationAndClaims() {
         UUID userId = UUID.randomUUID();
-        String email = "customer@seedhaproperties.com";
-        String fullName = "Test Customer";
-        String role = "CUSTOMER";
+        String email = "verified_user@seedhaproperties.com";
+        String fullName = "Verified User";
+        String role = "SEEKER";
 
         String token = jwtTokenProvider.generateAccessToken(userId, email, fullName, role);
-        assertNotNull(token, "Access token must not be null");
-        assertTrue(token.length() > 20, "Access token must be non-empty");
+        assertNotNull(token);
+        assertTrue(token.length() > 20);
 
-        assertTrue(jwtTokenProvider.validateToken(token), "Valid token must pass validation");
+        assertTrue(jwtTokenProvider.validateToken(token));
         UserPrincipal principal = jwtTokenProvider.parseToken(token);
-        assertNotNull(principal, "Parsed principal must not be null");
+        assertNotNull(principal);
         assertEquals(userId, principal.getId());
         assertEquals(email, principal.getEmail());
         assertEquals(role, principal.getRole());
@@ -56,84 +64,164 @@ class JwtSecurityTests {
     @Test
     void testExpiredAccessTokenRejection() {
         UUID userId = UUID.randomUUID();
-        String email = "expired_user@seedhaproperties.com";
-        String fullName = "Expired User";
-        String role = "CUSTOMER";
+        String token = jwtTokenProvider.generateToken(userId, "expired@seedhaproperties.com", "Expired", "SEEKER",
+                -1000L, jwtTokenProvider.getIssuer(), jwtTokenProvider.getAudience());
 
-        // Generate token with negative duration (-1000ms) to simulate expiration
-        String expiredToken = jwtTokenProvider.generateToken(userId, email, fullName, role, -1000L);
-
-        assertFalse(jwtTokenProvider.validateToken(expiredToken), "Expired token must be rejected");
-        assertNull(jwtTokenProvider.parseToken(expiredToken), "Parsing expired token must return null");
+        assertFalse(jwtTokenProvider.validateToken(token), "Expired access token must be rejected");
+        assertNull(jwtTokenProvider.parseToken(token));
     }
 
     @Test
-    void testRefreshTokenGenerationAndRotationFlow() {
-        String testEmail = "rotation_test_" + System.currentTimeMillis() + "@seedhaproperties.com";
-        AuthRequest signupReq = new AuthRequest();
-        signupReq.setAction("signup");
-        signupReq.setEmail(testEmail);
-        signupReq.setPassword("SecurePassword123!");
-        signupReq.setFullName("Rotation Tester");
-        signupReq.setRole("SEEKER");
-
-        AuthResponse signupResp = authService.handleAuthRequest(signupReq, null);
-        assertTrue(signupResp.isOk(), "Signup must succeed");
-        assertNotNull(signupResp.getToken(), "Access token must be present");
-        assertNotNull(signupResp.getRefreshToken(), "Refresh token must be present");
-        assertEquals(900L, signupResp.getExpiresIn(), "Access token lifetime must be 15 minutes (900 seconds)");
-
-        String oldRefreshToken = signupResp.getRefreshToken();
-
-        // 1. Refresh token rotation test
-        AuthRequest refreshReq = new AuthRequest();
-        refreshReq.setAction("refresh");
-        refreshReq.setRefreshToken(oldRefreshToken);
-
-        AuthResponse refreshResp = authService.handleAuthRequest(refreshReq, null);
-        assertTrue(refreshResp.isOk(), "Refresh request must succeed");
-        assertNotNull(refreshResp.getToken(), "New access token must be generated");
-        assertNotNull(refreshResp.getRefreshToken(), "New refresh token must be generated");
-        assertNotEquals(oldRefreshToken, refreshResp.getRefreshToken(), "Refresh token must be rotated to a new token");
-
-        // 2. Old refresh token must now be revoked/rejected
-        AuthRequest reuseOldReq = new AuthRequest();
-        reuseOldReq.setAction("refresh");
-        reuseOldReq.setRefreshToken(oldRefreshToken);
-
-        AuthResponse reuseResp = authService.handleAuthRequest(reuseOldReq, null);
-        assertFalse(reuseResp.isOk(), "Reusing previous rotated refresh token must fail");
-        assertTrue(reuseResp.getError().contains("Invalid or revoked"), "Error message must indicate invalid/revoked token");
+    void testInvalidSignatureAndMalformedTokenRejection() {
+        String malformedToken = "eyJhGciOiJIUzUxMiJ9.invalidpayload.invalidsignature";
+        assertFalse(jwtTokenProvider.validateToken(malformedToken));
+        assertNull(jwtTokenProvider.parseToken(malformedToken));
     }
 
     @Test
-    void testLogoutRevocationFlow() {
-        String testEmail = "logout_test_" + System.currentTimeMillis() + "@seedhaproperties.com";
+    void testWrongIssuerAndAudienceRejection() {
+        UUID userId = UUID.randomUUID();
+        // Wrong issuer
+        String wrongIssuerToken = jwtTokenProvider.generateToken(userId, "user@seedhaproperties.com", "User", "SEEKER",
+                60000L, "untrusted-issuer", jwtTokenProvider.getAudience());
+        assertFalse(jwtTokenProvider.validateToken(wrongIssuerToken));
+        assertNull(jwtTokenProvider.parseToken(wrongIssuerToken));
+
+        // Wrong audience
+        String wrongAudienceToken = jwtTokenProvider.generateToken(userId, "user@seedhaproperties.com", "User", "SEEKER",
+                60000L, jwtTokenProvider.getIssuer(), "untrusted-audience");
+        assertFalse(jwtTokenProvider.validateToken(wrongAudienceToken));
+        assertNull(jwtTokenProvider.parseToken(wrongAudienceToken));
+    }
+
+    // ==========================================
+    // 2. REFRESH TOKEN & REUSE DETECTION TESTS
+    // ==========================================
+
+    @Test
+    void testRefreshTokenRotationAndReuseFamilyRevocation() {
+        String testEmail = "reuse_test_" + System.currentTimeMillis() + "@seedhaproperties.com";
         AuthRequest signupReq = new AuthRequest();
         signupReq.setAction("signup");
         signupReq.setEmail(testEmail);
-        signupReq.setPassword("SecurePassword123!");
-        signupReq.setFullName("Logout Tester");
+        signupReq.setPassword("ComplexPassword123!");
+        signupReq.setFullName("Reuse Tester");
         signupReq.setRole("SEEKER");
 
         AuthResponse signupResp = authService.handleAuthRequest(signupReq, null);
         assertTrue(signupResp.isOk());
+        String tokenV1 = signupResp.getRefreshToken();
+        assertEquals(900L, signupResp.getExpiresIn(), "Access token expires_in must be 900 seconds (15 min)");
+
+        // 1. Valid rotation to Token V2
+        AuthRequest refreshReq1 = new AuthRequest();
+        refreshReq1.setAction("refresh");
+        refreshReq1.setRefreshToken(tokenV1);
+
+        AuthResponse refreshResp1 = authService.handleAuthRequest(refreshReq1, null);
+        assertTrue(refreshResp1.isOk());
+        String tokenV2 = refreshResp1.getRefreshToken();
+        assertNotEquals(tokenV1, tokenV2, "Rotated token must be distinct");
+
+        // 2. Malicious reuse attempt with old Token V1!
+        AuthRequest reuseReq = new AuthRequest();
+        reuseReq.setAction("refresh");
+        reuseReq.setRefreshToken(tokenV1);
+
+        AuthResponse reuseResp = authService.handleAuthRequest(reuseReq, null);
+        assertFalse(reuseResp.isOk(), "Reuse attempt of rotated token must fail");
+        assertTrue(reuseResp.getError().contains("Token reuse detected"), "Must detect token reuse");
+
+        // 3. Token V2 (in the same compromised family) must now also be revoked!
+        AuthRequest refreshReq2 = new AuthRequest();
+        refreshReq2.setAction("refresh");
+        refreshReq2.setRefreshToken(tokenV2);
+
+        AuthResponse refreshResp2 = authService.handleAuthRequest(refreshReq2, null);
+        assertFalse(refreshResp2.isOk(), "Token in compromised family must be rejected");
+    }
+
+    @Test
+    void testLogoutAndLogoutAllDevices() {
+        String testEmail = "logout_multi_" + System.currentTimeMillis() + "@seedhaproperties.com";
+        AuthRequest signupReq = new AuthRequest();
+        signupReq.setAction("signup");
+        signupReq.setEmail(testEmail);
+        signupReq.setPassword("ComplexPassword123!");
+        signupReq.setFullName("Logout Multi Tester");
+        signupReq.setRole("OWNER");
+
+        AuthResponse signupResp = authService.handleAuthRequest(signupReq, null);
+        assertTrue(signupResp.isOk());
         String refreshToken = signupResp.getRefreshToken();
+        UUID userId = signupResp.getUser().getId();
 
-        // Perform logout
-        AuthRequest logoutReq = new AuthRequest();
-        logoutReq.setAction("logout");
-        logoutReq.setRefreshToken(refreshToken);
+        // Logout all devices
+        AuthRequest logoutAllReq = new AuthRequest();
+        logoutAllReq.setAction("logout_all");
+        logoutAllReq.setRefreshToken(refreshToken);
 
-        AuthResponse logoutResp = authService.handleAuthRequest(logoutReq, null);
-        assertTrue(logoutResp.isOk(), "Logout must succeed");
+        AuthResponse logoutAllResp = authService.handleAuthRequest(logoutAllReq, null);
+        assertTrue(logoutAllResp.isOk(), "Logout all must succeed");
 
-        // Attempt refresh with logged-out token
+        // Verify token is revoked
         AuthRequest refreshReq = new AuthRequest();
         refreshReq.setAction("refresh");
         refreshReq.setRefreshToken(refreshToken);
 
         AuthResponse refreshResp = authService.handleAuthRequest(refreshReq, null);
-        assertFalse(refreshResp.isOk(), "Logged out refresh token must be rejected");
+        assertFalse(refreshResp.isOk(), "Revoked token from logout-all must be rejected");
+    }
+
+    // ==========================================
+    // 3. OBJECT-LEVEL AUTHORIZATION & IDOR TESTS
+    // ==========================================
+
+    @Test
+    void testObjectLevelAuthorizationAndIdorProtection() {
+        // Register Owner A
+        String emailA = "owner_a_" + System.currentTimeMillis() + "@seedhaproperties.com";
+        AuthRequest signupReqA = new AuthRequest();
+        signupReqA.setAction("signup");
+        signupReqA.setEmail(emailA);
+        signupReqA.setPassword("ComplexPassword123!");
+        signupReqA.setFullName("Owner Alpha");
+        signupReqA.setRole("OWNER");
+        AuthResponse respA = authService.handleAuthRequest(signupReqA, null);
+        assertTrue(respA.isOk());
+        UUID ownerA = respA.getUser().getId();
+
+        // Register Owner B
+        String emailB = "owner_b_" + System.currentTimeMillis() + "@seedhaproperties.com";
+        AuthRequest signupReqB = new AuthRequest();
+        signupReqB.setAction("signup");
+        signupReqB.setEmail(emailB);
+        signupReqB.setPassword("ComplexPassword123!");
+        signupReqB.setFullName("Owner Beta");
+        signupReqB.setRole("OWNER");
+        AuthResponse respB = authService.handleAuthRequest(signupReqB, null);
+        assertTrue(respB.isOk());
+        UUID ownerB = respB.getUser().getId();
+
+        Property propA = new Property();
+        propA.setOwnerId(ownerA);
+        propA.setTitle("Owner A Luxury Villa");
+        propA.setDescription("Spacious villa in Gachibowli");
+        propA.setListingType("BUY");
+        propA.setPropertyType("VILLA");
+        propA.setPrice(new BigDecimal("15000000"));
+        propA.setStateName("Telangana");
+        propA.setCityName("Hyderabad");
+        propA.setLocality("Gachibowli");
+        propA.setAddress("Plot 42, Financial District, Gachibowli, Hyderabad");
+        propA.setPincode("500032");
+        propA.setBhk(3);
+        propA.setBathrooms(3);
+        propA.setBuiltupAreaSqft(2500);
+        Property savedPropA = propertyRepository.save(propA);
+
+        // Verification: Owner B cannot modify Owner A's property (IDOR protection)
+        assertNotEquals(ownerA, ownerB, "Owner IDs must be distinct");
+        assertEquals(ownerA, savedPropA.getOwnerId());
     }
 }

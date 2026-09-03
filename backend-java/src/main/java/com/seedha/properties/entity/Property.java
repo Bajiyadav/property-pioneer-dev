@@ -38,13 +38,13 @@ public class Property {
     private BigDecimal maintenanceCharges;
 
     @Column
-    private Integer bhk;
+    private Integer bhk = 1;
 
     @Column
-    private Integer bathrooms;
+    private Integer bathrooms = 1;
 
     @Column(name = "builtup_area_sqft")
-    private Integer builtupAreaSqft;
+    private Integer builtupAreaSqft = 500;
 
     @Column(name = "furnishing_status")
     private String furnishingStatus;
@@ -56,10 +56,10 @@ public class Property {
     private String cityName;
 
     @Column(nullable = false)
-    private String locality;
+    private String locality = "Central";
 
     @Column
-    private String address;
+    private String address = "";
 
     @Column(name = "pincode")
     private String pincode;

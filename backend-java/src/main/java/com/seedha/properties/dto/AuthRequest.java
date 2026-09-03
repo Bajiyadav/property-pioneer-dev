@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 
 public class AuthRequest {
 
-    private String action; // signup, login, session, refresh, logout
+    private String action; // signup, login, session, refresh, logout, logout_all
 
     @Email
     private String email;
@@ -23,6 +23,9 @@ public class AuthRequest {
 
     @JsonProperty("device_info")
     private String deviceInfo;
+
+    @JsonProperty("logout_all")
+    private boolean logoutAll = false;
 
     public AuthRequest() {}
 
@@ -42,4 +45,6 @@ public class AuthRequest {
     public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
     public String getDeviceInfo() { return deviceInfo; }
     public void setDeviceInfo(String deviceInfo) { this.deviceInfo = deviceInfo; }
+    public boolean isLogoutAll() { return logoutAll; }
+    public void setLogoutAll(boolean logoutAll) { this.logoutAll = logoutAll; }
 }

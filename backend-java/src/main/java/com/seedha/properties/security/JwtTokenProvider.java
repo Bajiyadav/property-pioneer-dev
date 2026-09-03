@@ -1,6 +1,7 @@
 package com.seedha.properties.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,36 +21,51 @@ import java.util.UUID;
 public class JwtTokenProvider {
 
     private final SecretKey key;
+    private final String keyId;
+    private final String issuer;
+    private final String audience;
     private final long accessTokenExpirationMs;
     private final long refreshTokenExpirationMs;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public JwtTokenProvider(
             @Value("${seedha.jwt.secret:seedha_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256}") String secret,
+            @Value("${seedha.jwt.key-id:seedha-key-v1}") String keyId,
+            @Value("${seedha.jwt.issuer:seedha-properties-auth}") String issuer,
+            @Value("${seedha.jwt.audience:seedha-properties-client}") String audience,
             @Value("${seedha.jwt.access-token-expiration-minutes:15}") long accessTokenMinutes,
             @Value("${seedha.jwt.refresh-token-expiration-days:30}") long refreshTokenDays) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.keyId = keyId;
+        this.issuer = issuer;
+        this.audience = audience;
         this.accessTokenExpirationMs = accessTokenMinutes * 60 * 1000L;
         this.refreshTokenExpirationMs = refreshTokenDays * 24 * 60 * 60 * 1000L;
     }
 
     public String generateAccessToken(UUID userId, String email, String fullName, String role) {
-        return generateToken(userId, email, fullName, role, accessTokenExpirationMs);
+        return generateToken(userId, email, fullName, role, accessTokenExpirationMs, issuer, audience);
     }
 
     public String generateToken(UUID userId, String email, String fullName, String role) {
         return generateAccessToken(userId, email, fullName, role);
     }
 
-    public String generateToken(UUID userId, String email, String fullName, String role, long customExpirationMs) {
+    public String generateToken(UUID userId, String email, String fullName, String role,
+                                long customExpirationMs, String customIssuer, String customAudience) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + customExpirationMs);
+        String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
+                .header().keyId(keyId).and()
                 .subject(userId.toString())
                 .claim("email", email)
                 .claim("full_name", fullName)
                 .claim("role", role != null ? role : "SEEKER")
+                .id(jti)
+                .issuer(customIssuer)
+                .audience().add(customAudience).and()
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key)
@@ -63,6 +79,9 @@ public class JwtTokenProvider {
     }
 
     public String hashRefreshToken(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            throw new IllegalArgumentException("Raw refresh token cannot be blank");
+        }
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
@@ -80,10 +99,20 @@ public class JwtTokenProvider {
         return accessTokenExpirationMs / 1000L;
     }
 
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
     public UserPrincipal parseToken(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
+                    .requireIssuer(issuer)
+                    .requireAudience(audience)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -101,9 +130,14 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            Jwts.parser()
+                    .verifyWith(key)
+                    .requireIssuer(issuer)
+                    .requireAudience(audience)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
-        } catch (Exception ex) {
+        } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }
     }
