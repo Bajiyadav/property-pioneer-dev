@@ -26,42 +26,78 @@ public class PropertyController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Property>>> searchProperties(
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String city,
-            @RequestParam(name = "listing_type", required = false) String listingType,
-            @RequestParam(name = "property_type", required = false) String propertyType,
-            @RequestParam(name = "min_price", required = false) BigDecimal minPrice,
-            @RequestParam(name = "max_price", required = false) BigDecimal maxPrice,
+            @RequestParam(name = "state", required = false) String state,
+            @RequestParam(name = "stateName", required = false) String stateName,
+            @RequestParam(name = "city", required = false) String city,
+            @RequestParam(name = "cityName", required = false) String cityName,
+            @RequestParam(name = "listing_type", required = false) String listingTypeSnake,
+            @RequestParam(name = "listingType", required = false) String listingTypeCamel,
+            @RequestParam(name = "property_type", required = false) String propertyTypeSnake,
+            @RequestParam(name = "propertyType", required = false) String propertyTypeCamel,
+            @RequestParam(name = "min_price", required = false) BigDecimal minPriceSnake,
+            @RequestParam(name = "minPrice", required = false) BigDecimal minPriceCamel,
+            @RequestParam(name = "max_price", required = false) BigDecimal maxPriceSnake,
+            @RequestParam(name = "maxPrice", required = false) BigDecimal maxPriceCamel,
             @RequestParam(required = false) Integer bhk,
             @RequestParam(required = false) Double lat,
             @RequestParam(required = false) Double lng,
-            @RequestParam(name = "radius_km", defaultValue = "10.0") Double radiusKm,
+            @RequestParam(name = "radius_km", required = false) Double radiusKm,
+            @RequestParam(name = "radiusMeters", required = false) Double radiusMetersParam,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int limit) {
+
+        String effectiveState = state != null ? state : stateName;
+        String effectiveCity = city != null ? city : cityName;
+        String effectiveListingType = listingTypeSnake != null ? listingTypeSnake : listingTypeCamel;
+        String effectivePropertyType = propertyTypeSnake != null ? propertyTypeSnake : propertyTypeCamel;
+        BigDecimal effectiveMinPrice = minPriceSnake != null ? minPriceSnake : minPriceCamel;
+        BigDecimal effectiveMaxPrice = maxPriceSnake != null ? maxPriceSnake : maxPriceCamel;
 
         int pageIndex = Math.max(0, page - 1);
         int pageSize = Math.min(Math.max(1, limit), 50);
 
-        Double radiusMeters = radiusKm != null ? radiusKm * 1000.0 : 10000.0;
+        Double radiusMeters = radiusMetersParam != null ? radiusMetersParam
+                : (radiusKm != null ? radiusKm * 1000.0 : 10000.0);
 
         Page<Property> resultPage = propertyRepository.searchProperties(
-                state, city, listingType, propertyType, minPrice, maxPrice, bhk,
+                effectiveState, effectiveCity, effectiveListingType, effectivePropertyType,
+                effectiveMinPrice, effectiveMaxPrice, bhk,
                 lat, lng, radiusMeters, PageRequest.of(pageIndex, pageSize)
         );
 
         return ResponseEntity.ok(ApiResponse.success(resultPage.getContent(), resultPage.getTotalElements()));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Property>> getPropertyById(@PathVariable UUID id) {
+        return propertyRepository.findById(id)
+                .map(p -> ResponseEntity.ok(ApiResponse.success(p)))
+                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Property not found")));
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<Property>> createProperty(
+            @RequestBody Property property,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return handleSaveProperty(property, currentUser);
+    }
+
     @PostMapping("/manage")
     public ResponseEntity<ApiResponse<Property>> saveProperty(
             @RequestBody Property property,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        return handleSaveProperty(property, currentUser);
+    }
+
+    private ResponseEntity<ApiResponse<Property>> handleSaveProperty(
+            Property property,
+            UserPrincipal currentUser) {
 
         if (currentUser == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
         }
 
-        // Enforce ownership
+        // Enforce ownership if updating
         if (property.getId() != null) {
             Property existing = propertyRepository.findById(property.getId()).orElse(null);
             if (existing == null) {

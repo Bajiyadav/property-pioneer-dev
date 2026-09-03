@@ -1,0 +1,43 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: seedha-properties-backend-staging
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        show_sql: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+seedha:
+  jwt:
+    secret: ${JWT_SECRET:seedha_staging_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256_staging}
+    expiration-days: 30
+  cors:
+    allowed-origins:
+      - https://staging.seedhaproperties.com
+      - http://localhost:5173
+      - http://localhost:3000
+      - http://localhost:8080
+      - http://localhost:8085

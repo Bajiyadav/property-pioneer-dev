@@ -43,6 +43,7 @@ public/*.apk
 # Local environment (secrets stay out of git — configure them in Vercel)
 .env
 .env.local
+.env.staging
 .env.*.local
 !.env.example
 .agents/mcp_config.json

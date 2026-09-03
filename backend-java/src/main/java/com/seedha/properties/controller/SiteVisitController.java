@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v2/visits")
+@RequestMapping({"/api/v2/visits", "/api/v2/site-visits"})
 public class SiteVisitController {
 
     private final SiteVisitRepository siteVisitRepository;
