@@ -6,9 +6,9 @@ spring:
   application:
     name: seedha-properties-backend-staging
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://ep-damp-tree-a1310t1a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
-    username: ${DB_USERNAME:neondb_owner}
-    password: ${DB_PASSWORD:npg_gK7Ld8PefVha}
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -32,7 +32,7 @@ spring:
 
 seedha:
   jwt:
-    secret: ${JWT_SECRET:v2-staging-seedha-properties-enterprise-hmac-sha512-secure-staging-key-do-not-use-in-production-min-64-bytes}
+    secret: ${JWT_SECRET}
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
   cors:

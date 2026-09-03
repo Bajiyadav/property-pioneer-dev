@@ -8,9 +8,9 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://ep-damp-tree-a1310t1a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
-    username: ${DB_USERNAME:neondb_owner}
-    password: ${DB_PASSWORD:npg_gK7Ld8PefVha}
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -37,7 +37,7 @@ spring:
 seedha:
   jwt:
     # Supplied by the environment in production. Default staging fallback for testing.
-    secret: ${JWT_SECRET:v2-staging-seedha-properties-enterprise-hmac-sha512-secure-staging-key-do-not-use-in-production-min-64-bytes}
+    secret: ${JWT_SECRET}
     key-id: ${JWT_KEY_ID:seedha-key-v1}
     # Operational key rotation. Comma-separated kid:secret pairs that VERIFY but
     # never sign, for the overlap window after a rotation. Empty = single active
