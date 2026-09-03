@@ -1,3 +1,8 @@
+## v0.152.0 — 2026-09-03
+
+### Features
+- feat(mobile): make essential services display-only and accelerate conveyor scroll (e8e5be2)
+
 ## v0.151.1 — 2026-09-03
 
 ### Fixes
