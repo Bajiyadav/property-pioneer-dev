@@ -1,3 +1,8 @@
+## v0.146.0 — 2026-09-03
+
+### Features
+- feat(mobile): add animated One Stop Shop hub and direct services carousel (451a15f)
+
 ## v0.145.1 — 2026-09-03
 
 ### Fixes
