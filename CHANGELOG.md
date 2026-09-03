@@ -1,3 +1,8 @@
+## v0.163.0 — 2026-09-03
+
+### Features
+- feat(search): revamp search page with quick filters and grid view (0228bd3)
+
 ## v0.162.0 — 2026-09-03
 
 ### Features
