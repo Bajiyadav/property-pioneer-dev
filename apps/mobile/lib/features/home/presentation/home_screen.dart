@@ -20,15 +20,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
-  static const List<String> _popularCities = [
-    'Hyderabad',
-    'Bangalore',
-    'Mumbai',
-    'Delhi NCR',
-    'Pune',
-    'Chennai',
-  ];
-
   bool _isLocating = false;
   late final AnimationController _floatController;
   late final Animation<Offset> _floatAnimation;
@@ -133,17 +124,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       context.push('/search');
     } else {
       _showLocationPickerBottomSheet();
-    }
-  }
-
-  void _onCategorySelected(PropertyCategory category) {
-    final loc = ref.read(locationStateProvider).value;
-    ref.read(activeCategoryProvider.notifier).state = category;
-
-    if (loc != null && loc.isValidated && loc.city != 'All India' && loc.city.isNotEmpty) {
-      context.push('/search');
-    } else {
-      _showLocationPickerBottomSheet(category: category);
     }
   }
 
@@ -453,17 +433,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
-              // "ONE STOP SHOP" Hero Title Banner
+              // Animated Painting Typewriter Quote Banner
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                child: OneStopShopHeader(
-                  subtitle: 'For All Your Direct Property Needs',
-                ),
+                child: AnimatedPaintingQuoteHeader(),
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
 
               // Animated Primary Service Action Grid
               Padding(
@@ -524,56 +502,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
 
-              const SizedBox(height: 18),
-
-              // Quick Category Action Chips (Buy, Rent, Commercial, Plots)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _QuickCategoryChip(
-                        title: 'Buy',
-                        icon: Icons.business_outlined,
-                        color: const Color(0xFFE11D48),
-                        onTap: () => _onCategorySelected(PropertyCategory.buy),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _QuickCategoryChip(
-                        title: 'Rent',
-                        icon: Icons.home_outlined,
-                        color: const Color(0xFF0F766E),
-                        onTap: () => _onCategorySelected(PropertyCategory.rent),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _QuickCategoryChip(
-                        title: 'Commercial',
-                        icon: Icons.storefront_outlined,
-                        color: const Color(0xFF2563EB),
-                        onTap: () =>
-                            _onCategorySelected(PropertyCategory.commercial),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _QuickCategoryChip(
-                        title: 'Post Free',
-                        icon: Icons.add_home_work_rounded,
-                        color: const Color(0xFFD97706),
-                        onTap: _onPostPropertyPressed,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               const SizedBox(height: 20),
 
-              // Horizontal Scrolling "Essential Services" Section
+              // Horizontal Scrolling "Essential Services" Section with floating cards
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: AnimatedHomeServicesSection(
@@ -585,7 +516,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Location Status & Quick Switch Bar
               Padding(
@@ -693,76 +624,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
 
-              const SizedBox(height: 18),
-
-              // Popular Cities Quick Chips
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Explore Top Cities',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 38,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    ActionChip(
-                      avatar: const Icon(Icons.my_location,
-                          size: 14, color: Colors.white),
-                      label: const Text('Near by'),
-                      onPressed: () => _onUseCurrentLocation(navigateToSearch: true),
-                      backgroundColor: const Color(0xFF0F766E),
-                      labelStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide.none,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ..._popularCities.map(
-                      (city) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ActionChip(
-                          label: Text(city),
-                          onPressed: () => _onCitySelected(city),
-                          backgroundColor: Colors.white,
-                          labelStyle: TextStyle(
-                            color: displayCity.contains(city)
-                                ? const Color(0xFF0F766E)
-                                : const Color(0xFF334155),
-                            fontWeight: displayCity.contains(city)
-                                ? FontWeight.bold
-                                : FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(
-                              color: displayCity.contains(city)
-                                  ? const Color(0xFF0F766E)
-                                  : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               const SizedBox(height: 22),
 
               // Trust & Direct-Owner Guarantee Cards
@@ -811,61 +672,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
 
               const SizedBox(height: 28),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickCategoryChip extends StatelessWidget {
-  const _QuickCategoryChip({
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF334155),
-                ),
-              ),
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
@@ -177,7 +178,191 @@ class _Dropdown extends StatelessWidget {
   }
 }
 
-/// "ONE STOP SHOP" Hero Header
+/// Animated Painting/Writing Typewriter Quotes Header
+class AnimatedPaintingQuoteHeader extends StatefulWidget {
+  const AnimatedPaintingQuoteHeader({
+    super.key,
+    this.quotes = const [
+      'Zero Brokerage. 100% Direct Owners.',
+      'Find Your Dream Home Without Middlemen.',
+      'Verified Properties & Legal Agreements.',
+      'Connect Directly with Genuine Owners.',
+      'Save Lakhs in Brokerage Forever.',
+    ],
+  });
+
+  final List<String> quotes;
+
+  @override
+  State<AnimatedPaintingQuoteHeader> createState() =>
+      _AnimatedPaintingQuoteHeaderState();
+}
+
+class _AnimatedPaintingQuoteHeaderState
+    extends State<AnimatedPaintingQuoteHeader>
+    with SingleTickerProviderStateMixin {
+  int _quoteIndex = 0;
+  String _displayedText = '';
+  int _charIndex = 0;
+  bool _isDeleting = false;
+  Timer? _typewriterTimer;
+
+  late final AnimationController _cursorController;
+
+  @override
+  void initState() {
+    super.initState();
+    _cursorController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..repeat(reverse: true);
+
+    _startTypewriting();
+  }
+
+  @override
+  void dispose() {
+    _typewriterTimer?.cancel();
+    _cursorController.dispose();
+    super.dispose();
+  }
+
+  void _startTypewriting() {
+    _typewriterTimer?.cancel();
+    final currentQuote = widget.quotes[_quoteIndex];
+
+    _typewriterTimer = Timer.periodic(const Duration(milliseconds: 65), (timer) {
+      if (!mounted) return;
+
+      if (!_isDeleting) {
+        if (_charIndex < currentQuote.length) {
+          _charIndex++;
+          setState(() {
+            _displayedText = currentQuote.substring(0, _charIndex);
+          });
+        } else {
+          // Finished typing current quote, pause and then delete
+          timer.cancel();
+          _typewriterTimer = Timer(const Duration(milliseconds: 2400), () {
+            if (!mounted) return;
+            setState(() => _isDeleting = true);
+            _startTypewriting();
+          });
+        }
+      } else {
+        if (_charIndex > 0) {
+          _charIndex--;
+          setState(() {
+            _displayedText = currentQuote.substring(0, _charIndex);
+          });
+        } else {
+          // Finished deleting, move to next quote
+          timer.cancel();
+          _isDeleting = false;
+          _quoteIndex = (_quoteIndex + 1) % widget.quotes.length;
+          _typewriterTimer = Timer(const Duration(milliseconds: 400), () {
+            if (!mounted) return;
+            _startTypewriting();
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE11D48), Color(0xFFBE123C)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFE11D48).withValues(alpha: 0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.auto_awesome, size: 12, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      'SEEDHA PROMISE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Center(
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: _displayedText,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                        color: Color(0xFF0F172A),
+                        height: 1.25,
+                      ),
+                    ),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: AnimatedBuilder(
+                        animation: _cursorController,
+                        builder: (context, child) {
+                          return Opacity(
+                            opacity: _cursorController.value > 0.4 ? 1.0 : 0.0,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 3),
+                              width: 3,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE11D48),
+                                borderRadius: BorderRadius.circular(1.5),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "ONE STOP SHOP" Hero Header (Supports animated painting quotes)
 class OneStopShopHeader extends StatelessWidget {
   const OneStopShopHeader({
     super.key,
@@ -190,43 +375,7 @@ class OneStopShopHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'ONE STOP ',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-                color: Color(0xFFE11D48), // Vibrant Crimson Accent
-              ),
-            ),
-            Text(
-              'SHOP',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-                color: Color(0xFF1E293B),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF64748B),
-            letterSpacing: 0.2,
-          ),
-        ),
-      ],
-    );
+    return const AnimatedPaintingQuoteHeader();
   }
 }
 
@@ -498,8 +647,8 @@ class ActionServiceTile extends StatelessWidget {
   }
 }
 
-/// Horizontal scrolling "Essential Services" section
-class AnimatedHomeServicesSection extends StatelessWidget {
+/// Horizontal scrolling "Essential Services" section with floating card micro-animations
+class AnimatedHomeServicesSection extends StatefulWidget {
   const AnimatedHomeServicesSection({
     super.key,
     required this.onRentalAgreementTap,
@@ -512,6 +661,46 @@ class AnimatedHomeServicesSection extends StatelessWidget {
   final VoidCallback onVisitsTap;
   final VoidCallback onAiAssistantTap;
   final VoidCallback onHomeLoansTap;
+
+  @override
+  State<AnimatedHomeServicesSection> createState() =>
+      _AnimatedHomeServicesSectionState();
+}
+
+class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _servicesFloatController;
+  late final Animation<double> _floatOffset1;
+  late final Animation<double> _floatOffset2;
+
+  @override
+  void initState() {
+    super.initState();
+    _servicesFloatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
+
+    _floatOffset1 = Tween<double>(begin: 0.0, end: -4.0).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _floatOffset2 = Tween<double>(begin: -4.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _servicesFloatController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -571,49 +760,66 @@ class AnimatedHomeServicesSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: 112,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                _ServiceCardItem(
-                  title: 'Rental Agreement',
-                  subtitle: 'E-Stamp & Biometrics',
-                  icon: Icons.description_outlined,
-                  badge: 'LEGAL DRAFT',
-                  color: const Color(0xFF4338CA),
-                  onTap: onRentalAgreementTap,
+          AnimatedBuilder(
+            animation: _servicesFloatController,
+            builder: (context, child) {
+              return SizedBox(
+                height: 118,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: [
+                    Transform.translate(
+                      offset: Offset(0, _floatOffset1.value),
+                      child: _ServiceCardItem(
+                        title: 'Rental Agreement',
+                        subtitle: 'E-Stamp & Biometrics',
+                        icon: Icons.description_outlined,
+                        badge: 'LEGAL DRAFT',
+                        color: const Color(0xFF4338CA),
+                        onTap: widget.onRentalAgreementTap,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Transform.translate(
+                      offset: Offset(0, _floatOffset2.value),
+                      child: _ServiceCardItem(
+                        title: 'Schedule Visits',
+                        subtitle: 'Direct Site Slots',
+                        icon: Icons.calendar_month_outlined,
+                        badge: 'VERIFIED',
+                        color: const Color(0xFF0D9488),
+                        onTap: widget.onVisitsTap,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Transform.translate(
+                      offset: Offset(0, _floatOffset1.value),
+                      child: _ServiceCardItem(
+                        title: 'Home Loans',
+                        subtitle: 'Lowest Interest Rates',
+                        icon: Icons.account_balance_outlined,
+                        badge: 'PRE-APPROVED',
+                        color: const Color(0xFFD97706),
+                        onTap: widget.onHomeLoansTap,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Transform.translate(
+                      offset: Offset(0, _floatOffset2.value),
+                      child: _ServiceCardItem(
+                        title: 'Seedha AI Advisor',
+                        subtitle: '24/7 PropTech Guidance',
+                        icon: Icons.auto_awesome_rounded,
+                        badge: 'GROUNDED',
+                        color: const Color(0xFF2563EB),
+                        onTap: widget.onAiAssistantTap,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                _ServiceCardItem(
-                  title: 'Schedule Visits',
-                  subtitle: 'Direct Site Slots',
-                  icon: Icons.calendar_month_outlined,
-                  badge: 'VERIFIED',
-                  color: const Color(0xFF0D9488),
-                  onTap: onVisitsTap,
-                ),
-                const SizedBox(width: 10),
-                _ServiceCardItem(
-                  title: 'Home Loans',
-                  subtitle: 'Lowest Interest Rates',
-                  icon: Icons.account_balance_outlined,
-                  badge: 'PRE-APPROVED',
-                  color: const Color(0xFFD97706),
-                  onTap: onHomeLoansTap,
-                ),
-                const SizedBox(width: 10),
-                _ServiceCardItem(
-                  title: 'Seedha AI Advisor',
-                  subtitle: '24/7 PropTech Guidance',
-                  icon: Icons.auto_awesome_rounded,
-                  badge: 'GROUNDED',
-                  color: const Color(0xFF2563EB),
-                  onTap: onAiAssistantTap,
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),

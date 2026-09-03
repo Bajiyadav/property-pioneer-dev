@@ -99,14 +99,13 @@ void main() {
   });
 
   group('One Stop Shop & Modern Hero Cards', () {
-    testWidgets('OneStopShopHeader renders brand title and subtitle',
+    testWidgets('AnimatedPaintingQuoteHeader renders promise badge and types quotes',
         (tester) async {
-      await tester.pumpWidget(host(const OneStopShopHeader()));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(host(const AnimatedPaintingQuoteHeader()));
+      await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text('ONE STOP '), findsOneWidget);
-      expect(find.text('SHOP'), findsOneWidget);
-      expect(find.text('For All Your Direct Property Needs'), findsOneWidget);
+      expect(find.text('SEEDHA PROMISE'), findsOneWidget);
+      expect(find.byType(AnimatedPaintingQuoteHeader), findsOneWidget);
     });
 
     testWidgets('HeroSearchCard renders features and triggers onTap',
@@ -161,7 +160,7 @@ void main() {
         onHomeLoansTap: () => loansTapped = true,
         onAiAssistantTap: () => aiTapped = true,
       )));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Essential Services'), findsOneWidget);
       expect(find.text('Rental Agreement'), findsOneWidget);
@@ -170,19 +169,19 @@ void main() {
       expect(find.text('Seedha AI Advisor'), findsOneWidget);
 
       await tester.tap(find.text('Rental Agreement'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 50));
       expect(agreementTapped, isTrue);
 
       await tester.tap(find.text('Schedule Visits'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 50));
       expect(visitsTapped, isTrue);
 
       await tester.tap(find.text('Home Loans'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 50));
       expect(loansTapped, isTrue);
 
       await tester.tap(find.text('Seedha AI Advisor'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 50));
       expect(aiTapped, isTrue);
     });
   });
