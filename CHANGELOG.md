@@ -1,3 +1,8 @@
+## v0.139.0 — 2026-09-03
+
+### Features
+- feat(security): complete Step 4 authorization and IDOR hardening (2c315c1)
+
 ## v0.138.0 — 2026-09-03
 
 ### Features
