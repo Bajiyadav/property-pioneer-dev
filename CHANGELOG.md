@@ -1,3 +1,8 @@
+## v0.131.0 — 2026-09-03
+
+### Features
+- feat(nav): replace Properties with Payments in mobile bottom navigation (09b1725)
+
 ## v0.130.1 — 2026-09-03
 
 ### Refactoring
