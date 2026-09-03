@@ -670,8 +670,10 @@ class AnimatedHomeServicesSection extends StatefulWidget {
 class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSection>
     with SingleTickerProviderStateMixin {
   late final AnimationController _servicesFloatController;
+  late final Animation<double> _floatTranslateX1;
   late final Animation<double> _floatTranslateY1;
   late final Animation<double> _floatScale1;
+  late final Animation<double> _floatTranslateX2;
   late final Animation<double> _floatTranslateY2;
   late final Animation<double> _floatScale2;
 
@@ -680,33 +682,45 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
     super.initState();
     _servicesFloatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
-    // Staggered forward/backward floating wave (moving forward & coming back)
-    _floatTranslateY1 = Tween<double>(begin: 3.0, end: -5.0).animate(
+    // Moves the cards forward from their place and comes back
+    _floatTranslateX1 = Tween<double>(begin: 0.0, end: 6.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOutSine,
+        curve: Curves.easeInOutCubic,
       ),
     );
-    _floatScale1 = Tween<double>(begin: 0.98, end: 1.03).animate(
+    _floatTranslateY1 = Tween<double>(begin: 0.0, end: -4.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOutSine,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+    _floatScale1 = Tween<double>(begin: 0.98, end: 1.04).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOutCubic,
       ),
     );
 
-    _floatTranslateY2 = Tween<double>(begin: -5.0, end: 3.0).animate(
+    _floatTranslateX2 = Tween<double>(begin: 6.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOutSine,
+        curve: Curves.easeInOutCubic,
       ),
     );
-    _floatScale2 = Tween<double>(begin: 1.03, end: 0.98).animate(
+    _floatTranslateY2 = Tween<double>(begin: -4.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOutSine,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+    _floatScale2 = Tween<double>(begin: 1.04, end: 0.98).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOutCubic,
       ),
     );
   }
@@ -785,7 +799,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   children: [
                     Transform.translate(
-                      offset: Offset(0, _floatTranslateY1.value),
+                      offset: Offset(_floatTranslateX1.value, _floatTranslateY1.value),
                       child: Transform.scale(
                         scale: _floatScale1.value,
                         child: _ServiceCardItem(
@@ -800,7 +814,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatTranslateY2.value),
+                      offset: Offset(_floatTranslateX2.value, _floatTranslateY2.value),
                       child: Transform.scale(
                         scale: _floatScale2.value,
                         child: _ServiceCardItem(
@@ -815,7 +829,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatTranslateY1.value),
+                      offset: Offset(_floatTranslateX1.value, _floatTranslateY1.value),
                       child: Transform.scale(
                         scale: _floatScale1.value,
                         child: _ServiceCardItem(
@@ -830,7 +844,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatTranslateY2.value),
+                      offset: Offset(_floatTranslateX2.value, _floatTranslateY2.value),
                       child: Transform.scale(
                         scale: _floatScale2.value,
                         child: _ServiceCardItem(

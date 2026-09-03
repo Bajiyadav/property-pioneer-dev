@@ -6,18 +6,20 @@ import 'config/app_routes.dart';
 import 'services/supabase_service.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await SupabaseService.initialize();
-  } catch (e) {
-    // Offline resilience
-  }
   await SentryFlutter.init(
     (options) {
       options.dsn = const String.fromEnvironment('SENTRY_DSN', defaultValue: '');
       options.tracesSampleRate = 1.0;
     },
-    appRunner: () => runApp(const ProviderScope(child: SeedhaPropertiesMobileApp())),
+    appRunner: () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      try {
+        await SupabaseService.initialize();
+      } catch (e) {
+        // Offline resilience
+      }
+      runApp(const ProviderScope(child: SeedhaPropertiesMobileApp()));
+    },
   );
 }
 
