@@ -334,7 +334,7 @@ export const Route = createFileRoute("/api/v2/auth")({
 
             const users = await sql`
               SELECT u.id, u.email, u.password_hash, u.full_name,
-                     COALESCE(p.role, u.role) AS role
+                     COALESCE(p.role::text, u.role::text) AS role
               FROM users u
               LEFT JOIN profiles p ON p.id = u.id
               WHERE u.email = ${normalizedEmail}

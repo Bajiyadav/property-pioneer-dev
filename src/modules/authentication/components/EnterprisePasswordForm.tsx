@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
 import {
   Check,
@@ -192,50 +191,75 @@ export function EnterprisePasswordForm({
         }
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: resolvedEmail,
-        password,
-      });
+      let authUser: { name: string; email: string; phone: string; role: string } | null = null;
+
+      // 1. Try Supabase Auth
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: resolvedEmail,
+          password,
+        });
+
+        if (!error && data?.user) {
+          const user = data.user;
+          const resolvedName =
+            user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+          let resolvedRole: UserRole = "customer";
+          const dbRole = await resolveRoleFromDatabase(user.id);
+          resolvedRole =
+            dbRole ||
+            (isUserRole(user.user_metadata?.role) && user.user_metadata.role !== "admin"
+              ? user.user_metadata.role
+              : "customer");
+
+          authUser = {
+            name: resolvedName,
+            email: user?.email || resolvedEmail,
+            phone,
+            role: resolvedRole,
+          };
+        }
+      } catch {
+        // Fallback to native auth
+      }
+
+      // 2. Resilient fallback to native Seedha auth (/api/v2/auth)
+      if (!authUser) {
+        try {
+          const res = await fetch("/api/v2/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "login", email: resolvedEmail, password }),
+          });
+          const resData = await res.json();
+          if (res.ok && resData.ok && resData.user) {
+            if (typeof window !== "undefined") {
+              if (resData.token) {
+                localStorage.setItem("seedha_token", resData.token);
+              }
+              localStorage.setItem("seedha_user", JSON.stringify(resData.user));
+            }
+            authUser = {
+              name: resData.user.full_name || resData.user.fullName || "User",
+              email: resData.user.email || resolvedEmail,
+              phone: resData.user.phone || phone,
+              role: String(resData.user.role || "customer").toLowerCase(),
+            };
+          }
+        } catch {
+          // Native auth network error
+        }
+      }
 
       setLoading(false);
 
-      if (error) {
-        const msg = error.message.toLowerCase();
-        if (msg.includes("invalid login credentials")) {
-          // NOTE: a prior change called an RPC `check_account_exists` here to
-          // tell "no account" apart from "wrong password". That function does
-          // not exist in the database and wasn't in the generated types, which
-          // broke the typecheck / CD gate — so it never actually worked.
-          // Restored to a single generic message until the RPC is implemented
-          // (create the SQL function + regenerate types, then reintroduce it).
-          toast.error("Incorrect Email/Mobile or password. Please try again.");
-        } else if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
-          setAwaitingConfirmation(true);
-          toast.error("Your email isn't confirmed yet — we can resend the link.");
-        } else {
-          toast.error(error.message);
-        }
+      if (!authUser) {
+        toast.error("Incorrect Email/Mobile or password. Please try again.");
         return;
       }
 
-      const user = data.user;
-      const resolvedName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
-      let resolvedRole: UserRole = "customer";
-      if (user) {
-        const dbRole = await resolveRoleFromDatabase(user.id);
-        resolvedRole =
-          dbRole ||
-          (isUserRole(user.user_metadata?.role) && user.user_metadata.role !== "admin"
-            ? user.user_metadata.role
-            : "customer");
-      }
-      toast.success(`Welcome back, ${resolvedName}!`);
-      onSuccess({
-        name: resolvedName,
-        email: user?.email || resolvedEmail,
-        phone,
-        role: resolvedRole,
-      });
+      toast.success(`Welcome back, ${authUser.name}!`);
+      onSuccess(authUser);
     }
   };
 

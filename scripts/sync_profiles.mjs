@@ -1,0 +1,28 @@
+import postgres from 'postgres';
+
+const connectionString = "postgresql://neondb_owner:npg_5HcF2rMSXTaE@ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+async function syncProfiles() {
+  const sql = postgres(connectionString);
+  const users = await sql`SELECT id, email, full_name, phone, role FROM users WHERE email LIKE '%qa@%' OR email LIKE '%root%';`;
+  for (const u of users) {
+    const appRole = u.role.toLowerCase() === 'seeker' ? 'customer' : u.role.toLowerCase();
+    try {
+      await sql`
+        INSERT INTO profiles (id, email, full_name, phone, role)
+        VALUES (${u.id}, ${u.email}, ${u.full_name}, ${u.phone}, ${appRole})
+        ON CONFLICT (id) DO UPDATE
+        SET email = EXCLUDED.email,
+            full_name = EXCLUDED.full_name,
+            phone = EXCLUDED.phone,
+            role = EXCLUDED.role;
+      `;
+      console.log(`✅ Synced profile for: ${u.email} as ${appRole}`);
+    } catch (e) {
+      console.error(`Failed for ${u.email}:`, e.message);
+    }
+  }
+  await sql.end();
+}
+
+syncProfiles();
