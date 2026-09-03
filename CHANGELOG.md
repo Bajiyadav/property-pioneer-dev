@@ -1,3 +1,8 @@
+## v0.136.0 — 2026-09-03
+
+### Features
+- feat(db): add 002_staging_compatibility migration for reproducible staging (6e16a17)
+
 ## v0.135.0 — 2026-09-03
 
 ### Features
