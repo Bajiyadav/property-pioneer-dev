@@ -1,3 +1,8 @@
+## v0.145.0 — 2026-09-03
+
+### Features
+- feat(ops): add health readiness/liveness, staging restore rehearsal and release runbook (457c02c)
+
 ## v0.144.0 — 2026-09-03
 
 ### Features
