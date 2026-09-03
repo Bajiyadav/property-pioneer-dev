@@ -17,7 +17,6 @@ import '../features/owner/presentation/kyc_upload_screen.dart';
 import '../features/owner/presentation/promote_listing_screen.dart';
 import '../features/admin/presentation/admin_dashboard_screen.dart';
 import '../features/staff/presentation/staff_dashboard_screen.dart';
-import '../features/splash/presentation/splash_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/chat/presentation/ai_assistant_screen.dart';
 import '../features/loans/presentation/home_loans_screen.dart';
@@ -35,8 +34,7 @@ final GoRouter appRouter = GoRouter(
     final isAuth = session != null;
     final path = state.uri.path;
 
-    // The splash resolves auth itself; redirecting it would defeat that.
-    if (path == '/splash') return null;
+    if (path == '/splash') return '/';
 
     final isProtected = path.contains('-dashboard') ||
         path.startsWith('/profile') ||
@@ -179,7 +177,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/splash',
-      builder: (context, state) => const SplashScreen(),
+      redirect: (context, state) => '/',
     ),
     GoRoute(
       path: '/legal',
