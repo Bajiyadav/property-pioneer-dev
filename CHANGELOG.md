@@ -1,3 +1,8 @@
+## v0.133.0 — 2026-09-03
+
+### Features
+- feat(billing): add interactive Persona and Property Type plan selector (324cde8)
+
 ## v0.132.0 — 2026-09-03
 
 ### Features
