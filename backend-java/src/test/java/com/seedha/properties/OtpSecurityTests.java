@@ -357,9 +357,14 @@ public class OtpSecurityTests {
     @Test
     @DisplayName("13. Phone Number Normalization & Verification")
     void testPhoneOtpVerification() {
-        int randomDigits = 100000 + (int)(Math.random() * 900000);
-        String rawPhone = "+91 (987) 6" + (randomDigits / 1000) + "-" + (randomDigits % 1000);
-        String normalizedPhone = "+919876" + randomDigits;
+        // A fixed-width 6-digit suffix. The previous version built the raw phone
+        // from randomDigits/1000 and randomDigits%1000, which dropped leading
+        // zeros (e.g. %1000 == 42 became "42"), so the raw and normalized phones
+        // stopped matching whenever the low group was < 100 — a ~10% flake.
+        int randomDigits = 100000 + (int) (Math.random() * 900000); // always 6 digits
+        String suffix = String.valueOf(randomDigits); // e.g. "612345"
+        String rawPhone = "+91 (98) " + suffix.substring(0, 3) + "-" + suffix.substring(3);
+        String normalizedPhone = "+9198" + suffix;
 
         OtpRequestDto req = new OtpRequestDto();
         req.setContact(rawPhone);
