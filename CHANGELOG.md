@@ -1,3 +1,8 @@
+## v0.140.0 — 2026-09-03
+
+### Features
+- feat(security): complete Step 5 OTP security architecture & tests (ab1c8c4)
+
 ## v0.139.0 — 2026-09-03
 
 ### Features
