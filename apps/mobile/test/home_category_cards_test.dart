@@ -184,6 +184,31 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       expect(aiTapped, isTrue);
     });
+
+    testWidgets('PropertyManagementAndAgreementCards renders cards and responds to taps',
+        (tester) async {
+      var mgmtTapped = false;
+      var agreeTapped = false;
+
+      await tester.pumpWidget(host(PropertyManagementAndAgreementCards(
+        onPropertyManagementTap: () => mgmtTapped = true,
+        onRentalAgreementTap: () => agreeTapped = true,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Property Management'), findsOneWidget);
+      expect(find.text('Rental Agreement'), findsOneWidget);
+      expect(find.text('DIRECT CARE'), findsOneWidget);
+      expect(find.text('100% ONLINE'), findsOneWidget);
+
+      await tester.tap(find.text('Property Management'));
+      await tester.pumpAndSettle();
+      expect(mgmtTapped, isTrue);
+
+      await tester.tap(find.text('Rental Agreement'));
+      await tester.pumpAndSettle();
+      expect(agreeTapped, isTrue);
+    });
   });
 
   group('Legacy category cards compatibility', () {

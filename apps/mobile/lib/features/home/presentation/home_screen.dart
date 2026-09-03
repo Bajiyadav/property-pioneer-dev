@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/employee_access.dart';
 import 'package:seedha_properties_mobile/models/user_profile.dart';
@@ -20,7 +19,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
-  bool _isLocating = false;
   late final AnimationController _floatController;
   late final Animation<Offset> _floatAnimation;
 
@@ -60,11 +58,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _onUseCurrentLocation({bool navigateToSearch = false}) async {
-    setState(() => _isLocating = true);
     final loc =
         await ref.read(locationStateProvider.notifier).detectAndSetCurrentLocation();
     if (mounted) {
-      setState(() => _isLocating = false);
       if (loc != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -127,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  void _showLocationPickerBottomSheet({PropertyCategory? category}) {
+  void _showLocationPickerBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -227,78 +223,152 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     context.push('/post-property');
   }
 
-  Widget _buildTrustPillar({
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color iconColor,
-    required Color iconBgColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.borderSubtle),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13.5,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.3,
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
+  void _showPropertyManagementBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
           ),
-        ],
-      ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F766E).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.admin_panel_settings_rounded,
+                        color: Color(0xFF0F766E), size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Direct Property Management',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        Text(
+                          'Comprehensive care for genuine owners',
+                          style: TextStyle(
+                              fontSize: 12, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _managementFeatureRow(
+                Icons.verified_user_rounded,
+                'Tenant Background & Police Verification',
+                'Comprehensive Aadhaar, PAN, and identity screening.',
+              ),
+              const SizedBox(height: 12),
+              _managementFeatureRow(
+                Icons.account_balance_wallet_rounded,
+                'Automated Rent Collection & Receipts',
+                'On-time digital deposits directly to your bank account.',
+              ),
+              const SizedBox(height: 12),
+              _managementFeatureRow(
+                Icons.gavel_rounded,
+                'Digital Lease & Agreement Renewals',
+                'Legally binding e-stamped documentation anytime.',
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  final user = ref.read(authServiceProvider).currentUser;
+                  if (user != null) {
+                    context.push('/owner-dashboard');
+                  } else {
+                    context.go('/login');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F766E),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Manage My Properties',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _managementFeatureRow(IconData icon, String title, String desc) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF0F766E)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                desc,
+                style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final locationState = ref.watch(locationStateProvider);
-    final currentLocation = locationState.value;
-    final displayCity = currentLocation?.locality.isNotEmpty == true
-        ? '${currentLocation!.locality}, ${currentLocation.city}'
-        : (currentLocation?.city.isNotEmpty == true
-            ? currentLocation!.city
-            : 'All India');
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -516,162 +586,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
-              // Location Status & Quick Switch Bar
+              // Property Management & Rental Agreement Quick Cards
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0F766E).withValues(alpha: 0.10),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.location_on,
-                            color: Color(0xFF0F766E), size: 18),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Browsing Location',
-                              style: TextStyle(
-                                  fontSize: 10.5,
-                                  color: Color(0xFF64748B),
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            Text(
-                              displayCity,
-                              style: const TextStyle(
-                                  fontSize: 13.5,
-                                  color: Color(0xFF0F172A),
-                                  fontWeight: FontWeight.w800),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_isLocating)
-                        const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFF0F766E),
-                          ),
-                        )
-                      else ...[
-                        TextButton.icon(
-                          onPressed: () => _onUseCurrentLocation(navigateToSearch: true),
-                          icon: const Icon(Icons.my_location,
-                              size: 13, color: Color(0xFF0F766E)),
-                          label: const Text(
-                            'Near by',
-                            style: TextStyle(
-                              color: Color(0xFF0F766E),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11.5,
-                            ),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        TextButton(
-                          onPressed: _showLocationPickerBottomSheet,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Change',
-                            style: TextStyle(
-                              color: Color(0xFF64748B),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                child: PropertyManagementAndAgreementCards(
+                  onPropertyManagementTap: _showPropertyManagementBottomSheet,
+                  onRentalAgreementTap: () =>
+                      context.push('/rental-agreement'),
                 ),
               ),
 
-              const SizedBox(height: 22),
-
-              // Trust & Direct-Owner Guarantee Cards
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Why Choose Seedha Properties?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTrustPillar(
-                      icon: Icons.money_off_rounded,
-                      title: '100% Zero Brokerage Forever',
-                      description:
-                          'Connect directly with genuine property owners. Save lakhs in commissions on every deal.',
-                      iconColor: const Color(0xFF0F766E),
-                      iconBgColor: const Color(0xFF0F766E).withValues(alpha: 0.10),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTrustPillar(
-                      icon: Icons.verified_user_rounded,
-                      title: 'Multi-Tier KYC & Verified Ownership',
-                      description:
-                          'Every property undergoes title document and Aadhaar/PAN authentication before listing.',
-                      iconColor: const Color(0xFF2563EB),
-                      iconBgColor: const Color(0xFF2563EB).withValues(alpha: 0.10),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTrustPillar(
-                      icon: Icons.auto_awesome_rounded,
-                      title: 'Structured Grounded AI Guidance',
-                      description:
-                          'Ask Seedha AI for instant legal, price valuation, and neighborhood insights 24/7.',
-                      iconColor: const Color(0xFFD97706),
-                      iconBgColor: const Color(0xFFD97706).withValues(alpha: 0.10),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
             ],
           ),
         ),

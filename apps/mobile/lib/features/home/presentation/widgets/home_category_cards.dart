@@ -647,7 +647,7 @@ class ActionServiceTile extends StatelessWidget {
   }
 }
 
-/// Horizontal scrolling "Essential Services" section with floating card micro-animations
+/// Horizontal scrolling "Essential Services" section with forward-and-back floating card micro-animations
 class AnimatedHomeServicesSection extends StatefulWidget {
   const AnimatedHomeServicesSection({
     super.key,
@@ -670,28 +670,43 @@ class AnimatedHomeServicesSection extends StatefulWidget {
 class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSection>
     with SingleTickerProviderStateMixin {
   late final AnimationController _servicesFloatController;
-  late final Animation<double> _floatOffset1;
-  late final Animation<double> _floatOffset2;
+  late final Animation<double> _floatTranslateY1;
+  late final Animation<double> _floatScale1;
+  late final Animation<double> _floatTranslateY2;
+  late final Animation<double> _floatScale2;
 
   @override
   void initState() {
     super.initState();
     _servicesFloatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
+      duration: const Duration(milliseconds: 2200),
     )..repeat(reverse: true);
 
-    _floatOffset1 = Tween<double>(begin: 0.0, end: -4.0).animate(
+    // Staggered forward/backward floating wave (moving forward & coming back)
+    _floatTranslateY1 = Tween<double>(begin: 3.0, end: -5.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+    _floatScale1 = Tween<double>(begin: 0.98, end: 1.03).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOutSine,
       ),
     );
 
-    _floatOffset2 = Tween<double>(begin: -4.0, end: 0.0).animate(
+    _floatTranslateY2 = Tween<double>(begin: -5.0, end: 3.0).animate(
       CurvedAnimation(
         parent: _servicesFloatController,
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+    _floatScale2 = Tween<double>(begin: 1.03, end: 0.98).animate(
+      CurvedAnimation(
+        parent: _servicesFloatController,
+        curve: Curves.easeInOutSine,
       ),
     );
   }
@@ -764,56 +779,68 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
             animation: _servicesFloatController,
             builder: (context, child) {
               return SizedBox(
-                height: 118,
+                height: 124,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   children: [
                     Transform.translate(
-                      offset: Offset(0, _floatOffset1.value),
-                      child: _ServiceCardItem(
-                        title: 'Rental Agreement',
-                        subtitle: 'E-Stamp & Biometrics',
-                        icon: Icons.description_outlined,
-                        badge: 'LEGAL DRAFT',
-                        color: const Color(0xFF4338CA),
-                        onTap: widget.onRentalAgreementTap,
+                      offset: Offset(0, _floatTranslateY1.value),
+                      child: Transform.scale(
+                        scale: _floatScale1.value,
+                        child: _ServiceCardItem(
+                          title: 'Rental Agreement',
+                          subtitle: 'E-Stamp & Biometrics',
+                          icon: Icons.description_outlined,
+                          badge: 'LEGAL DRAFT',
+                          color: const Color(0xFF4338CA),
+                          onTap: widget.onRentalAgreementTap,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatOffset2.value),
-                      child: _ServiceCardItem(
-                        title: 'Schedule Visits',
-                        subtitle: 'Direct Site Slots',
-                        icon: Icons.calendar_month_outlined,
-                        badge: 'VERIFIED',
-                        color: const Color(0xFF0D9488),
-                        onTap: widget.onVisitsTap,
+                      offset: Offset(0, _floatTranslateY2.value),
+                      child: Transform.scale(
+                        scale: _floatScale2.value,
+                        child: _ServiceCardItem(
+                          title: 'Schedule Visits',
+                          subtitle: 'Direct Site Slots',
+                          icon: Icons.calendar_month_outlined,
+                          badge: 'VERIFIED',
+                          color: const Color(0xFF0D9488),
+                          onTap: widget.onVisitsTap,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatOffset1.value),
-                      child: _ServiceCardItem(
-                        title: 'Home Loans',
-                        subtitle: 'Lowest Interest Rates',
-                        icon: Icons.account_balance_outlined,
-                        badge: 'PRE-APPROVED',
-                        color: const Color(0xFFD97706),
-                        onTap: widget.onHomeLoansTap,
+                      offset: Offset(0, _floatTranslateY1.value),
+                      child: Transform.scale(
+                        scale: _floatScale1.value,
+                        child: _ServiceCardItem(
+                          title: 'Home Loans',
+                          subtitle: 'Lowest Interest Rates',
+                          icon: Icons.account_balance_outlined,
+                          badge: 'PRE-APPROVED',
+                          color: const Color(0xFFD97706),
+                          onTap: widget.onHomeLoansTap,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Transform.translate(
-                      offset: Offset(0, _floatOffset2.value),
-                      child: _ServiceCardItem(
-                        title: 'Seedha AI Advisor',
-                        subtitle: '24/7 PropTech Guidance',
-                        icon: Icons.auto_awesome_rounded,
-                        badge: 'GROUNDED',
-                        color: const Color(0xFF2563EB),
-                        onTap: widget.onAiAssistantTap,
+                      offset: Offset(0, _floatTranslateY2.value),
+                      child: Transform.scale(
+                        scale: _floatScale2.value,
+                        child: _ServiceCardItem(
+                          title: 'Seedha AI Advisor',
+                          subtitle: '24/7 PropTech Guidance',
+                          icon: Icons.auto_awesome_rounded,
+                          badge: 'GROUNDED',
+                          color: const Color(0xFF2563EB),
+                          onTap: widget.onAiAssistantTap,
+                        ),
                       ),
                     ),
                   ],
@@ -823,6 +850,195 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Compact pair of small cards for Property Management & Rental Agreement
+class PropertyManagementAndAgreementCards extends StatelessWidget {
+  const PropertyManagementAndAgreementCards({
+    super.key,
+    required this.onPropertyManagementTap,
+    required this.onRentalAgreementTap,
+  });
+
+  final VoidCallback onPropertyManagementTap;
+  final VoidCallback onRentalAgreementTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Property Management Small Card
+        Expanded(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPropertyManagementTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Ink(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F766E), Color(0xFF115E59)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0F766E).withValues(alpha: 0.22),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.admin_panel_settings_rounded,
+                              color: Colors.white, size: 20),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.24),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'DIRECT CARE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Property Management',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Tenant verification & rent collection',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Rental Agreement Small Card
+        Expanded(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onRentalAgreementTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Ink(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4338CA), Color(0xFF3730A3)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4338CA).withValues(alpha: 0.22),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.assignment_turned_in_rounded,
+                              color: Colors.white, size: 20),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.24),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            '100% ONLINE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Rental Agreement',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'E-Stamp & legal drafting delivered',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
