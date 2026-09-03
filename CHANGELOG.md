@@ -1,3 +1,12 @@
+## v0.157.0 — 2026-09-03
+
+### Features
+- feat(backend): add Msg91SmsProvider for Indian DLT compliance and 2-5s OTP delivery (ab2b403)
+- feat(auth): real Twilio SMS adapter + Flutter Seedha auth service + migration plan (58def8a)
+
+### Documentation
+- feat(auth): real Twilio SMS adapter + Flutter Seedha auth service + migration plan (58def8a)
+
 ## v0.156.0 — 2026-09-03
 
 ### Features
