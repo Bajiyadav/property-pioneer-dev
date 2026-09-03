@@ -226,6 +226,204 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  void _showQuickNavigationSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.fromLTRB(
+              20, 16, 20, MediaQuery.of(ctx).padding.bottom + 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF16A34A),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SEEDHA PROPERTIES',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      Text(
+                        '100% Direct Owner Marketplace',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              const SizedBox(height: 10),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.search_rounded,
+                        color: const Color(0xFFE11D48),
+                        title: 'Search Properties',
+                        subtitle: '100% Direct Owner • Zero Brokerage',
+                        route: '/search',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.cleaning_services_outlined,
+                        color: const Color(0xFF0F766E),
+                        title: 'Seedha Essential Services',
+                        subtitle: 'Rental agreements, management, loans & AI',
+                        route: '/services',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.credit_card_outlined,
+                        color: const Color(0xFF2563EB),
+                        title: 'Seedha Pay (Rent via Credit Card)',
+                        subtitle: 'Earn rewards, get instant HRA receipts',
+                        route: '/payments',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.description_outlined,
+                        color: const Color(0xFF7C3AED),
+                        title: 'Digital Rental Agreement',
+                        subtitle: 'Biometric/OTP e-stamped legal lease (₹499)',
+                        route: '/rental-agreement',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.account_balance_outlined,
+                        color: const Color(0xFFD97706),
+                        title: 'Home Loans & Mortgage Rates',
+                        subtitle: 'Lowest interest rates starting 8.35% p.a.',
+                        route: '/home-loans',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.psychology_outlined,
+                        color: const Color(0xFF10B981),
+                        title: 'Seedha AI Property Assistant',
+                        subtitle: 'Instant legal review & fair market pricing',
+                        route: '/ai-assistant',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.calendar_month_outlined,
+                        color: const Color(0xFFEC4899),
+                        title: 'Scheduled Site Visits',
+                        subtitle: 'Manage viewings and inspections',
+                        route: '/visits',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.add_business_rounded,
+                        color: const Color(0xFFE11D48),
+                        title: 'Post FREE Property Ad',
+                        subtitle: 'List your property in 2 minutes without brokerage',
+                        route: '/post-property',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.person_outline_rounded,
+                        color: const Color(0xFF64748B),
+                        title: 'My Profile & Account',
+                        subtitle: 'Account details, KYC verification & settings',
+                        route: '/profile',
+                      ),
+                      _navMenuItem(
+                        ctx,
+                        icon: Icons.policy_outlined,
+                        color: const Color(0xFF64748B),
+                        title: 'Legal Hub & Compliance',
+                        subtitle: 'Privacy policy, terms & RERA compliance',
+                        route: '/legal',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _navMenuItem(
+    BuildContext modalContext, {
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required String route,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      leading: Container(
+        padding: const EdgeInsets.all(9),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF0F172A),
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: 11.5,
+          color: Color(0xFF64748B),
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 18),
+      onTap: () {
+        Navigator.pop(modalContext);
+        context.push(route);
+      },
+    );
+  }
+
   void _showFilterModal() {
     showModalBottomSheet(
       context: context,
@@ -561,9 +759,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               )
             : IconButton(
                 icon: const Icon(Icons.menu_rounded, color: Color(0xFF1E293B), size: 26),
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Seedha Properties Menu')),
-                ),
+                onPressed: () => _showQuickNavigationSheet(context),
               ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -715,16 +911,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          context.push('/location-search').then((_) => _executeSearch());
-                          ref.read(selectedBedroomsFilterProvider.notifier).state = null;
-                          ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
-                          ref.read(selectedFurnishingFilterProvider.notifier).state = null;
-                          _executeSearch();
-                        },
-                        child: const Text('Show All Pan-India Listings'),
+                      ElevatedButton.icon(
+                        onPressed: _showLocationPickerModal,
+                        icon: const Icon(Icons.location_city_rounded, size: 16),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE11D48),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                        label: const Text('Change City / Location', style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _resetFilters,
+                        child: const Text('Reset All Filters', style: TextStyle(color: Color(0xFF64748B))),
                       ),
                     ],
                   ),
@@ -1050,8 +1252,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildLookingForTenantsBanner() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Container(
-        decoration: BoxDecoration(
+      child: GestureDetector(
+        onTap: () => context.push('/post-property'),
+        child: Container(
+          decoration: BoxDecoration(
           color: const Color(0xFF231F20),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -1197,8 +1401,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLocationAndFilterBar() {
     return Container(
