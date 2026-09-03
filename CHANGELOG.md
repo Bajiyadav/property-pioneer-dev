@@ -1,3 +1,8 @@
+## v0.150.0 — 2026-09-03
+
+### Features
+- feat(mobile): add forward translation float animation to services (f864588)
+
 ## v0.149.0 — 2026-09-03
 
 ### Features
