@@ -19,6 +19,8 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _homeServicesKey = GlobalKey();
   List<Property> _results = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -36,6 +38,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -434,443 +437,1103 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final locationState = ref.watch(locationStateProvider);
     final activeCity = locationState.value?.city ?? 'All India';
 
-    String screenTitle;
-    switch (activeCategory) {
-      case PropertyCategory.buy:
-        screenTitle = 'Buy Properties';
-        break;
-      case PropertyCategory.rent:
-        screenTitle = 'Rent Homes';
-        break;
-      case PropertyCategory.commercial:
-        screenTitle = 'Commercial Spaces';
-        break;
-    }
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         leading: Navigator.of(context).canPop()
             ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+                icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
                 onPressed: () => context.pop(),
               )
-            : null,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+            : IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Color(0xFF1E293B), size: 26),
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Seedha Properties Menu')),
+                ),
+              ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(screenTitle,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-            Text(
-              activeCity,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF0F766E),
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE11D48),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 16),
+            ),
+            const SizedBox(width: 8),
+            RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'SEEDHA ',
+                    style: TextStyle(
+                      color: Color(0xFFE11D48),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'PROPERTIES',
+                    style: TextStyle(
+                      color: Color(0xFF1E293B),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.tune, color: Color(0xFF0F766E)),
-            tooltip: 'Filter Options',
-            onPressed: _showFilterModal,
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: GestureDetector(
+              onTap: () => context.push('/profile'),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: const Color(0xFFF59E0B),
+                child: Text(
+                  _getUserInitial(ref),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Location, Search & Filter Bar
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-            decoration: BoxDecoration(
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Container(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopPills(),
+                  _buildTaglineAndCategoryTabs(activeCategory),
+                  _buildSearchBar(),
+                  _buildLookingForTenantsBanner(),
+                  _buildHomeServicesSection(),
+                  const SizedBox(height: 12),
+                  _buildLocationAndFilterBar(locationState, activeCity),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Location Bar (Searching in Gachibowli, Hyderabad + Change)
-                Row(
+          ),
+          if (_isLoading)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40),
+                  child: CircularProgressIndicator(color: Color(0xFFE11D48)),
+                ),
+              ),
+            )
+          else if (_errorMessage != null)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.wifi_off_rounded, size: 56, color: Color(0xFFD97706)),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'No internet connection',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Please check your internet connection and try again.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _executeSearch,
+                        icon: const Icon(Icons.refresh, size: 16),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE11D48),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        label: const Text('Retry Search', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (_results.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.search_off_outlined, size: 56, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text(
+                        "No ${activeCategory.label.toLowerCase()} properties found in $activeCity",
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "Try clearing specific filters or exploring other major metros.",
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          context.push('/location-search').then((_) => _executeSearch());
+                          ref.read(selectedBedroomsFilterProvider.notifier).state = null;
+                          ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
+                          ref.read(selectedFurnishingFilterProvider.notifier).state = null;
+                          _executeSearch();
+                        },
+                        child: const Text('Show All Pan-India Listings'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else if (_isMapView)
+            SliverFillRemaining(
+              child: PropertyMapView(
+                properties: _results,
+                centerLocation: _mapCenter(),
+                favoriteIds: ref.watch(favoritesProvider),
+                onToggleFavorite: (id) => ref
+                    .read(favoritesProvider.notifier)
+                    .toggleFavorite(id),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final prop = _results[index];
+                    final isFav = ref.watch(favoritesProvider).contains(prop.id);
+                    return PropertyCardWidget(
+                      property: prop,
+                      isFavorite: isFav,
+                      onTap: () => context.push('/properties/${prop.id}'),
+                      onToggleFavorite: () {
+                        ref
+                            .read(favoritesProvider.notifier)
+                            .toggleFavorite(prop.id);
+                      },
+                    );
+                  },
+                  childCount: _results.length,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _getUserInitial(WidgetRef ref) {
+    try {
+      final user = ref.watch(authServiceProvider).currentUser;
+      if (user?.email?.isNotEmpty == true) {
+        return user!.email![0].toUpperCase();
+      }
+    } catch (_) {}
+    return 'N';
+  }
+
+  Widget _buildTopPills() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      child: Row(
+        children: [
+          // Property (Selected)
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1F2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFFCCD3), width: 1.2),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Color(0xFFE11D48)),
+                  SizedBox(width: 6),
+                  Text(
+                    'Property',
+                    style: TextStyle(
+                      color: Color(0xFFE11D48),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Home
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                final ctx = _homeServicesKey.currentContext;
+                if (ctx != null) {
+                  Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.location_on_outlined, color: Color(0xFF0F766E), size: 20),
-                    const SizedBox(width: 8),
+                    Icon(Icons.cleaning_services_outlined, size: 18, color: Color(0xFF475569)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Home',
+                      style: TextStyle(
+                        color: Color(0xFF475569),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Payments
+          Expanded(
+            child: GestureDetector(
+              onTap: () => context.push('/rental-agreement'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.credit_card_outlined, size: 18, color: Color(0xFF475569)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Payments',
+                      style: TextStyle(
+                        color: Color(0xFF475569),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaglineAndCategoryTabs(PropertyCategory activeCategory) {
+    return Column(
+      children: [
+        const SizedBox(height: 14),
+        const Text(
+          '100% Owner Properties | Zero Brokerage',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF334155),
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 14),
+        // Buy | Rent | Commercial Tabs
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _categoryTabItem('Buy', PropertyCategory.buy, activeCategory),
+              _categoryTabItem('Rent', PropertyCategory.rent, activeCategory),
+              _categoryTabItem('Commercial', PropertyCategory.commercial, activeCategory),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Widget _categoryTabItem(String label, PropertyCategory category, PropertyCategory activeCategory) {
+    final isSelected = activeCategory == category;
+    return GestureDetector(
+      onTap: () {
+        ref.read(activeCategoryProvider.notifier).state = category;
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                fontStyle: isSelected ? FontStyle.normal : FontStyle.italic,
+                color: isSelected ? const Color(0xFFE11D48) : const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 3,
+            width: isSelected ? 48 : 0,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE11D48),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.only(left: 14, right: 6, top: 4, bottom: 4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => _executeSearch(),
+                decoration: const InputDecoration(
+                  hintText: 'Search up to 3 Localities or Landmarks',
+                  hintStyle: TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
+              ),
+            ),
+            if (_searchController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18, color: Colors.grey),
+                onPressed: () {
+                  _searchController.clear();
+                  _executeSearch();
+                },
+              ),
+            GestureDetector(
+              onTap: _executeSearch,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE11D48),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLookingForTenantsBanner() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF231F20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                bottom: -20,
+                child: Container(
+                  width: 130,
+                  height: 130,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFE11D48).withValues(alpha: 0.12),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
                     Expanded(
+                      flex: 12,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Searching in',
+                            'Looking for Tenants / Buyers ?',
                             style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF64748B),
-                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
                             ),
                           ),
-                          Builder(
-                            builder: (context) {
-                              final locality = locationState.value?.locality;
-                              final hasLocality = locality != null && locality.isNotEmpty;
-                              return Text(
-                                hasLocality
-                                    ? '$locality, $activeCity'
-                                    : '$activeCity, Telangana',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0F766E),
+                          const SizedBox(height: 10),
+                          const Row(
+                            children: [
+                              Icon(Icons.bolt_rounded, size: 16, color: Color(0xFFFBBF24)),
+                              SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Faster & Verified Tenants/Buyers',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              );
-                            },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          const Row(
+                            children: [
+                              Icon(Icons.timer_outlined, size: 15, color: Color(0xFF60A5FA)),
+                              SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Pay ZERO brokerage',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          ElevatedButton(
+                            onPressed: () => context.push('/post-property'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE11D48),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Post FREE Property Ad',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        context.push('/location-search').then((_) => _executeSearch());
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF0F766E),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Change',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
+                    const SizedBox(width: 8),
+                    // 3D House / Key Graphic
+                    Expanded(
+                      flex: 8,
+                      child: SizedBox(
+                        height: 115,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 85,
+                              height: 85,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.06),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            Positioned(
+                              top: 6,
+                              child: Icon(
+                                Icons.vpn_key_rounded,
+                                size: 36,
+                                color: const Color(0xFFFBBF24).withValues(alpha: 0.95),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 2,
+                              child: Icon(
+                                Icons.cottage_rounded,
+                                size: 68,
+                                color: Colors.white.withValues(alpha: 0.88),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Search Input Box
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search, color: Color(0xFF64748B), size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (_) => _executeSearch(),
-                          decoration: const InputDecoration(
-                            hintText: 'Search by society, landmark...',
-                            hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 13.5),
-                            border: InputBorder.none,
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      if (_searchController.text.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.clear, size: 18, color: Colors.grey),
-                          onPressed: () {
-                            _searchController.clear();
-                            _executeSearch();
-                          },
-                        ),
-                    ],
+  Widget _buildHomeServicesSection() {
+    return Padding(
+      key: _homeServicesKey,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Home Services',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => context.push('/rental-agreement'),
+                child: const Text(
+                  'See All >',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F766E),
                   ),
                 ),
-                const SizedBox(height: 10),
-
-                // Horizontal Filter Pills Row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      // Price ▾
-                      GestureDetector(
-                        onTap: _showFilterModal,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: ref.read(budgetRangeFilterProvider) != _kBudgetBounds
-                                  ? const Color(0xFF0F766E)
-                                  : const Color(0xFFCBD5E1),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                ref.read(budgetRangeFilterProvider) != _kBudgetBounds
-                                    ? '${_budgetLabel(ref.read(budgetRangeFilterProvider).start)} - ${_budgetLabel(ref.read(budgetRangeFilterProvider).end)}'
-                                    : 'Price',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: ref.read(budgetRangeFilterProvider) != _kBudgetBounds
-                                      ? const Color(0xFF0F766E)
-                                      : const Color(0xFF334155),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // BHK ▾
-                      GestureDetector(
-                        onTap: _showFilterModal,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: ref.read(selectedBedroomsFilterProvider) != null
-                                  ? const Color(0xFF0F766E)
-                                  : const Color(0xFFCBD5E1),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                ref.read(selectedBedroomsFilterProvider) != null
-                                    ? '${ref.read(selectedBedroomsFilterProvider)} BHK'
-                                    : 'BHK',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: ref.read(selectedBedroomsFilterProvider) != null
-                                      ? const Color(0xFF0F766E)
-                                      : const Color(0xFF334155),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Property Type ▾
-                      GestureDetector(
-                        onTap: _showFilterModal,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: ref.read(selectedPropertyTypeFilterProvider) != null
-                                  ? const Color(0xFF0F766E)
-                                  : const Color(0xFFCBD5E1),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                ref.read(selectedPropertyTypeFilterProvider) ?? 'Property Type',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: ref.read(selectedPropertyTypeFilterProvider) != null
-                                      ? const Color(0xFF0F766E)
-                                      : const Color(0xFF334155),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.arrow_drop_down, size: 16, color: Color(0xFF64748B)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Tune / All Filters button
-                      IconButton(
-                        icon: const Icon(Icons.tune, color: Color(0xFF0F766E), size: 20),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: _showFilterModal,
-                      ),
-                      if (_hasActiveFilters) ...[
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: _resetFilters,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.close, size: 14, color: Color(0xFF64748B)),
-                                SizedBox(width: 2),
-                                Text(
-                                  'Clear',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 112,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _buildServiceTile(
+                  title: 'Packers\n& Movers',
+                  badge: 'UPTO 20% OFF',
+                  icon: Icons.local_shipping_outlined,
+                  color: const Color(0xFF2563EB),
+                  onTap: () => _showServiceDetailModal(
+                    'Packers & Movers',
+                    'Safe packing, relocation, and doorstep transit assistance with verified movers.',
                   ),
                 ),
-                const SizedBox(height: 10),
-
-                // "Showing X properties from Direct Owners" + List/Map Toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isLoading
-                          ? 'Finding verified owners...'
-                          : 'Showing ${_results.length} ${_results.length == 1 ? 'property' : 'properties'} from Direct Owners',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF64748B),
-                      ),
-                    ),
-                    _listMapToggle(),
-                  ],
+                const SizedBox(width: 12),
+                _buildServiceTile(
+                  title: 'Home\nCleaning',
+                  badge: 'UPTO 20% OFF',
+                  icon: Icons.sanitizer_outlined,
+                  color: const Color(0xFF0D9488),
+                  onTap: () => _showServiceDetailModal(
+                    'Home Cleaning',
+                    'Full-house deep cleaning and sanitisation by vetted hygiene professionals.',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _buildServiceTile(
+                  title: 'Rental\nAgreement',
+                  badge: '100% ONLINE',
+                  icon: Icons.description_outlined,
+                  color: const Color(0xFFE11D48),
+                  onTap: () => context.push('/rental-agreement'),
+                ),
+                const SizedBox(width: 12),
+                _buildServiceTile(
+                  title: 'Painting\n& Repairs',
+                  badge: 'UPTO 25% OFF',
+                  icon: Icons.format_paint_outlined,
+                  color: const Color(0xFFD97706),
+                  onTap: () => _showServiceDetailModal(
+                    'Painting & Repairs',
+                    'Laser-measured room painting, water-proofing, and handyman repairs with warranty.',
+                  ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Results Feed
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
-                : _errorMessage != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.wifi_off_rounded, size: 56, color: Color(0xFFD97706)),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'No internet connection',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Please check your internet connection and try again.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey, fontSize: 13),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton.icon(
-                                onPressed: _executeSearch,
-                                icon: const Icon(Icons.refresh, size: 16),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0F766E),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                label: const Text('Retry Search', style: TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ],
+  Widget _buildServiceTile({
+    required String title,
+    required String badge,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 154,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1E293B),
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.10),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 18, color: color),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                badge,
+                style: const TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFFB45309),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showServiceDetailModal(String serviceName, String description) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                serviceName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: const TextStyle(fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Thank you! Our $serviceName team will contact you shortly.')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F766E),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 46),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Request Instant Callback', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLocationAndFilterBar(
+      AsyncValue<dynamic> locationState, String activeCity) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Location Bar (Searching in Gachibowli, Hyderabad + Change)
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined,
+                  color: Color(0xFFE11D48), size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Searching in',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final locality = locationState.value?.locality;
+                        final hasLocality =
+                            locality != null && locality.isNotEmpty;
+                        return Text(
+                          hasLocality
+                              ? '$locality, $activeCity'
+                              : '$activeCity, Telangana',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F766E),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  context
+                      .push('/location-search')
+                      .then((_) => _executeSearch());
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFE11D48),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Change',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Horizontal Filter Pills Row
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // Price ▾
+                GestureDetector(
+                  onTap: _showFilterModal,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: ref.read(budgetRangeFilterProvider) !=
+                                _kBudgetBounds
+                            ? const Color(0xFFE11D48)
+                            : const Color(0xFFCBD5E1),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ref.read(budgetRangeFilterProvider) != _kBudgetBounds
+                              ? '${_budgetLabel(ref.read(budgetRangeFilterProvider).start)} - ${_budgetLabel(ref.read(budgetRangeFilterProvider).end)}'
+                              : 'Price',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: ref.read(budgetRangeFilterProvider) !=
+                                    _kBudgetBounds
+                                ? const Color(0xFFE11D48)
+                                : const Color(0xFF334155),
                           ),
                         ),
-                      )
-                    : _results.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.search_off_outlined, size: 56, color: Colors.grey),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    "No ${activeCategory.label.toLowerCase()} properties found in $activeCity",
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  const Text(
-                                    "Try clearing specific filters or exploring other major metros.",
-                                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  OutlinedButton(
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      context.push('/location-search').then((_) => _executeSearch());
-                                      
-                                      ref.read(selectedBedroomsFilterProvider.notifier).state = null;
-                                      ref.read(selectedPropertyTypeFilterProvider.notifier).state = null;
-                                      ref.read(selectedFurnishingFilterProvider.notifier).state = null;
-                                      _executeSearch();
-                                    },
-                                    child: const Text('Show All Pan-India Listings'),
-                                  ),
-                                ],
-                              ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_drop_down,
+                            size: 16, color: Color(0xFF64748B)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // BHK ▾
+                GestureDetector(
+                  onTap: _showFilterModal,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: ref.read(selectedBedroomsFilterProvider) != null
+                            ? const Color(0xFFE11D48)
+                            : const Color(0xFFCBD5E1),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ref.read(selectedBedroomsFilterProvider) != null
+                              ? '${ref.read(selectedBedroomsFilterProvider)} BHK'
+                              : 'BHK',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                ref.read(selectedBedroomsFilterProvider) != null
+                                    ? const Color(0xFFE11D48)
+                                    : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_drop_down,
+                            size: 16, color: Color(0xFF64748B)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Property Type ▾
+                GestureDetector(
+                  onTap: _showFilterModal,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color:
+                            ref.read(selectedPropertyTypeFilterProvider) != null
+                                ? const Color(0xFFE11D48)
+                                : const Color(0xFFCBD5E1),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ref.read(selectedPropertyTypeFilterProvider) ??
+                              'Property Type',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: ref.read(
+                                        selectedPropertyTypeFilterProvider) !=
+                                    null
+                                ? const Color(0xFFE11D48)
+                                : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_drop_down,
+                            size: 16, color: Color(0xFF64748B)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Tune / All Filters button
+                IconButton(
+                  icon: const Icon(Icons.tune,
+                      color: Color(0xFFE11D48), size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: _showFilterModal,
+                ),
+                if (_hasActiveFilters) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _resetFilters,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.close, size: 14, color: Color(0xFF64748B)),
+                          SizedBox(width: 2),
+                          Text(
+                            'Clear',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B),
                             ),
-                          )
-                        : _isMapView
-                            ? PropertyMapView(
-                                properties: _results,
-                                centerLocation: _mapCenter(),
-                                favoriteIds: ref.watch(favoritesProvider),
-                                onToggleFavorite: (id) => ref
-                                    .read(favoritesProvider.notifier)
-                                    .toggleFavorite(id),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                itemCount: _results.length,
-                                itemBuilder: (context, index) {
-                                  final prop = _results[index];
-                                  final isFav =
-                                      ref.watch(favoritesProvider).contains(prop.id);
-                                  return PropertyCardWidget(
-                                    property: prop,
-                                    isFavorite: isFav,
-                                    // push, not go: back must return to these
-                                    // results with the filters still applied.
-                                    onTap: () => context.push('/properties/${prop.id}'),
-                                    onToggleFavorite: () {
-                                      ref
-                                          .read(favoritesProvider.notifier)
-                                          .toggleFavorite(prop.id);
-                                    },
-                                  );
-                                },
-                              ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // "Showing X properties from Direct Owners" + List/Map Toggle
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _isLoading
+                    ? 'Finding verified owners...'
+                    : 'Showing ${_results.length} ${_results.length == 1 ? 'property' : 'properties'} from Direct Owners',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+              _listMapToggle(),
+            ],
           ),
         ],
       ),
