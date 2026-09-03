@@ -1,3 +1,8 @@
+## v0.159.0 — 2026-09-03
+
+### Features
+- feat(property): native backend fallback, unhardcode contact gate, remove Unsplash dependency (aedf89a)
+
 ## v0.158.0 — 2026-09-03
 
 ### Features
