@@ -1,3 +1,8 @@
+## v0.149.0 — 2026-09-03
+
+### Features
+- feat(mobile): add forward-back float and direct cards (4ec387a)
+
 ## v0.148.1 — 2026-09-03
 
 ### Fixes
