@@ -1,3 +1,8 @@
+## v0.154.0 — 2026-09-03
+
+### Features
+- feat(mobile): add dedicated Seedha Pay Payments screen and wire Payments tab navigation (3bb070d)
+
 ## v0.153.1 — 2026-09-03
 
 ### Fixes
