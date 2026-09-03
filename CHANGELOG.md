@@ -1,3 +1,8 @@
+## v0.129.0 — 2026-09-03
+
+### Features
+- feat: standardize property management branding and update mobile navigation (5f0250a)
+
 ## v0.128.0 — 2026-09-02
 
 ### Features
