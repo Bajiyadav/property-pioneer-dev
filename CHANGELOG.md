@@ -1,3 +1,8 @@
+## v0.155.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): harmonize Home pill icon and navigation across payments screen (4d12e04)
+
 ## v0.155.0 — 2026-09-03
 
 ### Features
