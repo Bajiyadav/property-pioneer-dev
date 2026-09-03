@@ -1,3 +1,8 @@
+## v0.161.0 — 2026-09-03
+
+### Features
+- feat: add all Indian states and Tier 1/2/3 cities to location engine (f09a66b)
+
 ## v0.160.0 — 2026-09-03
 
 ### Features
