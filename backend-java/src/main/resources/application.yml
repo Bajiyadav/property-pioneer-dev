@@ -39,6 +39,12 @@ seedha:
     # Supplied by the environment only. A committed default would be a signing key
     # in the repository, and the application fails to start without it by design.
     secret: ${JWT_SECRET}
+    key-id: ${JWT_KEY_ID:seedha-key-v1}
+    # Operational key rotation. Comma-separated kid:secret pairs that VERIFY but
+    # never sign, for the overlap window after a rotation. Empty = single active
+    # key. See JwtTokenProvider and src/server/auth.ts — the two backends share
+    # this contract so their tokens rotate through one lifecycle.
+    previous-keys: ${JWT_PREVIOUS_KEYS:}
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
   aws:
