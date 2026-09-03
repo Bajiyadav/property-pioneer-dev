@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:seedha_properties_mobile/config/map_tiles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -390,10 +391,8 @@ class _Step1LocationState extends ConsumerState<Step1Location> {
           mapController: _mapController,
           options: MapOptions(initialCenter: point, initialZoom: 15),
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.seedhaproperties.mobile',
-            ),
+            MapTiles.layer(),
+            MapTiles.attribution(),
             MarkerLayer(
               markers: [
                 Marker(

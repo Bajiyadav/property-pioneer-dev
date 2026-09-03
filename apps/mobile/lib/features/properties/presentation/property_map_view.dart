@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:seedha_properties_mobile/config/map_tiles.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
@@ -51,10 +52,8 @@ class _PropertyMapViewState extends State<PropertyMapView> {
             },
           ),
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.seedhaproperties.mobile',
-            ),
+            MapTiles.layer(),
+            MapTiles.attribution(),
             MarkerLayer(
               markers: propertiesWithCoords.map((prop) {
                 final isSelected = _selectedProperty?.id == prop.id;
