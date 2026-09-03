@@ -1,3 +1,10 @@
+## v0.142.2 — 2026-09-03
+
+### Fixes
+- fix(journey): polish mobile search and unify rent landing page (1b897af)
+- fix(security): remove re-injected secret defaults from Spring config (8e1bfed)
+- fix(security): stop the recurring committed JWT secret at its root (0a0bfc4)
+
 ## v0.142.1 — 2026-09-03
 
 ### Fixes
