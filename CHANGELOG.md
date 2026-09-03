@@ -1,3 +1,8 @@
+## v0.134.0 — 2026-09-03
+
+### Features
+- feat(billing): add dedicated plan tiers for all 4 personas (Tenant, Owner, Buyer, Seller) (534bd31)
+
 ## v0.133.0 — 2026-09-03
 
 ### Features
