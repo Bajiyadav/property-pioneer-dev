@@ -210,7 +210,13 @@ class ProfileScreen extends ConsumerWidget {
                       _activityItem(
                         icon: Icons.description_outlined,
                         title: 'Rental Agreements',
-                        onTap: () => context.push('/rental-agreements/new'),
+                        onTap: () => context.push('/rental-agreement'),
+                      ),
+                      _divider(),
+                      _activityItem(
+                        icon: Icons.account_balance_outlined,
+                        title: 'Home Loans',
+                        onTap: () => context.push('/home-loans'),
                       ),
                     ],
                   ),

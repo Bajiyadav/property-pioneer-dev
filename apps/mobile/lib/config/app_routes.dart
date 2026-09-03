@@ -109,6 +109,14 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const RentalAgreementFormScreen(),
     ),
     GoRoute(
+      path: '/rental-agreements',
+      builder: (context, state) => const RentalAgreementFormScreen(),
+    ),
+    GoRoute(
+      path: '/rental-agreements/new',
+      builder: (context, state) => const RentalAgreementFormScreen(),
+    ),
+    GoRoute(
       path: '/create-agreement',
       builder: (context, state) => const RentalAgreementFormScreen(),
     ),
