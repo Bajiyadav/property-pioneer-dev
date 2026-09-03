@@ -498,7 +498,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           // Home
           Expanded(
             child: GestureDetector(
-              onTap: () => context.push('/rental-agreement'),
+              onTap: () => context.go('/'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -509,7 +509,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.cleaning_services_outlined, size: 18, color: Color(0xFF475569)),
+                    Icon(Icons.home_outlined, size: 18, color: Color(0xFF475569)),
                     SizedBox(width: 6),
                     Text(
                       'Home',
