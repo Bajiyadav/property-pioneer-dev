@@ -22,7 +22,7 @@ dependencies:
   http: ^1.2.1
   image_picker: ^1.2.3
   uuid: ^4.6.0
-  sentry_flutter: ^8.14.2
+  sentry_flutter: ^9.28.0
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   geolocator: ^14.0.2
