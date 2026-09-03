@@ -1,3 +1,8 @@
+## v0.138.0 — 2026-09-03
+
+### Features
+- feat(security): harden auth with token family reuse detection and audit (042287e)
+
 ## v0.137.0 — 2026-09-03
 
 ### Features
