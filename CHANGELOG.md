@@ -1,3 +1,8 @@
+## v0.135.0 — 2026-09-03
+
+### Features
+- feat(backend-java): connect & verify Spring Boot with Neon PostGIS (6015783)
+
 ## v0.134.0 — 2026-09-03
 
 ### Features
