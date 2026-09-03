@@ -1,3 +1,8 @@
+## v0.148.0 — 2026-09-03
+
+### Features
+- feat(mobile): add typewriter painting quote animation and floating essential services (52d5637)
+
 ## v0.147.0 — 2026-09-03
 
 ### Features
