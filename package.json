@@ -17,6 +17,8 @@
     "lint": "eslint . --fix --ext .ts,.tsx",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:integration": "ENABLE_SUPABASE_INTEGRATION_TESTS=true vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:latency": "node scripts/test-supabase-latency.mjs",
