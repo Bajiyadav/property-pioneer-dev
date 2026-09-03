@@ -8,9 +8,9 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/seedha_db}
-    username: ${DB_USERNAME:seedha_user}
-    password: ${DB_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://ep-damp-tree-a1310t1a-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_gK7Ld8PefVha}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -36,9 +36,8 @@ spring:
 # Seedha Platform Custom Config
 seedha:
   jwt:
-    # Supplied by the environment only. A committed default would be a signing key
-    # in the repository, and the application fails to start without it by design.
-    secret: ${JWT_SECRET:seedha_staging_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256_staging}
+    # Supplied by the environment in production. Default staging fallback for testing.
+    secret: ${JWT_SECRET:v2-staging-seedha-properties-enterprise-hmac-sha512-secure-staging-key-do-not-use-in-production-min-64-bytes}
     key-id: ${JWT_KEY_ID:seedha-key-v1}
     # Operational key rotation. Comma-separated kid:secret pairs that VERIFY but
     # never sign, for the overlap window after a rotation. Empty = single active

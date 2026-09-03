@@ -78,6 +78,24 @@ public class JwtTokenProvider {
                     "seedha.jwt.secret (JWT_SECRET) is not configured. Signing keys are supplied by the "
                             + "deployment environment and are never checked into the repository.");
         }
+        // Poison pill against known-compromised values.
+        //
+        // The connected Lovable/IDE sync has repeatedly re-injected a committed
+        // default signing secret into the config files after it was removed. A
+        // blank-check alone cannot stop that, because the re-injected value is
+        // non-blank. This refuses to boot when the resolved secret is one that
+        // has ever been committed to this repository — matched by SHA-256 so no
+        // compromised literal lives in this file. Rotating JWT_SECRET to a fresh
+        // value (owner action) is what clears it, since a new value is not on the
+        // list. A signing key that is public in git history can forge a token for
+        // any user and any role, so booting with one is never acceptable.
+        if (isKnownCompromisedSecret(secret)) {
+            throw new IllegalStateException(
+                    "seedha.jwt.secret resolves to a value that was previously committed to this "
+                            + "repository and is therefore compromised. Set JWT_SECRET to a freshly "
+                            + "generated secret in the deployment environment; the application will not "
+                            + "start with a known-exposed signing key.");
+        }
         this.activeKey = keyFrom(secret, "seedha.jwt.secret");
         this.activeKid = (keyId == null || keyId.isBlank()) ? "seedha-key-v1" : keyId.trim();
         this.previousKeys = parsePreviousKeys(previousKeys, this.activeKid);
@@ -292,4 +310,29 @@ public class JwtTokenProvider {
             return null;
         }
     }
+
+    /**
+     * SHA-256 hex digests of signing secrets that have appeared in this repo's
+     * config or history. Compared as digests so the compromised literals are not
+     * re-introduced here. Add a digest whenever a secret is found to have been
+     * committed; a rotated (never-committed) secret will not match.
+     */
+    private static final java.util.Set<String> COMPROMISED_SECRET_SHA256 = java.util.Set.of(
+            // seedha.jwt.secret staging default that was committed to application*.yml
+            "169581efeed15ce0282ca914458ddeac9d450ada1e3d800f028e8b43e430babe",
+            // original committed application.yml default
+            "3eda77d828ddb3f26de068160d0377eba5a2992fa44aa7852400dc1b0ddb7615"
+    );
+
+    private static boolean isKnownCompromisedSecret(String secret) {
+        try {
+            byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(secret.getBytes(StandardCharsets.UTF_8));
+            return COMPROMISED_SECRET_SHA256.contains(HexFormat.of().formatHex(digest));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            // SHA-256 is always available on a supported JVM; fail closed if not.
+            throw new IllegalStateException("SHA-256 unavailable for secret validation", e);
+        }
+    }
+
 }

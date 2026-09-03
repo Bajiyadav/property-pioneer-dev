@@ -79,6 +79,20 @@ jobs:
           fi
           echo "✓ .env untracked"
 
+      - name: No committed signing-secret or DB-password defaults in backend config
+        run: |
+          # The connected Lovable/IDE sync has repeatedly re-injected a committed
+          # ${JWT_SECRET:<literal>} / ${DB_PASSWORD:<literal>} default into the
+          # Spring config after it was removed. A value behind the ":" is a
+          # fallback baked into the image — a signing key in the repo. This fails
+          # the build if any Spring property provides such a default for a
+          # secret-bearing key, so the regression cannot merge unnoticed.
+          if grep -rnE '\$\{(JWT_SECRET|DB_PASSWORD|DATABASE_URL|SUPABASE_SERVICE_ROLE_KEY):[^}]+\}' \
+               backend-java/src/main/resources 2>/dev/null; then
+            echo "::error::A secret-bearing Spring property has a committed default value"; exit 1
+          fi
+          echo "✓ no committed secret defaults in backend config"
+
       - name: Server-only modules never imported from client code
         run: |
           # A *.server.ts import from a component would ship service-role code

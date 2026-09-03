@@ -89,4 +89,16 @@ class JwtKeyRotationTests {
         String forged = token.substring(0, token.lastIndexOf('.') + 1) + "x".repeat(43);
         assertFalse(p.validateToken(forged));
     }
+
+    @org.junit.jupiter.api.Test
+    void refusesToBootWithAKnownCompromisedSecret() {
+        // The exact staging default that the Lovable sync keeps re-injecting.
+        String committed = "seedha_staging_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256_staging";
+        assertThrows(IllegalStateException.class, () -> provider(committed, "kA", ""));
+
+        // A freshly generated secret of the same length is accepted.
+        String fresh = "R" + "x9Qz".repeat(16);
+        assertDoesNotThrow(() -> provider(fresh, "kA", ""));
+    }
+
 }
