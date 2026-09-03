@@ -25,6 +25,7 @@ import '../features/agreements/presentation/rental_agreement_form_screen.dart';
 import '../features/location/presentation/location_search_screen.dart';
 import '../features/profile/presentation/legal_hub_screen.dart';
 import '../features/profile/presentation/legal_policy_screen.dart';
+import '../features/notifications/presentation/notifications_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -118,6 +119,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/location-search',
       builder: (context, state) => const LocationSearchScreen(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsScreen(),
     ),
     GoRoute(
       path: '/login',

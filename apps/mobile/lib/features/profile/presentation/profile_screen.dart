@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/providers/notification_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -235,8 +236,8 @@ class ProfileScreen extends ConsumerWidget {
                       _activityItem(
                         icon: Icons.notifications_none_outlined,
                         title: 'Notifications',
-                        hasNotificationDot: true,
-                        onTap: () => context.push('/customer-dashboard'),
+                        hasNotificationDot: ref.watch(unreadNotificationsCountProvider) > 0,
+                        onTap: () => context.push('/notifications'),
                       ),
                       _divider(),
                       _activityItem(
