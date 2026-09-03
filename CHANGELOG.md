@@ -1,3 +1,9 @@
+## v0.156.0 — 2026-09-03
+
+### Features
+- feat(mobile): compact small property card and quick navigation drawer (d544f8f)
+- feat(auth): add SMS provider abstraction + Flutter phone-OTP client seam (c12847d)
+
 ## v0.155.1 — 2026-09-03
 
 ### Fixes
