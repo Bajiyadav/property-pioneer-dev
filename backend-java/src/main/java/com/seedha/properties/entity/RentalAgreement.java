@@ -27,10 +27,10 @@ public class RentalAgreement {
     private BigDecimal monthlyRent;
 
     @Column(name = "security_deposit", nullable = false)
-    private BigDecimal securityDeposit;
+    private BigDecimal securityDeposit = new BigDecimal("50000");
 
     @Column(name = "lease_start_date", nullable = false)
-    private LocalDate leaseStartDate;
+    private LocalDate leaseStartDate = LocalDate.now();
 
     @Column(name = "lease_duration_months", nullable = false)
     private Integer leaseDurationMonths = 11;

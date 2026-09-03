@@ -19,8 +19,8 @@ public class Property {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String description = "";
 
     @Column(name = "listing_type", nullable = false)
     private String listingType; // RENT, BUY, COMMERCIAL

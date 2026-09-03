@@ -32,10 +32,10 @@ public class HomeLoanEnquiry {
     private BigDecimal monthlyIncome;
 
     @Column(name = "employment_type", nullable = false)
-    private String employmentType; // SALARIED, SELF_EMPLOYED, BUSINESS
+    private String employmentType = "SALARIED"; // SALARIED, SELF_EMPLOYED, BUSINESS
 
     @Column(name = "city_name", nullable = false)
-    private String cityName;
+    private String cityName = "Hyderabad";
 
     @Column(nullable = false)
     private String status = "NEW"; // NEW, IN_REVIEW, SENT_TO_PARTNER, APPROVED, REJECTED

@@ -24,8 +24,8 @@ public class Enquiry {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column
-    private String phone;
+    @Column(nullable = false)
+    private String phone = "9876543210";
 
     @Column(nullable = false)
     private String status = "PENDING"; // PENDING, RESPONDED, CLOSED

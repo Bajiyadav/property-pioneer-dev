@@ -89,6 +89,29 @@ public class PropertyController {
         return handleSaveProperty(property, currentUser);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteProperty(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        if (currentUser == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
+        }
+
+        Property existing = propertyRepository.findById(id).orElse(null);
+        if (existing == null) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Property not found"));
+        }
+
+        // Strict ownership check (or ADMIN)
+        if (!existing.getOwnerId().equals(currentUser.getId()) && !"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("Forbidden: You do not own this property"));
+        }
+
+        propertyRepository.delete(existing);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     private ResponseEntity<ApiResponse<Property>> handleSaveProperty(
             Property property,
             UserPrincipal currentUser) {
@@ -108,6 +131,7 @@ public class PropertyController {
             }
         }
 
+        // Server-enforced owner ID (Prevent client mass-assignment / IDOR)
         property.setOwnerId(currentUser.getId());
         Property saved = propertyRepository.save(property);
         return ResponseEntity.ok(ApiResponse.success(saved));

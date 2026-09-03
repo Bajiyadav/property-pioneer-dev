@@ -23,7 +23,7 @@ public class SiteVisit {
     private UUID ownerId;
 
     @Column(name = "visit_date", nullable = false)
-    private LocalDate visitDate;
+    private LocalDate visitDate = LocalDate.now().plusDays(1);
 
     @Column(name = "time_slot", nullable = false)
     private String timeSlot;
