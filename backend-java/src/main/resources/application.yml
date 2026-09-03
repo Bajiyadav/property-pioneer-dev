@@ -47,12 +47,10 @@ seedha:
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
   sms:
-    # SMS OTP provider. No real vendor is wired yet, so the LoggingSmsProvider
-    # no-op runs and never claims delivery. To enable a real provider, add a
-    # bean named "smsProvider" (a Twilio/MSG91/SNS implementation of SmsProvider)
-    # and supply its credentials via the environment / secret manager — never here.
-    # 'none' (LoggingSmsProvider no-op) or 'twilio' (TwilioSmsProvider, needs
-    # TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER in the env).
+    # SMS OTP provider. Options:
+    # - 'none' (LoggingSmsProvider no-op for staging/dev)
+    # - 'twilio' (TwilioSmsProvider: TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER)
+    # - 'msg91' (Msg91SmsProvider for Indian DLT: MSG91_AUTH_KEY / MSG91_TEMPLATE_ID / MSG91_SENDER_ID)
     provider: ${SMS_PROVIDER:none}
   files:
     scan:
