@@ -1,3 +1,8 @@
+## v0.148.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): completely remove splash screen and route straight to home hub (a346e3d)
+
 ## v0.148.0 — 2026-09-03
 
 ### Features
