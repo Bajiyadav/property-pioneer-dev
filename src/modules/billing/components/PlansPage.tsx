@@ -80,7 +80,8 @@ const OWNER_PROMOTION_PLANS: PricingPlan[] = [
 ];
 
 export function PlansPage() {
-  const [activeAudience, setActiveAudience] = useState<"seekers" | "owners">("seekers");
+  const [role, setRole] = useState<"tenant" | "owner" | "buyer" | "seller">("tenant");
+  const [propertyType, setPropertyType] = useState<"residential" | "commercial">("residential");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const { status } = useAuthSession();
   const navigate = useNavigate();
@@ -113,45 +114,150 @@ export function PlansPage() {
             <span>100% Direct Owner Platform · 0% Brokerage</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight font-[family-name:var(--font-display)]">
-            Seedha Plans &amp; Pricing
+            Hey, are you Tenant, Owner, Buyer or Seller?
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Transparent, zero-brokerage plans tailored for property seekers and homeowners.
+            Select your journey to unlock customized zero-brokerage plans and instant verified owner
+            passes.
           </p>
         </div>
 
-        {/* Audience Switcher Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center rounded-2xl bg-secondary/80 p-1.5 border border-border shadow-xs">
+        {/* 1. Persona Selection Grid (2x2) */}
+        <div className="max-w-xl mx-auto mb-8 grid grid-cols-2 gap-3 sm:gap-4">
+          {/* Tenant */}
+          <button
+            type="button"
+            onClick={() => setRole("tenant")}
+            className={`relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer text-center ${
+              role === "tenant"
+                ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30 shadow-md"
+                : "border-border/80 bg-card hover:border-emerald-500/40 hover:bg-secondary/40"
+            }`}
+          >
+            {role === "tenant" && (
+              <span className="absolute top-2.5 right-2.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                ✓
+              </span>
+            )}
+            <div className="text-3xl mb-1.5">👤🏠</div>
+            <span className="text-sm font-bold text-foreground">Tenant</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Looking to Rent</span>
+          </button>
+
+          {/* Owner */}
+          <button
+            type="button"
+            onClick={() => setRole("owner")}
+            className={`relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer text-center ${
+              role === "owner"
+                ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30 shadow-md"
+                : "border-border/80 bg-card hover:border-emerald-500/40 hover:bg-secondary/40"
+            }`}
+          >
+            {role === "owner" && (
+              <span className="absolute top-2.5 right-2.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                ✓
+              </span>
+            )}
+            <div className="text-3xl mb-1.5">🏷️🔑</div>
+            <span className="text-sm font-bold text-foreground">Owner</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Listing for Rent</span>
+          </button>
+
+          {/* Buyer */}
+          <button
+            type="button"
+            onClick={() => setRole("buyer")}
+            className={`relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer text-center ${
+              role === "buyer"
+                ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30 shadow-md"
+                : "border-border/80 bg-card hover:border-emerald-500/40 hover:bg-secondary/40"
+            }`}
+          >
+            {role === "buyer" && (
+              <span className="absolute top-2.5 right-2.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                ✓
+              </span>
+            )}
+            <div className="text-3xl mb-1.5">🏡💼</div>
+            <span className="text-sm font-bold text-foreground">Buyer</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Looking to Buy</span>
+          </button>
+
+          {/* Seller */}
+          <button
+            type="button"
+            onClick={() => setRole("seller")}
+            className={`relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer text-center ${
+              role === "seller"
+                ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30 shadow-md"
+                : "border-border/80 bg-card hover:border-emerald-500/40 hover:bg-secondary/40"
+            }`}
+          >
+            {role === "seller" && (
+              <span className="absolute top-2.5 right-2.5 grid h-5 w-5 place-items-center rounded-full bg-emerald-600 text-white text-[10px] font-bold">
+                ✓
+              </span>
+            )}
+            <div className="text-3xl mb-1.5">🏢🏷️</div>
+            <span className="text-sm font-bold text-foreground">Seller</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5">Listing for Sale</span>
+          </button>
+        </div>
+
+        {/* 2. Property Type Sub-Selector */}
+        <div className="max-w-xl mx-auto mb-10">
+          <h2 className="text-center text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
+            What kind of property do you want to{" "}
+            {role === "tenant" || role === "owner" ? "rent" : "deal"}?
+          </h2>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <button
               type="button"
-              onClick={() => setActiveAudience("seekers")}
-              className={`flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs font-extrabold transition-all cursor-pointer ${
-                activeAudience === "seekers"
-                  ? "bg-card text-foreground shadow-sm ring-1 ring-border"
-                  : "text-muted-foreground hover:text-foreground"
+              onClick={() => setPropertyType("residential")}
+              className={`relative flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                propertyType === "residential"
+                  ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30"
+                  : "border-border/80 bg-card hover:bg-secondary/40"
               }`}
             >
-              <Users className="h-4 w-4 text-teal-600" />
-              <span>For Tenants &amp; Buyers</span>
+              <span className="text-2xl">🏠</span>
+              <div className="text-left">
+                <span className="block text-xs sm:text-sm font-bold text-foreground">
+                  Residential
+                </span>
+                <span className="block text-[10px] text-muted-foreground">Flats &amp; Houses</span>
+              </div>
+              {propertyType === "residential" && (
+                <span className="ml-auto text-emerald-600 font-bold text-sm">✓</span>
+              )}
             </button>
+
             <button
               type="button"
-              onClick={() => setActiveAudience("owners")}
-              className={`flex items-center gap-2 rounded-xl px-6 py-2.5 text-xs font-extrabold transition-all cursor-pointer ${
-                activeAudience === "owners"
-                  ? "bg-card text-foreground shadow-sm ring-1 ring-border"
-                  : "text-muted-foreground hover:text-foreground"
+              onClick={() => setPropertyType("commercial")}
+              className={`relative flex items-center gap-3 p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                propertyType === "commercial"
+                  ? "border-emerald-600 bg-emerald-500/10 dark:bg-emerald-950/30 ring-2 ring-emerald-600/30"
+                  : "border-border/80 bg-card hover:bg-secondary/40"
               }`}
             >
-              <Building2 className="h-4 w-4 text-amber-600" />
-              <span>For Property Owners</span>
+              <span className="text-2xl">🏬</span>
+              <div className="text-left">
+                <span className="block text-xs sm:text-sm font-bold text-foreground">
+                  Commercial
+                </span>
+                <span className="block text-[10px] text-muted-foreground">Shops &amp; Offices</span>
+              </div>
+              {propertyType === "commercial" && (
+                <span className="ml-auto text-emerald-600 font-bold text-sm">✓</span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Content based on Active Audience */}
-        {activeAudience === "seekers" ? (
+        {/* Content based on Active Persona */}
+        {role === "tenant" || role === "buyer" ? (
           <CustomerPlans />
         ) : (
           <div className="mx-auto max-w-5xl">
