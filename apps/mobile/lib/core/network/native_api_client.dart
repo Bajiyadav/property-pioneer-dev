@@ -19,6 +19,8 @@ class NativeApiClient {
     _authToken = token;
   }
 
+  String? get authToken => _authToken;
+
   Map<String, String> get _headers {
     final map = <String, String>{
       'Content-Type': 'application/json',

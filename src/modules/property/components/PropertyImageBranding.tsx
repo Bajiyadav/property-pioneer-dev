@@ -5,7 +5,7 @@ import {
 } from "@/modules/property/components/PropertyWatermark";
 
 export const DEFAULT_PROPERTY_COVER =
-  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200";
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><rect width='800' height='600' fill='%231e293b'/><circle cx='400' cy='250' r='80' fill='%23334155'/><path d='M400 195 L345 250 H370 V305 H430 V250 H455 Z' fill='%2310b981'/><text x='400' y='375' font-family='sans-serif' font-size='22' font-weight='800' fill='%23f8fafc' text-anchor='middle'>SEEDHA PROPERTIES</text><text x='400' y='410' font-family='sans-serif' font-size='14' font-weight='600' fill='%2394a3b8' text-anchor='middle'>100% Direct Owner • Zero Brokerage</text></svg>";
 
 export interface PropertyImageBrandingProps extends Omit<
   React.ImgHTMLAttributes<HTMLImageElement>,

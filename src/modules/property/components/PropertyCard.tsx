@@ -39,17 +39,25 @@ export function PropertyCard({ property }: { property: Property }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
 
-  const handleWhatsAppDirect = (e: React.MouseEvent) => {
+  const handleWhatsAppDirect = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const sizeStr = property.bedrooms ? `${property.bedrooms} BHK` : "Property";
-    const locStr = property.locality || property.city || "Hyderabad";
-    const text = encodeURIComponent(
-      `Hello! I saw your [${sizeStr} in ${locStr}] on Seedha Properties. Is it available for a visit?`,
-    );
-    const phone = "919876543210";
-    window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+    try {
+      const res = await fetch(`/api/public/properties/${property.id}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data?.ok && data?.whatsappUrl) {
+        window.open(data.whatsappUrl, "_blank");
+        return;
+      }
+    } catch {
+      // Fallback to inquiry modal
+    }
+
+    setIsModalOpen(true);
   };
 
   const images =

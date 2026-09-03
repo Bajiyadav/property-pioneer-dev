@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
 import '../models/property.dart';
 import '../models/listing_counts.dart';
+import '../core/network/native_api_client.dart';
 import 'supabase_service.dart';
 
 class PropertyService {
@@ -116,6 +117,25 @@ class PropertyService {
       return list;
     } catch (e) {
       debugPrint('[properties] fetchProperties error: $e');
+      // Resilient fallback to Seedha native Java backend (/api/v2/properties)
+      try {
+        final nativeList = await NativeApiClient().fetchProperties(
+          city: (city != null && city.isNotEmpty && city != 'All' && city != 'All India')
+              ? city
+              : null,
+          listingType: category == PropertyCategory.rent
+              ? 'rent'
+              : (category == PropertyCategory.buy ? 'sale' : null),
+          limit: limit,
+        );
+        if (nativeList.isNotEmpty) {
+          return nativeList
+              .map((item) => Property.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      } catch (nativeErr) {
+        debugPrint('[properties] native backend fallback error: $nativeErr');
+      }
       return [];
     }
   }

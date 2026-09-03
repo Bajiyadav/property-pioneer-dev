@@ -15,6 +15,7 @@ import 'package:seedha_properties_mobile/services/property_service.dart';
 import 'package:seedha_properties_mobile/services/enquiry_service.dart';
 import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
+import 'package:seedha_properties_mobile/core/network/native_api_client.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class PropertyDetailScreen extends ConsumerStatefulWidget {
@@ -321,7 +322,8 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
 
   Future<void> _openWhatsApp(BuildContext context, Property property) async {
     try {
-      final token = Supabase.instance.client.auth.currentSession?.accessToken;
+      final token = Supabase.instance.client.auth.currentSession?.accessToken ??
+          NativeApiClient().authToken;
       final headers = {
         'Content-Type': 'application/json',
       };
