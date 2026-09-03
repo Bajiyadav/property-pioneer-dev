@@ -21,8 +21,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
   static const List<String> _popularCities = [
-    'Bangalore',
     'Hyderabad',
+    'Bangalore',
     'Mumbai',
     'Delhi NCR',
     'Pune',
@@ -33,17 +33,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   late final AnimationController _floatController;
   late final Animation<Offset> _floatAnimation;
 
+  String? _selectedState;
+  String? _selectedCity;
+
   @override
   void initState() {
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: const Duration(milliseconds: 2800),
     )..repeat(reverse: true);
 
     _floatAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0.04, -0.06),
+      end: const Offset(0.0, -0.04),
     ).animate(CurvedAnimation(
       parent: _floatController,
       curve: Curves.easeInOut,
@@ -65,7 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  Future<void> _onUseCurrentLocation() async {
+  Future<void> _onUseCurrentLocation({bool navigateToSearch = false}) async {
     setState(() => _isLocating = true);
     final loc =
         await ref.read(locationStateProvider.notifier).detectAndSetCurrentLocation();
@@ -80,7 +83,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             backgroundColor: const Color(0xFF0F766E),
           ),
         );
-        context.push('/search');
+        if (navigateToSearch) {
+          context.push('/search');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -93,13 +98,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  String? _selectedState;
-  String? _selectedCity;
-
   void _onStateChanged(String? state) {
     setState(() {
       _selectedState = state;
-      // The chosen city belongs to the previous state, so it cannot survive it.
       _selectedCity = null;
     });
   }
@@ -107,24 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void _onCityChanged(String? city) {
     if (city == null) return;
     setState(() => _selectedCity = city);
-    // Writes through the same notifier every other surface reads, so a city
-    // chosen here is the city search and listings use.
     _onCitySelected(city);
-  }
-
-  void _onCategorySelected(PropertyCategory category) {
-    if (_selectedState == null || _selectedCity == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select your State and City above first to explore properties.'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-    ref.read(activeCategoryProvider.notifier).state = category;
-    context.push('/search');
   }
 
   void _onCitySelected(String city) {
@@ -133,7 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             formattedAddress: city,
             city: city,
             locality: '',
-            state: '',
+            state: _selectedState ?? '',
             country: 'India',
             latitude: 0,
             longitude: 0,
@@ -141,6 +125,112 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         );
     context.push('/search');
+  }
+
+  void _handleSearchPropertyTap() {
+    final loc = ref.read(locationStateProvider).value;
+    if (loc != null && loc.isValidated && loc.city != 'All India' && loc.city.isNotEmpty) {
+      context.push('/search');
+    } else {
+      _showLocationPickerBottomSheet();
+    }
+  }
+
+  void _onCategorySelected(PropertyCategory category) {
+    final loc = ref.read(locationStateProvider).value;
+    ref.read(activeCategoryProvider.notifier).state = category;
+
+    if (loc != null && loc.isValidated && loc.city != 'All India' && loc.city.isNotEmpty) {
+      context.push('/search');
+    } else {
+      _showLocationPickerBottomSheet(category: category);
+    }
+  }
+
+  void _showLocationPickerBottomSheet({PropertyCategory? category}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalContext, setModalState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                  20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCBD5E1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Select Location to Explore Properties',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Direct-owner listings are strictly location-scoped for genuine results.',
+                    style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      await _onUseCurrentLocation(navigateToSearch: true);
+                    },
+                    icon: const Icon(Icons.my_location_rounded, size: 18),
+                    label: const Text('Use Current Location (GPS)'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F766E),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 46),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  LocationPickerCard(
+                    selectedState: _selectedState,
+                    selectedCity: _selectedCity,
+                    onStateChanged: (s) {
+                      _onStateChanged(s);
+                      setModalState(() {});
+                    },
+                    onCityChanged: (c) {
+                      _onCityChanged(c);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _onPostPropertyPressed() {
@@ -230,41 +320,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             : 'All India');
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 1,
         title: Row(
           children: [
-            SlideTransition(
-              position: _floatAnimation,
-              child: Container(
-                width: 36,
-                height: 36,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/logo.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: const Color(0xFF0F766E),
-                      alignment: Alignment.center,
-                      child: const Text('SP',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13)),
-                    ),
+            Container(
+              width: 36,
+              height: 36,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: const Color(0xFF0F766E),
+                    alignment: Alignment.center,
+                    child: const Text('SP',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13)),
                   ),
                 ),
               ),
@@ -273,30 +364,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Home header only. AppConstants.appName is still "Seedha
-                // Properties" and is what every other screen, the splash and
-                // the store listing show — renaming those is a brand decision,
-                // not a screen change.
                 Text(
-                  'Seedha Deals',
+                  'Seedha Properties',
                   style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      fontSize: 17,
-                      letterSpacing: -0.4),
+                      fontSize: 16.5,
+                      letterSpacing: -0.3,
+                      color: Color(0xFF0F172A)),
                 ),
                 Text(
-                  'PAN-INDIA • 0% BROKERAGE',
+                  '100% DIRECT OWNER • 0% BROKERAGE',
                   style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 8.5,
                       color: Color(0xFF0F766E),
-                      letterSpacing: 0.5),
+                      letterSpacing: 0.4),
                 ),
               ],
             ),
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined,
+                color: Color(0xFF475569)),
+            tooltip: 'Notifications',
+            onPressed: () => context.push('/notifications'),
+          ),
           IconButton(
             icon: const Icon(Icons.auto_awesome, color: Color(0xFFD97706)),
             tooltip: 'Ask Seedha AI',
@@ -309,7 +403,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
               if (user != null) {
                 return IconButton(
-                  icon: const Icon(Icons.dashboard_outlined,
+                  icon: const Icon(Icons.account_circle_outlined,
                       color: AppTheme.primaryColor),
                   tooltip: 'My Dashboard',
                   onPressed: () async {
@@ -359,131 +453,150 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Location + categories, per the approved home design.
-              //
-              // The teal hero band that stood here (floating brand plus an
-              // inline search preview) is gone: the design leads with the
-              // location choice, and Search remains a bottom-nav destination.
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: LocationPickerCard(
-                  selectedState: _selectedState,
-                  selectedCity: _selectedCity,
-                  onStateChanged: _onStateChanged,
-                  onCityChanged: _onCityChanged,
-                  onDetectLocation: _isLocating ? null : _onUseCurrentLocation,
-                  onExploreDeals: () {
-                    if (_selectedCity != null && _selectedState != null) {
-                      _onCategorySelected(PropertyCategory.rent);
-                    }
-                  },
+              const SizedBox(height: 14),
+
+              // "ONE STOP SHOP" Hero Title Banner
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: OneStopShopHeader(
+                  subtitle: 'For All Your Direct Property Needs',
                 ),
               ),
 
+              const SizedBox(height: 18),
+
+              // Animated Primary Service Action Grid
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: Column(
-                  // Without stretch, a Column centres its children and each
-                  // card shrinks to its own content — so the row of categories
-                  // rendered at three different widths.
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SlideTransition(
+                  position: _floatAnimation,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Large Left Hero Card: "Search Property"
+                      Expanded(
+                        flex: 11,
+                        child: HeroSearchCard(
+                          onTap: _handleSearchPropertyTap,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Right Column: Two Stacked Action Cards
+                      Expanded(
+                        flex: 10,
+                        child: SizedBox(
+                          height: 220,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ActionServiceTile(
+                                  title: 'Post Property',
+                                  subtitle: 'Verified Tenants & Buyers',
+                                  icon: Icons.add_home_work_rounded,
+                                  badge: 'FREE',
+                                  gradientColors: const [
+                                    Color(0xFF0F766E),
+                                    Color(0xFF115E59),
+                                  ],
+                                  onTap: _onPostPropertyPressed,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Expanded(
+                                child: ActionServiceTile(
+                                  title: 'Home Loans',
+                                  subtitle: 'Lowest EMI Rates',
+                                  icon: Icons.calculate_outlined,
+                                  badge: 'INSTANT',
+                                  gradientColors: const [
+                                    Color(0xFF475569),
+                                    Color(0xFF334155),
+                                  ],
+                                  onTap: () => context.push('/home-loans'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // Quick Category Action Chips (Buy, Rent, Commercial, Plots)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   children: [
-                    CategoryHeroCard(
-                      title: 'Buy',
-                      subtitle: 'Find your dream home',
-                      icon: Icons.business_outlined,
-                      onTap: () => _onCategorySelected(PropertyCategory.buy),
-                    ),
-                    const SizedBox(height: 12),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: CategoryCard(
-                              title: 'Rent',
-                              subtitle: 'Find a home that fits your needs',
-                              icon: Icons.home_outlined,
-                              onTap: () =>
-                                  _onCategorySelected(PropertyCategory.rent),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: CategoryCard(
-                              title: 'Commercial',
-                              subtitle: 'Find the right space',
-                              icon: Icons.storefront_outlined,
-                              onTap: () => _onCategorySelected(
-                                  PropertyCategory.commercial),
-                            ),
-                          ),
-                        ],
+                    Expanded(
+                      child: _QuickCategoryChip(
+                        title: 'Buy',
+                        icon: Icons.business_outlined,
+                        color: const Color(0xFFE11D48),
+                        onTap: () => _onCategorySelected(PropertyCategory.buy),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    CategoryCard(
-                      title: 'Property Management',
-                      subtitle: 'Guaranteed rent • 100% hands-free management',
-                      badge: 'GUARANTEED RENT',
-                      icon: Icons.shield_outlined,
-                      // No dedicated Property Management screen exists yet; the
-                      // previous "Lease to Us" card used this same handler.
-                      onTap: _onPostPropertyPressed,
-                    ),
-                    const SizedBox(height: 12),
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: CategoryCard(
-                              title: 'Home Loans',
-                              subtitle: 'Lowest Rates',
-                              icon: Icons.account_balance_outlined,
-                              badge: 'LOW EMI',
-                              onTap: () => context.push('/home-loans'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: CategoryCard(
-                              title: 'Agreement',
-                              subtitle: 'Instant PDF',
-                              icon: Icons.description_outlined,
-                              badge: 'POPULAR',
-                              onTap: () => context.push('/rental-agreement'),
-                            ),
-                          ),
-                        ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _QuickCategoryChip(
+                        title: 'Rent',
+                        icon: Icons.home_outlined,
+                        color: const Color(0xFF0F766E),
+                        onTap: () => _onCategorySelected(PropertyCategory.rent),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    // Kept deliberately: the owner-side entry point, and the
-                    // only supply-side action on the home screen.
-                    CategoryCard(
-                      title: 'Post Property Free',
-                      subtitle: 'List your property at 0% brokerage',
-                      icon: Icons.add_home_work_rounded,
-                      badge: 'FREE',
-                      emphasised: true,
-                      onTap: _onPostPropertyPressed,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _QuickCategoryChip(
+                        title: 'Commercial',
+                        icon: Icons.storefront_outlined,
+                        color: const Color(0xFF2563EB),
+                        onTap: () =>
+                            _onCategorySelected(PropertyCategory.commercial),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _QuickCategoryChip(
+                        title: 'Post Free',
+                        icon: Icons.add_home_work_rounded,
+                        color: const Color(0xFFD97706),
+                        onTap: _onPostPropertyPressed,
+                      ),
                     ),
                   ],
                 ),
               ),
 
+              const SizedBox(height: 20),
 
-              // Location Selector Bar with "Near by" detection
+              // Horizontal Scrolling "Essential Services" Section
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: AnimatedHomeServicesSection(
+                  onRentalAgreementTap: () =>
+                      context.push('/rental-agreement'),
+                  onVisitsTap: () => context.push('/visits'),
+                  onAiAssistantTap: () => context.push('/ai-assistant'),
+                  onHomeLoansTap: () => context.push('/home-loans'),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Location Status & Quick Switch Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.borderSubtle),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.03),
@@ -494,25 +607,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.location_on,
-                          color: Color(0xFF0F766E), size: 20),
-                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F766E).withValues(alpha: 0.10),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.location_on,
+                            color: Color(0xFF0F766E), size: 18),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Selected Location',
+                              'Browsing Location',
                               style: TextStyle(
                                   fontSize: 10.5,
-                                  color: AppTheme.textSecondary,
+                                  color: Color(0xFF64748B),
                                   fontWeight: FontWeight.w600),
                             ),
                             Text(
                               displayCity,
                               style: const TextStyle(
                                   fontSize: 13.5,
-                                  color: AppTheme.textPrimary,
+                                  color: Color(0xFF0F172A),
                                   fontWeight: FontWeight.w800),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -522,8 +642,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                       if (_isLocating)
                         const SizedBox(
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Color(0xFF0F766E),
@@ -531,15 +651,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         )
                       else ...[
                         TextButton.icon(
-                          onPressed: _onUseCurrentLocation,
+                          onPressed: () => _onUseCurrentLocation(navigateToSearch: true),
                           icon: const Icon(Icons.my_location,
-                              size: 14, color: Color(0xFF0F766E)),
+                              size: 13, color: Color(0xFF0F766E)),
                           label: const Text(
                             'Near by',
                             style: TextStyle(
                               color: Color(0xFF0F766E),
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontSize: 11.5,
                             ),
                           ),
                           style: TextButton.styleFrom(
@@ -551,7 +671,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         const SizedBox(width: 4),
                         TextButton(
-                          onPressed: () => context.push('/location-search'),
+                          onPressed: _showLocationPickerBottomSheet,
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
@@ -562,8 +682,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             'Change',
                             style: TextStyle(
                               color: Color(0xFF64748B),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11.5,
                             ),
                           ),
                         ),
@@ -573,324 +693,124 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
 
-              // Popular Cities Quick Chips with "Near by" as First Pill
+              const SizedBox(height: 18),
+
+              // Popular Cities Quick Chips
               const Padding(
-                padding: EdgeInsets.fromLTRB(16, 10, 16, 6),
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Explore Top Cities',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
+                    color: Color(0xFF0F172A),
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
               SizedBox(
-                height: 42,
+                height: 38,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
                     ActionChip(
                       avatar: const Icon(Icons.my_location,
-                          size: 15, color: Colors.white),
+                          size: 14, color: Colors.white),
                       label: const Text('Near by'),
-                      onPressed: _onUseCurrentLocation,
+                      onPressed: () => _onUseCurrentLocation(navigateToSearch: true),
                       backgroundColor: const Color(0xFF0F766E),
                       labelStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
                         color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
-                      side: BorderSide.none,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
+                        side: BorderSide.none,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    ..._popularCities.map((city) {
-                      return Padding(
+                    ..._popularCities.map(
+                      (city) => Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ActionChip(
                           label: Text(city),
                           onPressed: () => _onCitySelected(city),
                           backgroundColor: Colors.white,
-                          surfaceTintColor: Colors.transparent,
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
+                            color: displayCity.contains(city)
+                                ? const Color(0xFF0F766E)
+                                : const Color(0xFF334155),
+                            fontWeight: displayCity.contains(city)
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textPrimary,
                           ),
-                          side: const BorderSide(color: AppTheme.borderSubtle),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: displayCity.contains(city)
+                                  ? const Color(0xFF0F766E)
+                                  : const Color(0xFFE2E8F0),
+                            ),
                           ),
                         ),
-                      );
-                    }),
+                      ),
+                    ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 22),
 
-              // Why Seedha Properties — Value Proposition & Trust
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Why Seedha Properties?',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
+              // Trust & Direct-Owner Guarantee Cards
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text(
+                      'Why Choose Seedha Properties?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     _buildTrustPillar(
-                      icon: Icons.savings_outlined,
-                      title: '0% Brokerage Guaranteed',
+                      icon: Icons.money_off_rounded,
+                      title: '100% Zero Brokerage Forever',
                       description:
-                          'Connect directly with genuine property owners and tenants without paying any broker commissions.',
+                          'Connect directly with genuine property owners. Save lakhs in commissions on every deal.',
                       iconColor: const Color(0xFF0F766E),
-                      iconBgColor: const Color(0xFFCCFBF1),
+                      iconBgColor: const Color(0xFF0F766E).withValues(alpha: 0.10),
                     ),
                     const SizedBox(height: 10),
                     _buildTrustPillar(
-                      icon: Icons.verified_user_outlined,
-                      title: '100% Verified Listings',
+                      icon: Icons.verified_user_rounded,
+                      title: 'Multi-Tier KYC & Verified Ownership',
                       description:
-                          'All listings undergo mobile OTP and owner credential validation for authentic, spam-free discovery.',
+                          'Every property undergoes title document and Aadhaar/PAN authentication before listing.',
                       iconColor: const Color(0xFF2563EB),
-                      iconBgColor: const Color(0xFFDBEAFE),
+                      iconBgColor: const Color(0xFF2563EB).withValues(alpha: 0.10),
                     ),
                     const SizedBox(height: 10),
                     _buildTrustPillar(
-                      icon: Icons.home_work_outlined,
-                      title: 'Property Management',
+                      icon: Icons.auto_awesome_rounded,
+                      title: 'Structured Grounded AI Guidance',
                       description:
-                          'Guaranteed monthly rent with zero vacancy downtime while we handle verified tenants & full maintenance.',
-                      iconColor: const Color(0xFF059669),
-                      iconBgColor: const Color(0xFFD1FAE5),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTrustPillar(
-                      icon: Icons.assignment_turned_in_outlined,
-                      title: 'Instant Legal Rental Agreements',
-                      description:
-                          'Generate legally binding digital agreements with instant e-signatures and downloadable PDF delivery.',
-                      iconColor: const Color(0xFFE11D48),
-                      iconBgColor: const Color(0xFFFFE4E6),
+                          'Ask Seedha AI for instant legal, price valuation, and neighborhood insights 24/7.',
+                      iconColor: const Color(0xFFD97706),
+                      iconBgColor: const Color(0xFFD97706).withValues(alpha: 0.10),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              // Property Management Guaranteed Rent Card
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF064E3B), Color(0xFF065F46)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF064E3B).withValues(alpha: 0.25),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.shield_outlined,
-                                color: Colors.white, size: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: const Text(
-                                    'GUARANTEED RENT • 100% HANDS-FREE',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 9,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  'Property Management',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'We manage your home and pay you fixed monthly payouts on the 1st of every month. Enjoy zero vacancy risk while we handle verified tenants, agreements, and complete home care.',
-                        style: TextStyle(
-                          color: Color(0xFFD1FAE5),
-                          fontSize: 12,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _onPostPropertyPressed,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF065F46),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Explore Property Management',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Owner Post Property Free Banner
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B)
-                                  .withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.home_work,
-                                color: Color(0xFFF59E0B), size: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Are you a Property Owner?',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Post free & reach 10,000+ verified buyers/tenants',
-                                  style: TextStyle(
-                                    color: Color(0xFF94A3B8),
-                                    fontSize: 11.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _onPostPropertyPressed,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0F766E),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Post Property for Free (0% Brokerage)',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
             ],
           ),
         ),
@@ -899,61 +819,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 }
 
-class _FloatingSeedhaText extends StatefulWidget {
-  const _FloatingSeedhaText();
+class _QuickCategoryChip extends StatelessWidget {
+  const _QuickCategoryChip({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
-  @override
-  State<_FloatingSeedhaText> createState() => _FloatingSeedhaTextState();
-}
-
-class _FloatingSeedhaTextState extends State<_FloatingSeedhaText>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animation = Tween<double>(begin: -10.0, end: 10.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _animation.value),
-          child: child,
-        );
-      },
-      child: const Text(
-        'SEEDHA',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 32,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 2.0,
-          shadows: [
-            Shadow(
-              color: Colors.black45,
-              offset: Offset(0, 4),
-              blurRadius: 15,
-            ),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF334155),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

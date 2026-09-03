@@ -3,11 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/features/home/presentation/widgets/home_category_cards.dart';
 
-/// The home screen's location picker and category cards.
-///
-/// The cascade is the part worth guarding: a state and a city that do not
-/// belong together would send a visitor to a search that can never return
-/// anything, and the pairing is only enforced here.
+/// The home screen's location picker, One Stop Shop hero widgets, and category cards.
 void main() {
   Widget host(Widget child, {Size size = const Size(360, 800)}) => MediaQuery(
         data: MediaQueryData(size: size),
@@ -78,8 +74,6 @@ void main() {
     });
 
     testWidgets('every offered state can actually be completed', (tester) async {
-      // A state with no cities is a dead end: the visitor picks it and then
-      // finds nothing to choose.
       for (final state in AppConstants.operatingStates) {
         expect(AppConstants.citiesByState[state], isNotNull,
             reason: '$state has no cities');
@@ -104,7 +98,96 @@ void main() {
     });
   });
 
-  group('category cards', () {
+  group('One Stop Shop & Modern Hero Cards', () {
+    testWidgets('OneStopShopHeader renders brand title and subtitle',
+        (tester) async {
+      await tester.pumpWidget(host(const OneStopShopHeader()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ONE STOP '), findsOneWidget);
+      expect(find.text('SHOP'), findsOneWidget);
+      expect(find.text('For All Your Direct Property Needs'), findsOneWidget);
+    });
+
+    testWidgets('HeroSearchCard renders features and triggers onTap',
+        (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(host(HeroSearchCard(
+        onTap: () => tapped = true,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Search Property'), findsOneWidget);
+      expect(find.text('Buy & Rent Effortlessly'), findsOneWidget);
+      expect(find.text('Residential & Commercial'), findsOneWidget);
+      expect(find.text('100% Zero Brokerage'), findsOneWidget);
+
+      await tester.tap(find.text('Search Property'));
+      await tester.pumpAndSettle();
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('ActionServiceTile renders badge and subtitle cleanly',
+        (tester) async {
+      var tapped = false;
+      await tester.pumpWidget(host(ActionServiceTile(
+        title: 'Post Property',
+        subtitle: 'Verified Tenants & Buyers',
+        icon: Icons.add_home_work_rounded,
+        badge: 'FREE',
+        onTap: () => tapped = true,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Post Property'), findsOneWidget);
+      expect(find.text('FREE'), findsOneWidget);
+      expect(find.text('Verified Tenants & Buyers'), findsOneWidget);
+
+      await tester.tap(find.text('Post Property'));
+      await tester.pumpAndSettle();
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('AnimatedHomeServicesSection displays all direct services',
+        (tester) async {
+      var agreementTapped = false;
+      var visitsTapped = false;
+      var loansTapped = false;
+      var aiTapped = false;
+
+      await tester.pumpWidget(host(AnimatedHomeServicesSection(
+        onRentalAgreementTap: () => agreementTapped = true,
+        onVisitsTap: () => visitsTapped = true,
+        onHomeLoansTap: () => loansTapped = true,
+        onAiAssistantTap: () => aiTapped = true,
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Essential Services'), findsOneWidget);
+      expect(find.text('Rental Agreement'), findsOneWidget);
+      expect(find.text('Schedule Visits'), findsOneWidget);
+      expect(find.text('Home Loans'), findsOneWidget);
+      expect(find.text('Seedha AI Advisor'), findsOneWidget);
+
+      await tester.tap(find.text('Rental Agreement'));
+      await tester.pumpAndSettle();
+      expect(agreementTapped, isTrue);
+
+      await tester.tap(find.text('Schedule Visits'));
+      await tester.pumpAndSettle();
+      expect(visitsTapped, isTrue);
+
+      await tester.tap(find.text('Home Loans'));
+      await tester.pumpAndSettle();
+      expect(loansTapped, isTrue);
+
+      await tester.tap(find.text('Seedha AI Advisor'));
+      await tester.pumpAndSettle();
+      expect(aiTapped, isTrue);
+    });
+  });
+
+  group('Legacy category cards compatibility', () {
     testWidgets('lay out at 360dp without overflowing', (tester) async {
       await tester.pumpWidget(host(
         Padding(
@@ -156,8 +239,6 @@ void main() {
 
     testWidgets('the owner listing card is reachable and marked free',
         (tester) async {
-      // Deliberately kept when the grid was replaced: it is the only
-      // supply-side action on the home screen.
       var tapped = false;
       await tester.pumpWidget(host(
         Padding(
