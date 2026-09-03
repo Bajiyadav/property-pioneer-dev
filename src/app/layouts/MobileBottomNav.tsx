@@ -60,16 +60,15 @@ export function MobileBottomNav() {
         {/* 4. Property Management */}
         <Link
           to="/list-property"
-          className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
+          className={`flex flex-col items-center justify-center py-0.5 transition active:scale-95 ${
             isActive("/list-property")
               ? "text-emerald-600 font-bold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <ShieldCheck className="h-5 w-5" />
-          <span className="text-[9px] mt-0.5 font-semibold leading-tight text-center">
-            Property Management
-          </span>
+          <span className="text-[8.5px] font-semibold leading-none text-center">Property</span>
+          <ShieldCheck className="h-4 w-4 my-0.5" />
+          <span className="text-[8.5px] font-semibold leading-none text-center">Management</span>
         </Link>
 
         {/* 5. Profile */}
