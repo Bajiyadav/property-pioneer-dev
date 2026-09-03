@@ -1,3 +1,8 @@
+## v0.154.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): route Home pill directly to Home Screen with home icon (4094ace)
+
 ## v0.154.0 — 2026-09-03
 
 ### Features
