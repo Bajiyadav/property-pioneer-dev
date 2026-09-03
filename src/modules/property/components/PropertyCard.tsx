@@ -31,7 +31,13 @@ import { InquiryPhoneModal } from "@/modules/tenant/components/InquiryPhoneModal
 import { ScheduleVisitModal } from "@/modules/tenant/components/ScheduleVisitModal";
 import { motion } from "framer-motion";
 
-export function PropertyCard({ property }: { property: Property }) {
+export function PropertyCard({
+  property,
+  variant = "grid",
+}: {
+  property: Property;
+  variant?: "grid" | "list";
+}) {
   const { has, toggle } = useFavorites();
   const saved = has(property.id);
   const [copied, setCopied] = useState(false);
@@ -153,7 +159,9 @@ export function PropertyCard({ property }: { property: Property }) {
     "group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/40";
 
   const imageClasses =
-    "relative w-full shrink-0 flex gap-1 h-[240px] sm:h-[320px] overflow-hidden bg-muted group/carousel";
+    variant === "grid"
+      ? "relative w-full shrink-0 flex gap-1 h-[190px] sm:h-[210px] overflow-hidden bg-muted group/carousel"
+      : "relative w-full shrink-0 flex gap-1 h-[240px] sm:h-[320px] overflow-hidden bg-muted group/carousel";
 
   return (
     <motion.div
@@ -235,8 +243,8 @@ export function PropertyCard({ property }: { property: Property }) {
           </div>
         </div>
 
-        {/* Right side: 3 smaller images (hidden on mobile) */}
-        {images.length > 1 && (
+        {/* Right side: 3 smaller images (hidden on mobile and compact grid) */}
+        {variant === "list" && images.length > 1 && (
           <div className="hidden sm:flex w-[28%] lg:w-[32%] flex-col gap-1 h-full shrink-0">
             <Link
               to="/properties/$id"

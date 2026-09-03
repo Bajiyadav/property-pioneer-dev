@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, SlidersHorizontal, List, MapPin, X } from "lucide-react";
+import { Search, SlidersHorizontal, List, MapPin, X, LayoutGrid, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -68,7 +68,7 @@ export function SearchUI({
     // `searchKey` collapses the params object to a stable dependency.
   }, [searchKey, isLoading, properties.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [keyword, setKeyword] = useState(search.q || "");
   const [isTyping, setIsTyping] = useState(false);
@@ -393,6 +393,16 @@ export function SearchUI({
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                   }`}
                 >
+                  <LayoutGrid className="h-3.5 w-3.5" /> Grid
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    viewMode === "list"
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
+                >
                   <List className="h-3.5 w-3.5" /> List
                 </button>
                 <button
@@ -478,10 +488,117 @@ export function SearchUI({
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
-            {/* Sorting Row */}
+            {/* 1-Tap Quick Filter Pill Bar */}
+            <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-border/50 bg-card/60 p-2.5 backdrop-blur-sm shadow-2xs">
+              {/* Listing Type Pills */}
+              <button
+                onClick={() => update({ listing: undefined, type: undefined })}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  !search.listing && !search.type
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                }`}
+              >
+                All Homes
+              </button>
+              <button
+                onClick={() => update({ listing: "rent", type: undefined })}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  search.listing === "rent"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                }`}
+              >
+                For Rent
+              </button>
+              <button
+                onClick={() => update({ listing: "sale", type: undefined })}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                  search.listing === "sale"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                }`}
+              >
+                For Sale
+              </button>
+
+              <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
+
+              {/* BHK Quick Chips */}
+              {[1, 2, 3, 4].map((num) => {
+                const isActive = search.beds === num;
+                return (
+                  <button
+                    key={num}
+                    onClick={() => update({ beds: isActive ? undefined : num })}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {num} BHK
+                  </button>
+                );
+              })}
+
+              <div className="h-4 w-px bg-border/60 mx-0.5 hidden md:block" />
+
+              {/* Quick Budget Chips */}
+              {[
+                { label: "< ₹25k", min: undefined, max: 25000 },
+                { label: "₹25k - ₹50k", min: 25000, max: 50000 },
+                { label: "₹50k - ₹1L", min: 50000, max: 100000 },
+                { label: "₹1L+", min: 100000, max: undefined },
+              ].map((b) => {
+                const isActive = search.minPrice === b.min && search.maxPrice === b.max;
+                return (
+                  <button
+                    key={b.label}
+                    onClick={() => {
+                      if (isActive) {
+                        update({ minPrice: undefined, maxPrice: undefined });
+                      } else {
+                        update({ minPrice: b.min, maxPrice: b.max });
+                      }
+                    }}
+                    className={`hidden md:inline-flex rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {b.label}
+                  </button>
+                );
+              })}
+
+              {/* Reset active filters */}
+              {(search.beds ||
+                search.listing ||
+                search.minPrice ||
+                search.maxPrice ||
+                search.type ||
+                search.furnishing ||
+                search.q) && (
+                <button
+                  onClick={clearFilters}
+                  className="ml-auto inline-flex items-center gap-1 rounded-xl bg-destructive/10 px-3 py-1.5 text-xs font-bold text-destructive hover:bg-destructive/20 transition-all cursor-pointer"
+                >
+                  <X className="h-3 w-3" /> Reset
+                </button>
+              )}
+            </div>
+
+            {/* Sorting & Result Summary Row */}
             <div className="mb-6 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground font-medium">
-                {isLoading ? "Finding homes..." : `Showing ${properties.length} homes`}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <Sparkles className="h-3 w-3" /> 0% Brokerage
+                </span>
+                <span>
+                  {isLoading ? "Finding verified homes..." : `${properties.length} homes available`}
+                </span>
               </div>
 
               <div className="flex items-center gap-3">
@@ -501,13 +618,13 @@ export function SearchUI({
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
                     className="flex flex-col rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card overflow-hidden shadow-xs animate-pulse"
                   >
-                    <div className="aspect-[4/3] w-full bg-muted/60" />
+                    <div className="h-[200px] w-full bg-muted/60" />
                     <div className="p-4 space-y-3">
                       <div className="h-5 w-3/4 bg-muted/60 rounded-md" />
                       <div className="h-4 w-1/2 bg-muted/40 rounded-md" />
@@ -531,7 +648,7 @@ export function SearchUI({
                   <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                     <button
                       onClick={clearFilters}
-                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:brightness-110"
+                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition hover:brightness-110 cursor-pointer"
                     >
                       Clear all filters
                     </button>
@@ -576,14 +693,42 @@ export function SearchUI({
             ) : viewMode === "grid" ? (
               <div className="space-y-6">
                 <OptionalPreferencesCard />
-                {/* Responsive auto-fit grid: cards flow into as many columns as the
-                  available width allows (~1 col mobile, 2-3 on desktop) and the
-                  1fr tracks stretch to fill the row, so a single/few results
-                  never leave a large empty column on the right. `min(280px,100%)`
-                  keeps a lone card from overflowing very narrow viewports. */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {properties.map((p) => (
+                    <PropertyCard key={p.id} property={p} variant="grid" />
+                  ))}
+                </div>
+
+                {/* Server-Side Pagination Bar */}
+                {(properties.length >= (search.limit || 20) ||
+                  (search.page && search.page > 1)) && (
+                  <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-6">
+                    <button
+                      onClick={() => update({ page: Math.max(1, (search.page || 1) - 1) })}
+                      disabled={!search.page || search.page <= 1}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Previous Page
+                    </button>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Page {search.page || 1}
+                    </span>
+                    <button
+                      onClick={() => update({ page: (search.page || 1) + 1 })}
+                      disabled={properties.length < (search.limit || 20)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Next Page
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : viewMode === "list" ? (
+              <div className="space-y-6">
+                <OptionalPreferencesCard />
                 <div className="flex flex-col gap-6">
                   {properties.map((p) => (
-                    <PropertyCard key={p.id} property={p} />
+                    <PropertyCard key={p.id} property={p} variant="list" />
                   ))}
                 </div>
 
