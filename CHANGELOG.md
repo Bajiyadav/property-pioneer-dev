@@ -1,3 +1,8 @@
+## v0.137.0 — 2026-09-03
+
+### Features
+- feat(auth): harden JWT with 15-min access tokens and 30-day refresh rotation (6bba693)
+
 ## v0.136.0 — 2026-09-03
 
 ### Features
