@@ -508,17 +508,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          Text(
-                            locationState.value?.locality != null && locationState.value!.locality!.isNotEmpty
-                                ? '${locationState.value!.locality}, $activeCity'
-                                : '$activeCity, Telangana',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F766E),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final locality = locationState.value?.locality;
+                              final hasLocality = locality != null && locality.isNotEmpty;
+                              return Text(
+                                hasLocality
+                                    ? '$locality, $activeCity'
+                                    : '$activeCity, Telangana',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0F766E),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -704,21 +710,55 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         constraints: const BoxConstraints(),
                         onPressed: _showFilterModal,
                       ),
+                      if (_hasActiveFilters) ...[
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: _resetFilters,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.close, size: 14, color: Color(0xFF64748B)),
+                                SizedBox(width: 2),
+                                Text(
+                                  'Clear',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
 
-                // "Showing X properties from Direct Owners"
-                Text(
-                  _isLoading
-                      ? 'Finding verified owners...'
-                      : 'Showing ${_results.isNotEmpty ? _results.length : 124} properties from Direct Owners',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
-                  ),
+                // "Showing X properties from Direct Owners" + List/Map Toggle
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isLoading
+                          ? 'Finding verified owners...'
+                          : 'Showing ${_results.length} ${_results.length == 1 ? 'property' : 'properties'} from Direct Owners',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                    _listMapToggle(),
+                  ],
                 ),
               ],
             ),

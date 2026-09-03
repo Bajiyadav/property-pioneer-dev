@@ -49,6 +49,11 @@ public class ClamAvScanService implements MalwareScanService {
     private final int timeoutMs;
     private final Transport transport;
 
+    public ClamAvScanService() {
+        this(false, "localhost", 3310, 10000, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
     public ClamAvScanService(
             @Value("${seedha.files.clamav.enabled:false}") boolean enabled,
             @Value("${seedha.files.clamav.host:localhost}") String host,
@@ -58,7 +63,7 @@ public class ClamAvScanService implements MalwareScanService {
     }
 
     /** Test constructor: supply a Transport to avoid a real socket. */
-    ClamAvScanService(boolean enabled, String host, int port, int timeoutMs, Transport transport) {
+    public ClamAvScanService(boolean enabled, String host, int port, int timeoutMs, Transport transport) {
         this.enabled = enabled;
         this.host = host;
         this.port = port;

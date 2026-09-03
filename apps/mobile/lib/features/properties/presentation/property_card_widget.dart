@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:seedha_properties_mobile/config/theme.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
-import 'package:seedha_properties_mobile/shared/widgets/property_watermark_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 /// One spec item on a property card. Kept small and self-sizing so a [Wrap]

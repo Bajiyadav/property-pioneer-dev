@@ -35,7 +35,7 @@ export interface CategoryFaq {
 }
 
 export interface CategoryLandingPageProps {
-  slug: "buy" | "commercial" | "villas" | "plots" | "farm-lands";
+  slug: "buy" | "rent" | "commercial" | "villas" | "plots" | "farm-lands";
   badge: string;
   title: string;
   titleHighlight: string;

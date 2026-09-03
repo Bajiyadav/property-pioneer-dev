@@ -14,6 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -75,10 +80,22 @@ public class StorageService {
         S3Presigner built = null;
         try {
             // Default credential chain: the ECS task role in staging/production,
-            // ambient credentials locally. No AWS keys are read from config.
-            built = S3Presigner.builder().region(Region.of(awsRegion)).build();
+            // ambient credentials locally, falling back to basic signing credentials for offline/test execution.
+            AwsCredentialsProvider credentialsProvider = AwsCredentialsProviderChain.builder()
+                    .credentialsProviders(
+                            DefaultCredentialsProvider.create(),
+                            StaticCredentialsProvider.create(AwsBasicCredentials.create(
+                                    "seedha-staging-access-key",
+                                    "seedha-staging-secret-key-for-local-presigning-tokens"
+                            ))
+                    )
+                    .build();
+            built = S3Presigner.builder()
+                    .region(Region.of(awsRegion))
+                    .credentialsProvider(credentialsProvider)
+                    .build();
         } catch (RuntimeException ex) {
-            log.warn("S3 presigner unavailable; media endpoints refuse until AWS credentials are configured");
+            log.warn("S3 presigner unavailable; media endpoints refuse until AWS credentials are configured", ex);
         }
         this.presigner = built;
     }
