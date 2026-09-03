@@ -65,5 +65,27 @@ class LocationServiceTests {
         assertTrue(states.contains("Karnataka"));
         assertTrue(states.contains("Maharashtra"));
         assertTrue(states.contains("Telangana"));
+        assertTrue(states.contains("Andhra Pradesh"));
+        assertTrue(states.contains("Tamil Nadu"));
+        assertTrue(states.contains("Gujarat"));
+        assertTrue(states.contains("Rajasthan"));
+        assertTrue(states.contains("Punjab"));
+        assertTrue(states.contains("Kerala"));
+        assertTrue(states.contains("West Bengal"));
+    }
+
+    @Test
+    void searchFindsTier2CitiesAndLocalities() {
+        List<LocationService.LocationItem> vizag = locationService.search("Visakhapatnam", 5);
+        assertFalse(vizag.isEmpty());
+        assertEquals("Andhra Pradesh", vizag.get(0).state());
+
+        List<LocationService.LocationItem> ahmedabad = locationService.search("Ahmedabad", 5);
+        assertFalse(ahmedabad.isEmpty());
+        assertEquals("Gujarat", ahmedabad.get(0).state());
+
+        List<LocationService.LocationItem> kochi = locationService.search("Kochi", 5);
+        assertFalse(kochi.isEmpty());
+        assertEquals("Kerala", kochi.get(0).state());
     }
 }
