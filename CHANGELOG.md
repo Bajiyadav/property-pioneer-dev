@@ -1,3 +1,8 @@
+## v0.153.0 — 2026-09-03
+
+### Features
+- feat(mobile): match NoBroker property discovery layout on search screen (d7d92a7)
+
 ## v0.152.0 — 2026-09-03
 
 ### Features
