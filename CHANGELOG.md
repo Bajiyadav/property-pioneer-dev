@@ -1,3 +1,8 @@
+## v0.147.0 — 2026-09-03
+
+### Features
+- feat(mobile): open directly on One Stop Shop home page without splash delay (aaa5c49)
+
 ## v0.146.0 — 2026-09-03
 
 ### Features
