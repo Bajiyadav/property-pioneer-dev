@@ -1,3 +1,8 @@
+## v0.160.0 — 2026-09-03
+
+### Features
+- feat: self-hosted Indian locality engine, native OTP auth, and health metrics (df1240a)
+
 ## v0.159.0 — 2026-09-03
 
 ### Features
