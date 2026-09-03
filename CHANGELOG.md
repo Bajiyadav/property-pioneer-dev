@@ -1,3 +1,8 @@
+## v0.145.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): bump sentry_flutter to ^9.28.0 to fix Xcode 15 SPM build compatibility on iOS (4aa0558)
+
 ## v0.145.0 — 2026-09-03
 
 ### Features
