@@ -1,3 +1,8 @@
+## v0.151.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): wire all essential routes in profile and app router (36b1d01)
+
 ## v0.151.0 — 2026-09-03
 
 ### Features
