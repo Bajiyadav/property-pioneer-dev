@@ -29,9 +29,7 @@ import '../features/notifications/presentation/notifications_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final GoRouter appRouter = GoRouter(
-  // The launch screen resolves the session and decides where to go. Everyone
-  // lands on Home unless their role genuinely requires a console.
-  initialLocation: '/splash',
+  initialLocation: '/',
   redirect: (context, state) {
     final session = Supabase.instance.client.auth.currentSession;
     final isAuth = session != null;
