@@ -10,7 +10,7 @@ spring:
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/seedha_db}
     username: ${DB_USERNAME:seedha_user}
-    password: ${DB_PASSWORD:seedha_pass}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -36,8 +36,11 @@ spring:
 # Seedha Platform Custom Config
 seedha:
   jwt:
-    secret: ${JWT_SECRET:seedha_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256}
-    expiration-days: 30
+    # Supplied by the environment only. A committed default would be a signing key
+    # in the repository, and the application fails to start without it by design.
+    secret: ${JWT_SECRET}
+    access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
+    refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
   aws:
     region: ${AWS_REGION:ap-south-1}
     public-bucket: ${S3_PUBLIC_MEDIA_BUCKET:seedha-properties-public-media-staging}

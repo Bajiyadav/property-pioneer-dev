@@ -65,6 +65,56 @@ const FOLDER_CONSTRAINTS: Record<
   },
 };
 
+/**
+ * Whether this deployment can actually sign an S3 URL.
+ *
+ * `AWS_EXECUTION_ENV` / `AWS_LAMBDA_FUNCTION_NAME` mean an execution role is
+ * present; `AWS_ACCESS_KEY_ID` means explicit local credentials are.
+ */
+function hasAwsConfig(): boolean {
+  return !!(
+    process.env.AWS_ACCESS_KEY_ID ||
+    process.env.AWS_EXECUTION_ENV ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME
+  );
+}
+
+/**
+ * Development convenience that must never reach production.
+ *
+ * The mock branches below return a plausible-looking URL so local work can
+ * proceed without AWS. In production that would silently hand a client a URL
+ * that cannot store or retrieve anything, and the failure would surface as
+ * "uploads mysteriously do nothing" rather than as a configuration error. So a
+ * production deployment without credentials fails here, loudly.
+ */
+function assertStorageUsable(): void {
+  if (!hasAwsConfig() && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Object storage is not configured on this deployment (no AWS credentials or execution role).",
+    );
+  }
+}
+
+/**
+ * Rejects any key that is not a plain, server-generated relative key.
+ * Keys are built by `generateSafeObjectKey`; anything with traversal, an
+ * absolute path or an encoded segment did not come from there.
+ */
+function assertPlainObjectKey(objectKey: string): void {
+  if (
+    objectKey.length === 0 ||
+    objectKey.length > 512 ||
+    objectKey.startsWith("/") ||
+    objectKey.includes("..") ||
+    objectKey.includes("//") ||
+    objectKey.includes("\\") ||
+    objectKey.includes("%")
+  ) {
+    throw new Error("Malformed object key");
+  }
+}
+
 // Lazy-initialized S3 client (loads IAM roles on ECS/EC2 automatically)
 let s3ClientInstance: S3Client | null = null;
 
@@ -163,14 +213,10 @@ export async function createPresignedUploadUrl(
     params.entityId,
   );
 
-  // If AWS credentials are not configured (e.g. early local dev), generate a structured mock URL
-  const hasAwsConfig = !!(
-    process.env.AWS_ACCESS_KEY_ID ||
-    process.env.AWS_EXECUTION_ENV ||
-    process.env.AWS_LAMBDA_FUNCTION_NAME
-  );
+  assertStorageUsable();
 
-  if (!hasAwsConfig) {
+  // Outside production, generate a structured mock URL so local dev needs no AWS.
+  if (!hasAwsConfig()) {
     return {
       uploadUrl: `https://${targetBucket}.s3.${REGION}.amazonaws.com/${objectKey}?mock_presigned=true&expires=${expiresInSeconds}`,
       objectKey,
@@ -223,6 +269,8 @@ export async function createPresignedDownloadUrl(
   objectKey: string,
   expiresInSeconds: number = 300, // 5 minutes TTL
 ): Promise<string> {
+  assertPlainObjectKey(objectKey);
+
   // Validate that key belongs to a private folder
   if (
     !objectKey.startsWith("kyc-documents/") &&
@@ -232,13 +280,9 @@ export async function createPresignedDownloadUrl(
     throw new Error("Invalid private object key");
   }
 
-  const hasAwsConfig = !!(
-    process.env.AWS_ACCESS_KEY_ID ||
-    process.env.AWS_EXECUTION_ENV ||
-    process.env.AWS_LAMBDA_FUNCTION_NAME
-  );
+  assertStorageUsable();
 
-  if (!hasAwsConfig) {
+  if (!hasAwsConfig()) {
     return `https://${S3_PRIVATE_BUCKET}.s3.${REGION}.amazonaws.com/${objectKey}?mock_download=true&expires=${expiresInSeconds}`;
   }
 
@@ -249,4 +293,21 @@ export async function createPresignedDownloadUrl(
   });
 
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+}
+
+/**
+ * The user id a server-generated key belongs to.
+ *
+ * Keys are `{folder}/{userId}/[entityId/]{uuid}.{ext}`, so the second segment is
+ * always the uploader. Callers use this to authorize a download instead of
+ * splitting the string themselves — one definition of the layout, one place to
+ * change it.
+ */
+export function objectKeyOwnerId(objectKey: string): string {
+  assertPlainObjectKey(objectKey);
+  const parts = objectKey.split("/");
+  if (parts.length < 3 || !parts[1]) {
+    throw new Error("Malformed object key");
+  }
+  return parts[1];
 }

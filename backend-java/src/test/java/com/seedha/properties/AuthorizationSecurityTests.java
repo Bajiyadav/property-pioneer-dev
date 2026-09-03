@@ -4,6 +4,7 @@ import com.seedha.properties.controller.*;
 import com.seedha.properties.dto.ApiResponse;
 import com.seedha.properties.dto.AuthRequest;
 import com.seedha.properties.dto.AuthResponse;
+import com.seedha.properties.dto.PropertyWriteRequest;
 import com.seedha.properties.dto.UserProfileDto;
 import com.seedha.properties.entity.*;
 import com.seedha.properties.repository.*;
@@ -106,7 +107,7 @@ class AuthorizationSecurityTests {
     // 1. Unauthenticated access rejected
     @Test
     void testUnauthenticatedAccessRejected() {
-        ResponseEntity<ApiResponse<Property>> propResp = propertyController.createProperty(new Property(), null);
+        ResponseEntity<ApiResponse<Property>> propResp = propertyController.createProperty(new PropertyWriteRequest(), null);
         assertEquals(HttpStatus.UNAUTHORIZED, propResp.getStatusCode());
 
         ResponseEntity<ApiResponse<List<Enquiry>>> enqResp = enquiryController.getEnquiries("seeker", null);
@@ -122,7 +123,7 @@ class AuthorizationSecurityTests {
     // 2. Owner A vs Owner B: Property IDOR on Update & Delete
     @Test
     void testOwnerPropertyIdorProtection() {
-        Property propA = new Property();
+        PropertyWriteRequest propA = new PropertyWriteRequest();
         propA.setTitle("Owner A Property");
         propA.setDescription("Spacious apartment in Madhapur");
         propA.setListingType("BUY");
@@ -138,7 +139,7 @@ class AuthorizationSecurityTests {
         UUID propId = created.getBody().getData().getId();
 
         // Owner B attempts to update Owner A's property -> Forbidden
-        Property updateAttempt = new Property();
+        PropertyWriteRequest updateAttempt = new PropertyWriteRequest();
         updateAttempt.setId(propId);
         updateAttempt.setTitle("Hacked Title by Owner B");
         ResponseEntity<ApiResponse<Property>> updateResp = propertyController.saveProperty(updateAttempt, ownerB);
@@ -154,7 +155,7 @@ class AuthorizationSecurityTests {
     }
 
     private Property createTestProperty(UserPrincipal owner) {
-        Property prop = new Property();
+        PropertyWriteRequest prop = new PropertyWriteRequest();
         prop.setTitle("Test Property for " + owner.getEmail());
         prop.setDescription("Prime luxury property");
         prop.setListingType("BUY");

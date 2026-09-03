@@ -46,10 +46,11 @@ export const Route = createFileRoute("/api/v2/media/presign-upload")({
               const properties = await sql`
                 SELECT id, owner_id FROM properties WHERE id = ${entityId} LIMIT 1
               `;
+              // An id that matches no row is refused rather than waved through.
+              // Ignoring it let a caller file media under any id they invented.
               if (
-                properties.length > 0 &&
-                properties[0].owner_id !== user.id &&
-                user.role !== "admin"
+                properties.length === 0 ||
+                (properties[0].owner_id !== user.id && user.role !== "admin")
               ) {
                 return jsonResponse(
                   {
@@ -68,9 +69,8 @@ export const Route = createFileRoute("/api/v2/media/presign-upload")({
                 SELECT id, user_id FROM rental_agreements WHERE id = ${entityId} LIMIT 1
               `;
               if (
-                agreements.length > 0 &&
-                agreements[0].user_id !== user.id &&
-                user.role !== "admin"
+                agreements.length === 0 ||
+                (agreements[0].user_id !== user.id && user.role !== "admin")
               ) {
                 return jsonResponse(
                   {

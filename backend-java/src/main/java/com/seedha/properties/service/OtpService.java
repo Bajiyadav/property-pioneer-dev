@@ -270,7 +270,11 @@ public class OtpService {
 
         if ("PASSWORD_RESET".equalsIgnoreCase(purpose)) {
             if (userOpt.isEmpty()) {
-                return AuthResponse.error("User not found for password reset");
+                // Deliberately the same wording the request step uses. Saying
+                // "user not found" here would confirm which contacts have accounts
+                // to anyone who controls the contact, undoing the enumeration
+                // protection the OTP request path is careful to provide.
+                return AuthResponse.error("Verification could not be completed. Please request a new code.");
             }
             User user = userOpt.get();
             if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {

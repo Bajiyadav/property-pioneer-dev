@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { jsonResponse } from "@/lib/security.server";
 import { verifyToken, extractBearerToken } from "@/server/auth";
-import { createPresignedDownloadUrl } from "@/server/storage";
+import { createPresignedDownloadUrl, objectKeyOwnerId } from "@/server/storage";
 
 export const Route = createFileRoute("/api/v2/media/presign-download")({
   server: {
@@ -33,10 +33,11 @@ export const Route = createFileRoute("/api/v2/media/presign-download")({
             return jsonResponse({ ok: false, error: "objectKey is required" }, 400);
           }
 
-          // Authorization Guard: Verify that user owns the document path or is admin
-          // Keys are structured as: {folder}/{userId}/...
-          const pathParts = objectKey.split("/");
-          const documentOwnerId = pathParts[1];
+          // Authorization Guard: Verify that user owns the document path or is admin.
+          // objectKeyOwnerId also rejects traversal and encoded keys, so a caller
+          // cannot craft a key whose second segment is their own id while the rest
+          // walks into someone else's prefix.
+          const documentOwnerId = objectKeyOwnerId(objectKey);
 
           if (documentOwnerId !== user.id && user.role !== "admin") {
             return jsonResponse(

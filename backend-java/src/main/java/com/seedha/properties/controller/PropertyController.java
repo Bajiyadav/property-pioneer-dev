@@ -1,6 +1,7 @@
 package com.seedha.properties.controller;
 
 import com.seedha.properties.dto.ApiResponse;
+import com.seedha.properties.dto.PropertyWriteRequest;
 import com.seedha.properties.entity.Property;
 import com.seedha.properties.repository.PropertyRepository;
 import com.seedha.properties.security.UserPrincipal;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -69,24 +71,43 @@ public class PropertyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Property>> getPropertyById(@PathVariable UUID id) {
-        return propertyRepository.findById(id)
-                .map(p -> ResponseEntity.ok(ApiResponse.success(p)))
-                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Property not found")));
+    public ResponseEntity<ApiResponse<Property>> getPropertyById(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        Property property = propertyRepository.findById(id).orElse(null);
+        if (property == null) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Property not found"));
+        }
+
+        // An unapproved listing is visible to its owner and to admins only. It used
+        // to be readable by anyone holding the id, which exposed listings that
+        // moderation had not passed — and rejected ones.
+        if (!Boolean.TRUE.equals(property.getIsVerified()) && !maySeeUnpublished(property, currentUser)) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Property not found"));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(property));
+    }
+
+    private boolean maySeeUnpublished(Property property, UserPrincipal currentUser) {
+        if (currentUser == null) return false;
+        if ("ADMIN".equalsIgnoreCase(currentUser.getRole())) return true;
+        return property.getOwnerId() != null && property.getOwnerId().equals(currentUser.getId());
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<Property>> createProperty(
-            @RequestBody Property property,
+            @Valid @RequestBody PropertyWriteRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
-        return handleSaveProperty(property, currentUser);
+        return handleSaveProperty(request, currentUser);
     }
 
     @PostMapping("/manage")
     public ResponseEntity<ApiResponse<Property>> saveProperty(
-            @RequestBody Property property,
+            @Valid @RequestBody PropertyWriteRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
-        return handleSaveProperty(property, currentUser);
+        return handleSaveProperty(request, currentUser);
     }
 
     @DeleteMapping("/{id}")
@@ -112,28 +133,64 @@ public class PropertyController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    /**
+     * Creates or updates a listing from the client-writable field set only.
+     *
+     * Trust state — {@code status}, {@code isVerified}, {@code isFeatured},
+     * {@code viewCount}, {@code ownerId} — is never read from the request. On an
+     * update the fields are copied onto the loaded row, so an omitted field keeps
+     * its stored value instead of being blanked, and moderation state survives the
+     * edit.
+     */
     private ResponseEntity<ApiResponse<Property>> handleSaveProperty(
-            Property property,
+            PropertyWriteRequest request,
             UserPrincipal currentUser) {
 
         if (currentUser == null) {
             return ResponseEntity.status(401).body(ApiResponse.error("Unauthorized"));
         }
 
-        // Enforce ownership if updating
-        if (property.getId() != null) {
-            Property existing = propertyRepository.findById(property.getId()).orElse(null);
+        Property property;
+        if (request.getId() != null) {
+            Property existing = propertyRepository.findById(request.getId()).orElse(null);
             if (existing == null) {
                 return ResponseEntity.status(404).body(ApiResponse.error("Property not found"));
             }
-            if (!existing.getOwnerId().equals(currentUser.getId()) && !"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            boolean isAdmin = "ADMIN".equalsIgnoreCase(currentUser.getRole());
+            if (!currentUser.getId().equals(existing.getOwnerId()) && !isAdmin) {
                 return ResponseEntity.status(403).body(ApiResponse.error("Forbidden: You do not own this property"));
             }
+            // An admin edit must not silently transfer the listing to the admin,
+            // which is what unconditionally stamping the caller's id used to do.
+            property = existing;
+        } else {
+            property = new Property();
+            property.setOwnerId(currentUser.getId());
         }
 
-        // Server-enforced owner ID (Prevent client mass-assignment / IDOR)
-        property.setOwnerId(currentUser.getId());
+        applyWritableFields(property, request);
         Property saved = propertyRepository.save(property);
         return ResponseEntity.ok(ApiResponse.success(saved));
+    }
+
+    private void applyWritableFields(Property target, PropertyWriteRequest src) {
+        target.setTitle(src.getTitle());
+        if (src.getDescription() != null) target.setDescription(src.getDescription());
+        target.setListingType(src.getListingType());
+        target.setPropertyType(src.getPropertyType());
+        target.setPrice(src.getPrice());
+        if (src.getSecurityDeposit() != null) target.setSecurityDeposit(src.getSecurityDeposit());
+        if (src.getMaintenanceCharges() != null) target.setMaintenanceCharges(src.getMaintenanceCharges());
+        if (src.getBhk() != null) target.setBhk(src.getBhk());
+        if (src.getBathrooms() != null) target.setBathrooms(src.getBathrooms());
+        if (src.getBuiltupAreaSqft() != null) target.setBuiltupAreaSqft(src.getBuiltupAreaSqft());
+        if (src.getFurnishingStatus() != null) target.setFurnishingStatus(src.getFurnishingStatus());
+        target.setStateName(src.getStateName());
+        target.setCityName(src.getCityName());
+        if (src.getLocality() != null) target.setLocality(src.getLocality());
+        if (src.getAddress() != null) target.setAddress(src.getAddress());
+        if (src.getPincode() != null) target.setPincode(src.getPincode());
+        if (src.getLatitude() != null) target.setLatitude(src.getLatitude());
+        if (src.getLongitude() != null) target.setLongitude(src.getLongitude());
     }
 }

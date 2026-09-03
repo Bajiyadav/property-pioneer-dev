@@ -17,9 +17,21 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
 
     List<Property> findByOwnerId(UUID ownerId);
 
+    /**
+     * Public catalogue search.
+     *
+     * {@code is_approved} is part of the predicate, not an afterthought: without
+     * it every listing awaiting moderation — including rejected ones — was served
+     * to anonymous callers on /api/v2/properties.
+     *
+     * The count query repeats the spatial predicate. It previously omitted it, so
+     * a radius search reported the unfiltered total and paginated past the end of
+     * its own result set.
+     */
     @Query(value = """
         SELECT * FROM properties p
-        WHERE (:stateName IS NULL OR LOWER(p.state_name) = LOWER(:stateName))
+        WHERE p.is_approved = TRUE
+          AND (:stateName IS NULL OR LOWER(p.state_name) = LOWER(:stateName))
           AND (:cityName IS NULL OR LOWER(p.city_name) = LOWER(:cityName))
           AND (:listingType IS NULL OR LOWER(p.listing_type) = LOWER(:listingType))
           AND (:propertyType IS NULL OR LOWER(p.property_type) = LOWER(:propertyType))
@@ -37,13 +49,21 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
         """,
         countQuery = """
         SELECT count(*) FROM properties p
-        WHERE (:stateName IS NULL OR LOWER(p.state_name) = LOWER(:stateName))
+        WHERE p.is_approved = TRUE
+          AND (:stateName IS NULL OR LOWER(p.state_name) = LOWER(:stateName))
           AND (:cityName IS NULL OR LOWER(p.city_name) = LOWER(:cityName))
           AND (:listingType IS NULL OR LOWER(p.listing_type) = LOWER(:listingType))
           AND (:propertyType IS NULL OR LOWER(p.property_type) = LOWER(:propertyType))
           AND (:minPrice IS NULL OR p.price >= :minPrice)
           AND (:maxPrice IS NULL OR p.price <= :maxPrice)
           AND (:bhk IS NULL OR p.bhk = :bhk)
+          AND (:lat IS NULL OR :lng IS NULL OR (
+                ST_DWithin(
+                    p.location,
+                    ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                    :radiusMeters
+                )
+          ))
         """,
         nativeQuery = true)
     Page<Property> searchProperties(
