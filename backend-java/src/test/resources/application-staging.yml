@@ -4,11 +4,11 @@ server:
 
 spring:
   application:
-    name: seedha-properties-backend-staging
+    name: seedha-properties-backend-staging-test
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://ep-odd-term-aege7qm2.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_5HcF2rMSXTaE}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -32,7 +32,7 @@ spring:
 
 seedha:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:test-jwt-secret-key-for-offline-unit-tests-do-not-use-in-production-min-64-bytes-long}
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
   cors:

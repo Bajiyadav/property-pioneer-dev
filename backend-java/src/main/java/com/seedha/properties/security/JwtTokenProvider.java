@@ -62,7 +62,7 @@ public class JwtTokenProvider {
     private final SecureRandom secureRandom = new SecureRandom();
 
     public JwtTokenProvider(
-            @Value("${seedha.jwt.secret:v2-staging-seedha-properties-enterprise-hmac-sha512-secure-staging-key-do-not-use-in-production-min-64-bytes}") String secret,
+            @Value("${seedha.jwt.secret}") String secret,
             @Value("${seedha.jwt.key-id:seedha-key-v1}") String keyId,
             @Value("${seedha.jwt.previous-keys:}") String previousKeys,
             @Value("${seedha.jwt.issuer:seedha-properties-auth}") String issuer,
