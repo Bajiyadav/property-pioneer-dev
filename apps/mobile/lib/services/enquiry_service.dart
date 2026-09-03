@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/constants.dart';
+import '../core/network/native_api_client.dart';
 import '../models/enquiry.dart';
 import '../models/visit.dart';
 import 'supabase_service.dart';
@@ -110,7 +111,8 @@ class EnquiryService {
     required String message,
   }) async {
     final userId = _currentUserId;
-    if (userId == null) {
+    final nativeToken = NativeApiClient().authToken;
+    if (userId == null && nativeToken == null) {
       return EnquiryResult.failure(
         EnquiryFailureReason.notAuthenticated,
         'Please sign in to send an enquiry.',
@@ -146,12 +148,32 @@ class EnquiryService {
       );
     }
 
-    final fingerprint = 'enquiry:$userId:$propertyId:$body';
+    final effectiveUserId = userId ?? 'native-user';
+    final fingerprint = 'enquiry:$effectiveUserId:$propertyId:$body';
     if (_submittedFingerprints.contains(fingerprint)) {
       return EnquiryResult.failure(
         EnquiryFailureReason.duplicateSubmission,
         'You have already sent this enquiry.',
       );
+    }
+
+    // If signed in via native phone OTP (Supabase session absent)
+    if (userId == null && nativeToken != null) {
+      try {
+        final res = await NativeApiClient().submitEnquiry(
+          propertyId: propertyId,
+          name: name,
+          phone: phone,
+          message: body,
+        );
+        if (res['ok'] == true) {
+          _submittedFingerprints.add(fingerprint);
+          final id = res['data']?['id']?.toString();
+          return EnquiryResult.success(id);
+        }
+      } catch (e) {
+        return _classify(e);
+      }
     }
 
     try {
@@ -190,7 +212,8 @@ class EnquiryService {
   }) async {
     final user = _client.auth.currentUser;
     final userId = user?.id;
-    if (userId == null) {
+    final nativeToken = NativeApiClient().authToken;
+    if (userId == null && nativeToken == null) {
       return EnquiryResult.failure(
         EnquiryFailureReason.notAuthenticated,
         'Please sign in to schedule a visit.',
@@ -233,12 +256,32 @@ class EnquiryService {
     final slotMessage =
         buildVisitMessage(date: date, timeSlot: timeSlot, notes: notes);
 
-    final fingerprint = 'visit:$userId:$propertyId:$formattedDate:$timeSlot';
+    final effectiveUserId = userId ?? 'native-user';
+    final fingerprint = 'visit:$effectiveUserId:$propertyId:$formattedDate:$timeSlot';
     if (_submittedFingerprints.contains(fingerprint)) {
       return EnquiryResult.failure(
         EnquiryFailureReason.duplicateSubmission,
         'You have already requested this visit.',
       );
+    }
+
+    // If signed in via native phone OTP (Supabase session absent)
+    if (userId == null && nativeToken != null) {
+      try {
+        final res = await NativeApiClient().scheduleVisit(
+          propertyId: propertyId,
+          visitDate: formattedDate,
+          visitTime: timeSlot,
+          notes: notes,
+        );
+        if (res['ok'] == true) {
+          _submittedFingerprints.add(fingerprint);
+          final id = res['data']?['id']?.toString();
+          return EnquiryResult.success(id);
+        }
+      } catch (e) {
+        return _classify(e);
+      }
     }
 
     try {

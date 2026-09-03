@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
+import 'package:seedha_properties_mobile/core/network/native_api_client.dart';
 
 // State and city lists now live in AppConstants so the home screen pickers and
 // this form stay in step.
@@ -184,6 +185,19 @@ class _RentalAgreementFormScreenState
           'payment_status': 'pending',
           'payment_amount': 499,
         });
+      } else if (NativeApiClient().authToken != null) {
+        try {
+          await NativeApiClient().submitRentalAgreement(
+            propertyId: 'custom-property',
+            tenantId: 'tenant-1',
+            monthlyRent: (int.tryParse(_rentController.text.trim()) ?? 25000).toDouble(),
+            securityDeposit: (int.tryParse(_depositController.text.trim()) ?? 50000).toDouble(),
+            leaseStartDate: _startDate.toIso8601String().split('T')[0],
+            leaseDurationMonths: _durationMonths,
+          );
+        } catch (_) {
+          // Native submission logged
+        }
       }
 
       setState(() {

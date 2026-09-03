@@ -202,6 +202,94 @@ class NativeApiClient {
     return jsonDecode(response.body);
   }
 
+  // --- Site Visits ---
+  Future<Map<String, dynamic>> scheduleVisit({
+    required String propertyId,
+    required String visitDate,
+    required String visitTime,
+    String? notes,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/visits'),
+      headers: _headers,
+      body: jsonEncode({
+        'propertyId': propertyId,
+        'visitDate': visitDate,
+        'visitTime': visitTime,
+        if (notes != null) 'notes': notes,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // --- Home Loans ---
+  Future<Map<String, dynamic>> submitHomeLoan({
+    required String fullName,
+    required String phone,
+    required String email,
+    required double loanAmount,
+    required double monthlyIncome,
+    String employmentType = 'SALARIED',
+    String cityName = 'Hyderabad',
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/home-loans'),
+      headers: _headers,
+      body: jsonEncode({
+        'fullName': fullName,
+        'phone': phone,
+        'email': email,
+        'loanAmount': loanAmount,
+        'monthlyIncome': monthlyIncome,
+        'employmentType': employmentType,
+        'cityName': cityName,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // --- Rental Agreements ---
+  Future<Map<String, dynamic>> submitRentalAgreement({
+    required String propertyId,
+    required String tenantId,
+    required double monthlyRent,
+    required double securityDeposit,
+    String? leaseStartDate,
+    int leaseDurationMonths = 11,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/rental-agreements'),
+      headers: _headers,
+      body: jsonEncode({
+        'propertyId': propertyId,
+        'tenantId': tenantId,
+        'monthlyRent': monthlyRent,
+        'securityDeposit': securityDeposit,
+        'leaseStartDate': leaseStartDate ?? DateTime.now().toIso8601String().split('T')[0],
+        'leaseDurationMonths': leaseDurationMonths,
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // --- Locations Autocomplete ---
+  Future<List<dynamic>> autocompleteLocations(String query, {int limit = 8}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/v2/locations/autocomplete')
+          .replace(queryParameters: {'q': query, 'limit': limit.toString()});
+      final response = await http.get(uri, headers: _headers);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['ok'] == true && data['data'] is List) {
+          return data['data'] as List<dynamic>;
+        }
+      }
+    } catch (_) {
+      // Fall through to empty
+    }
+    return [];
+  }
+
   // --- S3 Media Uploads ---
   Future<Map<String, dynamic>> getPresignedUploadUrl({
     required String folder,

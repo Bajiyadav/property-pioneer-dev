@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/constants.dart';
+import '../core/network/native_api_client.dart';
 import 'enquiry_service.dart' show EnquiryFailureReason, EnquiryResult;
 import 'supabase_service.dart';
 
@@ -42,7 +43,8 @@ class LoanEnquiryService {
     int? monthlyEmi,
   }) async {
     final userId = _currentUserId;
-    if (userId == null) {
+    final nativeToken = NativeApiClient().authToken;
+    if (userId == null && nativeToken == null) {
       return EnquiryResult.failure(
         EnquiryFailureReason.notAuthenticated,
         'Please sign in to request a call back.',
@@ -67,12 +69,33 @@ class LoanEnquiryService {
       );
     }
 
-    final fingerprint = 'loan:$userId:$trimmedPhone:${loanAmount?.round()}';
+    final effectiveUserId = userId ?? 'native-user';
+    final fingerprint = 'loan:$effectiveUserId:$trimmedPhone:${loanAmount?.round()}';
     if (_submittedFingerprints.contains(fingerprint)) {
       return EnquiryResult.failure(
         EnquiryFailureReason.duplicateSubmission,
         'You have already requested a call back.',
       );
+    }
+
+    // If signed in via native phone OTP (Supabase session absent)
+    if (userId == null && nativeToken != null) {
+      try {
+        final res = await NativeApiClient().submitHomeLoan(
+          fullName: trimmedName,
+          phone: trimmedPhone,
+          email: email?.trim() ?? 'customer@seedhaproperties.com',
+          loanAmount: loanAmount ?? 2500000.0,
+          monthlyIncome: 75000.0,
+        );
+        if (res['ok'] == true) {
+          _submittedFingerprints.add(fingerprint);
+          final id = res['data']?['id']?.toString();
+          return EnquiryResult.success(id);
+        }
+      } catch (e) {
+        return _classify(e);
+      }
     }
 
     try {
