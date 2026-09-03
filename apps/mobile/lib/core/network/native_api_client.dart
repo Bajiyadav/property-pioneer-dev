@@ -221,4 +221,55 @@ class NativeApiClient {
     );
     return jsonDecode(response.body);
   }
+
+  // --- Promotion payments (Razorpay, server-authoritative) ---
+  //
+  // The server computes the amount and creates the Razorpay order; the app only
+  // opens Checkout with the returned public key + order id, then asks the server
+  // to verify. The app is never the source of truth for success, and no Razorpay
+  // secret ever lives here. The native Razorpay Checkout plugin is a separate,
+  // credential-dependent step (see the payment service).
+
+  /// Creates/reuses a promotion order and its Razorpay order. Returns
+  /// { ok, gatewayConfigured, orderId, razorpayOrderId, keyId, amountPaise }.
+  Future<Map<String, dynamic>> createPromotionOrder({
+    required String propertyId,
+    required String planId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/payments/promotion/create'),
+      headers: _headers,
+      body: jsonEncode({'propertyId': propertyId, 'planId': planId}),
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// Verifies a Razorpay checkout result server-side. Success is concluded only
+  /// by the server after signature verification — never by the app.
+  Future<Map<String, dynamic>> verifyPromotionPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String signature,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/payments/promotion/verify'),
+      headers: _headers,
+      body: jsonEncode({
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': signature,
+      }),
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// Polls the server for the authoritative status of a promotion order — used
+  /// when checkout succeeded but the webhook/verification is still settling.
+  Future<Map<String, dynamic>> promotionPaymentStatus(String orderId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/v2/payments/promotion/status?orderId=$orderId'),
+      headers: _headers,
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
 }

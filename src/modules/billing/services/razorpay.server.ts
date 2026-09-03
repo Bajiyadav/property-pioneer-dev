@@ -151,3 +151,92 @@ export function verifyPaymentSignature(input: {
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
+
+/**
+ * Creates a Razorpay order for an arbitrary server-computed amount.
+ *
+ * Used by flows whose price does not come from the plan catalogue (owner
+ * promotion). The amount is always passed in from the server — this function
+ * never derives it from client input — and is validated here as a final guard:
+ * a positive integer number of paise within a sane ceiling.
+ */
+export async function createRazorpayOrder(input: {
+  amountPaise: number;
+  receipt: string;
+  notes?: Record<string, string>;
+}): Promise<CreateOrderResult> {
+  const creds = credentials();
+  if (!creds) {
+    return { status: "unconfigured", details: "Razorpay is not configured on this deployment." };
+  }
+
+  const amount = input.amountPaise;
+  // 50,00,000 paise = ₹50,000 — comfortably above any real promotion price and
+  // below anything that would indicate an overflow or manipulation.
+  if (!Number.isInteger(amount) || amount <= 0 || amount > 5_000_000) {
+    return { status: "unconfigured", details: "Invalid server amount." };
+  }
+
+  const auth = Buffer.from(`${creds.keyId}:${creds.keySecret}`).toString("base64");
+  const response = await fetch("https://api.razorpay.com/v1/orders", {
+    method: "POST",
+    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      amount,
+      currency: "INR",
+      receipt: input.receipt.slice(0, 40),
+      notes: input.notes ?? {},
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    return {
+      status: "unconfigured",
+      details: `Razorpay rejected the order (${response.status}): ${body.slice(0, 200)}`,
+    };
+  }
+
+  const order = (await response.json()) as { id?: string; amount?: number };
+  if (!order.id) {
+    return { status: "unconfigured", details: "Razorpay returned no order id." };
+  }
+  return {
+    status: "ok",
+    orderId: order.id,
+    keyId: creds.keyId,
+    amountPaise: order.amount ?? amount,
+    currency: "INR",
+  };
+}
+
+/**
+ * Verifies a Razorpay WEBHOOK signature.
+ *
+ * Distinct from verifyPaymentSignature (the browser callback): a webhook is
+ * signed with the dedicated RAZORPAY_WEBHOOK_SECRET (configured in the Razorpay
+ * dashboard), as HMAC-SHA256 over the EXACT raw request body. The raw bytes
+ * must be used — re-serialising the parsed JSON changes the signature — so the
+ * caller passes the untouched body string. Compared in constant time.
+ *
+ * Returns false when no webhook secret is configured, so an unconfigured
+ * deployment can never accept an unverified webhook.
+ */
+export function verifyWebhookSignature(
+  rawBody: string,
+  signature: string | null | undefined,
+): boolean {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret || !signature) return false;
+
+  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(signature, "utf8");
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+/** True when a Razorpay webhook secret is configured (webhooks can be verified). */
+export function isWebhookConfigured(): boolean {
+  return !!process.env.RAZORPAY_WEBHOOK_SECRET;
+}

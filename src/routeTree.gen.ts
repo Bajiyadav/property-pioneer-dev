@@ -79,6 +79,7 @@ import { Route as ApiV2NotificationsRouteImport } from './routes/api/v2/notifica
 import { Route as ApiV2PropertiesRouteImport } from './routes/api/v2/properties'
 import { Route as ApiV2RentalAgreementsRouteImport } from './routes/api/v2/rental-agreements'
 import { Route as ApiV2VisitsRouteImport } from './routes/api/v2/visits'
+import { Route as ApiWebhooksRazorpayRouteImport } from './routes/api/webhooks/razorpay'
 import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as BuyCityIndexRouteImport } from './routes/buy.$city.index'
 import { Route as BuyCityLocalityRouteImport } from './routes/buy.$city.$locality'
@@ -99,6 +100,9 @@ import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/pu
 import { Route as ApiPublicPropertiesIdSaveRouteImport } from './routes/api/public/properties.$id.save'
 import { Route as ApiPublicPropertiesIdScheduleVisitRouteImport } from './routes/api/public/properties.$id.schedule-visit'
 import { Route as ApiPublicPropertiesIdShareRouteImport } from './routes/api/public/properties.$id.share'
+import { Route as ApiV2PaymentsPromotionCreateRouteImport } from './routes/api/v2/payments/promotion.create'
+import { Route as ApiV2PaymentsPromotionStatusRouteImport } from './routes/api/v2/payments/promotion.status'
+import { Route as ApiV2PaymentsPromotionVerifyRouteImport } from './routes/api/v2/payments/promotion.verify'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -463,6 +467,11 @@ const ApiV2VisitsRoute = ApiV2VisitsRouteImport.update({
   path: '/api/v2/visits',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksRazorpayRoute = ApiWebhooksRazorpayRouteImport.update({
+  id: '/api/webhooks/razorpay',
+  path: '/api/webhooks/razorpay',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
   id: '/api/webhooks/stripe',
   path: '/api/webhooks/stripe',
@@ -571,6 +580,24 @@ const ApiPublicPropertiesIdShareRoute =
     path: '/api/public/properties/$id/share',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV2PaymentsPromotionCreateRoute =
+  ApiV2PaymentsPromotionCreateRouteImport.update({
+    id: '/api/v2/payments/promotion/create',
+    path: '/api/v2/payments/promotion/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV2PaymentsPromotionStatusRoute =
+  ApiV2PaymentsPromotionStatusRouteImport.update({
+    id: '/api/v2/payments/promotion/status',
+    path: '/api/v2/payments/promotion/status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiV2PaymentsPromotionVerifyRoute =
+  ApiV2PaymentsPromotionVerifyRouteImport.update({
+    id: '/api/v2/payments/promotion/verify',
+    path: '/api/v2/payments/promotion/verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -640,6 +667,7 @@ export interface FileRoutesByFullPath {
   '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
   '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
   '/api/v2/visits': typeof ApiV2VisitsRoute
+  '/api/webhooks/razorpay': typeof ApiWebhooksRazorpayRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -662,6 +690,9 @@ export interface FileRoutesByFullPath {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
+  '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
+  '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -727,6 +758,7 @@ export interface FileRoutesByTo {
   '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
   '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
   '/api/v2/visits': typeof ApiV2VisitsRoute
+  '/api/webhooks/razorpay': typeof ApiWebhooksRazorpayRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -749,6 +781,9 @@ export interface FileRoutesByTo {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
+  '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
+  '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -820,6 +855,7 @@ export interface FileRoutesById {
   '/api/v2/properties': typeof ApiV2PropertiesRouteWithChildren
   '/api/v2/rental-agreements': typeof ApiV2RentalAgreementsRoute
   '/api/v2/visits': typeof ApiV2VisitsRoute
+  '/api/webhooks/razorpay': typeof ApiWebhooksRazorpayRoute
   '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/buy/$city/$locality': typeof BuyCityLocalityRoute
   '/commercial/$city/$locality': typeof CommercialCityLocalityRoute
@@ -842,6 +878,9 @@ export interface FileRoutesById {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
+  '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
+  '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -913,6 +952,7 @@ export interface FileRouteTypes {
     | '/api/v2/properties'
     | '/api/v2/rental-agreements'
     | '/api/v2/visits'
+    | '/api/webhooks/razorpay'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -935,6 +975,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/payments/promotion/create'
+    | '/api/v2/payments/promotion/status'
+    | '/api/v2/payments/promotion/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1000,6 +1043,7 @@ export interface FileRouteTypes {
     | '/api/v2/properties'
     | '/api/v2/rental-agreements'
     | '/api/v2/visits'
+    | '/api/webhooks/razorpay'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -1022,6 +1066,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/payments/promotion/create'
+    | '/api/v2/payments/promotion/status'
+    | '/api/v2/payments/promotion/verify'
   id:
     | '__root__'
     | '/'
@@ -1092,6 +1139,7 @@ export interface FileRouteTypes {
     | '/api/v2/properties'
     | '/api/v2/rental-agreements'
     | '/api/v2/visits'
+    | '/api/webhooks/razorpay'
     | '/api/webhooks/stripe'
     | '/buy/$city/$locality'
     | '/commercial/$city/$locality'
@@ -1114,6 +1162,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/payments/promotion/create'
+    | '/api/v2/payments/promotion/status'
+    | '/api/v2/payments/promotion/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1165,6 +1216,7 @@ export interface RootRouteChildren {
   ApiV2PropertiesRoute: typeof ApiV2PropertiesRouteWithChildren
   ApiV2RentalAgreementsRoute: typeof ApiV2RentalAgreementsRoute
   ApiV2VisitsRoute: typeof ApiV2VisitsRoute
+  ApiWebhooksRazorpayRoute: typeof ApiWebhooksRazorpayRoute
   ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   BuyCityLocalityRoute: typeof BuyCityLocalityRoute
   CommercialCityLocalityRoute: typeof CommercialCityLocalityRoute
@@ -1181,6 +1233,9 @@ export interface RootRouteChildren {
   ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
   ApiPublicPropertiesIdScheduleVisitRoute: typeof ApiPublicPropertiesIdScheduleVisitRoute
   ApiPublicPropertiesIdShareRoute: typeof ApiPublicPropertiesIdShareRoute
+  ApiV2PaymentsPromotionCreateRoute: typeof ApiV2PaymentsPromotionCreateRoute
+  ApiV2PaymentsPromotionStatusRoute: typeof ApiV2PaymentsPromotionStatusRoute
+  ApiV2PaymentsPromotionVerifyRoute: typeof ApiV2PaymentsPromotionVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1675,6 +1730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV2VisitsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/razorpay': {
+      id: '/api/webhooks/razorpay'
+      path: '/api/webhooks/razorpay'
+      fullPath: '/api/webhooks/razorpay'
+      preLoaderRoute: typeof ApiWebhooksRazorpayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/webhooks/stripe': {
       id: '/api/webhooks/stripe'
       path: '/api/webhooks/stripe'
@@ -1813,6 +1875,27 @@ declare module '@tanstack/react-router' {
       path: '/api/public/properties/$id/share'
       fullPath: '/api/public/properties/$id/share'
       preLoaderRoute: typeof ApiPublicPropertiesIdShareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/payments/promotion/create': {
+      id: '/api/v2/payments/promotion/create'
+      path: '/api/v2/payments/promotion/create'
+      fullPath: '/api/v2/payments/promotion/create'
+      preLoaderRoute: typeof ApiV2PaymentsPromotionCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/payments/promotion/status': {
+      id: '/api/v2/payments/promotion/status'
+      path: '/api/v2/payments/promotion/status'
+      fullPath: '/api/v2/payments/promotion/status'
+      preLoaderRoute: typeof ApiV2PaymentsPromotionStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v2/payments/promotion/verify': {
+      id: '/api/v2/payments/promotion/verify'
+      path: '/api/v2/payments/promotion/verify'
+      fullPath: '/api/v2/payments/promotion/verify'
+      preLoaderRoute: typeof ApiV2PaymentsPromotionVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -2004,6 +2087,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV2PropertiesRoute: ApiV2PropertiesRouteWithChildren,
   ApiV2RentalAgreementsRoute: ApiV2RentalAgreementsRoute,
   ApiV2VisitsRoute: ApiV2VisitsRoute,
+  ApiWebhooksRazorpayRoute: ApiWebhooksRazorpayRoute,
   ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   BuyCityLocalityRoute: BuyCityLocalityRoute,
   CommercialCityLocalityRoute: CommercialCityLocalityRoute,
@@ -2022,6 +2106,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicPropertiesIdScheduleVisitRoute:
     ApiPublicPropertiesIdScheduleVisitRoute,
   ApiPublicPropertiesIdShareRoute: ApiPublicPropertiesIdShareRoute,
+  ApiV2PaymentsPromotionCreateRoute: ApiV2PaymentsPromotionCreateRoute,
+  ApiV2PaymentsPromotionStatusRoute: ApiV2PaymentsPromotionStatusRoute,
+  ApiV2PaymentsPromotionVerifyRoute: ApiV2PaymentsPromotionVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
