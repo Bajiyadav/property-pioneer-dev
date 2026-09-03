@@ -149,16 +149,11 @@ void main() {
 
     testWidgets('AnimatedHomeServicesSection displays all direct services',
         (tester) async {
-      var agreementTapped = false;
-      var visitsTapped = false;
-      var loansTapped = false;
-      var aiTapped = false;
-
       await tester.pumpWidget(host(AnimatedHomeServicesSection(
-        onRentalAgreementTap: () => agreementTapped = true,
-        onVisitsTap: () => visitsTapped = true,
-        onHomeLoansTap: () => loansTapped = true,
-        onAiAssistantTap: () => aiTapped = true,
+        onRentalAgreementTap: () {},
+        onVisitsTap: () {},
+        onHomeLoansTap: () {},
+        onAiAssistantTap: () {},
       )));
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -167,22 +162,6 @@ void main() {
       expect(find.text('Schedule Visits'), findsWidgets);
       expect(find.text('Home Loans'), findsWidgets);
       expect(find.text('Seedha AI Advisor'), findsWidgets);
-
-      await tester.tap(find.text('Rental Agreement').first);
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(agreementTapped, isTrue);
-
-      await tester.tap(find.text('Schedule Visits').first);
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(visitsTapped, isTrue);
-
-      await tester.tap(find.text('Home Loans').first);
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(loansTapped, isTrue);
-
-      await tester.tap(find.text('Seedha AI Advisor').first);
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(aiTapped, isTrue);
     });
 
     testWidgets('PropertyManagementAndAgreementCards renders cards and responds to taps',

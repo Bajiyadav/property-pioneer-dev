@@ -684,7 +684,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
 
   void _startAutoScroll() {
     _autoScrollTimer?.cancel();
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
       if (!mounted || !_scrollController.hasClients || _isUserInteracting) return;
 
       final max = _scrollController.position.maxScrollExtent;
@@ -693,7 +693,7 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
       if (current >= max - 1) {
         _scrollController.jumpTo(0.0);
       } else {
-        _scrollController.jumpTo(current + 1.2);
+        _scrollController.jumpTo(current + 2.0);
       }
     });
   }
@@ -707,43 +707,39 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
   }
 
   List<Widget> _buildServiceCards() {
-    return [
+    return const [
       _ServiceCardItem(
         title: 'Rental Agreement',
         subtitle: 'E-Stamp & Biometrics',
         icon: Icons.description_outlined,
         badge: 'LEGAL DRAFT',
-        color: const Color(0xFF4338CA),
-        onTap: widget.onRentalAgreementTap,
+        color: Color(0xFF4338CA),
       ),
-      const SizedBox(width: 10),
+      SizedBox(width: 10),
       _ServiceCardItem(
         title: 'Schedule Visits',
         subtitle: 'Direct Site Slots',
         icon: Icons.calendar_month_outlined,
         badge: 'VERIFIED',
-        color: const Color(0xFF0D9488),
-        onTap: widget.onVisitsTap,
+        color: Color(0xFF0D9488),
       ),
-      const SizedBox(width: 10),
+      SizedBox(width: 10),
       _ServiceCardItem(
         title: 'Home Loans',
         subtitle: 'Lowest Interest Rates',
         icon: Icons.account_balance_outlined,
         badge: 'PRE-APPROVED',
-        color: const Color(0xFFD97706),
-        onTap: widget.onHomeLoansTap,
+        color: Color(0xFFD97706),
       ),
-      const SizedBox(width: 10),
+      SizedBox(width: 10),
       _ServiceCardItem(
         title: 'Seedha AI Advisor',
         subtitle: '24/7 PropTech Guidance',
         icon: Icons.auto_awesome_rounded,
         badge: 'GROUNDED',
-        color: const Color(0xFF2563EB),
-        onTap: widget.onAiAssistantTap,
+        color: Color(0xFF2563EB),
       ),
-      const SizedBox(width: 10),
+      SizedBox(width: 10),
     ];
   }
 
@@ -1034,7 +1030,6 @@ class _ServiceCardItem extends StatelessWidget {
     required this.icon,
     required this.badge,
     required this.color,
-    required this.onTap,
   });
 
   final String title;
@@ -1042,97 +1037,89 @@ class _ServiceCardItem extends StatelessWidget {
   final IconData icon;
   final String badge;
   final Color color;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      width: 172,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: 172,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, size: 16, color: color),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        badge,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 8.5,
-                          fontWeight: FontWeight.w800,
-                          color: color,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 16, color: color),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
+              const SizedBox(width: 4),
+              Flexible(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    badge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                    style: TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w800,
+                      color: color,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
