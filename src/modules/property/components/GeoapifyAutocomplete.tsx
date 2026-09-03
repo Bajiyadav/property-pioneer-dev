@@ -81,6 +81,49 @@ export function GeoapifyAutocomplete({
 
     setIsLoading(true);
     try {
+      // 1. Try native zero-cost Indian Locality Autocomplete Engine first
+      try {
+        const nativeRes = await fetch(
+          `/api/v2/locations/autocomplete?q=${encodeURIComponent(searchText)}&limit=6`,
+          { signal: abortControllerRef.current.signal },
+        );
+        if (nativeRes.ok) {
+          const nativeData = await nativeRes.json();
+          if (nativeData?.ok && Array.isArray(nativeData?.data) && nativeData.data.length > 0) {
+            const mappedFeatures: GeoapifyFeature[] = nativeData.data.map(
+              (item: {
+                id: string;
+                locality: string;
+                city: string;
+                state: string;
+                pincode: string;
+                formattedAddress: string;
+                lat: number;
+                lng: number;
+              }) => ({
+                properties: {
+                  place_id: item.id,
+                  formatted: item.formattedAddress,
+                  lat: item.lat,
+                  lon: item.lng,
+                  city: item.city,
+                  state: item.state,
+                  suburb: item.locality,
+                  neighbourhood: item.locality,
+                },
+              }),
+            );
+            setSuggestions(mappedFeatures);
+            setIsOpen(true);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (nativeErr: unknown) {
+        if (nativeErr instanceof Error && nativeErr.name === "AbortError") throw nativeErr;
+      }
+
+      // 2. Fallback to external Geoapify if native backend returned empty
       const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
       if (!apiKey || apiKey === "mock" || apiKey === "undefined") {
         setIsLoading(false);

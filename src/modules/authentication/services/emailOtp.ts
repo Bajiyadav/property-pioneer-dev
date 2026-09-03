@@ -33,12 +33,35 @@ export type OtpRequestResult =
 
 /** Asks the server to send a code. Enumeration-safe: success looks the same for any email. */
 export async function requestEmailOtp(email: string, next?: string): Promise<OtpRequestResult> {
+  const normEmail = normalizeEmail(email);
+
+  // 1. Try native Seedha Java 21 backend first
+  try {
+    const nativeRes = await fetch("/api/v2/auth/otp/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contact: normEmail,
+        contact_type: "EMAIL",
+        purpose: "LOGIN",
+      }),
+    });
+    if (nativeRes.ok) {
+      const data = await nativeRes.json().catch(() => ({}));
+      if (data?.ok === true) {
+        return { ok: true, next: safeNextPath(next) };
+      }
+    }
+  } catch {
+    // Fall back to serverless proxy
+  }
+
   let res: Response;
   try {
     res = await fetch("/api/auth/request-otp", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email: normalizeEmail(email), next: safeNextPath(next) }),
+      body: JSON.stringify({ email: normEmail, next: safeNextPath(next) }),
     });
   } catch {
     return { ok: false, error: "Network error. Please try again." };
@@ -59,8 +82,7 @@ export async function requestEmailOtp(email: string, next?: string): Promise<Otp
 export type OtpVerifyResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Exchanges a 6-digit code for a session. `type: "email"` is the passwordless
- * login variant (distinct from "signup"/"recovery" used elsewhere in the app).
+ * Exchanges a 6-digit code for a session.
  */
 export async function verifyEmailOtp(email: string, token: string): Promise<OtpVerifyResult> {
   const code = token.trim();
@@ -68,8 +90,35 @@ export async function verifyEmailOtp(email: string, token: string): Promise<OtpV
     return { ok: false, error: "Enter the code from your email (6–8 digits)." };
   }
 
+  const normEmail = normalizeEmail(email);
+
+  // 1. Try native Seedha Java 21 backend (/api/v2/auth/otp/verify)
+  try {
+    const nativeRes = await fetch("/api/v2/auth/otp/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contact: normEmail,
+        otp: code,
+        purpose: "LOGIN",
+      }),
+    });
+    if (nativeRes.ok) {
+      const data = await nativeRes.json().catch(() => ({}));
+      if (data?.ok === true && data?.auth?.token) {
+        localStorage.setItem("seedha_auth_token", data.auth.token);
+        if (data.auth.refresh_token) {
+          localStorage.setItem("seedha_refresh_token", data.auth.refresh_token);
+        }
+        return { ok: true };
+      }
+    }
+  } catch {
+    // Fall back to Supabase client
+  }
+
   const { data, error } = await supabase.auth.verifyOtp({
-    email: normalizeEmail(email),
+    email: normEmail,
     token: code,
     type: "email",
   });

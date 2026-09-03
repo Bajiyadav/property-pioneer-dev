@@ -18,15 +18,24 @@ public class HealthController {
     @Autowired(required = false)
     private DataSource dataSource;
 
-    @GetMapping("/api/health")
+    @GetMapping({"/api/health", "/api/v2/health", "/health"})
     public ResponseEntity<Map<String, Object>> healthCheck() {
         boolean dbHealthy = checkDatabase();
+        Runtime runtime = Runtime.getRuntime();
+        long maxMem = runtime.maxMemory() / (1024 * 1024);
+        long totalMem = runtime.totalMemory() / (1024 * 1024);
+        long freeMem = runtime.freeMemory() / (1024 * 1024);
+        long usedMem = totalMem - freeMem;
+
         Map<String, Object> response = new HashMap<>();
         response.put("ok", dbHealthy);
         response.put("status", dbHealthy ? "UP" : "DEGRADED");
         response.put("service", "seedha-java-backend");
         response.put("version", "2.0.0");
         response.put("database", dbHealthy ? "CONNECTED" : "UNAVAILABLE");
+        response.put("available_processors", runtime.availableProcessors());
+        response.put("memory_used_mb", usedMem);
+        response.put("memory_max_mb", maxMem);
         response.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.status(dbHealthy ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE).body(response);
