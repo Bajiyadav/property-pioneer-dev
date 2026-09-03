@@ -1,3 +1,8 @@
+## v0.162.0 — 2026-09-03
+
+### Features
+- feat: complete native customer journeys for visits, loans, and agreements (2b12f3e)
+
 ## v0.161.0 — 2026-09-03
 
 ### Features
