@@ -28,27 +28,27 @@ interface PricingPlan {
 
 const OWNER_PROMOTION_PLANS: PricingPlan[] = [
   {
-    id: "basic",
-    name: "Free Ad Posting",
+    id: "owner-basic",
+    name: "Free Rental Ad",
     priceMonthly: 0,
     priceYearly: 0,
     tagline: "Always 100% Free with Zero Brokerage",
     features: [
       "1 Free Property Ad Posting",
       "Standard Platform Search Visibility",
-      "Direct Tenant & Buyer Inquiries",
+      "Direct Tenant Inquiries via WhatsApp & Phone",
       "High-Resolution Photo Gallery",
       "Basic Moderation & Verification",
     ],
-    ctaText: "List Property Free",
+    ctaText: "List Rental Free",
   },
   {
-    id: "premium",
-    name: "Fast-Track Promotion",
+    id: "owner-premium",
+    name: "Fast-Track Rental Boost",
     badge: "Most Popular",
     priceMonthly: 499,
     priceYearly: 299,
-    tagline: "4x faster tenant reach with top search ranking",
+    tagline: "4x faster tenant reach with topmost search ranking",
     popular: true,
     features: [
       "Topmost Search & Category Priority",
@@ -56,12 +56,12 @@ const OWNER_PROMOTION_PLANS: PricingPlan[] = [
       "Instant WhatsApp & SMS Lead Delivery",
       "Verified Tenant Shield (Screened Inquiries)",
       "Priority Same-Day Moderation",
-      "Listing Performance Insights",
+      "Listing Performance Analytics",
     ],
     ctaText: "Choose Fast-Track",
   },
   {
-    id: "professional",
+    id: "owner-managed",
     name: "Assist Plus (Dedicated RM)",
     badge: "Full Service",
     priceMonthly: 999,
@@ -76,6 +76,112 @@ const OWNER_PROMOTION_PLANS: PricingPlan[] = [
       "0% Brokerage Guarantee on Closure",
     ],
     ctaText: "Choose Assist Plus",
+  },
+];
+
+const BUYER_ASSIST_PLANS: PricingPlan[] = [
+  {
+    id: "buyer-freedom",
+    name: "Buyer Freedom Pass",
+    priceMonthly: 499,
+    priceYearly: 299,
+    tagline: "Unlock 30 genuine seller direct contacts",
+    features: [
+      "30 Direct Verified Seller Contacts",
+      "Instant WhatsApp & Call Connect",
+      "Price Trend & Commute Analysis",
+      "Locality Price Comparison Metrics",
+      "Instant New Listing Alerts",
+    ],
+    ctaText: "Get Freedom Pass",
+  },
+  {
+    id: "buyer-assisted",
+    name: "Buyer Assist Expert",
+    badge: "Recommended",
+    priceMonthly: 999,
+    priceYearly: 699,
+    tagline: "Personal buying manager & visit coordination",
+    popular: true,
+    features: [
+      "Dedicated Purchase Relationship Manager",
+      "Site Visit Scheduling & Coordination",
+      "Basic Legal Title & EC Document Guidance",
+      "Seller Negotiation Support",
+      "Home Loan Pre-Approval Assistance",
+      "0% Brokerage on All Purchases",
+    ],
+    ctaText: "Choose Buyer Assist",
+  },
+  {
+    id: "buyer-elite",
+    name: "Buyer Elite Closing",
+    badge: "Comprehensive",
+    priceMonthly: 1999,
+    priceYearly: 1499,
+    tagline: "End-to-end legal check & negotiation support",
+    features: [
+      "Dedicated Senior Property Advisor",
+      "Comprehensive Legal Title Verification",
+      "Physical Property Inspection Support",
+      "Final Price Negotiation on Your Behalf",
+      "Sale Agreement Legal Drafting Support",
+      "Priority Registration Guidance",
+    ],
+    ctaText: "Choose Elite Closing",
+  },
+];
+
+const SELLER_PROMOTION_PLANS: PricingPlan[] = [
+  {
+    id: "seller-basic",
+    name: "Free Sale Listing",
+    priceMonthly: 0,
+    priceYearly: 0,
+    tagline: "List your residential / commercial property for free",
+    features: [
+      "1 Free Property Sale Listing",
+      "Direct Buyer Inquiries via Phone",
+      "Standard Platform Discovery",
+      "High-Resolution Photo Gallery",
+      "100% Zero Brokerage on Sale",
+    ],
+    ctaText: "List Property Free",
+  },
+  {
+    id: "seller-showcase",
+    name: "Fast-Track Sale Showcase",
+    badge: "Most Popular",
+    priceMonthly: 999,
+    priceYearly: 699,
+    tagline: "Top search placement to attract serious genuine buyers",
+    popular: true,
+    features: [
+      "Topmost Search & Category Priority",
+      "Exclusive 'Verified Seller' Badge",
+      "Instant High-Budget Buyer Notifications",
+      "Buyer Screened Inquiries (No Brokers)",
+      "Priority Listing Verification",
+      "Corridor Spotlight Placement",
+    ],
+    ctaText: "Boost My Sale",
+  },
+  {
+    id: "seller-managed",
+    name: "Seller Express Managed",
+    badge: "End-to-End",
+    priceMonthly: 2499,
+    priceYearly: 1799,
+    tagline: "Dedicated manager for calls, screening & visits",
+    features: [
+      "Dedicated Relationship Manager for Sale",
+      "Pre-Screening Buyer Financial Capability",
+      "Assisted Buyer Visit Coordination",
+      "Legal Sale Agreement Drafting Support",
+      "Documentation & Title Deed Advisory",
+      "0% Brokerage Guarantee on Final Sale",
+    ],
+    ctaText: "Choose Express Managed",
   },
 ];
 
@@ -257,7 +363,7 @@ export function PlansPage() {
         </div>
 
         {/* Content based on Active Persona */}
-        {role === "tenant" || role === "buyer" ? (
+        {role === "tenant" ? (
           <CustomerPlans />
         ) : (
           <div className="mx-auto max-w-5xl">
@@ -301,7 +407,12 @@ export function PlansPage() {
 
             {/* Pricing Cards Grid */}
             <div className="grid gap-6 md:grid-cols-3 items-stretch">
-              {OWNER_PROMOTION_PLANS.map((plan) => {
+              {(role === "buyer"
+                ? BUYER_ASSIST_PLANS
+                : role === "seller"
+                  ? SELLER_PROMOTION_PLANS
+                  : OWNER_PROMOTION_PLANS
+              ).map((plan) => {
                 const price = billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
 
                 return (
