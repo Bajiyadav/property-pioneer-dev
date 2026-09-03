@@ -1,3 +1,8 @@
+## v0.142.3 — 2026-09-03
+
+### Fixes
+- fix(security): isolate test resources and enforce clean spring config (e10932f)
+
 ## v0.142.2 — 2026-09-03
 
 ### Fixes
