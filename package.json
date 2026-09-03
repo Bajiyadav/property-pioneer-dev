@@ -31,7 +31,8 @@
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "rehearse:backup": "node scripts/rehearse-staging-backup-restore.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1124.0",
