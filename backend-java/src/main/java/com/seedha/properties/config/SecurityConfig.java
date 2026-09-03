@@ -43,7 +43,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public Health & Read Endpoints
                 .requestMatchers("/api/health", "/actuator/health").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v2/auth").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v2/auth", "/api/v2/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/properties").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/properties/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/stats/location").permitAll()

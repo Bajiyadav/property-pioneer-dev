@@ -41,6 +41,7 @@ public class AuthResponse {
     public boolean isOk() { return ok; }
     public void setOk(boolean ok) { this.ok = ok; }
     public String getToken() { return token; }
+    public String getAccessToken() { return token; }
     public void setToken(String token) { this.token = token; }
     public String getRefreshToken() { return refreshToken; }
     public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }

@@ -231,7 +231,7 @@ public class AuthService {
         return AuthResponse.success(null, null, null, currentUser.getId(), currentUser.getEmail(), currentUser.getFullName(), currentUser.getRole());
     }
 
-    private AuthResponse issueTokenPair(User user, UUID familyId, String deviceInfo) {
+    public AuthResponse issueTokenPair(User user, UUID familyId, String deviceInfo) {
         String accessToken = jwtTokenProvider.generateAccessToken(
                 user.getId(),
                 user.getEmail(),
