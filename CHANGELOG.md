@@ -1,3 +1,8 @@
+## v0.158.0 — 2026-09-03
+
+### Features
+- feat(payments): complete Razorpay promotion payments — verify, webhook, status (4e73b1d)
+
 ## v0.157.0 — 2026-09-03
 
 ### Features
