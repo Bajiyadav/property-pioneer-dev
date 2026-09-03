@@ -1,3 +1,8 @@
+## v0.144.0 — 2026-09-03
+
+### Features
+- feat(mobile): add camera photo/document capture and comprehensive owner listing validation (8a14ba9)
+
 ## v0.143.0 — 2026-09-03
 
 ### Features
