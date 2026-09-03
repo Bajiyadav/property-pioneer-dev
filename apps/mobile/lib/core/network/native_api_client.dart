@@ -71,6 +71,37 @@ class NativeApiClient {
     _authToken = null;
   }
 
+  /// Rotates the session using a stored refresh token (Java /api/v2/auth,
+  /// action=refresh). On success the new access token is captured and the new
+  /// refresh token is returned in the response for the caller to re-persist.
+  Future<Map<String, dynamic>> refreshSession(String refreshToken) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/auth'),
+      headers: _headers,
+      body: jsonEncode({'action': 'refresh', 'refresh_token': refreshToken}),
+    );
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200 && data['ok'] == true && data['token'] is String) {
+      _authToken = data['token'] as String;
+    }
+    return data;
+  }
+
+  /// Server-side logout: revokes the presented refresh token's session
+  /// (action=logout). Always clears the in-memory access token afterwards.
+  Future<Map<String, dynamic>> logoutServer(String refreshToken) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/v2/auth'),
+        headers: _headers,
+        body: jsonEncode({'action': 'logout', 'refresh_token': refreshToken}),
+      );
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } finally {
+      _authToken = null;
+    }
+  }
+
   // --- Seedha phone OTP (Java backend, /api/v2/auth/otp/*) ---
   //
   // These call the Seedha-owned OTP endpoints rather than Supabase Auth. They

@@ -51,6 +51,8 @@ seedha:
     # no-op runs and never claims delivery. To enable a real provider, add a
     # bean named "smsProvider" (a Twilio/MSG91/SNS implementation of SmsProvider)
     # and supply its credentials via the environment / secret manager — never here.
+    # 'none' (LoggingSmsProvider no-op) or 'twilio' (TwilioSmsProvider, needs
+    # TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER in the env).
     provider: ${SMS_PROVIDER:none}
   files:
     scan:
