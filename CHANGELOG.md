@@ -1,3 +1,11 @@
+## v0.142.0 — 2026-09-03
+
+### Features
+- feat(files): real S3 presigning, ClamAV malware pipeline, observability (f40c11e)
+
+### Fixes
+- fix(config): ensure staging profile fallback properties are aligned (810b1ca)
+
 ## v0.141.0 — 2026-09-03
 
 ### Features
