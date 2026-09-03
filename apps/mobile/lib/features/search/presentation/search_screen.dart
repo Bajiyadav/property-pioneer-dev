@@ -735,7 +735,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Payments
           Expanded(
             child: GestureDetector(
-              onTap: () => context.push('/rental-agreement'),
+              onTap: () => context.push('/payments'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
