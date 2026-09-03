@@ -26,23 +26,81 @@ class _Step5PhotosState extends ConsumerState<Step5Photos> {
     _imagePaths = List.from(data.images);
   }
 
-  Future<void> _pickImages() async {
+  Future<void> _pickFromGallery() async {
     setState(() => _isLoading = true);
     try {
       final uploadService = ref.read(propertyUploadServiceProvider);
       final newImages = await uploadService.pickImages();
-      setState(() {
-        _imagePaths.addAll(newImages);
-      });
+      if (newImages.isNotEmpty && mounted) {
+        setState(() {
+          _imagePaths.addAll(newImages);
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking images: $e')),
+          SnackBar(content: Text('Failed to pick photos: $e')),
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _captureFromCamera() async {
+    setState(() => _isLoading = true);
+    try {
+      final uploadService = ref.read(propertyUploadServiceProvider);
+      final newImage = await uploadService.captureImageFromCamera();
+      if (newImage != null && mounted) {
+        setState(() {
+          _imagePaths.add(newImage);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to capture photo: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showImageSourcePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined, color: Color(0xFF0F766E)),
+                title: const Text('Take Photo with Camera', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _captureFromCamera();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: Color(0xFF0F766E)),
+                title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickFromGallery();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _removeImage(int index) {
@@ -121,8 +179,8 @@ class _Step5PhotosState extends ConsumerState<Step5Photos> {
           const SizedBox(height: 16),
           
           OutlinedButton.icon(
-            onPressed: _isLoading ? null : _pickImages,
-            icon: const Icon(Icons.photo_camera_outlined),
+            onPressed: _isLoading ? null : _showImageSourcePicker,
+            icon: const Icon(Icons.add_a_photo_outlined),
             label: const Text('Add Photos'),
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
           ),

@@ -16,7 +16,8 @@ import '../../../services/supabase_service.dart';
 const Duration kKycUploadTimeout = Duration(seconds: 30);
 
 class KYCUploadScreen extends ConsumerStatefulWidget {
-  const KYCUploadScreen({super.key});
+  final SupabaseClient? client;
+  const KYCUploadScreen({super.key, this.client});
 
   @override
   ConsumerState<KYCUploadScreen> createState() => _KYCUploadScreenState();
@@ -34,7 +35,8 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  String get currentUserId => SupabaseService.client.auth.currentUser?.id ?? '';
+  SupabaseClient get _client => widget.client ?? SupabaseService.client;
+  String get currentUserId => _client.auth.currentUser?.id ?? '';
 
   @override
   void initState() {
@@ -43,12 +45,15 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
   }
 
   Future<void> _loadKYCStatus() async {
-    if (currentUserId.isEmpty) return;
+    if (currentUserId.isEmpty) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
 
     if (mounted) setState(() => _loadFailed = false);
 
     try {
-      final res = await SupabaseService.client
+      final res = await _client
           .from('kyc_documents')
           .select()
           .eq('owner_id', currentUserId)
@@ -68,19 +73,72 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImageSource(ImageSource source) async {
     try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
       if (pickedFile != null) {
-        setState(() => _selectedImage = File(pickedFile.path));
+        final file = File(pickedFile.path);
+        final length = await file.length();
+        if (length > 10 * 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Document photo exceeds 10MB limit. Please choose a smaller photo.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+        setState(() => _selectedImage = file);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
+          SnackBar(content: Text('Failed to select document: $e')),
         );
       }
     }
+  }
+
+  void _showDocumentSourcePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined, color: AppTheme.primaryColor),
+                title: const Text('Capture Document with Camera', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImageSource(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: AppTheme.primaryColor),
+                title: const Text('Select from Photo Library', style: TextStyle(fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImageSource(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _submitVerification() async {
@@ -101,7 +159,7 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
       // A document photo on a slow connection legitimately takes longer than an
       // ordinary query, so it gets the same 30s allowance the listing wizard
       // uses. Unbounded, this could hold the spinner indefinitely.
-      await SupabaseService.client.storage
+      await _client.storage
           .from('properties')
           .upload(
             filePath,
@@ -110,9 +168,9 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
           )
           .timeout(kKycUploadTimeout);
 
-      final publicUrl = SupabaseService.client.storage.from('properties').getPublicUrl(filePath);
+      final publicUrl = _client.storage.from('properties').getPublicUrl(filePath);
 
-      await SupabaseService.client.from('kyc_documents').insert({
+      await _client.from('kyc_documents').insert({
         'owner_id': currentUserId,
         'document_type': _selectedDocType,
         'file_path': publicUrl,
@@ -336,7 +394,7 @@ class _KYCUploadScreenState extends ConsumerState<KYCUploadScreen> {
                         ),
                         const SizedBox(height: 20),
                         InkWell(
-                          onTap: _pickImage,
+                          onTap: _showDocumentSourcePicker,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 24),

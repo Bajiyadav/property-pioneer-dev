@@ -90,6 +90,16 @@ class PropertyUploadService {
     return images.map((img) => img.path).toList();
   }
 
+  Future<String?> captureImageFromCamera() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1920,
+      maxHeight: 1080,
+      imageQuality: 85,
+    );
+    return image?.path;
+  }
+
   /// Rejects a file before upload. Returns null when the file is acceptable.
   String? validateImage(File file, int lengthBytes) {
     final ext = file.path.split('.').last.toLowerCase();
