@@ -1,3 +1,14 @@
+## v0.141.0 — 2026-09-03
+
+### Features
+- feat(security): implement Step 6 industry-level file and document security (web + mobile) (f429ada)
+
+### Fixes
+- fix(config): align key rotation properties in application.yml (b6cf5f7)
+
+### Documentation
+- docs(rules): persist learned pre-push verification and safe repository query guardrails (2717943)
+
 ## v0.140.0 — 2026-09-03
 
 ### Features
