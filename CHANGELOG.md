@@ -1,3 +1,9 @@
+## v0.155.0 — 2026-09-03
+
+### Features
+- feat(mobile): add Seedha Services screen and State-City selector (26f4c36)
+- feat(mobile): make map tiles provider-configurable with OSM attribution (fe30482)
+
 ## v0.154.1 — 2026-09-03
 
 ### Fixes
