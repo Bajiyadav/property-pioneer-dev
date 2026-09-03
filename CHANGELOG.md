@@ -1,3 +1,8 @@
+## v0.132.0 — 2026-09-03
+
+### Features
+- feat(branding): add slow forward floating micro-animation to Seedha logo across web and mobile (b3dd105)
+
 ## v0.131.0 — 2026-09-03
 
 ### Features
