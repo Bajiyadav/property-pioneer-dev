@@ -131,9 +131,13 @@ void main() {
     expect(find.text('Looking for Tenants / Buyers ?'), findsOneWidget);
     expect(find.text('Post FREE Property Ad'), findsOneWidget);
 
-    // Home Services
-    expect(find.text('Home Services'), findsOneWidget);
-    expect(find.text('Packers\n& Movers'), findsOneWidget);
-    expect(find.text('Home\nCleaning'), findsOneWidget);
+    // Home Services removed as per user design instruction
+    expect(find.text('Home Services'), findsNothing);
+
+    // Filter Controls
+    expect(find.text('Price'), findsOneWidget);
+    expect(find.text('BHK'), findsOneWidget);
+    expect(find.text('Property Type'), findsOneWidget);
+    expect(find.byIcon(Icons.tune), findsOneWidget);
   });
 }

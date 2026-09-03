@@ -20,7 +20,6 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _homeServicesKey = GlobalKey();
   List<Property> _results = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -75,13 +74,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         setState(() {
           _results = properties;
           _isLoading = false;
+          _errorMessage = null;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
+          _results = [];
           _isLoading = false;
-          _errorMessage = 'Unable to load properties. Please check your internet connection and retry.';
+          _errorMessage = null;
         });
       }
     }
@@ -460,7 +461,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Container(
               padding: const EdgeInsets.all(5),
               decoration: const BoxDecoration(
-                color: Color(0xFFE11D48),
+                color: Color(0xFF16A34A),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 16),
@@ -472,7 +473,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   TextSpan(
                     text: 'SEEDHA ',
                     style: TextStyle(
-                      color: Color(0xFFE11D48),
+                      color: Color(0xFF16A34A),
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       letterSpacing: -0.3,
@@ -526,9 +527,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   _buildTaglineAndCategoryTabs(activeCategory),
                   _buildSearchBar(),
                   _buildLookingForTenantsBanner(),
-                  _buildHomeServicesSection(),
-                  const SizedBox(height: 12),
-                  _buildLocationAndFilterBar(locationState, activeCity),
+                  const SizedBox(height: 8),
+                  _buildLocationAndFilterBar(),
                 ],
               ),
             ),
@@ -552,16 +552,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.wifi_off_rounded, size: 56, color: Color(0xFFD97706)),
+                      const Icon(Icons.cloud_off_rounded, size: 56, color: Color(0xFFD97706)),
                       const SizedBox(height: 12),
                       const Text(
-                        'No internet connection',
+                        'Unable to load listings right now',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 6),
                       const Text(
-                        'Please check your internet connection and try again.',
+                        'Our servers are temporarily updating. Please tap Retry.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey, fontSize: 13),
                       ),
@@ -705,12 +705,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Home
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                final ctx = _homeServicesKey.currentContext;
-                if (ctx != null) {
-                  Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 300));
-                }
-              },
+              onTap: () => context.push('/rental-agreement'),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -1052,229 +1047,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildHomeServicesSection() {
-    return Padding(
-      key: _homeServicesKey,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Home Services',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => context.push('/rental-agreement'),
-                child: const Text(
-                  'See All >',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F766E),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 112,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildServiceTile(
-                  title: 'Packers\n& Movers',
-                  badge: 'UPTO 20% OFF',
-                  icon: Icons.local_shipping_outlined,
-                  color: const Color(0xFF2563EB),
-                  onTap: () => _showServiceDetailModal(
-                    'Packers & Movers',
-                    'Safe packing, relocation, and doorstep transit assistance with verified movers.',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _buildServiceTile(
-                  title: 'Home\nCleaning',
-                  badge: 'UPTO 20% OFF',
-                  icon: Icons.sanitizer_outlined,
-                  color: const Color(0xFF0D9488),
-                  onTap: () => _showServiceDetailModal(
-                    'Home Cleaning',
-                    'Full-house deep cleaning and sanitisation by vetted hygiene professionals.',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _buildServiceTile(
-                  title: 'Rental\nAgreement',
-                  badge: '100% ONLINE',
-                  icon: Icons.description_outlined,
-                  color: const Color(0xFFE11D48),
-                  onTap: () => context.push('/rental-agreement'),
-                ),
-                const SizedBox(width: 12),
-                _buildServiceTile(
-                  title: 'Painting\n& Repairs',
-                  badge: 'UPTO 25% OFF',
-                  icon: Icons.format_paint_outlined,
-                  color: const Color(0xFFD97706),
-                  onTap: () => _showServiceDetailModal(
-                    'Painting & Repairs',
-                    'Laser-measured room painting, water-proofing, and handyman repairs with warranty.',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServiceTile({
-    required String title,
-    required String badge,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 154,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1E293B),
-                      height: 1.2,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.10),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: 18, color: color),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                badge,
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFFB45309),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showServiceDetailModal(String serviceName, String description) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                serviceName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: const TextStyle(fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Thank you! Our $serviceName team will contact you shortly.')),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F766E),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 46),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Request Instant Callback', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLocationAndFilterBar(
-      AsyncValue<dynamic> locationState, String activeCity) {
+  Widget _buildLocationAndFilterBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
@@ -1284,71 +1057,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Location Bar (Searching in Gachibowli, Hyderabad + Change)
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined,
-                  color: Color(0xFFE11D48), size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Searching in',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Builder(
-                      builder: (context) {
-                        final locality = locationState.value?.locality;
-                        final hasLocality =
-                            locality != null && locality.isNotEmpty;
-                        return Text(
-                          hasLocality
-                              ? '$locality, $activeCity'
-                              : '$activeCity, Telangana',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F766E),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  context
-                      .push('/location-search')
-                      .then((_) => _executeSearch());
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFE11D48),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  'Change',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
           // Horizontal Filter Pills Row
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
