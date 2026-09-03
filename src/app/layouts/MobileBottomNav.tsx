@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Search, PlusCircle, User, ShieldCheck } from "lucide-react";
+import { Home, PlusCircle, User, ShieldCheck, CreditCard } from "lucide-react";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function MobileBottomNav() {
@@ -32,18 +32,17 @@ export function MobileBottomNav() {
           <span className="text-[10px] mt-0.5 font-medium">Home</span>
         </Link>
 
-        {/* 2. Properties / Search */}
+        {/* 2. Payments */}
         <Link
-          to="/properties"
-          search={{ q: "", city: "", listing: "rent", minPrice: 0, maxPrice: 0, beds: 0 }}
+          to="/plans"
           className={`flex flex-col items-center justify-center py-1 transition active:scale-95 ${
-            isActive("/properties")
+            isActive("/plans")
               ? "text-emerald-600 font-bold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          <Search className="h-5 w-5" />
-          <span className="text-[10px] mt-0.5 font-medium">Properties</span>
+          <CreditCard className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5 font-medium">Payments</span>
         </Link>
 
         {/* 3. Post Property (Featured Plus Action) */}
