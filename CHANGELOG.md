@@ -1,3 +1,8 @@
+## v0.153.1 — 2026-09-03
+
+### Fixes
+- fix(mobile): green SEEDHA brand, remove home services & location line, graceful query error handling (8989011)
+
 ## v0.153.0 — 2026-09-03
 
 ### Features
