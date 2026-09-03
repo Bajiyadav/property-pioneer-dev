@@ -1,3 +1,8 @@
+## v0.142.1 — 2026-09-03
+
+### Fixes
+- fix(notifications): show real notifications, not hardcoded samples (d4a396d)
+
 ## v0.142.0 — 2026-09-03
 
 ### Features
