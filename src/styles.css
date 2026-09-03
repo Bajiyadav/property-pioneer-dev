@@ -248,6 +248,20 @@
   animation: float 4s ease-in-out infinite;
 }
 
+@keyframes float-forward {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) translateX(3px) scale(1.03);
+  }
+}
+
+.animate-float-forward {
+  animation: float-forward 3.5s ease-in-out infinite;
+}
+
 @keyframes marquee {
   0% {
     transform: translate3d(0, 0, 0);

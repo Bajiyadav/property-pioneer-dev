@@ -18,7 +18,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with SingleTickerProviderStateMixin {
   static const List<String> _popularCities = [
     'Bangalore',
     'Hyderabad',
@@ -29,11 +30,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ];
 
   bool _isLocating = false;
+  late final AnimationController _floatController;
+  late final Animation<Offset> _floatAnimation;
 
   @override
   void initState() {
     super.initState();
+    _floatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3200),
+    )..repeat(reverse: true);
+
+    _floatAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0.04, -0.06),
+    ).animate(CurvedAnimation(
+      parent: _floatController,
+      curve: Curves.easeInOut,
+    ));
+
     _autoDetectLocation();
+  }
+
+  @override
+  void dispose() {
+    _floatController.dispose();
+    super.dispose();
   }
 
   Future<void> _autoDetectLocation() async {
@@ -211,35 +233,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/logo.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: const Color(0xFF0F766E),
-                    alignment: Alignment.center,
-                    child: const Text('SP',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13)),
+            SlideTransition(
+              position: _floatAnimation,
+              child: Container(
+                width: 36,
+                height: 36,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/logo.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: const Color(0xFF0F766E),
+                      alignment: Alignment.center,
+                      child: const Text('SP',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13)),
+                    ),
                   ),
                 ),
               ),

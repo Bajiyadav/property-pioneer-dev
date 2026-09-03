@@ -7,7 +7,7 @@ import logoImg from "@/assets/logo.png";
 export function SeedhaLogoIcon({ className = "h-8 w-8" }: { className?: string }) {
   return (
     <div
-      className={`relative shrink-0 flex items-center justify-center rounded-xl bg-[#0a1220] p-0.5 shadow-xs border border-amber-500/30 overflow-hidden ${className}`}
+      className={`relative shrink-0 flex items-center justify-center rounded-xl bg-[#0a1220] p-0.5 shadow-xs border border-amber-500/30 overflow-hidden animate-float-forward transition-transform duration-300 hover:scale-110 ${className}`}
     >
       <img
         src={logoImg}
