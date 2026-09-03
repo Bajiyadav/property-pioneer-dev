@@ -7,16 +7,27 @@ public class AuthResponse {
 
     private boolean ok;
     private String token;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
+    @JsonProperty("expires_in")
+    private Long expiresIn;
+
     private UserDto user;
     private String error;
 
     public AuthResponse() {}
 
-    public static AuthResponse success(String token, UUID id, String email, String fullName, String role) {
+    public static AuthResponse success(String token, String refreshToken, Long expiresIn, UUID id, String email, String fullName, String role) {
         AuthResponse resp = new AuthResponse();
         resp.setOk(true);
         resp.setToken(token);
-        resp.setUser(new UserDto(id, email, fullName, role));
+        resp.setRefreshToken(refreshToken);
+        resp.setExpiresIn(expiresIn);
+        if (id != null) {
+            resp.setUser(new UserDto(id, email, fullName, role));
+        }
         return resp;
     }
 
@@ -31,6 +42,10 @@ public class AuthResponse {
     public void setOk(boolean ok) { this.ok = ok; }
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+    public Long getExpiresIn() { return expiresIn; }
+    public void setExpiresIn(Long expiresIn) { this.expiresIn = expiresIn; }
     public UserDto getUser() { return user; }
     public void setUser(UserDto user) { this.user = user; }
     public String getError() { return error; }

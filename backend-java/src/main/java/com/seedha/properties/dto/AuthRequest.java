@@ -18,6 +18,12 @@ public class AuthRequest {
     private String phone;
     private String role;
 
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+
+    @JsonProperty("device_info")
+    private String deviceInfo;
+
     public AuthRequest() {}
 
     public String getAction() { return action; }
@@ -32,4 +38,8 @@ public class AuthRequest {
     public void setPhone(String phone) { this.phone = phone; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
+    public String getDeviceInfo() { return deviceInfo; }
+    public void setDeviceInfo(String deviceInfo) { this.deviceInfo = deviceInfo; }
 }
