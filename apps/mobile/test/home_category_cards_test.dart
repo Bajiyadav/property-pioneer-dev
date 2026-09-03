@@ -163,24 +163,24 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Essential Services'), findsOneWidget);
-      expect(find.text('Rental Agreement'), findsOneWidget);
-      expect(find.text('Schedule Visits'), findsOneWidget);
-      expect(find.text('Home Loans'), findsOneWidget);
-      expect(find.text('Seedha AI Advisor'), findsOneWidget);
+      expect(find.text('Rental Agreement'), findsWidgets);
+      expect(find.text('Schedule Visits'), findsWidgets);
+      expect(find.text('Home Loans'), findsWidgets);
+      expect(find.text('Seedha AI Advisor'), findsWidgets);
 
-      await tester.tap(find.text('Rental Agreement'));
+      await tester.tap(find.text('Rental Agreement').first);
       await tester.pump(const Duration(milliseconds: 50));
       expect(agreementTapped, isTrue);
 
-      await tester.tap(find.text('Schedule Visits'));
+      await tester.tap(find.text('Schedule Visits').first);
       await tester.pump(const Duration(milliseconds: 50));
       expect(visitsTapped, isTrue);
 
-      await tester.tap(find.text('Home Loans'));
+      await tester.tap(find.text('Home Loans').first);
       await tester.pump(const Duration(milliseconds: 50));
       expect(loansTapped, isTrue);
 
-      await tester.tap(find.text('Seedha AI Advisor'));
+      await tester.tap(find.text('Seedha AI Advisor').first);
       await tester.pump(const Duration(milliseconds: 50));
       expect(aiTapped, isTrue);
     });

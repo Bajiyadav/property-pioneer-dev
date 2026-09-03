@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 
@@ -669,66 +670,81 @@ class AnimatedHomeServicesSection extends StatefulWidget {
 
 class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSection>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _servicesFloatController;
-  late final Animation<double> _floatTranslateX1;
-  late final Animation<double> _floatTranslateY1;
-  late final Animation<double> _floatScale1;
-  late final Animation<double> _floatTranslateX2;
-  late final Animation<double> _floatTranslateY2;
-  late final Animation<double> _floatScale2;
+  late final ScrollController _scrollController;
+  Timer? _autoScrollTimer;
+  Timer? _resumeTimer;
+  bool _isUserInteracting = false;
 
   @override
   void initState() {
     super.initState();
-    _servicesFloatController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
+    _scrollController = ScrollController();
+    _startAutoScroll();
+  }
 
-    // Moves the cards forward from their place and comes back
-    _floatTranslateX1 = Tween<double>(begin: 0.0, end: 6.0).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
-    _floatTranslateY1 = Tween<double>(begin: 0.0, end: -4.0).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
-    _floatScale1 = Tween<double>(begin: 0.98, end: 1.04).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+      if (!mounted || !_scrollController.hasClients || _isUserInteracting) return;
 
-    _floatTranslateX2 = Tween<double>(begin: 6.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
-    _floatTranslateY2 = Tween<double>(begin: -4.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
-    _floatScale2 = Tween<double>(begin: 1.04, end: 0.98).animate(
-      CurvedAnimation(
-        parent: _servicesFloatController,
-        curve: Curves.easeInOutCubic,
-      ),
-    );
+      final max = _scrollController.position.maxScrollExtent;
+      final current = _scrollController.offset;
+
+      if (current >= max - 1) {
+        _scrollController.jumpTo(0.0);
+      } else {
+        _scrollController.jumpTo(current + 1.2);
+      }
+    });
   }
 
   @override
   void dispose() {
-    _servicesFloatController.dispose();
+    _autoScrollTimer?.cancel();
+    _resumeTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  List<Widget> _buildServiceCards() {
+    return [
+      _ServiceCardItem(
+        title: 'Rental Agreement',
+        subtitle: 'E-Stamp & Biometrics',
+        icon: Icons.description_outlined,
+        badge: 'LEGAL DRAFT',
+        color: const Color(0xFF4338CA),
+        onTap: widget.onRentalAgreementTap,
+      ),
+      const SizedBox(width: 10),
+      _ServiceCardItem(
+        title: 'Schedule Visits',
+        subtitle: 'Direct Site Slots',
+        icon: Icons.calendar_month_outlined,
+        badge: 'VERIFIED',
+        color: const Color(0xFF0D9488),
+        onTap: widget.onVisitsTap,
+      ),
+      const SizedBox(width: 10),
+      _ServiceCardItem(
+        title: 'Home Loans',
+        subtitle: 'Lowest Interest Rates',
+        icon: Icons.account_balance_outlined,
+        badge: 'PRE-APPROVED',
+        color: const Color(0xFFD97706),
+        onTap: widget.onHomeLoansTap,
+      ),
+      const SizedBox(width: 10),
+      _ServiceCardItem(
+        title: 'Seedha AI Advisor',
+        subtitle: '24/7 PropTech Guidance',
+        icon: Icons.auto_awesome_rounded,
+        badge: 'GROUNDED',
+        color: const Color(0xFF2563EB),
+        onTap: widget.onAiAssistantTap,
+      ),
+      const SizedBox(width: 10),
+    ];
   }
 
   @override
@@ -789,78 +805,32 @@ class _AnimatedHomeServicesSectionState extends State<AnimatedHomeServicesSectio
             ),
           ),
           const SizedBox(height: 12),
-          AnimatedBuilder(
-            animation: _servicesFloatController,
-            builder: (context, child) {
-              return SizedBox(
-                height: 124,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  children: [
-                    Transform.translate(
-                      offset: Offset(_floatTranslateX1.value, _floatTranslateY1.value),
-                      child: Transform.scale(
-                        scale: _floatScale1.value,
-                        child: _ServiceCardItem(
-                          title: 'Rental Agreement',
-                          subtitle: 'E-Stamp & Biometrics',
-                          icon: Icons.description_outlined,
-                          badge: 'LEGAL DRAFT',
-                          color: const Color(0xFF4338CA),
-                          onTap: widget.onRentalAgreementTap,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Transform.translate(
-                      offset: Offset(_floatTranslateX2.value, _floatTranslateY2.value),
-                      child: Transform.scale(
-                        scale: _floatScale2.value,
-                        child: _ServiceCardItem(
-                          title: 'Schedule Visits',
-                          subtitle: 'Direct Site Slots',
-                          icon: Icons.calendar_month_outlined,
-                          badge: 'VERIFIED',
-                          color: const Color(0xFF0D9488),
-                          onTap: widget.onVisitsTap,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Transform.translate(
-                      offset: Offset(_floatTranslateX1.value, _floatTranslateY1.value),
-                      child: Transform.scale(
-                        scale: _floatScale1.value,
-                        child: _ServiceCardItem(
-                          title: 'Home Loans',
-                          subtitle: 'Lowest Interest Rates',
-                          icon: Icons.account_balance_outlined,
-                          badge: 'PRE-APPROVED',
-                          color: const Color(0xFFD97706),
-                          onTap: widget.onHomeLoansTap,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Transform.translate(
-                      offset: Offset(_floatTranslateX2.value, _floatTranslateY2.value),
-                      child: Transform.scale(
-                        scale: _floatScale2.value,
-                        child: _ServiceCardItem(
-                          title: 'Seedha AI Advisor',
-                          subtitle: '24/7 PropTech Guidance',
-                          icon: Icons.auto_awesome_rounded,
-                          badge: 'GROUNDED',
-                          color: const Color(0xFF2563EB),
-                          onTap: widget.onAiAssistantTap,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+          NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              if (notification.direction != ScrollDirection.idle) {
+                _resumeTimer?.cancel();
+                _isUserInteracting = true;
+              } else {
+                _resumeTimer?.cancel();
+                _resumeTimer = Timer(const Duration(milliseconds: 1500), () {
+                  if (mounted) _isUserInteracting = false;
+                });
+              }
+              return false;
             },
+            child: SizedBox(
+              height: 124,
+              child: ListView(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  ..._buildServiceCards(),
+                  ..._buildServiceCards(),
+                  ..._buildServiceCards(),
+                ],
+              ),
+            ),
           ),
         ],
       ),
