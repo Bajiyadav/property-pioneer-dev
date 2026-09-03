@@ -16,6 +16,7 @@ class LocationPickerCard extends StatelessWidget {
     required this.onStateChanged,
     required this.onCityChanged,
     this.onDetectLocation,
+    this.onExploreDeals,
   });
 
   final String? selectedState;
@@ -25,6 +26,9 @@ class LocationPickerCard extends StatelessWidget {
 
   /// Optional "use my location" affordance behind the crosshair.
   final VoidCallback? onDetectLocation;
+
+  /// Optional explore button when location is selected.
+  final VoidCallback? onExploreDeals;
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +104,29 @@ class LocationPickerCard extends StatelessWidget {
             // without one, and an enabled-but-empty menu reads as broken.
             onChanged: selectedState == null ? null : onCityChanged,
           ),
+          if (selectedCity != null && onExploreDeals != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onExploreDeals,
+                icon: const Icon(Icons.explore_outlined, size: 18),
+                label: Text(
+                  'Explore $selectedCity Deals',
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

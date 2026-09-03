@@ -241,16 +241,14 @@ class PropertyCardWidget extends StatelessWidget {
                       const SizedBox(height: 8),
 
                       // Specs Row (Beds, Baths, Sqft)
-                      Row(
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 4,
                         children: [
-                          if (property.bedrooms > 0) ...[
+                          if (property.bedrooms > 0)
                             _specChip(Icons.king_bed_outlined, "${property.bedrooms} Beds"),
-                            const SizedBox(width: 14),
-                          ],
-                          if (property.bathrooms > 0) ...[
+                          if (property.bathrooms > 0)
                             _specChip(Icons.shower_outlined, "${property.bathrooms} Baths"),
-                            const SizedBox(width: 14),
-                          ],
                           if (property.areaSqft > 0)
                             _specChip(Icons.square_foot_outlined, "${property.areaSqft} sqft"),
                         ],

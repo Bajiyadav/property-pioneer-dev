@@ -347,6 +347,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onStateChanged: _onStateChanged,
                   onCityChanged: _onCityChanged,
                   onDetectLocation: _isLocating ? null : _onUseCurrentLocation,
+                  onExploreDeals: () {
+                    if (_selectedCity != null && _selectedState != null) {
+                      _onCategorySelected(PropertyCategory.rent);
+                    }
+                  },
                 ),
               ),
 

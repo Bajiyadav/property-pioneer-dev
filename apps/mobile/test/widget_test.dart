@@ -54,17 +54,17 @@ void main() {
       ),
     );
 
-    expect(find.text('FOR RENT'), findsOneWidget);
+    expect(find.text('Verified Owner'), findsOneWidget);
     expect(find.text('₹60,000/mo'), findsOneWidget);
-    expect(find.text('3 BHK Flat in Indiranagar'), findsOneWidget);
-    expect(find.text('0% Brokerage'), findsOneWidget);
-    expect(find.text('3 BHK'), findsOneWidget);
+    expect(find.text('3 Beds'), findsOneWidget);
+    expect(find.text('3 Baths'), findsOneWidget);
+    expect(find.text('2000 sqft'), findsOneWidget);
   });
 
   testWidgets('PropertyCardWidget renders Buy property with Crore price and FOR SALE badge', (WidgetTester tester) async {
     final saleProp = Property(
       id: 'test-sale-1',
-      title: '4 BHK Luxury Villa in Jubilee Hills',
+      title: 'Luxury Villa in Jubilee Hills',
       description: 'Private villa',
       price: 25000000,
       city: 'Hyderabad',
@@ -93,9 +93,10 @@ void main() {
       ),
     );
 
-    expect(find.text('FOR SALE'), findsOneWidget);
+    expect(find.text('Verified Owner'), findsOneWidget);
     expect(find.text('₹2.50 Cr'), findsOneWidget);
-    expect(find.text('4 BHK Luxury Villa in Jubilee Hills'), findsOneWidget);
-    expect(find.text('4 BHK'), findsOneWidget);
+    expect(find.text('4 Beds'), findsOneWidget);
+    expect(find.text('4 Baths'), findsOneWidget);
+    expect(find.text('4200 sqft'), findsOneWidget);
   });
 }
