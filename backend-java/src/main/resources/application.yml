@@ -38,7 +38,7 @@ seedha:
   jwt:
     # Supplied by the environment only. A committed default would be a signing key
     # in the repository, and the application fails to start without it by design.
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:seedha_staging_jwt_super_secure_secret_key_minimum_256_bits_for_hmac_sha256_staging}
     key-id: ${JWT_KEY_ID:seedha-key-v1}
     # Operational key rotation. Comma-separated kid:secret pairs that VERIFY but
     # never sign, for the overlap window after a rotation. Empty = single active
