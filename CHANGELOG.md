@@ -1,3 +1,8 @@
+## v0.151.0 — 2026-09-03
+
+### Features
+- feat(mobile): add continuous forward auto-scroll conveyor to essential services (6c9aabf)
+
 ## v0.150.0 — 2026-09-03
 
 ### Features
