@@ -1,3 +1,8 @@
+## v0.163.1 — 2026-09-03
+
+### Fixes
+- fix(auth): seed QA test users and add native auth fallback in password form (6260ad7)
+
 ## v0.163.0 — 2026-09-03
 
 ### Features
