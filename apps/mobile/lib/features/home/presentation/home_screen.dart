@@ -141,66 +141,79 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   topRight: Radius.circular(24),
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Select Location to Explore Properties',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Direct-owner listings are strictly location-scoped for genuine results.',
-                    style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      await _onUseCurrentLocation(navigateToSearch: true);
-                    },
-                    icon: const Icon(Icons.my_location_rounded, size: 18),
-                    label: const Text('Use Current Location (GPS)'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F766E),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 46),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Select Location to Explore Properties',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
                       ),
-                      elevation: 0,
-                    ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Direct-owner listings are strictly location-scoped for genuine results.',
+                        style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          await _onUseCurrentLocation(navigateToSearch: true);
+                        },
+                        icon: const Icon(Icons.my_location_rounded, size: 18),
+                        label: const Text('Use Current Location (GPS)'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F766E),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 46),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      LocationPickerCard(
+                        selectedState: _selectedState,
+                        selectedCity: _selectedCity,
+                        onStateChanged: (s) {
+                          _onStateChanged(s);
+                          setModalState(() {});
+                        },
+                        onCityChanged: (c) {
+                          _onCityChanged(c);
+                          Navigator.pop(ctx);
+                        },
+                        onExploreDeals: _selectedCity != null
+                            ? () {
+                                Navigator.pop(ctx);
+                                _onCitySelected(_selectedCity!);
+                              }
+                            : null,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  LocationPickerCard(
-                    selectedState: _selectedState,
-                    selectedCity: _selectedCity,
-                    onStateChanged: (s) {
-                      _onStateChanged(s);
-                      setModalState(() {});
-                    },
-                    onCityChanged: (c) {
-                      _onCityChanged(c);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                ],
+                ),
               ),
             );
           },

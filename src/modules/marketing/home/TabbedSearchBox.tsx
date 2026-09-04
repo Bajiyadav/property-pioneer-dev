@@ -207,8 +207,27 @@ export function TabbedSearchBox({
         </button>
       </form>
 
+      {/* ── State selected: Fast 1-Tap Cities in State ── */}
+      {selectedState && !selectedCity && filteredCities.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-2 px-2 animate-in fade-in">
+          <span className="text-xs font-extrabold text-amber-300 uppercase tracking-wide flex items-center gap-1 drop-shadow-sm">
+            📍 Next: Tap your city in {selectedState}:
+          </span>
+          {filteredCities.map((c) => (
+            <button
+              key={c.slug}
+              type="button"
+              onClick={() => onCityChange(c.name)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white text-xs font-bold shadow-md border border-emerald-300/60 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <span>{c.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* ── Fast 1-Tap Popular Cities Bar ── */}
-      {!locationReady && (
+      {!locationReady && !selectedState && (
         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 px-1">
           <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider mr-1">
             ⚡ Quick Pick:

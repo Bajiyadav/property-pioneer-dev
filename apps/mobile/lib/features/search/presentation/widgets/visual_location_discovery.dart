@@ -25,12 +25,19 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
   String? _selectedCity;
   bool _isDetectingGps = false;
   String? _gpsMessage;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _selectedState = widget.initialState;
     _selectedCity = widget.initialCity;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleUseGps() async {
@@ -127,6 +134,16 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
       _selectedState = state;
       _selectedCity = null;
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          380.0,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   void _onCityTap(String city) {
@@ -140,6 +157,7 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
     return Container(
       color: Colors.white,
       child: ListView(
+        controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
           // Direct Owner Marketplace Badge
@@ -357,6 +375,34 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
             },
           ),
           const SizedBox(height: 24),
+
+          if (_selectedState != null) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF86EFAC)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.arrow_circle_down_rounded, size: 22, color: Color(0xFF16A34A)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '$_selectedState selected! Tap your city below to continue:',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF15803D),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Step 2: Choose City
           Row(
