@@ -1,7 +1,20 @@
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
 
-const connectionString = "postgresql://neondb_owner:npg_5HcF2rMSXTaE@ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require";
+// STRICT SAFETY GUARD: QA seed scripts MUST NEVER run against production!
+if (process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production') {
+  console.error("❌ FATAL: QA user seeding is strictly forbidden in PRODUCTION!");
+  process.exit(1);
+}
+
+const connectionString = process.env.STAGING_DATABASE_URL ||
+  "postgresql://neondb_owner:npg_5HcF2rMSXTaE@ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+// Additional safeguard: verify database host is staging / neon / localhost
+if (!connectionString.includes("neon.tech") && !connectionString.includes("localhost") && !connectionString.includes("127.0.0.1") && !connectionString.includes("staging")) {
+  console.error("❌ FATAL: QA seed script may ONLY run against staging (neon.tech) or localhost!");
+  process.exit(1);
+}
 
 const QA_USERS = [
   {

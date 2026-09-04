@@ -59,6 +59,21 @@ function AuthPage() {
       if (data.session) {
         const target = redirect ? safeRedirect(redirect) : null;
         window.location.href = target || "/dashboard";
+        return;
+      }
+      if (typeof window !== "undefined") {
+        const nativeToken = localStorage.getItem("seedha_token");
+        const savedUser = localStorage.getItem("seedha_user");
+        if (nativeToken && savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            const target = redirect ? safeRedirect(redirect) : null;
+            const dest = target || `${getDashboardRoute(user.role || "customer")}?tab=overview`;
+            window.location.href = dest;
+          } catch {
+            // Bad JSON
+          }
+        }
       }
     });
   }, [redirect]);

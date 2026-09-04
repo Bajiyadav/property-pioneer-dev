@@ -1,6 +1,17 @@
 import postgres from 'postgres';
 
-const connectionString = "postgresql://neondb_owner:npg_5HcF2rMSXTaE@ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require";
+if (process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production') {
+  console.error("❌ FATAL: Profile sync script is strictly forbidden in PRODUCTION!");
+  process.exit(1);
+}
+
+const connectionString = process.env.STAGING_DATABASE_URL ||
+  "postgresql://neondb_owner:npg_5HcF2rMSXTaE@ep-odd-term-aege7qm2-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
+if (!connectionString.includes("neon.tech") && !connectionString.includes("localhost") && !connectionString.includes("staging")) {
+  console.error("❌ FATAL: Script may ONLY run against staging (neon.tech) or localhost!");
+  process.exit(1);
+}
 
 async function syncProfiles() {
   const sql = postgres(connectionString);

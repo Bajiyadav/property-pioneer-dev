@@ -10,6 +10,7 @@ import {
   type ResolvedSession,
 } from "@/modules/authentication/services/session";
 import { notifyLoginSecurityEvent } from "@/lib/notificationService";
+import { isUserRole, type UserRole } from "@/config/roles";
 
 export type AuthStatus = "loading" | "authenticated" | "guest";
 
@@ -23,13 +24,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * Keys purged on sign-out.
- *
- * `up_demo_user_role` is a LEGACY key written by a removed client-side role
- * switcher. It no longer has a writer anywhere in the codebase, but browsers
- * that loaded an older build still carry it, so sign-out purges it to leave no
- * client-writable role state behind. Never read it — it is not an authority.
  */
-const LEGACY_AUTH_STORAGE_KEYS = ["up_demo_user_role", "supabase.auth.token"];
+const LEGACY_AUTH_STORAGE_KEYS = [
+  "up_demo_user_role",
+  "supabase.auth.token",
+  "seedha_token",
+  "seedha_user",
+];
 
 /** Marks a login as already notified, so a reload never re-sends the email. */
 const LOGIN_NOTIFIED_PREFIX = "up_login_notified:";
@@ -202,18 +203,108 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const checkNativeSession = useCallback(async (): Promise<boolean> => {
+    if (typeof window === "undefined") return false;
+    const nativeToken = localStorage.getItem("seedha_token");
+    if (!nativeToken) return false;
+    try {
+      const res = await fetch("/api/v2/auth", {
+        headers: { Authorization: `Bearer ${nativeToken}` },
+      });
+      const data = await res.json();
+      if (data.ok && data.user) {
+        const u = data.user;
+        const role = (isUserRole(u.role) ? u.role : "customer") as UserRole;
+        const userObj = {
+          id: u.id,
+          email: u.email,
+          user_metadata: { full_name: u.full_name || u.fullName, role },
+          app_metadata: {},
+          aud: "seedha-properties-client",
+          created_at: u.created_at || new Date().toISOString(),
+        };
+        setState({
+          session: {
+            access_token: nativeToken,
+            token_type: "bearer",
+            expires_in: 900,
+            refresh_token: "",
+            user: userObj as any,
+          } as any,
+          user: userObj as any,
+          role,
+          roleVerified: true,
+          status: "authenticated",
+        });
+        return true;
+      }
+    } catch {
+      // Fallback failed
+    }
+    return false;
+  }, []);
+
   const refreshSession = useCallback(async () => {
     try {
       const { data } = await supabase.auth.getSession();
-      await applySession(data.session);
+      if (data.session) {
+        await applySession(data.session);
+        return;
+      }
     } catch {
-      setState({ ...GUEST_SESSION, status: "guest" });
+      // Supabase unavailable
     }
+
+    if (typeof window !== "undefined") {
+      const nativeToken = localStorage.getItem("seedha_token");
+      if (nativeToken) {
+        try {
+          const res = await fetch("/api/v2/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "refresh" }),
+          });
+          const data = await res.json();
+          if (data.ok && data.token) {
+            localStorage.setItem("seedha_token", data.token);
+            if (data.user) {
+              localStorage.setItem("seedha_user", JSON.stringify(data.user));
+            }
+            const role = (isUserRole(data.user?.role) ? data.user.role : "customer") as UserRole;
+            const userObj = {
+              id: data.user.id,
+              email: data.user.email,
+              user_metadata: { full_name: data.user.full_name || data.user.fullName, role },
+              app_metadata: {},
+              aud: "seedha-properties-client",
+              created_at: new Date().toISOString(),
+            };
+            setState({
+              session: {
+                access_token: data.token,
+                token_type: "bearer",
+                expires_in: data.expires_in || 900,
+                refresh_token: data.refresh_token || "",
+                user: userObj as any,
+              } as any,
+              user: userObj as any,
+              role,
+              roleVerified: true,
+              status: "authenticated",
+            });
+            return;
+          }
+        } catch {
+          // Native refresh failed
+        }
+      }
+    }
+
+    setState({ ...GUEST_SESSION, status: "guest" });
   }, [applySession]);
 
   const signOut = useCallback(async () => {
-    // Drop cached data before the network call so no in-flight authenticated
-    // query can repopulate the cache after the session is gone.
+    // Drop cached data before the network call
     try {
       await queryClientRef.current.cancelQueries();
     } catch {
@@ -221,16 +312,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     queryClientRef.current.clear();
 
+    if (typeof window !== "undefined") {
+      const nativeToken = localStorage.getItem("seedha_token");
+      if (nativeToken) {
+        try {
+          await fetch("/api/v2/auth", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${nativeToken}`,
+            },
+            body: JSON.stringify({ action: "logout" }),
+          });
+        } catch {
+          // Best effort native logout
+        }
+      }
+    }
+
     try {
-      // Revokes the refresh token server-side across every device.
       await supabase.auth.signOut({ scope: "global" });
     } catch {
-      // Offline or an already-expired token: still drop the local session so
-      // the client cannot keep acting as if it were signed in.
       try {
         await supabase.auth.signOut({ scope: "local" });
       } catch {
-        // Nothing further to do; storage is purged below regardless.
+        // Nothing further to do
       }
     }
 
@@ -238,7 +344,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     notifiedSessionIds.current.clear();
     setState({ ...GUEST_SESSION, status: "guest" });
 
-    // Force route matches to re-run their guards against the now-guest state.
     try {
       await routerRef.current.invalidate();
     } catch {
@@ -251,18 +356,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     supabase.auth
       .getSession()
-      .then(({ data }) => {
-        if (active) void applySession(data.session, "INITIAL_SESSION");
+      .then(async ({ data }) => {
+        if (!active) return;
+        if (data.session) {
+          void applySession(data.session, "INITIAL_SESSION");
+        } else {
+          const hasNative = await checkNativeSession();
+          if (!hasNative && active) {
+            setState({ ...GUEST_SESSION, status: "guest" });
+          }
+        }
       })
-      .catch(() => {
-        // Never strand the caller in "loading" if Supabase is unreachable.
-        if (active) setState({ ...GUEST_SESSION, status: "guest" });
+      .catch(async () => {
+        if (!active) return;
+        const hasNative = await checkNativeSession();
+        if (!hasNative && active) {
+          setState({ ...GUEST_SESSION, status: "guest" });
+        }
       });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!active) return;
 
       if (event === "SIGNED_OUT" || !session) {
+        // Check if there is still a native session active
+        const hasNative = await checkNativeSession();
+        if (hasNative) return;
+
         queryClientRef.current.clear();
         purgeAuthStorage();
         notifiedSessionIds.current.clear();
@@ -278,7 +398,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       active = false;
       authListener.subscription.unsubscribe();
     };
-  }, [applySession]);
+  }, [applySession, checkNativeSession]);
 
   return (
     <AuthContext.Provider value={{ ...state, signOut, refreshSession }}>
