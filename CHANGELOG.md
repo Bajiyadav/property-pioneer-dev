@@ -1,3 +1,8 @@
+## v0.163.2 — 2026-09-04
+
+### Fixes
+- fix(auth): connect native session lifecycle to AuthContext and add staging guardrails (f7cacf4)
+
 ## v0.163.1 — 2026-09-03
 
 ### Fixes
