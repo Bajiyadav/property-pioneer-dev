@@ -1,3 +1,8 @@
+## v0.166.1 — 2026-09-04
+
+### Fixes
+- fix(mobile,web): display interactive city chips and auto-scroll when state is selected (6154505)
+
 ## v0.166.0 — 2026-09-04
 
 ### Features
