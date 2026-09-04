@@ -1,3 +1,8 @@
+## v0.167.1 — 2026-09-04
+
+### Fixes
+- fix(ci): sync package-lock.json to resolve npm ci failure in vulnerability scan (bc3c190)
+
 ## v0.167.0 — 2026-09-04
 
 ### Features
