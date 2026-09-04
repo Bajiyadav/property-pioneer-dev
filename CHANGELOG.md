@@ -1,3 +1,8 @@
+## v0.167.0 — 2026-09-04
+
+### Features
+- feat(mobile): showcase assisted and premium plans matching website (d904608)
+
 ## v0.166.1 — 2026-09-04
 
 ### Fixes
