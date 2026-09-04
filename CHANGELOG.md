@@ -1,3 +1,8 @@
+## v0.166.0 — 2026-09-04
+
+### Features
+- feat(auth): transition to native in-house authentication and OTP engine (2fc91dd)
+
 ## v0.165.0 — 2026-09-04
 
 ### Features
