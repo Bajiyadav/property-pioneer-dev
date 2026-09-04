@@ -1,3 +1,8 @@
+## v0.165.0 — 2026-09-04
+
+### Features
+- feat: redesign search discovery and payment plan selection for web and mobile (927954f)
+
 ## v0.164.0 — 2026-09-04
 
 ### Features
