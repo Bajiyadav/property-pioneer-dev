@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, SlidersHorizontal, List, MapPin, X, LayoutGrid, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +10,8 @@ import { useLocationStore } from "@/modules/property/store/locationStore";
 import type { Property, PropertySearchParams } from "@/modules/property/services/propertyQueries";
 import { trackSearch } from "@/modules/analytics/services/tracking";
 import { OptionalPreferencesCard } from "@/modules/tenant/components/OptionalPreferencesCard";
+import { VisualLocationDiscovery } from "@/modules/property/components/VisualLocationDiscovery";
+import { findCity } from "@/config/locationHierarchy";
 
 interface SearchUIProps {
   properties: Property[];
@@ -72,6 +74,51 @@ export function SearchUI({
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [keyword, setKeyword] = useState(search.q || "");
   const [isTyping, setIsTyping] = useState(false);
+
+  const geoData = useLocationStore((state) => state.geoData);
+  const sessionState =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_state") : null;
+  const sessionCity =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_city") : null;
+
+  const confirmedState = search.state || geoData?.state || sessionState || "";
+  const confirmedCity = search.city || geoData?.city || sessionCity || "";
+  const hasConfirmedLocation = Boolean(confirmedState && confirmedCity);
+
+  const [isChangingLocation, setIsChangingLocation] = useState(!hasConfirmedLocation);
+
+  useEffect(() => {
+    if (search.state && search.city) {
+      setIsChangingLocation(false);
+    }
+  }, [search.state, search.city]);
+
+  const popularLocalities = useMemo(() => {
+    if (!confirmedCity) return [];
+    const cityInfo = findCity(confirmedCity, confirmedState);
+    return cityInfo?.popularLocalities || [];
+  }, [confirmedCity, confirmedState]);
+
+  const handleLocationConfirmed = (
+    state: string,
+    city: string,
+    geo?: { lat: number; lng: number },
+  ) => {
+    setLocation(city, {
+      lat: geo?.lat ?? 17.385,
+      lon: geo?.lng ?? 78.4867,
+      city,
+      state,
+    });
+    try {
+      sessionStorage.setItem("seedha_selected_state", state);
+      sessionStorage.setItem("seedha_selected_city", city);
+    } catch {
+      // Ignore sessionStorage errors (e.g. private browsing mode)
+    }
+    update({ state, city, locality: undefined });
+    setIsChangingLocation(false);
+  };
 
   // Keep local keyword state in sync when search.q changes externally (e.g. navigation / URL reload)
   useEffect(() => {
@@ -322,8 +369,20 @@ export function SearchUI({
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        {/* Visual Location Discovery (Gated or Changed) */}
+        {(!hasConfirmedLocation || isChangingLocation) && (
+          <div className="mb-8">
+            <VisualLocationDiscovery
+              initialState={confirmedState}
+              initialCity={confirmedCity}
+              onSelectLocation={handleLocationConfirmed}
+              onCancel={hasConfirmedLocation ? () => setIsChangingLocation(false) : undefined}
+            />
+          </div>
+        )}
+
         {/* Header & Location Picker */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-6">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/50 pb-6">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-foreground sm:text-4xl tracking-tight mb-2">
               {title}
@@ -420,6 +479,116 @@ export function SearchUI({
           </div>
         </div>
 
+        {/* Confirmed Location Bar & Intent Selector */}
+        {hasConfirmedLocation && !isChangingLocation && (
+          <div className="mb-8 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3.5 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
+                  <MapPin className="h-4 w-4" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    Browsing Verified Properties In
+                  </span>
+                  <p className="text-sm font-extrabold text-foreground">
+                    {confirmedCity}, {confirmedState}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsChangingLocation(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-foreground shadow-xs transition hover:bg-secondary cursor-pointer"
+              >
+                Change Location
+              </button>
+            </div>
+
+            {/* Property Intent: Buy / Rent / Commercial */}
+            <div className="rounded-3xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                What are you looking for?
+              </h2>
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+                <button
+                  type="button"
+                  onClick={() => update({ listing: "sale", type: undefined })}
+                  className={`flex flex-col items-center justify-center rounded-2xl p-3 sm:p-4 text-center transition-all cursor-pointer border ${
+                    search.listing === "sale"
+                      ? "border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500 text-emerald-700 dark:text-emerald-300"
+                      : "border-border/70 bg-secondary/30 hover:border-emerald-500/40 hover:bg-secondary/60 text-foreground"
+                  }`}
+                >
+                  <span className="text-2xl sm:text-3xl mb-1">🏠</span>
+                  <span className="font-extrabold text-xs sm:text-sm">Buy</span>
+                  <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                    0% Brokerage Homes
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => update({ listing: "rent", type: undefined })}
+                  className={`flex flex-col items-center justify-center rounded-2xl p-3 sm:p-4 text-center transition-all cursor-pointer border ${
+                    search.listing === "rent" || (!search.listing && search.type !== "Commercial")
+                      ? "border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500 text-emerald-700 dark:text-emerald-300"
+                      : "border-border/70 bg-secondary/30 hover:border-emerald-500/40 hover:bg-secondary/60 text-foreground"
+                  }`}
+                >
+                  <span className="text-2xl sm:text-3xl mb-1">🏡</span>
+                  <span className="font-extrabold text-xs sm:text-sm">Rent</span>
+                  <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                    Verified Rentals
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => update({ listing: undefined, type: "Commercial" })}
+                  className={`flex flex-col items-center justify-center rounded-2xl p-3 sm:p-4 text-center transition-all cursor-pointer border ${
+                    search.type === "Commercial"
+                      ? "border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500 text-emerald-700 dark:text-emerald-300"
+                      : "border-border/70 bg-secondary/30 hover:border-emerald-500/40 hover:bg-secondary/60 text-foreground"
+                  }`}
+                >
+                  <span className="text-2xl sm:text-3xl mb-1">🏢</span>
+                  <span className="font-extrabold text-xs sm:text-sm">Commercial</span>
+                  <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                    Offices & Retail
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Popular Localities in City */}
+            {popularLocalities.length > 0 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                <span className="shrink-0 font-bold text-muted-foreground">
+                  Popular in {confirmedCity}:
+                </span>
+                {popularLocalities.map((loc) => {
+                  const isActive = search.locality === loc;
+                  return (
+                    <button
+                      key={loc}
+                      type="button"
+                      onClick={() => update({ locality: isActive ? undefined : loc })}
+                      className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer border ${
+                        isActive
+                          ? "border-emerald-600 bg-emerald-600 text-white shadow-xs"
+                          : "border-border/60 bg-card text-muted-foreground hover:border-emerald-500/50 hover:bg-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {loc}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-72 shrink-0">
@@ -490,88 +659,105 @@ export function SearchUI({
           <div className="flex-1 min-w-0">
             {/* 1-Tap Quick Filter Pill Bar */}
             <div className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-border/50 bg-card/60 p-2.5 backdrop-blur-sm shadow-2xs">
-              {/* Listing Type Pills */}
-              <button
-                onClick={() => update({ listing: undefined, type: undefined })}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                  !search.listing && !search.type
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                }`}
-              >
-                All Homes
-              </button>
-              <button
-                onClick={() => update({ listing: "rent", type: undefined })}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                  search.listing === "rent"
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                }`}
-              >
-                For Rent
-              </button>
-              <button
-                onClick={() => update({ listing: "sale", type: undefined })}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                  search.listing === "sale"
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                }`}
-              >
-                For Sale
-              </button>
+              {/* Contextual BHK Chips for Residential */}
+              {search.type !== "Commercial" && (
+                <>
+                  {[1, 2, 3, 4].map((num) => {
+                    const isActive = search.beds === num;
+                    return (
+                      <button
+                        key={num}
+                        onClick={() => update({ beds: isActive ? undefined : num })}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {num} BHK
+                      </button>
+                    );
+                  })}
+                  <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
+                </>
+              )}
 
-              <div className="h-4 w-px bg-border/60 mx-0.5 hidden sm:block" />
-
-              {/* BHK Quick Chips */}
-              {[1, 2, 3, 4].map((num) => {
-                const isActive = search.beds === num;
-                return (
-                  <button
-                    key={num}
-                    onClick={() => update({ beds: isActive ? undefined : num })}
-                    className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                      isActive
-                        ? "bg-emerald-600 text-white shadow-xs"
-                        : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    {num} BHK
-                  </button>
-                );
-              })}
-
-              <div className="h-4 w-px bg-border/60 mx-0.5 hidden md:block" />
-
-              {/* Quick Budget Chips */}
-              {[
-                { label: "< ₹25k", min: undefined, max: 25000 },
-                { label: "₹25k - ₹50k", min: 25000, max: 50000 },
-                { label: "₹50k - ₹1L", min: 50000, max: 100000 },
-                { label: "₹1L+", min: 100000, max: undefined },
-              ].map((b) => {
-                const isActive = search.minPrice === b.min && search.maxPrice === b.max;
-                return (
-                  <button
-                    key={b.label}
-                    onClick={() => {
-                      if (isActive) {
-                        update({ minPrice: undefined, maxPrice: undefined });
-                      } else {
-                        update({ minPrice: b.min, maxPrice: b.max });
-                      }
-                    }}
-                    className={`hidden md:inline-flex rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
-                      isActive
-                        ? "bg-emerald-600 text-white shadow-xs"
-                        : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    {b.label}
-                  </button>
-                );
-              })}
+              {/* Contextual Budget / Category Chips */}
+              {search.listing === "sale"
+                ? // Buy Budget Chips
+                  [
+                    { label: "< ₹25L", min: undefined, max: 2500000 },
+                    { label: "₹25L - ₹50L", min: 2500000, max: 5000000 },
+                    { label: "₹50L - ₹1Cr", min: 5000000, max: 10000000 },
+                    { label: "₹1Cr+", min: 10000000, max: undefined },
+                  ].map((b) => {
+                    const isActive = search.minPrice === b.min && search.maxPrice === b.max;
+                    return (
+                      <button
+                        key={b.label}
+                        onClick={() => {
+                          if (isActive) {
+                            update({ minPrice: undefined, maxPrice: undefined });
+                          } else {
+                            update({ minPrice: b.min, maxPrice: b.max });
+                          }
+                        }}
+                        className={`hidden md:inline-flex rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                        }`}
+                      >
+                        {b.label}
+                      </button>
+                    );
+                  })
+                : search.type === "Commercial"
+                  ? // Commercial Category Chips
+                    ["Office Space", "Shop / Retail", "Showroom", "Warehouse"].map((comType) => {
+                      const isActive = search.type === comType;
+                      return (
+                        <button
+                          key={comType}
+                          onClick={() => update({ type: isActive ? "Commercial" : comType })}
+                          className={`inline-flex rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                          }`}
+                        >
+                          {comType}
+                        </button>
+                      );
+                    })
+                  : // Rent Budget Chips
+                    [
+                      { label: "< ₹20k", min: undefined, max: 20000 },
+                      { label: "₹20k - ₹40k", min: 20000, max: 40000 },
+                      { label: "₹40k - ₹75k", min: 40000, max: 75000 },
+                      { label: "₹75k+", min: 75000, max: undefined },
+                    ].map((b) => {
+                      const isActive = search.minPrice === b.min && search.maxPrice === b.max;
+                      return (
+                        <button
+                          key={b.label}
+                          onClick={() => {
+                            if (isActive) {
+                              update({ minPrice: undefined, maxPrice: undefined });
+                            } else {
+                              update({ minPrice: b.min, maxPrice: b.max });
+                            }
+                          }}
+                          className={`hidden md:inline-flex rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : "border border-border/70 bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+                          }`}
+                        >
+                          {b.label}
+                        </button>
+                      );
+                    })}
 
               {/* Reset active filters */}
               {(search.beds ||
@@ -580,6 +766,7 @@ export function SearchUI({
                 search.maxPrice ||
                 search.type ||
                 search.furnishing ||
+                search.locality ||
                 search.q) && (
                 <button
                   onClick={clearFilters}

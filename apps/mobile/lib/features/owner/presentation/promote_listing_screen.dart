@@ -107,7 +107,11 @@ class _PromoteListingScreenState extends State<PromoteListingScreen> {
               ),
               const SizedBox(height: 12),
             ],
-            const SizedBox(height: 4),
+
+            // Feature Comparison Table
+            _PlanComparisonTable(),
+            const SizedBox(height: 14),
+
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -117,23 +121,46 @@ class _PromoteListingScreenState extends State<PromoteListingScreen> {
               ),
               child: const Text(
                 'Promotion improves where your listing appears. It cannot guarantee '
-                'enquiries, visits or a tenant.',
+                'enquiries, visits or a tenant. Zero brokerage always applies.',
                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.5),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Order Summary Card
+            if (_selectedPlanId != null) ...[
+              _OrderSummaryCard(
+                plan: findVisibilityPlan(_selectedPlanId!)!,
+              ),
+              const SizedBox(height: 18),
+            ],
+
             SizedBox(
-              height: 48,
+              height: 50,
               child: ElevatedButton(
                 onPressed: _selectedPlanId == null ? null : _continueToPayment,
-                child: const Text('Continue to Payment'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  _selectedPlanId != null
+                      ? 'Proceed to Pay ${formatVisibilityInr(findVisibilityPlan(_selectedPlanId!)!.priceInr)}'
+                      : 'Select a Plan to Continue',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             SizedBox(
               height: 48,
               child: OutlinedButton(
                 onPressed: _continueFree,
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 child: const Text('Continue with Free Listing'),
               ),
             ),
@@ -306,6 +333,210 @@ class _PlanCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PlanComparisonTable extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        border: Border.all(color: AppTheme.borderSubtle),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.compare_arrows_rounded, size: 18, color: AppTheme.primaryColor),
+              SizedBox(width: 6),
+              Text(
+                'Plan Comparison',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildRow('Platform Brokerage', '0% Free', '0% Free', '0% Free', isGreen: true),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _buildRow('Direct Enquiries', 'Included', 'Included', 'Included'),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _buildRow('Duration', '—', '30 Days', '60 Days'),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _buildRow('Search Placement', 'Standard', 'Featured', 'Priority Top'),
+          const Divider(height: 16, color: Color(0xFFF1F5F9)),
+          _buildRow('Total Cost', '₹0', '₹299', '₹499', isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(String title, String v1, String v2, String v3, {bool isGreen = false, bool isBold = false}) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 4,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text(
+            v1,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+              color: isGreen ? const Color(0xFF16A34A) : AppTheme.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            v2,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+              color: isGreen ? const Color(0xFF16A34A) : AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            v3,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w700,
+              color: isGreen ? const Color(0xFF16A34A) : AppTheme.primaryColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OrderSummaryCard extends StatelessWidget {
+  const _OrderSummaryCard({required this.plan});
+
+  final VisibilityPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'ORDER SUMMARY',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  '${plan.durationDays} Days Featured',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                plan.name,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              Text(
+                formatVisibilityInr(plan.priceInr),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Total amount (all-inclusive) • 0% brokerage',
+            style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const SizedBox(height: 10),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 13, color: AppTheme.textSecondary),
+                  SizedBox(width: 4),
+                  Text(
+                    '256-bit Secure Razorpay',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+              Text(
+                'UPI • Cards • Net Banking',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

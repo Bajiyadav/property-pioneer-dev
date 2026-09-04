@@ -195,7 +195,7 @@ export function PromoteListing({ propertyId }: { propertyId: string }) {
       <div className="mt-9">
         <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
           <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
-          Want more visibility?
+          Choose Your Visibility Plan
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Get your property in front of more relevant property seekers. Optional — it never changes
@@ -203,7 +203,8 @@ export function PromoteListing({ propertyId }: { propertyId: string }) {
         </p>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      {/* Plan Cards */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {VISIBILITY_PLANS.map((plan) => (
           <PlanCard
             key={plan.id}
@@ -214,13 +215,124 @@ export function PromoteListing({ propertyId }: { propertyId: string }) {
         ))}
       </div>
 
+      {/* Feature Comparison Matrix Table */}
+      <div className="mt-8 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <h3 className="text-base font-semibold tracking-tight text-foreground">
+          Plan Comparison & Features
+        </h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Seedha Properties charges 0% brokerage on all listings. Promotion increases search
+          visibility.
+        </p>
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-left text-xs">
+            <thead>
+              <tr className="border-b border-border text-muted-foreground">
+                <th className="pb-3 font-semibold">Features & Benefits</th>
+                <th className="pb-3 text-center font-semibold">Free Listing</th>
+                <th className="pb-3 text-center font-semibold">More Visibility (₹299)</th>
+                <th className="pb-3 text-center font-semibold text-primary">Maximum (₹499)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">Platform Brokerage</td>
+                <td className="py-2.5 text-center text-emerald-600 font-semibold">0% Free</td>
+                <td className="py-2.5 text-center text-emerald-600 font-semibold">0% Free</td>
+                <td className="py-2.5 text-center text-emerald-600 font-semibold">0% Free</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">
+                  Direct Tenant/Buyer Enquiries
+                </td>
+                <td className="py-2.5 text-center font-medium">Included</td>
+                <td className="py-2.5 text-center font-medium">Included</td>
+                <td className="py-2.5 text-center font-medium">Included</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">Featured Duration</td>
+                <td className="py-2.5 text-center text-muted-foreground">—</td>
+                <td className="py-2.5 text-center font-semibold">30 Days</td>
+                <td className="py-2.5 text-center font-semibold text-primary">60 Days</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">Search Placement</td>
+                <td className="py-2.5 text-center text-muted-foreground">Standard</td>
+                <td className="py-2.5 text-center font-medium">Featured Placement</td>
+                <td className="py-2.5 text-center font-medium text-primary">Priority Featured</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">Homepage Section Eligibility</td>
+                <td className="py-2.5 text-center text-muted-foreground">—</td>
+                <td className="py-2.5 text-center font-medium">Eligible</td>
+                <td className="py-2.5 text-center font-medium text-primary">High Priority</td>
+              </tr>
+              <tr>
+                <td className="py-2.5 font-medium text-foreground">Total Cost</td>
+                <td className="py-2.5 text-center font-bold">₹0</td>
+                <td className="py-2.5 text-center font-bold">₹299</td>
+                <td className="py-2.5 text-center font-bold text-primary">₹499</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-border bg-muted/40 p-3.5">
         <Info className="mt-0.5 h-4 w-4 flex-none text-muted-foreground" aria-hidden="true" />
         <p className="text-xs leading-relaxed text-muted-foreground">
           Promotion improves where your listing appears. It cannot guarantee enquiries, visits or a
-          tenant — anyone promising that is guessing.
+          tenant — anyone promising that is guessing. Zero brokerage always applies.
         </p>
       </div>
+
+      {/* Selected Order Summary Card */}
+      {selectedPlanId &&
+        (() => {
+          const plan = VISIBILITY_PLANS.find((p) => p.id === selectedPlanId);
+          if (!plan) return null;
+          return (
+            <div className="mt-6 rounded-2xl border border-primary/40 bg-primary/5 p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                  Order Summary
+                </span>
+                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                  {plan.durationDays} Days Featured
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-primary/10 pb-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{plan.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {data?.title || "Your Property"} · {place || "Verified Listing"}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-bold tabular-nums text-foreground">
+                    {formatVisibilityInr(plan.priceInr)}
+                  </span>
+                  <p className="text-[11px] text-muted-foreground">Total amount (all-inclusive)</p>
+                </div>
+              </div>
+
+              {/* Payment method trust badges */}
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5 font-medium">
+                  🔒 256-bit Secure Razorpay Checkout
+                </span>
+                <span className="flex items-center gap-2 text-[11px]">
+                  <span>UPI</span>
+                  <span>•</span>
+                  <span>Cards</span>
+                  <span>•</span>
+                  <span>Net Banking</span>
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
       <div className="mt-7 flex flex-col gap-3 sm:flex-row">
         <Button
@@ -235,7 +347,9 @@ export function PromoteListing({ propertyId }: { propertyId: string }) {
             });
           }}
         >
-          Continue
+          {selectedPlanId
+            ? `Proceed to Pay ${formatVisibilityInr(VISIBILITY_PLANS.find((p) => p.id === selectedPlanId)?.priceInr ?? 299)}`
+            : "Select a Plan to Continue"}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         {/* Equal weight, never a whispered link. */}

@@ -9,7 +9,7 @@ import 'package:seedha_properties_mobile/features/location/providers/location_pr
 import 'package:seedha_properties_mobile/features/properties/presentation/property_card_widget.dart';
 import 'package:seedha_properties_mobile/features/properties/presentation/property_map_view.dart';
 import 'package:seedha_properties_mobile/features/location/models/selected_location.dart';
-import 'package:seedha_properties_mobile/features/home/presentation/widgets/home_category_cards.dart';
+import 'package:seedha_properties_mobile/features/search/presentation/widgets/visual_location_discovery.dart';
 import 'package:latlong2/latlong.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -25,6 +25,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<Property> _results = [];
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isChangingLocation = false;
 
   /// List is the default: most people scan results before placing them on a
   /// map, and only a subset of listings carry coordinates at all.
@@ -116,114 +117,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     ref.read(budgetRangeFilterProvider.notifier).state = _kBudgetBounds;
     _searchController.clear();
     _executeSearch();
-  }
-
-  void _showLocationPickerModal() {
-    String? tempState = ref.read(locationStateProvider).value?.state;
-    String? tempCity = ref.read(locationStateProvider).value?.city;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (modalContext, setModalState) {
-            return Container(
-              padding: EdgeInsets.fromLTRB(
-                  20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Select State & City',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Direct-owner properties are strictly scoped by state and city.',
-                    style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      final loc = await ref.read(locationStateProvider.notifier).detectAndSetCurrentLocation();
-                      if (loc != null) {
-                        _executeSearch();
-                      }
-                    },
-                    icon: const Icon(Icons.my_location_rounded, size: 18),
-                    label: const Text('Use Current Location (GPS)'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F766E),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(double.infinity, 46),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  LocationPickerCard(
-                    selectedState: tempState,
-                    selectedCity: tempCity,
-                    onStateChanged: (s) {
-                      setModalState(() {
-                        tempState = s;
-                        tempCity = null;
-                      });
-                    },
-                    onCityChanged: (c) {
-                      if (c != null && tempState != null) {
-                        ref.read(locationStateProvider.notifier).setLocation(
-                              SelectedLocation(
-                                formattedAddress: '$c, $tempState',
-                                city: c,
-                                locality: '',
-                                state: tempState!,
-                                country: 'India',
-                                latitude: 0,
-                                longitude: 0,
-                                isValidated: true,
-                              ),
-                            );
-                        Navigator.pop(ctx);
-                        _executeSearch();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   void _showQuickNavigationSheet(BuildContext context) {
@@ -673,6 +566,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (loc != null && loc.latitude != 0.0 && loc.longitude != 0.0) {
       return LatLng(loc.latitude, loc.longitude);
     }
+    if (loc != null && loc.city.isNotEmpty) {
+      final centroid = AppConstants.cityCentroids[loc.city];
+      if (centroid != null) {
+        return LatLng(centroid[0], centroid[1]);
+      }
+    }
     return null;
   }
 
@@ -744,7 +643,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     final activeCategory = ref.watch(activeCategoryProvider);
     final locationState = ref.watch(locationStateProvider);
-    final activeCity = locationState.value?.city ?? 'All India';
+    final loc = locationState.value;
+    final isLocationConfirmed = loc != null &&
+        loc.isValidated &&
+        loc.city.isNotEmpty &&
+        loc.city != 'All India' &&
+        loc.state.isNotEmpty;
+    final activeCity = isLocationConfirmed ? loc.city : 'All India';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -820,9 +725,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ],
       ),
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
+      body: _isChangingLocation
+          ? VisualLocationDiscoveryWidget(
+              initialState: loc?.state,
+              initialCity: isLocationConfirmed ? loc.city : null,
+              onCancel: () => setState(() => _isChangingLocation = false),
+              onLocationSelected: (state, city, lat, lng) {
+                ref.read(locationStateProvider.notifier).setLocation(
+                      SelectedLocation(
+                        formattedAddress: '$city, $state',
+                        city: city,
+                        locality: '',
+                        state: state,
+                        country: 'India',
+                        latitude: lat,
+                        longitude: lng,
+                        isValidated: true,
+                      ),
+                    );
+                setState(() {
+                  _isChangingLocation = false;
+                });
+                _executeSearch();
+              },
+            )
+          : CustomScrollView(
+              controller: _scrollController,
+              slivers: [
           SliverToBoxAdapter(
             child: Container(
               color: Colors.white,
@@ -912,7 +841,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
-                        onPressed: _showLocationPickerModal,
+                        onPressed: () => setState(() => _isChangingLocation = true),
                         icon: const Icon(Icons.location_city_rounded, size: 16),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE11D48),
@@ -1099,7 +1028,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
         // State & City Selector Pill
         GestureDetector(
-          onTap: _showLocationPickerModal,
+          onTap: () => setState(() => _isChangingLocation = true),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
@@ -1133,17 +1062,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        // Buy | Rent | Commercial Tabs
+        // Buy | Rent | Commercial Intent Cards
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _categoryTabItem('Buy', PropertyCategory.buy, activeCategory),
-              _categoryTabItem('Rent', PropertyCategory.rent, activeCategory),
-              _categoryTabItem('Commercial', PropertyCategory.commercial, activeCategory),
+              Expanded(child: _categoryTabItem('Buy', '🏠', PropertyCategory.buy, activeCategory)),
+              const SizedBox(width: 8),
+              Expanded(child: _categoryTabItem('Rent', '🏡', PropertyCategory.rent, activeCategory)),
+              const SizedBox(width: 8),
+              Expanded(child: _categoryTabItem('Commercial', '🏢', PropertyCategory.commercial, activeCategory)),
             ],
           ),
         ),
@@ -1152,38 +1082,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _categoryTabItem(String label, PropertyCategory category, PropertyCategory activeCategory) {
+  Widget _categoryTabItem(String label, String icon, PropertyCategory category, PropertyCategory activeCategory) {
     final isSelected = activeCategory == category;
     return GestureDetector(
       onTap: () {
         ref.read(activeCategoryProvider.notifier).state = category;
       },
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Text(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.6 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 14)),
+            const SizedBox(width: 6),
+            Text(
               label,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                fontStyle: isSelected ? FontStyle.normal : FontStyle.italic,
-                color: isSelected ? const Color(0xFFE11D48) : const Color(0xFF64748B),
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                color: isSelected ? const Color(0xFF14532D) : const Color(0xFF475569),
               ),
             ),
-          ),
-          const SizedBox(height: 4),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 3,
-            width: isSelected ? 48 : 0,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE11D48),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -54,12 +54,44 @@ class AppConstants {
   ];
 
   static const Map<String, List<String>> citiesByState = {
-    'Telangana': ['Hyderabad', 'Secunderabad', 'Warangal', 'Nizamabad'],
-    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati'],
+    'Telangana': ['Hyderabad', 'Secunderabad', 'Warangal', 'Karimnagar', 'Nizamabad', 'Khammam'],
+    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Nellore', 'Kurnool'],
     'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi', 'Mangaluru'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
+    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik'],
     'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
     'Delhi NCR': ['Delhi', 'Gurugram', 'Noida', 'Faridabad'],
+  };
+
+  /// Authoritative city coordinates (centroids) for map viewport centering.
+  static const Map<String, List<double>> cityCentroids = {
+    'Hyderabad': [17.3850, 78.4867],
+    'Secunderabad': [17.4399, 78.4983],
+    'Warangal': [17.9689, 79.5941],
+    'Karimnagar': [18.4386, 79.1288],
+    'Nizamabad': [18.6725, 78.0941],
+    'Khammam': [17.2473, 80.1514],
+    'Bengaluru': [12.9716, 77.5946],
+    'Mysuru': [12.2958, 76.6394],
+    'Hubballi': [15.3647, 75.1240],
+    'Mangaluru': [12.9141, 74.8560],
+    'Mumbai': [19.0760, 72.8777],
+    'Pune': [18.5204, 73.8567],
+    'Nagpur': [21.1458, 79.0882],
+    'Thane': [19.2183, 72.9781],
+    'Nashik': [19.9975, 73.7898],
+    'Delhi': [28.6139, 77.2090],
+    'Gurugram': [28.4595, 77.0266],
+    'Noida': [28.5355, 77.3910],
+    'Faridabad': [28.4089, 77.3178],
+    'Chennai': [13.0827, 80.2707],
+    'Coimbatore': [11.0168, 76.9558],
+    'Madurai': [9.9252, 78.1198],
+    'Visakhapatnam': [17.6868, 83.2185],
+    'Vijayawada': [16.5062, 80.6480],
+    'Guntur': [16.3067, 80.4365],
+    'Tirupati': [13.6288, 79.4192],
+    'Nellore': [14.4426, 79.9865],
+    'Kurnool': [15.8281, 78.0373],
   };
 
   static const List<String> topMetroCities = [
