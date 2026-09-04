@@ -1,3 +1,8 @@
+## v0.164.0 — 2026-09-04
+
+### Features
+- feat(payments): complete Razorpay payment system (57ca2c3)
+
 ## v0.163.2 — 2026-09-04
 
 ### Fixes
