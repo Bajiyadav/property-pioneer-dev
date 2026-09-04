@@ -35,6 +35,10 @@ seedha:
     secret: ${JWT_SECRET}
     access-token-expiration-minutes: ${JWT_ACCESS_MINUTES:15}
     refresh-token-expiration-days: ${JWT_REFRESH_DAYS:30}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
   cors:
     allowed-origins:
       - https://staging.seedhaproperties.com

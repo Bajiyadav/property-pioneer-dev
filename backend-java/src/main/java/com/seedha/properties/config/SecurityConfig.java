@@ -88,6 +88,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v2/properties/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v2/stats/location").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v2/home-loans").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/webhooks/**").permitAll()
                 // All other write and private endpoints require valid Bearer token
                 .anyRequest().authenticated()
             );

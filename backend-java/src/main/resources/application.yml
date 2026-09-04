@@ -65,6 +65,10 @@ seedha:
     public-bucket: ${S3_PUBLIC_MEDIA_BUCKET:seedha-properties-public-media-staging}
     private-bucket: ${S3_PRIVATE_DOCS_BUCKET:seedha-properties-private-docs-staging}
     sqs-queue-url: ${SQS_QUEUE_URL:}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
   cors:
     allowed-origins:
       - https://seedhaproperties.com

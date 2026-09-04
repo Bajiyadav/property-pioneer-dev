@@ -93,6 +93,7 @@ import { Route as ApiDevEmailPreviewTypeRouteImport } from './routes/api/dev/ema
 import { Route as ApiPublicPropertiesLocationAccessRouteImport } from './routes/api/public/properties.location-access'
 import { Route as ApiV2MediaPresignDownloadRouteImport } from './routes/api/v2/media/presign-download'
 import { Route as ApiV2MediaPresignUploadRouteImport } from './routes/api/v2/media/presign-upload'
+import { Route as ApiV2PaymentsHistoryRouteImport } from './routes/api/v2/payments/history'
 import { Route as ApiV2PropertiesManageRouteImport } from './routes/api/v2/properties/manage'
 import { Route as ListPropertyPromoteIdCheckoutRouteImport } from './routes/list-property.promote.$id.checkout'
 import { Route as ApiPublicPropertiesIdContactRouteImport } from './routes/api/public/properties.$id.contact'
@@ -539,6 +540,11 @@ const ApiV2MediaPresignUploadRoute = ApiV2MediaPresignUploadRouteImport.update({
   path: '/api/v2/media/presign-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiV2PaymentsHistoryRoute = ApiV2PaymentsHistoryRouteImport.update({
+  id: '/api/v2/payments/history',
+  path: '/api/v2/payments/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiV2PropertiesManageRoute = ApiV2PropertiesManageRouteImport.update({
   id: '/manage',
   path: '/manage',
@@ -683,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
   '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -774,6 +781,7 @@ export interface FileRoutesByTo {
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
   '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -871,6 +879,7 @@ export interface FileRoutesById {
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
   '/api/v2/media/presign-upload': typeof ApiV2MediaPresignUploadRoute
+  '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
@@ -968,6 +977,7 @@ export interface FileRouteTypes {
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
     | '/api/v2/media/presign-upload'
+    | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -1059,6 +1069,7 @@ export interface FileRouteTypes {
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
     | '/api/v2/media/presign-upload'
+    | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -1155,6 +1166,7 @@ export interface FileRouteTypes {
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
     | '/api/v2/media/presign-upload'
+    | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
     | '/api/public/properties/$id/contact'
@@ -1228,6 +1240,7 @@ export interface RootRouteChildren {
   ApiPublicPropertiesLocationAccessRoute: typeof ApiPublicPropertiesLocationAccessRoute
   ApiV2MediaPresignDownloadRoute: typeof ApiV2MediaPresignDownloadRoute
   ApiV2MediaPresignUploadRoute: typeof ApiV2MediaPresignUploadRoute
+  ApiV2PaymentsHistoryRoute: typeof ApiV2PaymentsHistoryRoute
   ApiPublicPropertiesIdContactRoute: typeof ApiPublicPropertiesIdContactRoute
   ApiPublicPropertiesIdReportRoute: typeof ApiPublicPropertiesIdReportRoute
   ApiPublicPropertiesIdSaveRoute: typeof ApiPublicPropertiesIdSaveRoute
@@ -1828,6 +1841,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV2MediaPresignUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v2/payments/history': {
+      id: '/api/v2/payments/history'
+      path: '/api/v2/payments/history'
+      fullPath: '/api/v2/payments/history'
+      preLoaderRoute: typeof ApiV2PaymentsHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/v2/properties/manage': {
       id: '/api/v2/properties/manage'
       path: '/manage'
@@ -2100,6 +2120,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicPropertiesLocationAccessRoute,
   ApiV2MediaPresignDownloadRoute: ApiV2MediaPresignDownloadRoute,
   ApiV2MediaPresignUploadRoute: ApiV2MediaPresignUploadRoute,
+  ApiV2PaymentsHistoryRoute: ApiV2PaymentsHistoryRoute,
   ApiPublicPropertiesIdContactRoute: ApiPublicPropertiesIdContactRoute,
   ApiPublicPropertiesIdReportRoute: ApiPublicPropertiesIdReportRoute,
   ApiPublicPropertiesIdSaveRoute: ApiPublicPropertiesIdSaveRoute,
