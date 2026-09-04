@@ -1,29 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-enum PaymentType {
-  houseRent('House Rent', Icons.home_work_outlined),
-  maintenance('Maintenance', Icons.build_circle_outlined),
-  deposit('Security Deposit', Icons.lock_outline_rounded),
-  token('Token Advance', Icons.bolt_rounded),
-  commercial('Commercial Rent', Icons.storefront_outlined);
+enum PlanPersona {
+  tenant('Tenant', 'Looking to Rent', '👤🏠'),
+  owner('Owner', 'Listing for Rent', '🏷️🔑'),
+  buyer('Buyer', 'Looking to Buy', '🏡💼'),
+  seller('Seller', 'Listing for Sale', '🏢🤝');
 
   final String label;
-  final IconData icon;
-  const PaymentType(this.label, this.icon);
+  final String subtitle;
+  final String emoji;
+  const PlanPersona(this.label, this.subtitle, this.emoji);
 }
 
-enum PaymentMethod {
-  creditCard('Credit Card', 'Earn rewards & air miles', Icons.credit_card_rounded),
-  upi('UPI (GPay / PhonePe / Paytm)', 'Zero transaction fee', Icons.qr_code_rounded),
-  netBanking('Net Banking', 'All major Indian banks', Icons.account_balance_outlined);
+enum BillingCycle {
+  monthly('Monthly'),
+  yearly('Yearly (Save 40%)');
 
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  const PaymentMethod(this.title, this.subtitle, this.icon);
+  final String label;
+  const BillingCycle(this.label);
+}
+
+class MobilePricingPlan {
+  final String id;
+  final String name;
+  final String? badge;
+  final int priceMonthly;
+  final int priceYearly;
+  final int mrpMonthly;
+  final String validity;
+  final String tagline;
+  final List<String> benefits;
+  final String ctaText;
+  final bool popular;
+
+  const MobilePricingPlan({
+    required this.id,
+    required this.name,
+    this.badge,
+    required this.priceMonthly,
+    required this.priceYearly,
+    required this.mrpMonthly,
+    required this.validity,
+    required this.tagline,
+    required this.benefits,
+    required this.ctaText,
+    this.popular = false,
+  });
 }
 
 class PaymentsScreen extends ConsumerStatefulWidget {
@@ -34,308 +58,549 @@ class PaymentsScreen extends ConsumerStatefulWidget {
 }
 
 class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
-  PaymentType _selectedType = PaymentType.houseRent;
-  PaymentMethod _selectedMethod = PaymentMethod.creditCard;
+  PlanPersona _selectedPersona = PlanPersona.tenant;
+  BillingCycle _selectedCycle = BillingCycle.monthly;
+  String _selectedPaymentMethod = 'UPI';
 
-  final TextEditingController _amountController = TextEditingController(text: '25000');
-  final TextEditingController _landlordNameController = TextEditingController(text: 'Ramesh Sharma');
-  final TextEditingController _landlordPhoneController = TextEditingController(text: '9876543210');
-  final TextEditingController _upiIdController = TextEditingController(text: 'ramesh.sharma@okaxis');
-  final TextEditingController _accountNoController = TextEditingController();
-  final TextEditingController _ifscController = TextEditingController();
-  final TextEditingController _propertyAddressController = TextEditingController(text: 'Flat 402, Green Glen Heights, Gurgaon');
+  // ── TENANT PLANS (from website CustomerPlans.tsx & plans.ts) ──
+  static const List<MobilePricingPlan> _tenantPlans = [
+    MobilePricingPlan(
+      id: 'plan_freedom',
+      name: 'Freedom Plan',
+      badge: 'Freedom',
+      priceMonthly: 199,
+      priceYearly: 149,
+      mrpMonthly: 499,
+      validity: '90 Days',
+      tagline: 'Get genuine house owner contacts matching your requirements',
+      benefits: [
+        '25 Direct Verified House Owner Contacts',
+        'Premium Filters & Instant Property Alerts',
+        'Locality Level Price Trends & Commute Metrics',
+        'Rent Negotiation Assistance with Owners',
+        '0% Brokerage Guarantee',
+      ],
+      ctaText: 'Get Freedom Plan',
+    ),
+    MobilePricingPlan(
+      id: 'plan_relax',
+      name: 'Relax Plan',
+      badge: 'Most Popular',
+      priceMonthly: 299,
+      priceYearly: 249,
+      mrpMonthly: 799,
+      validity: '45 Days',
+      popular: true,
+      tagline: 'Get Relationship Manager to help you SAVE time and money',
+      benefits: [
+        'Dedicated Relationship Manager (House-Hunt Assistant)',
+        '50 Direct Verified House Owner Contacts',
+        'Assistant contacts owners & fixes property visit meetings',
+        'Rent Negotiation Assistance directly with Owners',
+        'Premium Filters & Instant WhatsApp Lead Alerts',
+        'Assisted Move-In Coordination',
+      ],
+      ctaText: 'Choose Relax Plan',
+    ),
+    MobilePricingPlan(
+      id: 'plan_moneyback',
+      name: 'MoneyBack Plan',
+      badge: '100% Guaranteed',
+      priceMonthly: 499,
+      priceYearly: 399,
+      mrpMonthly: 1299,
+      validity: '45 Days',
+      tagline: 'Get Guaranteed home or 100% Refund Policy',
+      benefits: [
+        'Guaranteed Home or 100% Refund Policy',
+        'Dedicated Senior Relationship Manager',
+        '50 Direct Verified House Owner Contacts',
+        'Unlimited Visit Scheduling & Owner Negotiation',
+        'Priority Agreement Drafting Support',
+        '100% Direct Owner Transparency',
+      ],
+      ctaText: 'Choose MoneyBack Plan',
+    ),
+    MobilePricingPlan(
+      id: 'plan_super_relax',
+      name: 'Super Relax Plan',
+      badge: 'Field Assistance',
+      priceMonthly: 799,
+      priceYearly: 599,
+      mrpMonthly: 1999,
+      validity: '45 Days',
+      tagline: 'Home Tours with Field Relationship Manager (FRM)',
+      benefits: [
+        'Field Relationship Manager (FRM) for Physical & Virtual Tours',
+        'Shows Nearby Matching Properties in the Locality',
+        'Dedicated Senior Relationship Manager',
+        'Unlimited Visit Scheduling & Price Negotiation',
+        'Doorstep Rental Agreement Delivery',
+      ],
+      ctaText: 'Choose Super Relax',
+    ),
+  ];
 
-  bool _isUpiTransfer = true;
-  bool _needHraReceipt = true;
+  // ── OWNER PLANS (from website OWNER_PROMOTION_PLANS) ──
+  static const List<MobilePricingPlan> _ownerPlans = [
+    MobilePricingPlan(
+      id: 'owner-basic',
+      name: 'Free Rental Ad',
+      priceMonthly: 0,
+      priceYearly: 0,
+      mrpMonthly: 0,
+      validity: 'Unlimited',
+      tagline: 'Always 100% Free with Zero Brokerage',
+      benefits: [
+        '1 Free Property Ad Posting',
+        'Standard Platform Search Visibility',
+        'Direct Tenant Inquiries via WhatsApp & Phone',
+        'High-Resolution Photo Gallery',
+        '100% Zero Brokerage Guarantee on Closure',
+      ],
+      ctaText: 'List Rental Free',
+    ),
+    MobilePricingPlan(
+      id: 'owner-premium',
+      name: 'Fast-Track Rental Boost',
+      badge: 'Most Popular',
+      priceMonthly: 499,
+      priceYearly: 299,
+      mrpMonthly: 999,
+      validity: '45 Days',
+      popular: true,
+      tagline: '4x faster tenant reach with topmost search ranking',
+      benefits: [
+        'Topmost Search & Category Priority Ranking',
+        'Highlighted "Direct Owner" Card Badge',
+        'Instant WhatsApp & SMS Tenant Lead Delivery',
+        'Verified Tenant Shield (Screened Inquiries)',
+        'Priority Same-Day Moderation Approval',
+        'Listing Performance & Impression Analytics',
+      ],
+      ctaText: 'Choose Fast-Track',
+    ),
+    MobilePricingPlan(
+      id: 'owner-managed',
+      name: 'Assist Plus (Dedicated RM)',
+      badge: 'Full Service',
+      priceMonthly: 999,
+      priceYearly: 699,
+      mrpMonthly: 1999,
+      validity: '60 Days',
+      tagline: 'Dedicated manager to handle calls, screening & visits',
+      benefits: [
+        'Dedicated Relationship Manager (RM)',
+        'Tenant Inquiry Screening & Filtering',
+        'Visit Coordination & Tenant Matching',
+        'Topmost Homepage & Corridor Spotlight',
+        'Assisted Legal Rental Agreement Support',
+        '0% Brokerage Guarantee on Closure',
+      ],
+      ctaText: 'Choose Assist Plus',
+    ),
+  ];
 
-  @override
-  void dispose() {
-    _amountController.dispose();
-    _landlordNameController.dispose();
-    _landlordPhoneController.dispose();
-    _upiIdController.dispose();
-    _accountNoController.dispose();
-    _ifscController.dispose();
-    _propertyAddressController.dispose();
-    super.dispose();
-  }
+  // ── BUYER PLANS (from website BUYER_ASSIST_PLANS) ──
+  static const List<MobilePricingPlan> _buyerPlans = [
+    MobilePricingPlan(
+      id: 'buyer-freedom',
+      name: 'Buyer Freedom Pass',
+      priceMonthly: 499,
+      priceYearly: 299,
+      mrpMonthly: 999,
+      validity: '90 Days',
+      tagline: 'Unlock 30 genuine seller direct contacts',
+      benefits: [
+        '30 Direct Verified Seller Contacts',
+        'Instant WhatsApp & Phone Direct Connect',
+        'Price Trend & Commute Analysis',
+        'Locality Price Comparison Metrics',
+        'Instant New Listing Alerts in Target Area',
+      ],
+      ctaText: 'Get Freedom Pass',
+    ),
+    MobilePricingPlan(
+      id: 'buyer-assisted',
+      name: 'Buyer Assist Expert',
+      badge: 'Recommended',
+      priceMonthly: 999,
+      priceYearly: 699,
+      mrpMonthly: 1999,
+      validity: '60 Days',
+      popular: true,
+      tagline: 'Personal buying manager & site visit coordination',
+      benefits: [
+        'Dedicated Purchase Relationship Manager',
+        'Site Visit Scheduling & Coordination',
+        'Basic Legal Title & EC Document Guidance',
+        'Seller Final Price Negotiation Support',
+        'Home Loan Pre-Approval Assistance (8.35% p.a.)',
+        '0% Brokerage on All Purchases',
+      ],
+      ctaText: 'Choose Buyer Assist',
+    ),
+    MobilePricingPlan(
+      id: 'buyer-elite',
+      name: 'Buyer Elite Closing',
+      badge: 'Comprehensive',
+      priceMonthly: 1999,
+      priceYearly: 1499,
+      mrpMonthly: 3999,
+      validity: '90 Days',
+      tagline: 'End-to-end legal verification & purchase closing',
+      benefits: [
+        'Dedicated Senior Property Advisor',
+        'Comprehensive Legal Title & Encumbrance Verification',
+        'Physical Property Inspection Support',
+        'Final Best Price Negotiation on Your Behalf',
+        'Sale Agreement Legal Drafting Support',
+        'Priority Sub-Registrar Registration Guidance',
+      ],
+      ctaText: 'Choose Elite Closing',
+    ),
+  ];
 
-  double get _currentAmount {
-    final parsed = double.tryParse(_amountController.text.replaceAll(',', '').trim());
-    return (parsed != null && parsed > 0) ? parsed : 0.0;
-  }
+  // ── SELLER PLANS (from website SELLER_PROMOTION_PLANS) ──
+  static const List<MobilePricingPlan> _sellerPlans = [
+    MobilePricingPlan(
+      id: 'seller-basic',
+      name: 'Free Sale Listing',
+      priceMonthly: 0,
+      priceYearly: 0,
+      mrpMonthly: 0,
+      validity: 'Unlimited',
+      tagline: 'List your residential / commercial property for free',
+      benefits: [
+        '1 Free Property Sale Listing',
+        'Direct Buyer Inquiries via Phone',
+        'Standard Platform Search Discovery',
+        'High-Resolution Photo Gallery',
+        '100% Zero Brokerage on Final Sale',
+      ],
+      ctaText: 'List Property Free',
+    ),
+    MobilePricingPlan(
+      id: 'seller-showcase',
+      name: 'Fast-Track Sale Showcase',
+      badge: 'Most Popular',
+      priceMonthly: 999,
+      priceYearly: 699,
+      mrpMonthly: 1999,
+      validity: '45 Days',
+      popular: true,
+      tagline: 'Top search placement to attract serious genuine buyers',
+      benefits: [
+        'Topmost Search & Category Priority',
+        'Exclusive "Verified Seller" Badge',
+        'Instant High-Budget Buyer Notifications',
+        'Buyer Screened Inquiries (No Brokers)',
+        'Priority Listing Verification',
+        'Corridor Spotlight Placement',
+      ],
+      ctaText: 'Boost My Sale',
+    ),
+    MobilePricingPlan(
+      id: 'seller-managed',
+      name: 'Seller Express Managed',
+      badge: 'End-to-End',
+      priceMonthly: 2499,
+      priceYearly: 1799,
+      mrpMonthly: 4999,
+      validity: '90 Days',
+      tagline: 'Dedicated manager for calls, screening & visits',
+      benefits: [
+        'Dedicated Relationship Manager for Sale',
+        'Pre-Screening Buyer Financial Capability',
+        'Assisted Buyer Visit Coordination',
+        'Legal Sale Agreement Drafting Support',
+        'Documentation & Title Deed Advisory',
+        '0% Brokerage Guarantee on Final Sale',
+      ],
+      ctaText: 'Choose Express Managed',
+    ),
+  ];
 
-  double get _convenienceFee {
-    if (_selectedMethod == PaymentMethod.creditCard) {
-      // Nominal 1% for credit card reward processing
-      return (_currentAmount * 0.01).roundToDouble();
+  List<MobilePricingPlan> get _currentPlans {
+    switch (_selectedPersona) {
+      case PlanPersona.tenant:
+        return _tenantPlans;
+      case PlanPersona.owner:
+        return _ownerPlans;
+      case PlanPersona.buyer:
+        return _buyerPlans;
+      case PlanPersona.seller:
+        return _sellerPlans;
     }
-    return 0.0;
   }
 
-  double get _totalPayable => _currentAmount + _convenienceFee;
-
-  void _onQuickAmountTap(int amt) {
-    setState(() {
-      _amountController.text = amt.toString();
-    });
-  }
-
-  void _handleProceedToPay() {
-    final amt = _currentAmount;
-    if (amt < 500) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Minimum payment amount is ₹500'),
-          backgroundColor: Color(0xFFDC2626),
-        ),
-      );
+  void _handleSelectPlan(MobilePricingPlan plan) {
+    if (plan.priceMonthly == 0) {
+      context.push('/post-property');
       return;
     }
 
-    if (_landlordNameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter Landlord / Beneficiary name'),
-          backgroundColor: Color(0xFFDC2626),
-        ),
-      );
-      return;
-    }
+    final price = _selectedCycle == BillingCycle.yearly
+        ? plan.priceYearly
+        : plan.priceMonthly;
+    final gst = (price * 0.18).round();
+    final total = price + gst;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _buildPaymentConfirmationSheet(ctx),
-    );
-  }
-
-  Widget _buildPaymentConfirmationSheet(BuildContext ctx) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        24,
-        20,
-        24,
-        MediaQuery.of(ctx).viewInsets.bottom + 32,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(2),
-              ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFECFDF5),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.verified_user_rounded, color: Color(0xFF16A34A), size: 24),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Confirm & Pay Securely',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
-                      ),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              20,
+              24,
+              MediaQuery.of(ctx).viewInsets.bottom + 28,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCBD5E1),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    Text(
-                      'Seedha Pay • 256-Bit Encrypted Transfer',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFECFDF5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.verified_user_rounded,
+                          color: Color(0xFF16A34A), size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            plan.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          Text(
+                            'Validity: ${plan.validity} • 0% Brokerage',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF16A34A),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              children: [
-                _confirmRow('Payment For', _selectedType.label),
-                const Divider(height: 16, thickness: 1, color: Color(0xFFE2E8F0)),
-                _confirmRow('Beneficiary', _landlordNameController.text.trim()),
-                const Divider(height: 16, thickness: 1, color: Color(0xFFE2E8F0)),
-                _confirmRow(
-                  _isUpiTransfer ? 'UPI ID' : 'Account',
-                  _isUpiTransfer ? _upiIdController.text.trim() : _accountNoController.text.trim(),
+                const SizedBox(height: 18),
+
+                // Order breakdown card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${plan.name} (${_selectedCycle == BillingCycle.yearly ? 'Yearly' : 'Monthly'})',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF475569),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '₹$price',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'GST (18% Govt Tax)',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          Text(
+                            '₹$gst',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total Amount Payable',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          Text(
+                            '₹$total',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0F766E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const Divider(height: 16, thickness: 1, color: Color(0xFFE2E8F0)),
-                _confirmRow('Amount', '₹${_currentAmount.toStringAsFixed(0)}'),
-                if (_convenienceFee > 0) ...[
-                  const Divider(height: 16, thickness: 1, color: Color(0xFFE2E8F0)),
-                  _confirmRow('Processing Fee', '₹${_convenienceFee.toStringAsFixed(0)}'),
-                ],
-                const Divider(height: 16, thickness: 1, color: Color(0xFFE2E8F0)),
-                _confirmRow(
-                  'Total Payable',
-                  '₹${_totalPayable.toStringAsFixed(0)}',
-                  isTotal: true,
+                const SizedBox(height: 18),
+
+                // Payment Method Selector
+                const Text(
+                  'Select Payment Method',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF334155),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _paymentMethodChip('UPI', Icons.qr_code_rounded, setModalState),
+                    const SizedBox(width: 8),
+                    _paymentMethodChip('Card', Icons.credit_card_rounded, setModalState),
+                    const SizedBox(width: 8),
+                    _paymentMethodChip('Net Banking', Icons.account_balance_outlined, setModalState),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Confirm CTA
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Subscribed to ${plan.name}! Order created successfully.'),
+                        backgroundColor: const Color(0xFF0F766E),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Proceed to Pay ₹$total',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showSuccessDialog();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE11D48),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 52),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.lock_rounded, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  'Pay ₹${_totalPayable.toStringAsFixed(0)} with ${_selectedMethod.title}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _confirmRow(String label, String value, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isTotal ? 14 : 13,
-            fontWeight: isTotal ? FontWeight.w800 : FontWeight.w500,
-            color: isTotal ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+  Widget _paymentMethodChip(String method, IconData icon, StateSetter setModalState) {
+    final isSelected = _selectedPaymentMethod == method;
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setModalState(() {
+            _selectedPaymentMethod = method;
+          });
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFCBD5E1),
+              width: isSelected ? 1.6 : 1.0,
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isTotal ? 16 : 13,
-            fontWeight: isTotal ? FontWeight.w900 : FontWeight.w700,
-            color: isTotal ? const Color(0xFF0F766E) : const Color(0xFF0F172A),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(24),
-          content: Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFECFDF5),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 48),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Payment Successful!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '₹${_totalPayable.toStringAsFixed(0)} has been queued for instant credit to ${_landlordNameController.text.trim()}.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13.5, color: Color(0xFF64748B), height: 1.4),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'TXN ID: SPAY-2026-9481237',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF475569)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('HRA Rent Receipt downloaded successfully to your device.')),
-                        );
-                      },
-                      icon: const Icon(Icons.receipt_long_rounded, size: 16),
-                      label: const Text('Receipt', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold)),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF0F766E),
-                        side: const BorderSide(color: Color(0xFF0F766E)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
+              Icon(icon, size: 15, color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF64748B)),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  method,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: isSelected ? const Color(0xFF15803D) : const Color(0xFF334155),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F766E),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Done', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -347,75 +612,63 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 1,
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF0F172A)),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/search');
-            }
-          },
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color(0xFF16A34A),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 16),
-            ),
-            const SizedBox(width: 8),
             RichText(
               text: const TextSpan(
                 children: [
                   TextSpan(
-                    text: 'SEEDHA ',
+                    text: 'SEEDHA PAY ',
                     style: TextStyle(
-                      color: Color(0xFF16A34A),
+                      color: Color(0xFF0F766E),
                       fontWeight: FontWeight.w900,
-                      fontSize: 16,
+                      fontSize: 17,
                       letterSpacing: -0.3,
                     ),
                   ),
                   TextSpan(
-                    text: 'PAY',
+                    text: '& PLANS',
                     style: TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                      color: Color(0xFF0F172A),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 17,
                       letterSpacing: -0.3,
                     ),
                   ),
                 ],
               ),
             ),
+            const Text(
+              '100% DIRECT OWNER • 0% BROKERAGE',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w700,
+                fontSize: 9,
+                letterSpacing: 0.5,
+              ),
+            ),
           ],
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 14),
+            margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: const Color(0xFFECFDF5),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFA7F3D0)),
+              border: Border.all(color: const Color(0xFFBBF7D0)),
             ),
             child: const Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock_rounded, size: 13, color: Color(0xFF16A34A)),
+                Icon(Icons.verified_rounded, size: 14, color: Color(0xFF16A34A)),
                 SizedBox(width: 4),
                 Text(
                   '100% Secure',
                   style: TextStyle(
+                    color: Color(0xFF15803D),
+                    fontWeight: FontWeight.w800,
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF16A34A),
                   ),
                 ),
               ],
@@ -433,29 +686,19 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             // Hero Promotion Card
             _buildHeroBanner(),
 
-            // Payment Type Chips
-            _buildPaymentTypeSelector(),
+            // Persona Selector (Tenant, Owner, Buyer, Seller)
+            _buildPersonaSelector(),
 
-            // Amount Input Card
-            _buildAmountCard(),
+            // Billing Cycle Toggle (Monthly vs Yearly)
+            _buildBillingCycleToggle(),
 
-            // Landlord & Transfer Details
-            _buildLandlordDetailsCard(),
+            // Plans Cards
+            _buildPlansList(),
 
-            // Payment Method Selector
-            _buildPaymentMethodCard(),
-
-            // Summary & Breakdown
-            _buildSummaryCard(),
-
-            // Past Payments Section
-            _buildPastPaymentsSection(),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 36),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomPayBar(),
     );
   }
 
@@ -530,19 +773,19 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF1F2),
+                color: const Color(0xFFECFDF5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFFFCCD3), width: 1.2),
+                border: Border.all(color: const Color(0xFF10B981), width: 1.4),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.credit_card_rounded, size: 18, color: Color(0xFFE11D48)),
+                  Icon(Icons.credit_card_rounded, size: 18, color: Color(0xFF0F766E)),
                   SizedBox(width: 6),
                   Text(
                     'Payments',
                     style: TextStyle(
-                      color: Color(0xFFE11D48),
+                      color: Color(0xFF0F766E),
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                     ),
@@ -558,109 +801,90 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
 
   Widget _buildHeroBanner() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      margin: const EdgeInsets.fromLTRB(16, 14, 16, 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          colors: [Color(0xFF064E3B), Color(0xFF0F766E)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 10,
+            color: const Color(0xFF0F766E).withValues(alpha: 0.25),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'EARN UPTO 3% CASHBACK',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFFB45309)),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Pay Rent Using Credit Card',
+                Icon(Icons.star_rounded, size: 14, color: Color(0xFFFDE047)),
+                SizedBox(width: 4),
+                Text(
+                  '100% DIRECT OWNER ASSISTANCE',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
                     color: Colors.white,
-                    height: 1.2,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
                   ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  '• 45 Days Interest-Free Credit\n• Free Instant HRA Rent Receipts\n• Direct Landlord Bank / UPI Credit',
-                  style: TextStyle(fontSize: 12, color: Color(0xFFCBD5E1), height: 1.4),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(height: 12),
+          const Text(
+            'Assisted Plans & Membership',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Save thousands in brokerage. Get dedicated relationship managers, verified direct contacts, and legal support.',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: Colors.white.withValues(alpha: 0.88),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.10),
-              shape: BoxShape.circle,
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.credit_score_rounded, color: Color(0xFFF59E0B), size: 36),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentTypeSelector() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Select Payment Purpose',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)),
-          ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: PaymentType.values.map((type) {
-                final isSelected = _selectedType == type;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    avatar: Icon(
-                      type.icon,
-                      size: 16,
-                      color: isSelected ? Colors.white : const Color(0xFF64748B),
-                    ),
-                    label: Text(type.label),
-                    selected: isSelected,
-                    selectedColor: const Color(0xFF0F766E),
-                    backgroundColor: Colors.white,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
-                    ),
-                    onSelected: (_) => setState(() => _selectedType = type),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.verified_outlined, size: 14, color: Color(0xFF0F766E)),
+                SizedBox(width: 6),
+                Text(
+                  '0% BROKERAGE GUARANTEE',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF0F766E),
+                    letterSpacing: 0.4,
                   ),
-                );
-              }).toList(),
+                ),
+              ],
             ),
           ),
         ],
@@ -668,59 +892,70 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     );
   }
 
-  Widget _buildAmountCard() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
+  Widget _buildPersonaSelector() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Enter Amount',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              prefixText: '₹ ',
-              prefixStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFF0F766E)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            'Are you a Tenant, Owner, Buyer or Seller?',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
             ),
           ),
           const SizedBox(height: 10),
           Row(
-            children: [10000, 20000, 30000, 50000].map((amt) {
+            children: PlanPersona.values.map((persona) {
+              final isSelected = _selectedPersona == persona;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 3),
-                  child: OutlinedButton(
-                    onPressed: () => _onQuickAmountTap(amt),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text(
-                      '₹${amt ~/ 1000}k',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                  child: InkWell(
+                    onTap: () => setState(() => _selectedPersona = persona),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                          width: isSelected ? 1.8 : 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isSelected ? 0.05 : 0.02),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(persona.emoji, style: const TextStyle(fontSize: 20)),
+                          const SizedBox(height: 4),
+                          Text(
+                            persona.label,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              color: isSelected ? const Color(0xFF14532D) : const Color(0xFF1E293B),
+                            ),
+                          ),
+                          Text(
+                            persona.subtitle,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: Color(0xFF64748B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -732,380 +967,279 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     );
   }
 
-  Widget _buildLandlordDetailsCard() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Landlord / Beneficiary',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-              ),
-              Row(
-                children: [
-                  ChoiceChip(
-                    label: const Text('UPI ID', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                    selected: _isUpiTransfer,
-                    selectedColor: const Color(0xFF0F766E),
-                    labelStyle: TextStyle(color: _isUpiTransfer ? Colors.white : Colors.black87),
-                    onSelected: (_) => setState(() => _isUpiTransfer = true),
-                  ),
-                  const SizedBox(width: 6),
-                  ChoiceChip(
-                    label: const Text('Bank A/C', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                    selected: !_isUpiTransfer,
-                    selectedColor: const Color(0xFF0F766E),
-                    labelStyle: TextStyle(color: !_isUpiTransfer ? Colors.white : Colors.black87),
-                    onSelected: (_) => setState(() => _isUpiTransfer = false),
-                  ),
-                ],
-              ),
-            ],
+  Widget _buildBillingCycleToggle() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
-          const SizedBox(height: 12),
-          _field('Landlord Full Name', _landlordNameController, hint: 'e.g. Ramesh Sharma'),
-          const SizedBox(height: 10),
-          _field('Landlord Mobile Number', _landlordPhoneController, hint: '10-digit mobile number', keyboardType: TextInputType.phone),
-          const SizedBox(height: 10),
-          if (_isUpiTransfer)
-            _field('Landlord UPI ID', _upiIdController, hint: 'e.g. landlord@okhdfcbank')
-          else ...[
-            _field('Bank Account Number', _accountNoController, hint: 'Enter account number', keyboardType: TextInputType.number),
-            const SizedBox(height: 10),
-            _field('Bank IFSC Code', _ifscController, hint: 'e.g. HDFC0001234'),
-          ],
-          const SizedBox(height: 10),
-          _field('Rental Property Address', _propertyAddressController, hint: 'Flat / House number, Society, Locality'),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Checkbox(
-                value: _needHraReceipt,
-                activeColor: const Color(0xFF0F766E),
-                onChanged: (v) => setState(() => _needHraReceipt = v ?? true),
-              ),
-              const Expanded(
-                child: Text(
-                  'Generate Instant HRA Rent Receipt with Owner PAN (Free PDF)',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _field(String label, TextEditingController ctrl, {String? hint, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
-        ),
-        const SizedBox(height: 5),
-        TextField(
-          controller: ctrl,
-          keyboardType: keyboardType,
-          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentMethodCard() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Payment Mode',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-          ),
-          const SizedBox(height: 10),
-          ...PaymentMethod.values.map((method) {
-            final isSelected = _selectedMethod == method;
-            return GestureDetector(
-              onTap: () => setState(() => _selectedMethod = method),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
-                    width: isSelected ? 1.5 : 1.0,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      method.icon,
-                      color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF64748B),
-                      size: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            method.title,
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF334155),
-                            ),
-                          ),
-                          Text(
-                            method.subtitle,
-                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Radio<PaymentMethod>(
-                      value: method,
-                      groupValue: _selectedMethod,
-                      activeColor: const Color(0xFF16A34A),
-                      onChanged: (v) {
-                        if (v != null) setState(() => _selectedMethod = v);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          _summaryRow('Rent Amount', '₹${_currentAmount.toStringAsFixed(0)}'),
-          const SizedBox(height: 6),
-          _summaryRow(
-            'Payment Gateway Fee',
-            _convenienceFee > 0 ? '₹${_convenienceFee.toStringAsFixed(0)} (1%)' : 'FREE (0%)',
-            highlight: _convenienceFee == 0,
-          ),
-          const SizedBox(height: 6),
-          _summaryRow('Instant HRA Receipt', 'Included (FREE)', highlight: true),
-          const Divider(height: 16, thickness: 1, color: Color(0xFFCBD5E1)),
-          _summaryRow(
-            'Total Amount',
-            '₹${_totalPayable.toStringAsFixed(0)}',
-            isBold: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryRow(String label, String value, {bool isBold = false, bool highlight = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isBold ? 14 : 12.5,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
-            color: isBold ? const Color(0xFF0F172A) : const Color(0xFF475569),
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? 15 : 12.5,
-            fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
-            color: highlight
-                ? const Color(0xFF16A34A)
-                : (isBold ? const Color(0xFF0F172A) : const Color(0xFF334155)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPastPaymentsSection() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Recent Payment History',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-              ),
-              Text(
-                '1 Recorded',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.grey.shade500),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: BillingCycle.values.map((cycle) {
+              final isSelected = _selectedCycle == cycle;
+              return GestureDetector(
+                onTap: () => setState(() => _selectedCycle = cycle),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(8),
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ]
+                        : null,
                   ),
-                  child: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF16A34A), size: 20),
+                  child: Text(
+                    cycle.label,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected ? const Color(0xFF0F766E) : const Color(0xFF64748B),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlansList() {
+    final plans = _currentPlans;
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: plans.length,
+      itemBuilder: (context, index) {
+        final plan = plans[index];
+        final price = _selectedCycle == BillingCycle.yearly
+            ? plan.priceYearly
+            : plan.priceMonthly;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: plan.popular ? const Color(0xFF10B981) : const Color(0xFFE2E8F0),
+              width: plan.popular ? 2.0 : 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: plan.popular ? 0.08 : 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Badge header if available
+              if (plan.badge != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: plan.popular ? const Color(0xFF0F766E) : const Color(0xFFF1F5F9),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        'August House Rent • Ramesh Sharma',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 13,
+                        color: plan.popular ? Colors.white : const Color(0xFF475569),
                       ),
+                      const SizedBox(width: 6),
                       Text(
-                        'Paid ₹25,000 on 01 Aug 2026 • UPI Transfer',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                        plan.badge!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: plan.popular ? Colors.white : const Color(0xFF475569),
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Downloading August Rent Receipt...')),
-                    );
-                  },
-                  child: const Text('Receipt', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F766E))),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBottomPayBar() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Total Payable',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                plan.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                plan.tagline,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF64748B),
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (price == 0)
+                              const Text(
+                                'FREE',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF16A34A),
+                                ),
+                              )
+                            else ...[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(
+                                    '₹$price',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF0F766E),
+                                    ),
+                                  ),
+                                  const Text(
+                                    '/mo',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (plan.mrpMonthly > price)
+                                Text(
+                                  '₹${plan.mrpMonthly}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    decoration: TextDecoration.lineThrough,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                            ],
+                            const SizedBox(height: 2),
+                            Text(
+                              'Validity: ${plan.validity}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F766E),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Feature Checklist
+                    const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                    const SizedBox(height: 14),
+                    ...plan.benefits.map((benefit) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                padding: const EdgeInsets.all(2),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFDCFCE7),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.check_rounded,
+                                    size: 13, color: Color(0xFF15803D)),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  benefit,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    color: Color(0xFF334155),
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                    const SizedBox(height: 14),
+
+                    // CTA Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _handleSelectPlan(plan),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: plan.popular
+                              ? const Color(0xFF0F766E)
+                              : const Color(0xFF0F172A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          plan.ctaText,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '₹${_totalPayable.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: ElevatedButton(
-              onPressed: _handleProceedToPay,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE11D48),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock_rounded, size: 16),
-                  SizedBox(width: 6),
-                  Text('Proceed to Pay', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
-                ],
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

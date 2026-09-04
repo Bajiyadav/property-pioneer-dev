@@ -131,6 +131,14 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const PaymentsScreen(),
     ),
     GoRoute(
+      path: '/plans',
+      builder: (context, state) => const PaymentsScreen(),
+    ),
+    GoRoute(
+      path: '/pricing',
+      builder: (context, state) => const PaymentsScreen(),
+    ),
+    GoRoute(
       path: '/services',
       builder: (context, state) => const ServicesScreen(),
     ),
