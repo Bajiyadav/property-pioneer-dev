@@ -35,7 +35,7 @@ export type OtpRequestResult =
 export async function requestEmailOtp(email: string, next?: string): Promise<OtpRequestResult> {
   const normEmail = normalizeEmail(email);
 
-  // 1. Try native Seedha Java 21 backend first
+  // 1. Native Seedha in-house OTP engine (/api/v2/auth/otp/request)
   try {
     const nativeRes = await fetch("/api/v2/auth/otp/request", {
       method: "POST",
@@ -46,14 +46,23 @@ export async function requestEmailOtp(email: string, next?: string): Promise<Otp
         purpose: "LOGIN",
       }),
     });
-    if (nativeRes.ok) {
-      const data = await nativeRes.json().catch(() => ({}));
-      if (data?.ok === true) {
-        return { ok: true, next: safeNextPath(next) };
-      }
+    const data = (await nativeRes.json().catch(() => ({}))) as {
+      ok?: boolean;
+      message?: string;
+      cooldown_seconds?: number;
+    };
+    if (nativeRes.ok && data?.ok === true) {
+      return { ok: true, next: safeNextPath(next) };
+    }
+    if (nativeRes.status === 429 || (!nativeRes.ok && data?.message)) {
+      return {
+        ok: false,
+        error: data.message || "Could not send verification code.",
+        retryAfterSeconds: data.cooldown_seconds || (nativeRes.status === 429 ? 60 : undefined),
+      };
     }
   } catch {
-    // Fall back to serverless proxy
+    // Fall back to secondary proxy if network fails
   }
 
   let res: Response;
@@ -79,10 +88,18 @@ export async function requestEmailOtp(email: string, next?: string): Promise<Otp
   };
 }
 
-export type OtpVerifyResult = { ok: true } | { ok: false; error: string };
+export type OtpVerifiedUser = {
+  id?: string;
+  email?: string;
+  full_name?: string;
+  role?: string;
+  phone?: string;
+};
+
+export type OtpVerifyResult = { ok: true; user?: OtpVerifiedUser } | { ok: false; error: string };
 
 /**
- * Exchanges a 6-digit code for a session.
+ * Exchanges a 6-digit code for an authenticated session.
  */
 export async function verifyEmailOtp(email: string, token: string): Promise<OtpVerifyResult> {
   const code = token.trim();
@@ -92,7 +109,7 @@ export async function verifyEmailOtp(email: string, token: string): Promise<OtpV
 
   const normEmail = normalizeEmail(email);
 
-  // 1. Try native Seedha Java 21 backend (/api/v2/auth/otp/verify)
+  // 1. Native Seedha in-house OTP engine (/api/v2/auth/otp/verify)
   try {
     const nativeRes = await fetch("/api/v2/auth/otp/verify", {
       method: "POST",
@@ -103,15 +120,24 @@ export async function verifyEmailOtp(email: string, token: string): Promise<OtpV
         purpose: "LOGIN",
       }),
     });
-    if (nativeRes.ok) {
-      const data = await nativeRes.json().catch(() => ({}));
-      if (data?.ok === true && data?.auth?.token) {
-        localStorage.setItem("seedha_auth_token", data.auth.token);
-        if (data.auth.refresh_token) {
-          localStorage.setItem("seedha_refresh_token", data.auth.refresh_token);
-        }
-        return { ok: true };
+    const data = await nativeRes.json().catch(() => ({}));
+    const authToken = data?.token || data?.auth?.token;
+    const refreshToken = data?.refresh_token || data?.auth?.refresh_token;
+    const authUser = data?.user || data?.auth?.user;
+
+    if (nativeRes.ok && data?.ok === true && authToken) {
+      localStorage.setItem("seedha_token", authToken);
+      if (refreshToken) {
+        localStorage.setItem("seedha_refresh_token", refreshToken);
       }
+      if (authUser) {
+        localStorage.setItem("seedha_user", JSON.stringify(authUser));
+      }
+      return { ok: true, user: authUser };
+    }
+
+    if (!nativeRes.ok && data?.message) {
+      return { ok: false, error: data.message };
     }
   } catch {
     // Fall back to Supabase client
@@ -124,7 +150,6 @@ export async function verifyEmailOtp(email: string, token: string): Promise<OtpV
   });
 
   if (error) {
-    // Normalised, non-revealing messages. The code itself is never echoed.
     const m = error.message?.toLowerCase() ?? "";
     if (m.includes("expired"))
       return { ok: false, error: "That code has expired. Request a new one." };

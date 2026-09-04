@@ -101,6 +101,9 @@ import { Route as ApiPublicPropertiesIdReportRouteImport } from './routes/api/pu
 import { Route as ApiPublicPropertiesIdSaveRouteImport } from './routes/api/public/properties.$id.save'
 import { Route as ApiPublicPropertiesIdScheduleVisitRouteImport } from './routes/api/public/properties.$id.schedule-visit'
 import { Route as ApiPublicPropertiesIdShareRouteImport } from './routes/api/public/properties.$id.share'
+import { Route as ApiV2AuthOtpRequestRouteImport } from './routes/api/v2/auth/otp.request'
+import { Route as ApiV2AuthOtpResendRouteImport } from './routes/api/v2/auth/otp.resend'
+import { Route as ApiV2AuthOtpVerifyRouteImport } from './routes/api/v2/auth/otp.verify'
 import { Route as ApiV2PaymentsPromotionCreateRouteImport } from './routes/api/v2/payments/promotion.create'
 import { Route as ApiV2PaymentsPromotionStatusRouteImport } from './routes/api/v2/payments/promotion.status'
 import { Route as ApiV2PaymentsPromotionVerifyRouteImport } from './routes/api/v2/payments/promotion.verify'
@@ -586,6 +589,21 @@ const ApiPublicPropertiesIdShareRoute =
     path: '/api/public/properties/$id/share',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiV2AuthOtpRequestRoute = ApiV2AuthOtpRequestRouteImport.update({
+  id: '/otp/request',
+  path: '/otp/request',
+  getParentRoute: () => ApiV2AuthRoute,
+} as any)
+const ApiV2AuthOtpResendRoute = ApiV2AuthOtpResendRouteImport.update({
+  id: '/otp/resend',
+  path: '/otp/resend',
+  getParentRoute: () => ApiV2AuthRoute,
+} as any)
+const ApiV2AuthOtpVerifyRoute = ApiV2AuthOtpVerifyRouteImport.update({
+  id: '/otp/verify',
+  path: '/otp/verify',
+  getParentRoute: () => ApiV2AuthRoute,
+} as any)
 const ApiV2PaymentsPromotionCreateRoute =
   ApiV2PaymentsPromotionCreateRouteImport.update({
     id: '/api/v2/payments/promotion/create',
@@ -665,7 +683,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
-  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/auth': typeof ApiV2AuthRouteWithChildren
   '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
   '/api/v2/favorites': typeof ApiV2FavoritesRoute
   '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
@@ -697,6 +715,9 @@ export interface FileRoutesByFullPath {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/auth/otp/request': typeof ApiV2AuthOtpRequestRoute
+  '/api/v2/auth/otp/resend': typeof ApiV2AuthOtpResendRoute
+  '/api/v2/auth/otp/verify': typeof ApiV2AuthOtpVerifyRoute
   '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
   '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
   '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
@@ -757,7 +778,7 @@ export interface FileRoutesByTo {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
-  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/auth': typeof ApiV2AuthRouteWithChildren
   '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
   '/api/v2/favorites': typeof ApiV2FavoritesRoute
   '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
@@ -789,6 +810,9 @@ export interface FileRoutesByTo {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/auth/otp/request': typeof ApiV2AuthOtpRequestRoute
+  '/api/v2/auth/otp/resend': typeof ApiV2AuthOtpResendRoute
+  '/api/v2/auth/otp/verify': typeof ApiV2AuthOtpVerifyRoute
   '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
   '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
   '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
@@ -855,7 +879,7 @@ export interface FileRoutesById {
   '/api/auth/request-otp': typeof ApiAuthRequestOtpRoute
   '/api/auth/request-password-reset': typeof ApiAuthRequestPasswordResetRoute
   '/api/public/enquiries': typeof ApiPublicEnquiriesRoute
-  '/api/v2/auth': typeof ApiV2AuthRoute
+  '/api/v2/auth': typeof ApiV2AuthRouteWithChildren
   '/api/v2/enquiries': typeof ApiV2EnquiriesRoute
   '/api/v2/favorites': typeof ApiV2FavoritesRoute
   '/api/v2/home-loans': typeof ApiV2HomeLoansRoute
@@ -887,6 +911,9 @@ export interface FileRoutesById {
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
   '/api/public/properties/$id/schedule-visit': typeof ApiPublicPropertiesIdScheduleVisitRoute
   '/api/public/properties/$id/share': typeof ApiPublicPropertiesIdShareRoute
+  '/api/v2/auth/otp/request': typeof ApiV2AuthOtpRequestRoute
+  '/api/v2/auth/otp/resend': typeof ApiV2AuthOtpResendRoute
+  '/api/v2/auth/otp/verify': typeof ApiV2AuthOtpVerifyRoute
   '/api/v2/payments/promotion/create': typeof ApiV2PaymentsPromotionCreateRoute
   '/api/v2/payments/promotion/status': typeof ApiV2PaymentsPromotionStatusRoute
   '/api/v2/payments/promotion/verify': typeof ApiV2PaymentsPromotionVerifyRoute
@@ -985,6 +1012,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/auth/otp/request'
+    | '/api/v2/auth/otp/resend'
+    | '/api/v2/auth/otp/verify'
     | '/api/v2/payments/promotion/create'
     | '/api/v2/payments/promotion/status'
     | '/api/v2/payments/promotion/verify'
@@ -1077,6 +1107,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/auth/otp/request'
+    | '/api/v2/auth/otp/resend'
+    | '/api/v2/auth/otp/verify'
     | '/api/v2/payments/promotion/create'
     | '/api/v2/payments/promotion/status'
     | '/api/v2/payments/promotion/verify'
@@ -1174,6 +1207,9 @@ export interface FileRouteTypes {
     | '/api/public/properties/$id/save'
     | '/api/public/properties/$id/schedule-visit'
     | '/api/public/properties/$id/share'
+    | '/api/v2/auth/otp/request'
+    | '/api/v2/auth/otp/resend'
+    | '/api/v2/auth/otp/verify'
     | '/api/v2/payments/promotion/create'
     | '/api/v2/payments/promotion/status'
     | '/api/v2/payments/promotion/verify'
@@ -1220,7 +1256,7 @@ export interface RootRouteChildren {
   ApiAuthRequestOtpRoute: typeof ApiAuthRequestOtpRoute
   ApiAuthRequestPasswordResetRoute: typeof ApiAuthRequestPasswordResetRoute
   ApiPublicEnquiriesRoute: typeof ApiPublicEnquiriesRoute
-  ApiV2AuthRoute: typeof ApiV2AuthRoute
+  ApiV2AuthRoute: typeof ApiV2AuthRouteWithChildren
   ApiV2EnquiriesRoute: typeof ApiV2EnquiriesRoute
   ApiV2FavoritesRoute: typeof ApiV2FavoritesRoute
   ApiV2HomeLoansRoute: typeof ApiV2HomeLoansRoute
@@ -1897,6 +1933,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPropertiesIdShareRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/v2/auth/otp/request': {
+      id: '/api/v2/auth/otp/request'
+      path: '/otp/request'
+      fullPath: '/api/v2/auth/otp/request'
+      preLoaderRoute: typeof ApiV2AuthOtpRequestRouteImport
+      parentRoute: typeof ApiV2AuthRoute
+    }
+    '/api/v2/auth/otp/resend': {
+      id: '/api/v2/auth/otp/resend'
+      path: '/otp/resend'
+      fullPath: '/api/v2/auth/otp/resend'
+      preLoaderRoute: typeof ApiV2AuthOtpResendRouteImport
+      parentRoute: typeof ApiV2AuthRoute
+    }
+    '/api/v2/auth/otp/verify': {
+      id: '/api/v2/auth/otp/verify'
+      path: '/otp/verify'
+      fullPath: '/api/v2/auth/otp/verify'
+      preLoaderRoute: typeof ApiV2AuthOtpVerifyRouteImport
+      parentRoute: typeof ApiV2AuthRoute
+    }
     '/api/v2/payments/promotion/create': {
       id: '/api/v2/payments/promotion/create'
       path: '/api/v2/payments/promotion/create'
@@ -2046,6 +2103,22 @@ const RentalAgreementRouteWithChildren = RentalAgreementRoute._addFileChildren(
   RentalAgreementRouteChildren,
 )
 
+interface ApiV2AuthRouteChildren {
+  ApiV2AuthOtpRequestRoute: typeof ApiV2AuthOtpRequestRoute
+  ApiV2AuthOtpResendRoute: typeof ApiV2AuthOtpResendRoute
+  ApiV2AuthOtpVerifyRoute: typeof ApiV2AuthOtpVerifyRoute
+}
+
+const ApiV2AuthRouteChildren: ApiV2AuthRouteChildren = {
+  ApiV2AuthOtpRequestRoute: ApiV2AuthOtpRequestRoute,
+  ApiV2AuthOtpResendRoute: ApiV2AuthOtpResendRoute,
+  ApiV2AuthOtpVerifyRoute: ApiV2AuthOtpVerifyRoute,
+}
+
+const ApiV2AuthRouteWithChildren = ApiV2AuthRoute._addFileChildren(
+  ApiV2AuthRouteChildren,
+)
+
 interface ApiV2PropertiesRouteChildren {
   ApiV2PropertiesManageRoute: typeof ApiV2PropertiesManageRoute
 }
@@ -2099,7 +2172,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthRequestOtpRoute: ApiAuthRequestOtpRoute,
   ApiAuthRequestPasswordResetRoute: ApiAuthRequestPasswordResetRoute,
   ApiPublicEnquiriesRoute: ApiPublicEnquiriesRoute,
-  ApiV2AuthRoute: ApiV2AuthRoute,
+  ApiV2AuthRoute: ApiV2AuthRouteWithChildren,
   ApiV2EnquiriesRoute: ApiV2EnquiriesRoute,
   ApiV2FavoritesRoute: ApiV2FavoritesRoute,
   ApiV2HomeLoansRoute: ApiV2HomeLoansRoute,

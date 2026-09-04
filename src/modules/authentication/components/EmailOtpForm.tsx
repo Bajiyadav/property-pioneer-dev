@@ -4,13 +4,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { requestEmailOtp, verifyEmailOtp } from "@/modules/authentication/services/emailOtp";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/modules/authentication/context/AuthContext";
 
 /**
  * Passwordless Email-OTP sign-in, offered ALONGSIDE password and Google — never
  * replacing them. Two steps on one surface:
  *
  *   1. email → requestEmailOtp (server-rate-limited, enumeration-safe)
- *   2. 6-digit code → verifyEmailOtp (Supabase, establishes the session)
+ *   2. 6-digit code → verifyEmailOtp (Native in-house OTP engine, establishes session)
  *
  * On success it does NOT navigate itself; it hands the resolved profile to the
  * parent's onSuccess, so redirect handling (safeRedirect + the original
@@ -26,6 +27,7 @@ interface EmailOtpFormProps {
 type Stage = "email" | "code";
 
 export function EmailOtpForm({ redirect, onSuccess }: EmailOtpFormProps) {
+  const { refreshSession } = useAuth();
   const [stage, setStage] = useState<Stage>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -67,16 +69,38 @@ export function EmailOtpForm({ redirect, onSuccess }: EmailOtpFormProps) {
     phone: string;
     role: string;
   }> => {
-    const { data } = await supabase.auth.getUser();
-    const u = data.user;
-    return {
-      name: (u?.user_metadata?.full_name as string) || email.split("@")[0] || "there",
-      email: u?.email || email,
-      phone: (u?.user_metadata?.phone as string) || "",
-      // Authoritative role comes from user_roles server-side; default customer
-      // here is only a display fallback until the dashboard reloads it.
-      role: "customer",
-    };
+    try {
+      const stored = localStorage.getItem("seedha_user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        return {
+          name: u.full_name || u.fullName || email.split("@")[0] || "there",
+          email: u.email || email,
+          phone: u.phone || "",
+          role: u.role || "customer",
+        };
+      }
+    } catch {
+      // JSON parse error fallback
+    }
+
+    try {
+      const { data } = await supabase.auth.getUser();
+      const u = data.user;
+      return {
+        name: (u?.user_metadata?.full_name as string) || email.split("@")[0] || "there",
+        email: u?.email || email,
+        phone: (u?.user_metadata?.phone as string) || "",
+        role: "customer",
+      };
+    } catch {
+      return {
+        name: email.split("@")[0] || "there",
+        email,
+        phone: "",
+        role: "customer",
+      };
+    }
   };
 
   const verify = async () => {
@@ -87,7 +111,16 @@ export function EmailOtpForm({ redirect, onSuccess }: EmailOtpFormProps) {
       toast.error(result.error);
       return;
     }
-    const profile = await resolveProfile();
+    const profile = result.user
+      ? {
+          name: result.user.full_name || email.split("@")[0] || "there",
+          email: result.user.email || email,
+          phone: result.user.phone || "",
+          role: result.user.role || "customer",
+        }
+      : await resolveProfile();
+
+    await refreshSession();
     setLoading(false);
     onSuccess(profile);
   };

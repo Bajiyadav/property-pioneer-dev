@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/constants.dart';
+import '../core/network/native_api_client.dart';
 import '../models/employee_access.dart';
 import '../models/user_profile.dart';
 import 'supabase_service.dart';
@@ -122,6 +123,36 @@ class AuthService {
       token: token,
       type: type == 'signup' ? OtpType.signup : OtpType.recovery,
     ).timeout(_kNetworkTimeout);
+  }
+
+  /// In-house native Seedha OTP request via /api/v2/auth/otp/request
+  Future<Map<String, dynamic>> requestNativeOtp({
+    required String contact,
+    String purpose = 'LOGIN',
+    String? fullName,
+  }) async {
+    return await NativeApiClient().requestPhoneOtp(
+      phone: contact,
+      purpose: purpose,
+      fullName: fullName,
+    );
+  }
+
+  /// In-house native Seedha OTP verification via /api/v2/auth/otp/verify
+  Future<Map<String, dynamic>> verifyNativeOtp({
+    required String contact,
+    required String otp,
+    String purpose = 'LOGIN',
+    String? fullName,
+    String? deviceInfo,
+  }) async {
+    return await NativeApiClient().verifyPhoneOtp(
+      phone: contact,
+      otp: otp,
+      purpose: purpose,
+      fullName: fullName,
+      deviceInfo: deviceInfo,
+    );
   }
 
   Future<void> resendOtp({required String email}) async {

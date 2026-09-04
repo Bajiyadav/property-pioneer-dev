@@ -160,6 +160,8 @@ class NativeApiClient {
       final auth = data['auth'];
       if (auth is Map && auth['token'] is String) {
         _authToken = auth['token'] as String;
+      } else if (data['token'] is String) {
+        _authToken = data['token'] as String;
       }
     }
     return data;
