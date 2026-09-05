@@ -42,10 +42,16 @@ class PropertyService {
     PropertyCategory category = PropertyCategory.rent,
     String? city,
     String? locality,
+    String? cityId,
+    String? stateId,
+    String? districtId,
+    String? localityId,
     String? searchQuery,
     int? minBedrooms,
     double? minPrice,
     double? maxPrice,
+    double? minArea,
+    double? maxArea,
     String? propertyType,
     String? furnishingStatus,
     List<String>? amenities,
@@ -58,14 +64,24 @@ class PropertyService {
         category,
       );
 
-      // City filter
-      if (city != null && city.isNotEmpty && city != 'All' && city != 'All India') {
+      // Canonical Location ID filters with name fallbacks
+      if (cityId != null && cityId.isNotEmpty) {
+        query = query.eq('city_id', cityId);
+      } else if (city != null && city.isNotEmpty && city != 'All' && city != 'All India') {
         query = query.ilike('city', '%$city%');
       }
 
-      // Locality filter
-      if (locality != null && locality.isNotEmpty && locality != 'All' && locality != 'All India') {
+      if (localityId != null && localityId.isNotEmpty) {
+        query = query.eq('locality_id', localityId);
+      } else if (locality != null && locality.isNotEmpty && locality != 'All' && locality != 'All India') {
         query = query.ilike('locality', '%$locality%');
+      }
+
+      if (stateId != null && stateId.isNotEmpty) {
+        query = query.eq('state_id', stateId);
+      }
+      if (districtId != null && districtId.isNotEmpty) {
+        query = query.eq('district_id', districtId);
       }
 
       // Property Type filter
@@ -84,6 +100,14 @@ class PropertyService {
       }
       if (maxPrice != null && maxPrice > 0) {
         query = query.lte('price', maxPrice);
+      }
+
+      // Carpet area filter
+      if (minArea != null && minArea > 0) {
+        query = query.gte('area_sqft', minArea);
+      }
+      if (maxArea != null && maxArea > 0) {
+        query = query.lte('area_sqft', maxArea);
       }
 
       // Furnishing status
@@ -123,6 +147,10 @@ class PropertyService {
           city: (city != null && city.isNotEmpty && city != 'All' && city != 'All India')
               ? city
               : null,
+          cityId: cityId,
+          stateId: stateId,
+          districtId: districtId,
+          localityId: localityId,
           listingType: category == PropertyCategory.rent
               ? 'rent'
               : (category == PropertyCategory.buy ? 'sale' : null),

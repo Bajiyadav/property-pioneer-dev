@@ -5,11 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/core/network/native_api_client.dart';
-
-// State and city lists now live in AppConstants so the home screen pickers and
-// this form stay in step.
-const _availableStates = AppConstants.operatingStates;
-const _citiesByState = AppConstants.citiesByState;
+import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 
 class RentalAgreementFormScreen extends ConsumerStatefulWidget {
   const RentalAgreementFormScreen({super.key});
@@ -569,7 +565,13 @@ class _RentalAgreementFormScreenState
   }
 
   Widget _buildPropertyStep() {
-    final cities = _citiesByState[_state] ?? ['Hyderabad', 'Secunderabad'];
+    final statesAsync = ref.watch(locationApiStatesProvider);
+    final citiesAsync = ref.watch(locationApiCitiesByStateProvider(_state));
+    final availableStates = statesAsync.value?.map((s) => s.name).toList() ?? AppConstants.operatingStates;
+    final cities = citiesAsync.value?.map((c) => c.name).toList() ?? (AppConstants.citiesByState[_state] ?? ['Hyderabad', 'Secunderabad']);
+    if (!cities.contains(_city) && cities.isNotEmpty) {
+      _city = cities.first;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,9 +666,9 @@ class _RentalAgreementFormScreenState
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: _state,
+                        value: availableStates.contains(_state) ? _state : (availableStates.isNotEmpty ? availableStates.first : _state),
                         isExpanded: true,
-                        items: _availableStates
+                        items: availableStates
                             .map((s) => DropdownMenuItem(
                                   value: s,
                                   child: Text(s,
@@ -677,7 +679,7 @@ class _RentalAgreementFormScreenState
                           if (s != null) {
                             setState(() {
                               _state = s;
-                              final cList = _citiesByState[s] ?? ['Hyderabad'];
+                              final cList = ref.read(locationApiCitiesByStateProvider(s)).value?.map((c) => c.name).toList() ?? ['Hyderabad'];
                               _city = cList.first;
                             });
                           }
@@ -706,7 +708,7 @@ class _RentalAgreementFormScreenState
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: _city,
+                        value: cities.contains(_city) ? _city : (cities.isNotEmpty ? cities.first : _city),
                         isExpanded: true,
                         items: cities
                             .map((c) => DropdownMenuItem(

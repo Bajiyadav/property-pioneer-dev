@@ -22,14 +22,18 @@ interface LocationFirstAccessGateProps {
 
 export const LocationFirstAccessGate: React.FC<LocationFirstAccessGateProps> = ({
   propertyId,
-  initialCity = "Hyderabad",
+  initialCity = "",
   initialLocality = "",
   onLocationValidated,
   className = "",
 }) => {
   const { user } = useAuthSession();
   const [searchQuery, setSearchQuery] = useState(
-    initialLocality ? `${initialLocality}, ${initialCity}` : initialCity,
+    initialLocality
+      ? initialCity
+        ? `${initialLocality}, ${initialCity}`
+        : initialLocality
+      : initialCity,
   );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

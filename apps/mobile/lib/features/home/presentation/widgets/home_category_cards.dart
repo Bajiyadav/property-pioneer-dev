@@ -14,6 +14,11 @@ class LocationPickerCard extends StatelessWidget {
     required this.onCityChanged,
     this.onDetectLocation,
     this.onExploreDeals,
+    this.availableStates,
+    this.availableCities,
+    this.isLoading = false,
+    this.errorMessage,
+    this.onRetry,
   });
 
   final String? selectedState;
@@ -22,12 +27,19 @@ class LocationPickerCard extends StatelessWidget {
   final ValueChanged<String?> onCityChanged;
   final VoidCallback? onDetectLocation;
   final VoidCallback? onExploreDeals;
+  final List<String>? availableStates;
+  final List<String>? availableCities;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final cities = selectedState == null
-        ? const <String>[]
-        : (AppConstants.citiesByState[selectedState] ?? const <String>[]);
+    final states = availableStates ?? AppConstants.allStates;
+    final cities = availableCities ??
+        (selectedState == null
+            ? const <String>[]
+            : (AppConstants.citiesByState[selectedState] ?? const <String>[]));
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -70,7 +82,7 @@ class LocationPickerCard extends StatelessWidget {
               const SizedBox(width: 14),
               const Expanded(
                 child: Text(
-                  'Select a city to see local deals, or browse all categories below.',
+                  'Select a city to see verified direct-owner properties.',
                   style: TextStyle(
                     fontSize: 15,
                     height: 1.35,
@@ -81,19 +93,59 @@ class LocationPickerCard extends StatelessWidget {
               ),
             ],
           ),
+          if (errorMessage != null && cities.isEmpty) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFECACA)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded, color: Color(0xFFDC2626), size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      errorMessage!,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF991B1B)),
+                    ),
+                  ),
+                  if (onRetry != null) ...[
+                    const SizedBox(width: 6),
+                    TextButton(
+                      onPressed: onRetry,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: const Color(0xFFDC2626),
+                      ),
+                      child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (isLoading) ...[
+            const SizedBox(height: 10),
+            const LinearProgressIndicator(color: AppTheme.primaryColor, minHeight: 2),
+          ],
           const SizedBox(height: 16),
           _Dropdown(
             hint: 'Select State',
             value: selectedState,
-            items: AppConstants.operatingStates,
+            items: states,
             onChanged: onStateChanged,
           ),
           const SizedBox(height: 10),
           _Dropdown(
-            hint: selectedState == null ? 'Select City' : 'Select City',
+            hint: selectedState == null ? 'Select City' : (isLoading ? 'Loading cities...' : 'Select City'),
             value: selectedCity,
             items: cities,
-            onChanged: selectedState == null ? null : onCityChanged,
+            onChanged: (selectedState == null || isLoading) ? null : onCityChanged,
           ),
           if (selectedState != null && cities.isNotEmpty) ...[
             const SizedBox(height: 14),

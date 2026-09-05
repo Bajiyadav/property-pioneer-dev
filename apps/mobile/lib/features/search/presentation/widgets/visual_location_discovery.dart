@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
+import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 
-class VisualLocationDiscoveryWidget extends StatefulWidget {
+class VisualLocationDiscoveryWidget extends ConsumerStatefulWidget {
   const VisualLocationDiscoveryWidget({
     super.key,
     this.initialState,
@@ -17,10 +20,10 @@ class VisualLocationDiscoveryWidget extends StatefulWidget {
   final VoidCallback? onCancel;
 
   @override
-  State<VisualLocationDiscoveryWidget> createState() => _VisualLocationDiscoveryWidgetState();
+  ConsumerState<VisualLocationDiscoveryWidget> createState() => _VisualLocationDiscoveryWidgetState();
 }
 
-class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryWidget> {
+class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDiscoveryWidget> {
   String? _selectedState;
   String? _selectedCity;
   bool _isDetectingGps = false;
@@ -82,11 +85,21 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
         ),
       );
 
-      // Find nearest city from AppConstants.cityCentroids
-      String? bestCity;
-      String? bestState;
-      double minDistance = double.infinity;
+      final client = ref.read(locationApiClientProvider);
+      final searchResults = await client.searchLocations('${position.latitude},${position.longitude}', limit: 1);
+      if (searchResults.isNotEmpty) {
+        final r = searchResults.first;
+        final targetCity = r.city.isNotEmpty ? r.city : r.name;
+        final targetState = r.state;
+        if (targetState.isNotEmpty) {
+          widget.onLocationSelected(targetState, targetCity, r.latitude, r.longitude);
+          return;
+        }
+      }
 
+      // Fallback nearest city from AppConstants.cityCentroids
+      String? bestCity;
+      double minDistance = double.infinity;
       AppConstants.cityCentroids.forEach((city, coords) {
         final dist = Geolocator.distanceBetween(
           position.latitude,
@@ -101,20 +114,12 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
       });
 
       if (bestCity != null) {
-        // Resolve state
         for (final entry in AppConstants.citiesByState.entries) {
           if (entry.value.contains(bestCity)) {
-            bestState = entry.key;
-            break;
+            final coords = AppConstants.cityCentroids[bestCity] ?? [position.latitude, position.longitude];
+            widget.onLocationSelected(entry.key, bestCity!, coords[0], coords[1]);
+            return;
           }
-        }
-
-        if (bestState != null) {
-          final String targetCity = bestCity!;
-          final String targetState = bestState;
-          final coords = AppConstants.cityCentroids[targetCity] ?? [position.latitude, position.longitude];
-          widget.onLocationSelected(targetState, targetCity, coords[0], coords[1]);
-          return;
         }
       }
 
@@ -146,10 +151,15 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
     });
   }
 
-  void _onCityTap(String city) {
-    if (_selectedState == null) return;
-    final coords = AppConstants.cityCentroids[city] ?? [17.3850, 78.4867];
-    widget.onLocationSelected(_selectedState!, city, coords[0], coords[1]);
+  void _onCityTap(String city, {double? lat, double? lng}) {
+    setState(() {
+      _selectedCity = city;
+    });
+
+    if (_selectedState != null) {
+      final coords = AppConstants.cityCentroids[city] ?? [lat ?? 17.3850, lng ?? 78.4867];
+      widget.onLocationSelected(_selectedState!, city, coords[0], coords[1]);
+    }
   }
 
   @override
@@ -303,76 +313,145 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
           const SizedBox(height: 12),
 
           // State Cards Grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 2.2,
+          ref.watch(locationApiStatesProvider).when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
             ),
-            itemCount: AppConstants.operatingStates.length,
-            itemBuilder: (context, index) {
-              final state = AppConstants.operatingStates[index];
-              final isSelected = _selectedState == state;
-              final cityCount = AppConstants.citiesByState[state]?.length ?? 0;
+            error: (err, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Location data is temporarily unavailable. Please try again.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () => ref.refresh(locationApiStatesProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            data: (states) => GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 2.2,
+              ),
+              itemCount: states.length,
+              itemBuilder: (context, index) {
+                final stateNode = states[index];
+                final state = stateNode.name;
+                final isSelected = _selectedState?.toLowerCase() == state.toLowerCase();
+                final cityCount = stateNode.childCount ?? 0;
+                final imageUrl = AppConstants.stateLandmarkImages[state];
+                final landmarkTitle = AppConstants.stateLandmarkTitles[state];
 
-              return InkWell(
-                onTap: () => _onStateTap(state),
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
-                      width: isSelected ? 1.8 : 1.0,
+                return InkWell(
+                  onTap: () => _onStateTap(state),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                        width: isSelected ? 1.8 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            width: 38,
+                            height: 38,
+                            child: imageUrl != null && imageUrl.isNotEmpty
+                                ? (imageUrl.startsWith('http')
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Container(
+                                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                                          child: Icon(
+                                            Icons.location_city_rounded,
+                                            size: 16,
+                                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) => Container(
+                                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                                          child: Icon(
+                                            Icons.location_city_rounded,
+                                            size: 16,
+                                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Container(
+                                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                                          child: Icon(
+                                            Icons.location_city_rounded,
+                                            size: 16,
+                                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ))
+                                : Container(
+                                    color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
+                                    child: Icon(
+                                      Icons.location_city_rounded,
+                                      size: 16,
+                                      color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                                  color: isSelected ? const Color(0xFF14532D) : const Color(0xFF0F172A),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                landmarkTitle ?? (cityCount > 0 ? '$cityCount areas' : 'All districts'),
+                                style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.location_city_rounded,
-                          size: 14,
-                          color: isSelected ? Colors.white : const Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                color: isSelected ? const Color(0xFF14532D) : const Color(0xFF0F172A),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              '$cityCount cities',
-                              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           const SizedBox(height: 24),
 
@@ -461,78 +540,122 @@ class _VisualLocationDiscoveryWidgetState extends State<VisualLocationDiscoveryW
               ),
             )
           else ...[
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 2.3,
+            ref.watch(locationApiCitiesByStateProvider(_selectedState!)).when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
               ),
-              itemCount: (AppConstants.citiesByState[_selectedState!] ?? []).length,
-              itemBuilder: (context, index) {
-                final city = AppConstants.citiesByState[_selectedState!]![index];
-                final isSelected = _selectedCity == city;
-
-                return InkWell(
-                  onTap: () => _onCityTap(city),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFCBD5E1),
-                        width: isSelected ? 1.8 : 1.0,
+              error: (err, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Location data is temporarily unavailable. Please try again.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                       ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          blurRadius: 4,
-                          offset: Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.apartment_rounded,
-                          size: 18,
-                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF64748B),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                city,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? const Color(0xFF14532D) : const Color(0xFF0F172A),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const Text(
-                                'Explore homes',
-                                style: TextStyle(fontSize: 10.5, color: Color(0xFF16A34A)),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 12,
-                          color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFCBD5E1),
-                        ),
-                      ],
-                    ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () => ref.refresh(locationApiCitiesByStateProvider(_selectedState!)),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
+                ),
+              ),
+              data: (cities) {
+                if (cities.isEmpty) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'No cities found for this state.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                      ),
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 2.3,
+                  ),
+                  itemCount: cities.length,
+                  itemBuilder: (context, index) {
+                    final cityNode = cities[index];
+                    final city = cityNode.name;
+                    final isSelected = _selectedCity?.toLowerCase() == city.toLowerCase();
+
+                    return InkWell(
+                      onTap: () => _onCityTap(city, lat: cityNode.latitude, lng: cityNode.longitude),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFCBD5E1),
+                            width: isSelected ? 1.8 : 1.0,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x08000000),
+                              blurRadius: 4,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.apartment_rounded,
+                              size: 18,
+                              color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    city,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: isSelected ? const Color(0xFF14532D) : const Color(0xFF0F172A),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    cityNode.childCount != null && cityNode.childCount! > 0
+                                        ? '${cityNode.childCount} localities'
+                                        : 'Explore homes',
+                                    style: const TextStyle(fontSize: 10.5, color: Color(0xFF16A34A)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 12,
+                              color: isSelected ? const Color(0xFF16A34A) : const Color(0xFFCBD5E1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

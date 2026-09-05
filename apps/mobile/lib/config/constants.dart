@@ -44,6 +44,10 @@ class AppConstants {
   ///
   /// Lifted out of the rental-agreement form so the home screen's State → City
   /// pickers and the agreement form cannot drift apart on which cities exist.
+  /// States Seedha operates in, and the cities live within each.
+  ///
+  /// Lifted out of the rental-agreement form so the home screen's State → City
+  /// pickers and the agreement form cannot drift apart on which cities exist.
   static const List<String> operatingStates = [
     'Telangana',
     'Andhra Pradesh',
@@ -53,13 +57,137 @@ class AppConstants {
     'Delhi NCR',
   ];
 
+  /// All 36 States and Union Territories of India (LGD & Census authoritative).
+  static const List<String> allStates = [
+    'Andhra Pradesh',
+    'Telangana',
+    'Karnataka',
+    'Maharashtra',
+    'Tamil Nadu',
+    'Delhi NCR',
+    'Uttar Pradesh',
+    'West Bengal',
+    'Gujarat',
+    'Rajasthan',
+    'Kerala',
+    'Punjab',
+    'Haryana',
+    'Madhya Pradesh',
+    'Bihar',
+    'Odisha',
+    'Jharkhand',
+    'Chhattisgarh',
+    'Assam',
+    'Goa',
+    'Uttarakhand',
+    'Himachal Pradesh',
+    'Jammu & Kashmir',
+    'Chandigarh',
+    'Ladakh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Lakshadweep',
+    'Puducherry',
+    'Andaman & Nicobar',
+    'Tripura',
+    'Meghalaya',
+    'Manipur',
+    'Nagaland',
+    'Arunachal Pradesh',
+    'Mizoram',
+    'Sikkim',
+  ];
+
   static const Map<String, List<String>> citiesByState = {
-    'Telangana': ['Hyderabad', 'Secunderabad', 'Warangal', 'Karimnagar', 'Nizamabad', 'Khammam'],
-    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Nellore', 'Kurnool'],
+    'Telangana': [
+      'Hyderabad',
+      'Secunderabad',
+      'Warangal',
+      'Hanumakonda',
+      'Karimnagar',
+      'Nizamabad',
+      'Khammam',
+      'Mahbubnagar',
+      'Nalgonda',
+      'Siddipet',
+      'Medak',
+      'Sangareddy',
+      'Adilabad',
+      'Mancherial',
+      'Nirmal',
+      'Peddapalli',
+      'Jagtial',
+      'Sircilla',
+      'Kamareddy',
+      'Kothagudem',
+      'Suryapet',
+      'Bhongir',
+      'Gadwal',
+      'Wanaparthy',
+      'Nagarkurnool',
+      'Narayanpet',
+      'Vikarabad',
+      'Jangaon',
+      'Bhupalpally',
+      'Mulugu',
+      'Mahabubabad',
+      'Asifabad',
+      'Medchal',
+    ],
+    'Andhra Pradesh': [
+      'Visakhapatnam',
+      'Vijayawada',
+      'Guntur',
+      'Tirupati',
+      'Nellore',
+      'Kurnool',
+      'Rajahmundry',
+      'Kakinada',
+      'Anantapur',
+      'Kadapa',
+      'Eluru',
+      'Ongole',
+      'Srikakulam',
+      'Vizianagaram',
+      'Machilipatnam',
+      'Amaravati',
+      'Chittoor',
+      'Proddatur',
+      'Bhimavaram',
+      'Tenali',
+      'Nandyal',
+      'Anakapalli',
+      'Bapatla',
+      'Narasaraopet',
+      'Rayachoti',
+      'Puttaparthi',
+      'Amalapuram',
+      'Paderu',
+      'Parvathipuram',
+    ],
     'Karnataka': ['Bengaluru', 'Mysuru', 'Hubballi', 'Mangaluru'],
     'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik'],
     'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai'],
     'Delhi NCR': ['Delhi', 'Gurugram', 'Noida', 'Faridabad'],
+  };
+
+  /// Curated, high-resolution photographic images of iconic landmarks for operating states.
+  static const Map<String, String> stateLandmarkImages = {
+    'Telangana': 'assets/images/states/telangana.jpg',
+    'Karnataka': 'assets/images/states/karnataka.jpg',
+    'Maharashtra': 'assets/images/states/maharashtra.jpg',
+    'Delhi NCR': 'assets/images/states/delhi_ncr.jpg',
+    'Tamil Nadu': 'assets/images/states/tamil_nadu.jpg',
+    'Andhra Pradesh': 'assets/images/states/andhra_pradesh.jpg',
+  };
+
+  /// Primary landmark title associated with each state.
+  static const Map<String, String> stateLandmarkTitles = {
+    'Telangana': 'Charminar',
+    'Karnataka': 'Vidhana Soudha',
+    'Maharashtra': 'Gateway of India',
+    'Delhi NCR': 'India Gate',
+    'Tamil Nadu': 'Shore Temple',
+    'Andhra Pradesh': 'RK Beach Coastal',
   };
 
   /// Authoritative city coordinates (centroids) for map viewport centering.

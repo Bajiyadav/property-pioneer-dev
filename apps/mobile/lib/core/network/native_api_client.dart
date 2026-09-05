@@ -1,14 +1,40 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:seedha_properties_mobile/features/location/models/location_nodes.dart';
+
+class LocationApiException implements Exception {
+  final String message;
+  const LocationApiException(this.message);
+  @override
+  String toString() => message;
+}
 
 /// Native API Client for Seedha Deals Flutter App
-/// Connects directly to AWS ALB / ECS backend running /api/v2/* endpoints.
+/// Connects directly to Java Spring Boot /api/v2/* endpoints.
 class NativeApiClient {
   static final NativeApiClient _instance = NativeApiClient._internal();
   factory NativeApiClient() => _instance;
   NativeApiClient._internal();
 
-  String _baseUrl = 'https://api.seedhaproperties.com';
+  String _baseUrl = () {
+    const customUrl = String.fromEnvironment('API_BASE_URL');
+    if (customUrl.isNotEmpty) {
+      if (customUrl.endsWith('/api')) {
+        return customUrl.substring(0, customUrl.length - 4);
+      }
+      return customUrl;
+    }
+    if (kReleaseMode) {
+      return 'https://api.seedhaproperties.com';
+    }
+    if (kIsWeb) {
+      return 'http://localhost:8080';
+    }
+    return defaultTargetPlatform == TargetPlatform.android
+        ? 'http://10.0.2.2:8080'
+        : 'http://localhost:8080';
+  }();
   String? _authToken;
 
   void setBaseUrl(String url) {
@@ -168,11 +194,23 @@ class NativeApiClient {
   }
 
   // --- Properties ---
-  Future<List<dynamic>> fetchProperties({String? city, String? listingType, int limit = 20}) async {
+  Future<List<dynamic>> fetchProperties({
+    String? city,
+    String? cityId,
+    String? stateId,
+    String? districtId,
+    String? localityId,
+    String? listingType,
+    int limit = 20,
+  }) async {
     final uri = Uri.parse('$_baseUrl/api/v2/properties').replace(
       queryParameters: {
-        if (city != null) 'city': city,
-        if (listingType != null) 'listingType': listingType,
+        if (city != null && city.isNotEmpty) 'city': city,
+        if (cityId != null && cityId.isNotEmpty) 'cityId': cityId,
+        if (stateId != null && stateId.isNotEmpty) 'stateId': stateId,
+        if (districtId != null && districtId.isNotEmpty) 'districtId': districtId,
+        if (localityId != null && localityId.isNotEmpty) 'localityId': localityId,
+        if (listingType != null && listingType.isNotEmpty) 'listingType': listingType,
         'limit': limit.toString(),
       },
     );
@@ -363,5 +401,184 @@ class NativeApiClient {
       headers: _headers,
     );
     return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  // --- Locations Master (/api/v2/locations/*) ---
+
+  List<dynamic> _unwrapListData(http.Response response) {
+    if (response.statusCode == 200) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        final data = decoded['data'];
+        if (data is List) return data;
+      } else if (decoded is List) {
+        return decoded;
+      }
+      return [];
+    } else if (response.statusCode == 503) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    } else {
+      throw LocationApiException('Failed to fetch location data (HTTP ${response.statusCode}).');
+    }
+  }
+
+  Map<String, dynamic>? _unwrapMapData(http.Response response) {
+    if (response.statusCode == 200) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        final data = decoded['data'];
+        if (data is Map<String, dynamic>) return data;
+        return decoded;
+      }
+      return null;
+    } else if (response.statusCode == 404) {
+      return null;
+    } else if (response.statusCode == 503) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    } else {
+      throw LocationApiException('Failed to fetch location data (HTTP ${response.statusCode}).');
+    }
+  }
+
+  /// Get all 28 States and 8 Union Territories
+  Future<List<LocationNode>> getStates() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/states'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationNode.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Get official districts for a state
+  Future<List<LocationNode>> getDistricts(String stateId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/states/${Uri.encodeComponent(stateId)}/districts'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationNode.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Get cities/towns in a district
+  Future<List<LocationNode>> getCitiesByDistrict(String districtId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/districts/${Uri.encodeComponent(districtId)}/cities'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationNode.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Get all cities/towns across an entire state
+  Future<List<LocationNode>> getCitiesByState(String stateId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/states/${Uri.encodeComponent(stateId)}/cities'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationNode.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Backward-compatible getCities helper
+  Future<List<Map<String, dynamic>>> getCities(String districtId) async {
+    try {
+      final nodes = await getCitiesByDistrict(districtId);
+      return nodes.map((n) => n.toJson()).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Get localities under a city node
+  Future<List<LocationItem>> getLocalities(String cityId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/cities/${Uri.encodeComponent(cityId)}/localities'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationItem.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Get PIN codes under a city
+  Future<List<LocationNode>> getPincodes(String cityId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/cities/${Uri.encodeComponent(cityId)}/pincodes'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationNode.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Lookup PIN code details
+  Future<LocationNode?> getPincodeDetails(String pincode) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v2/locations/pincodes/${Uri.encodeComponent(pincode)}'),
+        headers: _headers,
+      ).timeout(const Duration(seconds: 12));
+      final map = _unwrapMapData(response);
+      if (map == null) return null;
+      return LocationNode.fromJson(map);
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
+  }
+
+  /// Autocomplete and natural search across locations
+  Future<List<LocationItem>> searchLocations(String query, {String? state, int limit = 10}) async {
+    if (query.trim().length < 2) return [];
+    try {
+      final params = {'q': query, 'limit': limit.toString()};
+      if (state != null && state.isNotEmpty) {
+        params['state'] = state;
+      }
+      final uri = Uri.parse('$_baseUrl/api/v2/locations/search').replace(queryParameters: params);
+      final response = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 12));
+      final list = _unwrapListData(response);
+      return list.map((e) => LocationItem.fromJson(e as Map<String, dynamic>)).toList();
+    } on LocationApiException {
+      rethrow;
+    } catch (e) {
+      throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
+    }
   }
 }

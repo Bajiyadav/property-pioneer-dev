@@ -10,6 +10,10 @@ class SelectedLocation {
   final double longitude;
   final String? placeId;
   final bool isValidated;
+  final String? stateId;
+  final String? districtId;
+  final String? cityId;
+  final String? localityId;
 
   SelectedLocation({
     required this.formattedAddress,
@@ -21,6 +25,10 @@ class SelectedLocation {
     required this.longitude,
     this.placeId,
     required this.isValidated,
+    this.stateId,
+    this.districtId,
+    this.cityId,
+    this.localityId,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +42,10 @@ class SelectedLocation {
       'longitude': longitude,
       'placeId': placeId,
       'isValidated': isValidated,
+      'stateId': stateId,
+      'districtId': districtId,
+      'cityId': cityId,
+      'localityId': localityId,
     };
   }
 
@@ -48,6 +60,10 @@ class SelectedLocation {
       longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
       placeId: map['placeId'] as String?,
       isValidated: map['isValidated'] as bool? ?? false,
+      stateId: map['stateId'] as String?,
+      districtId: map['districtId'] as String?,
+      cityId: map['cityId'] as String?,
+      localityId: map['localityId'] as String?,
     );
   }
 

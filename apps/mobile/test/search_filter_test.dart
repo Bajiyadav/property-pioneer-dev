@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/features/search/presentation/search_screen.dart';
+import 'package:seedha_properties_mobile/features/location/models/location_nodes.dart';
+import 'package:seedha_properties_mobile/features/location/providers/location_providers.dart';
 import 'package:seedha_properties_mobile/models/property.dart';
 import 'package:seedha_properties_mobile/providers/app_providers.dart';
 import 'package:seedha_properties_mobile/services/property_service.dart';
@@ -32,11 +34,17 @@ class _FakePropertyService implements PropertyService {
   Future<List<Property>> fetchProperties({
     PropertyCategory category = PropertyCategory.rent,
     String? city,
+    String? cityId,
+    String? stateId,
+    String? districtId,
     String? locality,
+    String? localityId,
     String? searchQuery,
     int? minBedrooms,
     double? minPrice,
     double? maxPrice,
+    double? minArea,
+    double? maxArea,
     String? propertyType,
     String? furnishingStatus,
     List<String>? amenities,
@@ -99,12 +107,17 @@ void main() {
     expect(bar.items.length, 4);
   });
 
-  testWidgets('SearchScreen renders NoBroker-inspired discovery header and controls', (WidgetTester tester) async {
+  testWidgets('SearchScreen renders premium real estate discovery UI and controls', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           propertyServiceProvider.overrideWithValue(_FakePropertyService()),
           authServiceProvider.overrideWithValue(_FakeAuthService()),
+          locationApiStatesProvider.overrideWith((ref) => Future.value([
+            const LocationNode(id: 'in-ts', type: 'STATE', name: 'Telangana', lat: 17.1232, lng: 79.2088, childCount: 33),
+            const LocationNode(id: 'in-ka', type: 'STATE', name: 'Karnataka', lat: 15.3173, lng: 75.7139, childCount: 31),
+            const LocationNode(id: 'in-mh', type: 'STATE', name: 'Maharashtra', lat: 19.7515, lng: 75.7139, childCount: 36),
+          ])),
         ],
         child: const MaterialApp(
           home: SearchScreen(),
@@ -118,26 +131,38 @@ void main() {
     expect(find.text('Home'), findsWidgets);
     expect(find.text('Payments'), findsWidgets);
 
-    // Tagline & Category Tabs
-    expect(find.text('100% Owner Properties | Zero Brokerage'), findsOneWidget);
+    // Header & Tagline
+    expect(find.text('100% Owner Properties | Zero Brokerage'), findsWidgets);
+    expect(find.text('Find Your Perfect Property'), findsOneWidget);
+
+    // Location & Category Intent Steps
+    expect(find.text('1. Where are you looking?'), findsOneWidget);
+    expect(find.text('2. Choose your city'), findsOneWidget);
+    expect(find.text('3. What are you looking for?'), findsOneWidget);
+
     expect(find.text('Buy'), findsOneWidget);
     expect(find.text('Rent'), findsOneWidget);
     expect(find.text('Commercial'), findsOneWidget);
 
     // Search bar
-    expect(find.text('Search up to 3 Localities or Landmarks'), findsOneWidget);
+    expect(find.text('Search by locality, project, property name...'), findsOneWidget);
+    expect(find.text('Search'), findsOneWidget);
 
-    // Looking for Tenants Banner
-    expect(find.text('Looking for Tenants / Buyers ?'), findsOneWidget);
-    expect(find.text('Post FREE Property Ad'), findsOneWidget);
-
-    // Home Services removed as per user design instruction
-    expect(find.text('Home Services'), findsNothing);
-
-    // Filter Controls
-    expect(find.text('Price'), findsOneWidget);
-    expect(find.text('BHK'), findsOneWidget);
-    expect(find.text('Property Type'), findsOneWidget);
+    // Popular Searches & More Filters
+    expect(find.text('1 BHK'), findsOneWidget);
+    expect(find.text('2 BHK'), findsOneWidget);
+    expect(find.text('3 BHK'), findsOneWidget);
+    expect(find.text('Under ₹50L'), findsOneWidget);
+    expect(find.text('More Filters'), findsOneWidget);
     expect(find.byIcon(Icons.tune), findsOneWidget);
+
+    // Free Property Promotion Banner
+    expect(find.text('List Your Property for FREE'), findsOneWidget);
+    expect(find.text('Post Ad'), findsOneWidget);
+
+    // State Discovery Cards
+    expect(find.text('Telangana'), findsWidgets);
+    expect(find.text('Karnataka'), findsOneWidget);
+    expect(find.text('Maharashtra'), findsOneWidget);
   });
 }

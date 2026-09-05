@@ -206,42 +206,47 @@ export function VisualLocationDiscovery({
                 key={state.id}
                 type="button"
                 onClick={() => handleStateClick(state)}
-                className={`group relative flex flex-col justify-between rounded-2xl p-4 text-left transition-all cursor-pointer border ${
+                className={`group relative flex flex-col justify-between rounded-2xl overflow-hidden text-left transition-all cursor-pointer border ${
                   isSelected
-                    ? "border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500"
-                    : "border-border/80 bg-card hover:border-emerald-500/50 hover:bg-secondary/40"
+                    ? "border-emerald-500 bg-emerald-500/10 shadow-md ring-2 ring-emerald-500/80"
+                    : "border-border/80 bg-card hover:border-emerald-500/50 hover:shadow-sm"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`inline-flex items-center justify-center rounded-lg text-xs font-extrabold px-2 py-0.5 ${
+                {/* State Landmark Photo Banner */}
+                <div className="relative h-20 w-full overflow-hidden bg-muted">
+                  <img
+                    src={state.imageUrl}
+                    alt={`${state.name} landmark`}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                  <span
+                    className={`absolute top-2 left-2 inline-flex items-center justify-center rounded-md text-[10px] font-extrabold px-1.5 py-0.5 shadow-sm ${
+                      isSelected
+                        ? "bg-emerald-600 text-white"
+                        : "bg-black/60 text-white backdrop-blur-xs border border-white/20"
+                    }`}
+                  >
+                    {state.shortCode}
+                  </span>
+                  <span className="absolute bottom-1.5 left-2 right-2 text-[10px] font-semibold text-white/90 truncate drop-shadow-xs">
+                    {state.landmark}
+                  </span>
+                </div>
+
+                <div className="p-3 w-full">
+                  <h4 className="font-bold text-sm text-foreground leading-tight">{state.name}</h4>
+                  <div className="mt-2 flex items-center justify-between pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
+                    <span>{state.cities.length} cities</span>
+                    <ChevronRight
+                      className={`h-3.5 w-3.5 transition-transform ${
                         isSelected
-                          ? "bg-emerald-600 text-white"
-                          : "bg-secondary text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    >
-                      {state.shortCode}
-                    </span>
-                    <Compass
-                      className={`h-4 w-4 transition-transform group-hover:rotate-45 ${
-                        isSelected ? "text-emerald-600" : "text-muted-foreground/40"
+                          ? "translate-x-1 text-emerald-600"
+                          : "group-hover:translate-x-0.5"
                       }`}
                     />
                   </div>
-                  <h4 className="font-bold text-sm text-foreground leading-tight">{state.name}</h4>
-                  <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1">
-                    {state.cities[0]?.name} & more
-                  </p>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
-                  <span>{state.cities.length} cities</span>
-                  <ChevronRight
-                    className={`h-3.5 w-3.5 transition-transform ${
-                      isSelected ? "translate-x-1 text-emerald-600" : "group-hover:translate-x-0.5"
-                    }`}
-                  />
                 </div>
               </button>
             );

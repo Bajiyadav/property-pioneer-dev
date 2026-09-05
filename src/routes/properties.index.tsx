@@ -7,6 +7,7 @@ import { recordRecentSearch } from "@/modules/dashboard/services/dashboardData";
 import { SearchUI } from "@/modules/property/components/SearchUI";
 
 import { APP_NAME, getCanonicalUrl, getOgImageUrl } from "@/config/app";
+import { useLocationStore } from "@/modules/property/store/locationStore";
 
 export const Route = createFileRoute("/properties/")({
   validateSearch: (search: Record<string, unknown>): PropertySearchParams => ({
@@ -17,6 +18,8 @@ export const Route = createFileRoute("/properties/")({
     listing: search.listing as string | undefined,
     minPrice: Number(search.minPrice) || undefined,
     maxPrice: Number(search.maxPrice) || undefined,
+    minArea: Number(search.minArea) || undefined,
+    maxArea: Number(search.maxArea) || undefined,
     beds: Number(search.beds) || undefined,
     baths: Number(search.baths) || undefined,
     type: search.type as string | undefined,
@@ -55,9 +58,25 @@ function PropertiesPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/properties" });
 
+  const geoData = useLocationStore((state) => state.geoData);
+  const sessionState =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_state") : null;
+  const sessionCity =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_city") : null;
+
+  const confirmedState = search.state || geoData?.state || sessionState || "";
+  const confirmedCity = search.city || geoData?.city || sessionCity || "";
+  const hasConfirmedLocation = Boolean(confirmedState && confirmedCity);
+
   const { data: all = [], isLoading } = useQuery({
-    queryKey: ["properties", search],
-    queryFn: () => fetchProperties(search),
+    queryKey: ["properties", search, confirmedState, confirmedCity],
+    queryFn: () =>
+      fetchProperties({
+        ...search,
+        state: confirmedState || undefined,
+        city: confirmedCity || undefined,
+      }),
+    enabled: hasConfirmedLocation,
     staleTime: 5 * 60 * 1000,
     placeholderData: (previousData) => previousData,
     refetchOnWindowFocus: false,
@@ -93,17 +112,17 @@ function PropertiesPage() {
   };
 
   const locationLabel = search.locality || search.q;
-  const pageTitle = locationLabel
-    ? `Properties in ${locationLabel}${search.city && search.city !== locationLabel ? `, ${search.city}` : ""}`
-    : search.city
-      ? `Properties in ${search.city}`
-      : "All Properties";
+  const pageTitle = hasConfirmedLocation
+    ? locationLabel
+      ? `Properties in ${locationLabel}${confirmedCity && confirmedCity !== locationLabel ? `, ${confirmedCity}` : ""}`
+      : `Properties in ${confirmedCity}`
+    : "Browse Verified Properties";
 
-  const pageSubtitle = locationLabel
-    ? `Showing verified 0% brokerage listings matching "${locationLabel}".`
-    : search.city
-      ? `Discover direct-owner homes across ${search.city}.`
-      : "Discover homes across all our active cities.";
+  const pageSubtitle = hasConfirmedLocation
+    ? locationLabel
+      ? `Showing verified 0% brokerage listings matching "${locationLabel}".`
+      : `Discover direct-owner homes across ${confirmedCity}.`
+    : "Select your state and city to view verified listings directly from owners.";
 
   return (
     <SearchUI

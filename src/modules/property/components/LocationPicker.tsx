@@ -44,7 +44,7 @@ interface LocationPickerProps {
 }
 
 export function LocationPicker({
-  currentCity = ACTIVE_CITY,
+  currentCity = "",
   currentLocality = "",
   onLocationSelect,
   className = "",
@@ -91,7 +91,11 @@ export function LocationPicker({
     loc.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const displayTitle = currentLocality ? `${currentLocality}, ${currentCity}` : currentCity;
+  const displayTitle = currentLocality
+    ? currentCity
+      ? `${currentLocality}, ${currentCity}`
+      : currentLocality
+    : currentCity || "Select Location";
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>

@@ -33,6 +33,7 @@ final selectedBedroomsFilterProvider = StateProvider<int?>((ref) => null);
 final selectedPropertyTypeFilterProvider = StateProvider<String?>((ref) => null);
 final selectedFurnishingFilterProvider = StateProvider<String?>((ref) => null);
 final budgetRangeFilterProvider = StateProvider<RangeValues>((ref) => const RangeValues(0, 50000000));
+final areaRangeFilterProvider = StateProvider<RangeValues>((ref) => const RangeValues(0, 10000));
 
 // Real-time live synchronization provider for properties
 final livePropertiesStreamProvider = StreamProvider.autoDispose((ref) {

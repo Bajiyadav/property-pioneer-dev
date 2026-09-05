@@ -686,6 +686,8 @@ export interface PropertySearchParams {
   listing?: string;
   minPrice?: number;
   maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
   beds?: number;
   baths?: number;
   type?: string;
@@ -733,6 +735,9 @@ function buildFeedQuery(params: PropertySearchParams | undefined, useExtended: b
 
     if (params.minPrice && params.minPrice > 0) query = query.gte("price", params.minPrice);
     if (params.maxPrice && params.maxPrice > 0) query = query.lte("price", params.maxPrice);
+
+    if (params.minArea && params.minArea > 0) query = query.gte("area_sqft", params.minArea);
+    if (params.maxArea && params.maxArea > 0) query = query.lte("area_sqft", params.maxArea);
 
     const q = params.q?.trim().replace(/[%_]/g, "");
     if (q) {

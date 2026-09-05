@@ -40,21 +40,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       parent: _floatController,
       curve: Curves.easeInOut,
     ));
-
-    _autoDetectLocation();
   }
 
   @override
   void dispose() {
     _floatController.dispose();
     super.dispose();
-  }
-
-  Future<void> _autoDetectLocation() async {
-    final locationState = ref.read(locationStateProvider);
-    if (locationState.value == null || locationState.value?.city == 'All India') {
-      await ref.read(locationStateProvider.notifier).detectAndSetCurrentLocation();
-    }
   }
 
   Future<void> _onUseCurrentLocation({bool navigateToSearch = false}) async {
@@ -193,23 +184,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      LocationPickerCard(
-                        selectedState: _selectedState,
-                        selectedCity: _selectedCity,
-                        onStateChanged: (s) {
-                          _onStateChanged(s);
-                          setModalState(() {});
-                        },
-                        onCityChanged: (c) {
-                          _onCityChanged(c);
-                          Navigator.pop(ctx);
-                        },
-                        onExploreDeals: _selectedCity != null
-                            ? () {
-                                Navigator.pop(ctx);
-                                _onCitySelected(_selectedCity!);
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final statesAsync = ref.watch(locationApiStatesProvider);
+                          final citiesAsync = _selectedState != null
+                              ? ref.watch(locationApiCitiesByStateProvider(_selectedState!))
+                              : null;
+
+                          final availableStates = statesAsync.value?.map((s) => s.name).toList();
+                          final availableCities = citiesAsync?.value?.map((c) => c.name).toList();
+                          final isLoading = statesAsync.isLoading || (citiesAsync?.isLoading ?? false);
+                          final hasError = statesAsync.hasError || (citiesAsync?.hasError ?? false);
+
+                          return LocationPickerCard(
+                            selectedState: _selectedState,
+                            selectedCity: _selectedCity,
+                            availableStates: availableStates,
+                            availableCities: availableCities,
+                            isLoading: isLoading,
+                            errorMessage: hasError ? 'Location data is temporarily unavailable. Please try again.' : null,
+                            onRetry: () {
+                              ref.invalidate(locationApiStatesProvider);
+                              if (_selectedState != null) {
+                                ref.invalidate(locationApiCitiesByStateProvider(_selectedState!));
                               }
-                            : null,
+                              setModalState(() {});
+                            },
+                            onStateChanged: (s) {
+                              _onStateChanged(s);
+                              setModalState(() {});
+                            },
+                            onCityChanged: (c) {
+                              _onCityChanged(c);
+                              Navigator.pop(ctx);
+                            },
+                            onExploreDeals: _selectedCity != null
+                                ? () {
+                                    Navigator.pop(ctx);
+                                    _onCitySelected(_selectedCity!);
+                                  }
+                                : null,
+                          );
+                        },
                       ),
                     ],
                   ),

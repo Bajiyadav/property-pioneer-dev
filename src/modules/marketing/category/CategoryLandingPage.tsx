@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { fetchProperties, type Property } from "@/modules/property/services/propertyQueries";
 import { PropertyCard } from "@/modules/property/components/PropertyCard";
+import { useLocationStore } from "@/modules/property/store/locationStore";
+import { VisualLocationDiscovery } from "@/modules/property/components/VisualLocationDiscovery";
+import { findCity } from "@/config/locationHierarchy";
 
 export interface Hotspot {
   name: string;
@@ -90,13 +93,67 @@ export function CategoryLandingPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocality, setSelectedLocality] = useState<string>("");
 
+  const geoData = useLocationStore((state) => state.geoData);
+  const setLocation = useLocationStore((state) => state.setLocation);
+  const sessionState =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_state") : null;
+  const sessionCity =
+    typeof window !== "undefined" ? sessionStorage.getItem("seedha_selected_city") : null;
+
+  const confirmedState = geoData?.state || sessionState || "";
+  const confirmedCity = geoData?.city || sessionCity || "";
+  const hasConfirmedLocation = Boolean(confirmedState && confirmedCity);
+  const [isChangingLocation, setIsChangingLocation] = useState(!hasConfirmedLocation);
+
+  const activeCityInfo = confirmedCity ? findCity(confirmedCity, confirmedState) : null;
+  const displayHotspots: Hotspot[] =
+    activeCityInfo?.popularLocalities && activeCityInfo.popularLocalities.length > 0
+      ? activeCityInfo.popularLocalities.map((loc) => ({
+          name: loc,
+          priceRange: slug === "buy" ? "Market Verified" : "0% Brokerage",
+          highlight: `Verified direct-owner properties in ${loc}, ${confirmedCity}.`,
+        }))
+      : hotspots;
+
+  const handleLocationConfirmed = (
+    state: string,
+    city: string,
+    geo?: { lat: number; lng: number },
+  ) => {
+    setLocation(city, {
+      lat: geo?.lat ?? 17.385,
+      lon: geo?.lng ?? 78.4867,
+      city,
+      state,
+    });
+    try {
+      sessionStorage.setItem("seedha_selected_state", state);
+      sessionStorage.setItem("seedha_selected_city", city);
+    } catch {
+      // ignore
+    }
+    setIsChangingLocation(false);
+  };
+
   const { data: properties = [], isLoading } = useQuery({
-    queryKey: ["properties"],
-    queryFn: () => fetchProperties(),
+    queryKey: ["properties", confirmedState, confirmedCity],
+    queryFn: () =>
+      fetchProperties({
+        state: confirmedState || undefined,
+        city: confirmedCity || undefined,
+        listing: searchListingType === "all" ? undefined : searchListingType,
+      }),
+    enabled: hasConfirmedLocation,
     staleTime: 5 * 60 * 1000,
   });
 
-  const matchingProperties = properties.filter(filterPredicate);
+  const matchingProperties = properties.filter((p) => {
+    if (!filterPredicate(p)) return false;
+    if (confirmedCity && p.city) {
+      return p.city.toLowerCase() === confirmedCity.toLowerCase();
+    }
+    return true;
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +161,8 @@ export function CategoryLandingPage({
       to: "/properties",
       search: {
         q: searchQuery,
-        city: selectedLocality,
+        state: confirmedState || undefined,
+        city: selectedLocality || confirmedCity || undefined,
         listing: searchListingType === "all" ? "" : searchListingType,
         minPrice: 0,
         maxPrice: 0,
@@ -131,6 +189,46 @@ export function CategoryLandingPage({
         </div>
       </div>
 
+      {/* Mandatory Location Discovery / Gating Modal */}
+      {(!hasConfirmedLocation || isChangingLocation) && (
+        <div className="mx-auto max-w-6xl px-4 pt-6">
+          <VisualLocationDiscovery
+            initialState={confirmedState}
+            initialCity={confirmedCity}
+            onSelectLocation={handleLocationConfirmed}
+            onCancel={hasConfirmedLocation ? () => setIsChangingLocation(false) : undefined}
+          />
+        </div>
+      )}
+
+      {/* Location Confirmation Pill Bar */}
+      {hasConfirmedLocation && !isChangingLocation && (
+        <div className="mx-auto max-w-6xl px-4 pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                  Browsing Verified Properties In
+                </span>
+                <p className="text-xs font-extrabold text-foreground">
+                  {confirmedCity}, {confirmedState}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsChangingLocation(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground shadow-xs transition hover:bg-secondary cursor-pointer"
+            >
+              Change Location
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. Hero Header Section */}
       <section
         className={`relative overflow-hidden border-b border-border/60 ${heroGradient} px-4 py-12 sm:px-6 sm:py-20 text-center`}
@@ -146,11 +244,16 @@ export function CategoryLandingPage({
           </span>
 
           <h1 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            {title} <span className="text-primary">{titleHighlight}</span>
+            {title}{" "}
+            <span className="text-primary">
+              {confirmedCity ? `in ${confirmedCity}` : titleHighlight}
+            </span>
           </h1>
 
           <p className="mt-4 max-w-2xl mx-auto text-sm text-muted-foreground sm:text-base leading-relaxed">
-            {subline}
+            {confirmedCity
+              ? `Browse verified listings across ${confirmedCity}, ${confirmedState} directly from owners with 0% brokerage.`
+              : subline}
           </p>
 
           {/* Search Bar Form */}
@@ -181,33 +284,26 @@ export function CategoryLandingPage({
           {/* Hotspot Locality Quick Chips */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs">
             <span className="text-muted-foreground font-medium flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-primary" /> Popular Hubs:
+              <MapPin className="h-3.5 w-3.5 text-primary" /> Popular in {confirmedCity || "Area"}:
             </span>
-            {hotspots.map((spot) => (
+            {displayHotspots.map((spot) => (
               <button
                 key={spot.name}
                 onClick={() => {
                   setSelectedLocality(spot.name);
-                  const citySlug = "hyderabad";
-                  const localitySlug = spot.name.toLowerCase().replace(/\s+/g, "-");
-                  if (slug === "buy" || slug === "commercial") {
-                    navigate({
-                      to: `/${slug}/$city/$locality`,
-                      params: { city: citySlug, locality: localitySlug },
-                    });
-                  } else {
-                    navigate({
-                      to: "/properties",
-                      search: {
-                        q: spot.name,
-                        city: "Hyderabad",
-                        listing: searchListingType === "all" ? "" : searchListingType,
-                        minPrice: 0,
-                        maxPrice: 0,
-                        beds: 0,
-                      },
-                    });
-                  }
+                  navigate({
+                    to: "/properties",
+                    search: {
+                      q: spot.name,
+                      state: confirmedState || undefined,
+                      city: confirmedCity || undefined,
+                      locality: spot.name,
+                      listing: searchListingType === "all" ? "" : searchListingType,
+                      minPrice: 0,
+                      maxPrice: 0,
+                      beds: 0,
+                    },
+                  });
                 }}
                 className="rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition cursor-pointer"
               >
@@ -227,7 +323,9 @@ export function CategoryLandingPage({
                 Live Inventory
               </p>
               <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-bold text-foreground sm:text-3xl">
-                Available Listings Across India
+                {hasConfirmedLocation
+                  ? `Available Listings in ${confirmedCity}`
+                  : "Verified Listings Direct from Owners"}
               </h2>
             </div>
             <Link
@@ -246,7 +344,33 @@ export function CategoryLandingPage({
             </Link>
           </div>
 
-          {isLoading ? (
+          {!hasConfirmedLocation ? (
+            <div className="rounded-3xl border border-dashed border-border bg-card/50 p-8 sm:p-12 text-center">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-4">
+                <MapPin className="h-7 w-7" />
+              </div>
+              <h3 className="font-[family-name:var(--font-display)] text-xl font-bold text-foreground">
+                Select Your Location to View {badge} Listings
+              </h3>
+              <p className="mt-2 max-w-lg mx-auto text-xs text-muted-foreground leading-relaxed sm:text-sm">
+                Please select your State and City to unlock verified direct-owner properties with
+                zero brokerage in your area.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsChangingLocation(true);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-semibold text-primary-foreground shadow hover:brightness-110 transition cursor-pointer"
+                >
+                  <MapPin className="h-4 w-4" />
+                  Choose State & City
+                </button>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((n) => (
                 <div key={n} className="h-72 rounded-2xl bg-muted animate-pulse" />

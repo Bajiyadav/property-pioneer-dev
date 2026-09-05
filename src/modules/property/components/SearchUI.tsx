@@ -155,6 +155,8 @@ export function SearchUI({
       listing: undefined,
       minPrice: undefined,
       maxPrice: undefined,
+      minArea: undefined,
+      maxArea: undefined,
       beds: undefined,
       baths: undefined,
       type: undefined,
@@ -226,6 +228,30 @@ export function SearchUI({
             placeholder="Max"
             className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none"
             aria-label="Maximum price in INR"
+          />
+        </div>
+      </div>
+
+      {/* Carpet Area (sqft) Range */}
+      <div className="space-y-3">
+        <label className="text-sm font-semibold text-foreground">Carpet Area (sq ft)</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={search.minArea || ""}
+            onChange={(e) => update({ minArea: Number(e.target.value) || undefined })}
+            placeholder="Min sqft"
+            className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none"
+            aria-label="Minimum area in sqft"
+          />
+          <span className="text-muted-foreground">-</span>
+          <input
+            type="number"
+            value={search.maxArea || ""}
+            onChange={(e) => update({ maxArea: Number(e.target.value) || undefined })}
+            placeholder="Max sqft"
+            className="w-full rounded-xl bg-secondary px-3 py-2.5 text-sm outline-none"
+            aria-label="Maximum area in sqft"
           />
         </div>
       </div>
@@ -764,6 +790,8 @@ export function SearchUI({
                 search.listing ||
                 search.minPrice ||
                 search.maxPrice ||
+                search.minArea ||
+                search.maxArea ||
                 search.type ||
                 search.furnishing ||
                 search.locality ||
@@ -778,33 +806,65 @@ export function SearchUI({
             </div>
 
             {/* Sorting & Result Summary Row */}
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  <Sparkles className="h-3 w-3" /> 0% Brokerage
-                </span>
-                <span>
-                  {isLoading ? "Finding verified homes..." : `${properties.length} homes available`}
-                </span>
-              </div>
+            {hasConfirmedLocation && (
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                    <Sparkles className="h-3 w-3" /> 0% Brokerage
+                  </span>
+                  <span>
+                    {isLoading
+                      ? "Finding verified homes..."
+                      : `${properties.length} homes available`}
+                  </span>
+                </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground">Sort by:</span>
-                <select
-                  value={search.sort || ""}
-                  onChange={(e) => update({ sort: e.target.value as PropertySearchParams["sort"] })}
-                  className="rounded-xl bg-secondary px-3 py-2 text-sm font-medium outline-none cursor-pointer border-none"
-                >
-                  <option value="">Recommended</option>
-                  <option value="newest">Newest</option>
-                  <option value="lowest_rent">Lowest Rent</option>
-                  <option value="highest_rent">Highest Rent</option>
-                  <option value="largest_area">Largest Area</option>
-                </select>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-foreground">Sort by:</span>
+                  <select
+                    value={search.sort || ""}
+                    onChange={(e) =>
+                      update({ sort: e.target.value as PropertySearchParams["sort"] })
+                    }
+                    className="rounded-xl bg-secondary px-3 py-2 text-sm font-medium outline-none cursor-pointer border-none"
+                  >
+                    <option value="">Recommended</option>
+                    <option value="newest">Newest</option>
+                    <option value="lowest_rent">Lowest Rent</option>
+                    <option value="highest_rent">Highest Rent</option>
+                    <option value="largest_area">Largest Area</option>
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
 
-            {isLoading ? (
+            {!hasConfirmedLocation ? (
+              <div className="rounded-3xl border border-dashed border-border/80 bg-card/60 p-8 sm:p-14 text-center shadow-xs">
+                <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <MapPin className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-foreground">
+                  Select Your Location to Browse Listings
+                </h3>
+                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground leading-relaxed">
+                  Seedha Properties requires you to choose your State and City to view 100%
+                  verified, direct-owner properties with zero brokerage.
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsChangingLocation(true);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-sm transition hover:brightness-110 cursor-pointer"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Choose State & City
+                  </button>
+                </div>
+              </div>
+            ) : isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div

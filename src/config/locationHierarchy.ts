@@ -20,6 +20,8 @@ export interface StateInfo {
   name: string;
   shortCode: string;
   tagline: string;
+  landmark: string;
+  imageUrl: string;
   cities: CityInfo[];
 }
 
@@ -29,6 +31,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Telangana",
     shortCode: "TS",
     tagline: "Hi-Tech City, Cyberabad & Historic Heritage",
+    landmark: "Charminar & Hitec City",
+    imageUrl:
+      "https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "hyderabad",
@@ -95,6 +100,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Karnataka",
     shortCode: "KA",
     tagline: "Silicon Valley of India & Cultural Hubs",
+    landmark: "Vidhana Soudha & IT Corridor",
+    imageUrl:
+      "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "bengaluru",
@@ -145,6 +153,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Maharashtra",
     shortCode: "MH",
     tagline: "Financial Capital & Oxford of the East",
+    landmark: "Gateway of India & Marine Drive",
+    imageUrl:
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "mumbai",
@@ -213,6 +224,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Delhi NCR",
     shortCode: "DL",
     tagline: "National Capital Region & Millennium City",
+    landmark: "India Gate & Capital Skyline",
+    imageUrl:
+      "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "delhi",
@@ -277,6 +291,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Tamil Nadu",
     shortCode: "TN",
     tagline: "Gateway of South India & Industrial Powerhouses",
+    landmark: "Shore Temple & Marina Coast",
+    imageUrl:
+      "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "chennai",
@@ -318,6 +335,9 @@ export const AUTHORITATIVE_LOCATIONS: StateInfo[] = [
     name: "Andhra Pradesh",
     shortCode: "AP",
     tagline: "Coastal Metropolis, Amaravati & Royal Tirupati",
+    landmark: "RK Beach & Coastal Amaravati",
+    imageUrl:
+      "https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=600&q=80",
     cities: [
       {
         slug: "visakhapatnam",
