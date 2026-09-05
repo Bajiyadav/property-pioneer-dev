@@ -1,3 +1,13 @@
+## v0.169.0 — 2026-09-05
+
+### Features
+- feat: location alphabetical sorting and property management workflow (466cfcc)
+
+### Migration notes
+- supabase/migrations/20260907000000_property_management.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.168.0 — 2026-09-05
 
 ### Features
