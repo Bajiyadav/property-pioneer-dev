@@ -1,3 +1,13 @@
+## v0.168.0 — 2026-09-05
+
+### Features
+- feat(location): wire flutter to authoritative java location master (cbb07fd)
+
+### Migration notes
+- supabase/migrations/20260906000000_create_india_locations_master.sql
+
+Apply with `supabase db push` before promoting.
+
 ## v0.167.1 — 2026-09-04
 
 ### Fixes
