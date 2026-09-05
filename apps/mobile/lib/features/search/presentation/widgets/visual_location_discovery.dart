@@ -29,6 +29,8 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
   bool _isDetectingGps = false;
   String? _gpsMessage;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -138,6 +141,8 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
     setState(() {
       _selectedState = state;
       _selectedCity = null;
+      _searchController.clear();
+      _searchQuery = '';
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -270,7 +275,53 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
               ),
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // Search typing input to find state or city immediately
+          TextField(
+            controller: _searchController,
+            onChanged: (val) {
+              setState(() {
+                _searchQuery = val.trim().toLowerCase();
+              });
+            },
+            decoration: InputDecoration(
+              hintText: _selectedState == null
+                  ? 'Type to search state (e.g. Telangana, Maharashtra)...'
+                  : 'Type to search city in $_selectedState...',
+              hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8)),
+              prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              isDense: true,
+              filled: true,
+              fillColor: const Color(0xFFF8FAFC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
+              ),
+            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
+          ),
+          const SizedBox(height: 16),
 
           // Step 1: Select State
           Row(
@@ -290,7 +341,7 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
               ),
               const SizedBox(width: 8),
               const Text(
-                'SELECT STATE',
+                'SELECT STATE (A → Z)',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -339,23 +390,28 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
                 ),
               ),
             ),
-            data: (states) => GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 2.2,
-              ),
-              itemCount: states.length,
-              itemBuilder: (context, index) {
-                final stateNode = states[index];
-                final state = stateNode.name;
-                final isSelected = _selectedState?.toLowerCase() == state.toLowerCase();
-                final cityCount = stateNode.childCount ?? 0;
-                final imageUrl = AppConstants.stateLandmarkImages[state];
-                final landmarkTitle = AppConstants.stateLandmarkTitles[state];
+            data: (states) {
+              final filteredStates = (_searchQuery.isNotEmpty && _selectedState == null)
+                  ? states.where((s) => s.name.toLowerCase().contains(_searchQuery)).toList()
+                  : states;
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: filteredStates.length,
+                itemBuilder: (context, index) {
+                  final stateNode = filteredStates[index];
+                  final state = stateNode.name;
+                  final isSelected = _selectedState?.toLowerCase() == state.toLowerCase();
+                  final cityCount = stateNode.childCount ?? 0;
+                  final imageUrl = AppConstants.stateLandmarkImages[state];
+                  final landmarkTitle = AppConstants.stateLandmarkTitles[state];
 
                 return InkWell(
                   onTap: () => _onStateTap(state),
@@ -451,8 +507,9 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
                   ),
                 );
               },
-            ),
-          ),
+            );
+          },
+        ),
           const SizedBox(height: 24),
 
           if (_selectedState != null) ...[
@@ -567,13 +624,19 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
                 ),
               ),
               data: (cities) {
-                if (cities.isEmpty) {
-                  return const Center(
+                final filteredCities = (_searchQuery.isNotEmpty && _selectedState != null)
+                    ? cities.where((c) => c.name.toLowerCase().contains(_searchQuery)).toList()
+                    : cities;
+
+                if (filteredCities.isEmpty) {
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
-                        'No cities found for this state.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                        _searchQuery.isNotEmpty
+                            ? 'No cities matching "$_searchQuery" in $_selectedState.'
+                            : 'No cities found for this state.',
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                       ),
                     ),
                   );
@@ -588,9 +651,9 @@ class _VisualLocationDiscoveryWidgetState extends ConsumerState<VisualLocationDi
                     mainAxisSpacing: 10,
                     childAspectRatio: 2.3,
                   ),
-                  itemCount: cities.length,
+                  itemCount: filteredCities.length,
                   itemBuilder: (context, index) {
-                    final cityNode = cities[index];
+                    final cityNode = filteredCities[index];
                     final city = cityNode.name;
                     final isSelected = _selectedCity?.toLowerCase() == city.toLowerCase();
 

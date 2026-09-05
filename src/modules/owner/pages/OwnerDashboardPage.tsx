@@ -20,11 +20,13 @@ import {
   Phone,
   PlusCircle,
   Settings,
+  ShieldCheck,
   Star,
   Trash2,
   TrendingUp,
   Users,
 } from "lucide-react";
+import { OwnerPropertyManagementTab } from "@/modules/owner/components/OwnerPropertyManagementTab";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchPropertyFeed,
@@ -66,6 +68,7 @@ import { ChatInterface } from "@/modules/interactions/components/ChatInterface";
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "listings", label: "My Listings", icon: Building2 },
+  { id: "management", label: "Property Management", icon: ShieldCheck, badge: "VERIFIED" },
   { id: "add", label: "Add Property", icon: PlusCircle, badge: "FREE" },
   { id: "drafts", label: "Draft Listings", icon: FileEdit },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -714,6 +717,8 @@ function OwnerDashboard({ user }: { user: User | null }) {
           )}
         </div>
       )}
+
+      {activeTab === "management" && <OwnerPropertyManagementTab myListings={mine ?? []} />}
 
       {activeTab === "settings" && <OwnerSettings user={user} />}
     </DashboardLayout>

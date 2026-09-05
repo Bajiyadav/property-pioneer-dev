@@ -89,6 +89,8 @@ import { Route as ListPropertyPromoteIdRouteImport } from './routes/list-propert
 import { Route as ListPropertySubmittedIdRouteImport } from './routes/list-property.submitted.$id'
 import { Route as RentCityIndexRouteImport } from './routes/rent.$city.index'
 import { Route as RentCityLocalityRouteImport } from './routes/rent.$city.$locality'
+import { Route as AuthenticatedAdminPropertyManagementIndexRouteImport } from './routes/_authenticated/admin/property-management.index'
+import { Route as AuthenticatedAdminPropertyManagementIdRouteImport } from './routes/_authenticated/admin/property-management.$id'
 import { Route as ApiDevEmailPreviewTypeRouteImport } from './routes/api/dev/email-preview.$type'
 import { Route as ApiPublicPropertiesLocationAccessRouteImport } from './routes/api/public/properties.location-access'
 import { Route as ApiV2MediaPresignDownloadRouteImport } from './routes/api/v2/media/presign-download'
@@ -521,6 +523,18 @@ const RentCityLocalityRoute = RentCityLocalityRouteImport.update({
   path: '/rent/$city/$locality',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminPropertyManagementIndexRoute =
+  AuthenticatedAdminPropertyManagementIndexRouteImport.update({
+    id: '/property-management/',
+    path: '/property-management/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminPropertyManagementIdRoute =
+  AuthenticatedAdminPropertyManagementIdRouteImport.update({
+    id: '/property-management/$id',
+    path: '/property-management/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const ApiDevEmailPreviewTypeRoute = ApiDevEmailPreviewTypeRouteImport.update({
   id: '/api/dev/email-preview/$type',
   path: '/api/dev/email-preview/$type',
@@ -703,6 +717,7 @@ export interface FileRoutesByFullPath {
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/admin/property-management/$id': typeof AuthenticatedAdminPropertyManagementIdRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
@@ -710,6 +725,7 @@ export interface FileRoutesByFullPath {
   '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
+  '/admin/property-management/': typeof AuthenticatedAdminPropertyManagementIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -798,6 +814,7 @@ export interface FileRoutesByTo {
   '/buy/$city': typeof BuyCityIndexRoute
   '/commercial/$city': typeof CommercialCityIndexRoute
   '/rent/$city': typeof RentCityIndexRoute
+  '/admin/property-management/$id': typeof AuthenticatedAdminPropertyManagementIdRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
@@ -805,6 +822,7 @@ export interface FileRoutesByTo {
   '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
+  '/admin/property-management': typeof AuthenticatedAdminPropertyManagementIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -899,6 +917,7 @@ export interface FileRoutesById {
   '/buy/$city/': typeof BuyCityIndexRoute
   '/commercial/$city/': typeof CommercialCityIndexRoute
   '/rent/$city/': typeof RentCityIndexRoute
+  '/_authenticated/admin/property-management/$id': typeof AuthenticatedAdminPropertyManagementIdRoute
   '/api/dev/email-preview/$type': typeof ApiDevEmailPreviewTypeRoute
   '/api/public/properties/location-access': typeof ApiPublicPropertiesLocationAccessRoute
   '/api/v2/media/presign-download': typeof ApiV2MediaPresignDownloadRoute
@@ -906,6 +925,7 @@ export interface FileRoutesById {
   '/api/v2/payments/history': typeof ApiV2PaymentsHistoryRoute
   '/api/v2/properties/manage': typeof ApiV2PropertiesManageRoute
   '/list-property/promote/$id/checkout': typeof ListPropertyPromoteIdCheckoutRoute
+  '/_authenticated/admin/property-management/': typeof AuthenticatedAdminPropertyManagementIndexRoute
   '/api/public/properties/$id/contact': typeof ApiPublicPropertiesIdContactRoute
   '/api/public/properties/$id/report': typeof ApiPublicPropertiesIdReportRoute
   '/api/public/properties/$id/save': typeof ApiPublicPropertiesIdSaveRoute
@@ -1000,6 +1020,7 @@ export interface FileRouteTypes {
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/admin/property-management/$id'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
@@ -1007,6 +1028,7 @@ export interface FileRouteTypes {
     | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
+    | '/admin/property-management/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -1095,6 +1117,7 @@ export interface FileRouteTypes {
     | '/buy/$city'
     | '/commercial/$city'
     | '/rent/$city'
+    | '/admin/property-management/$id'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
@@ -1102,6 +1125,7 @@ export interface FileRouteTypes {
     | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
+    | '/admin/property-management'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -1195,6 +1219,7 @@ export interface FileRouteTypes {
     | '/buy/$city/'
     | '/commercial/$city/'
     | '/rent/$city/'
+    | '/_authenticated/admin/property-management/$id'
     | '/api/dev/email-preview/$type'
     | '/api/public/properties/location-access'
     | '/api/v2/media/presign-download'
@@ -1202,6 +1227,7 @@ export interface FileRouteTypes {
     | '/api/v2/payments/history'
     | '/api/v2/properties/manage'
     | '/list-property/promote/$id/checkout'
+    | '/_authenticated/admin/property-management/'
     | '/api/public/properties/$id/contact'
     | '/api/public/properties/$id/report'
     | '/api/public/properties/$id/save'
@@ -1849,6 +1875,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentCityLocalityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/property-management/': {
+      id: '/_authenticated/admin/property-management/'
+      path: '/property-management'
+      fullPath: '/admin/property-management/'
+      preLoaderRoute: typeof AuthenticatedAdminPropertyManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/property-management/$id': {
+      id: '/_authenticated/admin/property-management/$id'
+      path: '/property-management/$id'
+      fullPath: '/admin/property-management/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPropertyManagementIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/api/dev/email-preview/$type': {
       id: '/api/dev/email-preview/$type'
       path: '/api/dev/email-preview/$type'
@@ -1987,6 +2027,8 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminVisitorsRoute: typeof AuthenticatedAdminVisitorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminPropertyManagementIdRoute: typeof AuthenticatedAdminPropertyManagementIdRoute
+  AuthenticatedAdminPropertyManagementIndexRoute: typeof AuthenticatedAdminPropertyManagementIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -1999,6 +2041,10 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminVisitorsRoute: AuthenticatedAdminVisitorsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminPropertyManagementIdRoute:
+      AuthenticatedAdminPropertyManagementIdRoute,
+    AuthenticatedAdminPropertyManagementIndexRoute:
+      AuthenticatedAdminPropertyManagementIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =

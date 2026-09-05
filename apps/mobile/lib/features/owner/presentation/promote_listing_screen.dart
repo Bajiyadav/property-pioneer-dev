@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../config/theme.dart';
 import '../../../config/visibility_plans.dart';
+import 'widgets/request_property_management_sheet.dart';
 
 /// Optional visibility promotion, shown AFTER a free submission.
 ///
@@ -110,6 +111,72 @@ class _PromoteListingScreenState extends State<PromoteListingScreen> {
 
             // Feature Comparison Table
             _PlanComparisonTable(),
+            const SizedBox(height: 14),
+
+            // Seedha End-to-End Property Management Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.shield_rounded, color: AppTheme.primaryColor, size: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Want Seedha to manage your property?',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Turn your property into 100% hands-off passive income. We source police-verified tenants, collect rent on-time, and manage all repairs with zero broker fees.',
+                    style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.primaryColor),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        if (widget.propertyId != null) {
+                          RequestPropertyManagementSheet.show(
+                            context,
+                            propertyId: widget.propertyId!,
+                          );
+                        } else {
+                          context.go('/owner-dashboard');
+                        }
+                      },
+                      icon: const Icon(Icons.handshake_outlined, size: 16, color: AppTheme.primaryColor),
+                      label: const Text(
+                        'Request Property Management',
+                        style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 14),
 
             Container(

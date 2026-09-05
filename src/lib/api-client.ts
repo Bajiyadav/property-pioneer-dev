@@ -263,6 +263,104 @@ class NativeApiClient {
   };
 
   // -------------------------------------------------------------------------
+  // PROPERTY MANAGEMENT & RENTAL MANAGEMENT
+  // -------------------------------------------------------------------------
+  propertyManagement = {
+    getMyRequests: async () => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/property-management/my`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+    getById: async (id: string) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/property-management/${id}`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+    create: async (data: {
+      propertyId: string;
+      ownerContactPhone: string;
+      servicesRequested?: string[];
+      monthlyRentTarget?: number;
+      availableFromDate?: string;
+      ownerNotes?: string;
+    }) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/property-management`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    cancel: async (id: string, reason?: string) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/property-management/${id}/cancel`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ reason }),
+      });
+      return res.json();
+    },
+  };
+
+  adminPropertyManagement = {
+    getStats: async () => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/admin/property-management/stats`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+    getAll: async (status?: string, page = 0, size = 20) => {
+      const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+      if (status && status !== "ALL") params.append("status", status);
+      const res = await fetch(
+        `${BASE_API_URL}/api/v2/admin/property-management?${params.toString()}`,
+        {
+          headers: this.getHeaders(),
+        },
+      );
+      return res.json();
+    },
+    getById: async (id: string) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/admin/property-management/${id}`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+    updateStatus: async (
+      id: string,
+      data: {
+        status: string;
+        assignedManagerName?: string;
+        assignedManagerContact?: string;
+        managementFeePercent?: number;
+        rejectionReason?: string;
+      },
+    ) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/admin/property-management/${id}/status`, {
+        method: "PATCH",
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    getInternalNotes: async (id: string) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/admin/property-management/${id}/notes`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+    addInternalNote: async (id: string, note: string) => {
+      const res = await fetch(`${BASE_API_URL}/api/v2/admin/property-management/${id}/notes`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify({ note }),
+      });
+      return res.json();
+    },
+  };
+
+  // -------------------------------------------------------------------------
   // S3 MEDIA & STORAGE
   // -------------------------------------------------------------------------
   storage = {

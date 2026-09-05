@@ -185,5 +185,45 @@ void main() {
       expect(find.text('Andhra Pradesh'), findsOneWidget);
       expect(find.text('Karnataka'), findsOneWidget);
     });
+
+    testWidgets('LocationPickerCard provides search filter text field and displays sorted items', (tester) async {
+      String? selectedState = 'Telangana';
+      String? selectedCity;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: LocationPickerCard(
+                selectedState: selectedState,
+                selectedCity: selectedCity,
+                availableStates: const ['Telangana', 'Andhra Pradesh', 'Karnataka'],
+                availableCities: const ['Warangal', 'Hyderabad', 'Karimnagar', 'Khammam'],
+                onStateChanged: (s) => selectedState = s,
+                onCityChanged: (c) => selectedCity = c,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Check search TextField exists
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Verify cities are sorted A-Z in chip display
+      expect(find.text('Hyderabad'), findsOneWidget);
+      expect(find.text('Karimnagar'), findsOneWidget);
+      expect(find.text('Khammam'), findsOneWidget);
+      expect(find.text('Warangal'), findsOneWidget);
+
+      // Type in search field to filter
+      await tester.enterText(find.byType(TextField), 'Hyder');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hyderabad'), findsOneWidget);
+      expect(find.text('Warangal'), findsNothing);
+    });
   });
 }

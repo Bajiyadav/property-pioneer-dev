@@ -5,7 +5,7 @@ import 'package:seedha_properties_mobile/config/constants.dart';
 import 'package:seedha_properties_mobile/config/theme.dart';
 
 /// State → City pickers for the top of the home screen or modal sheet.
-class LocationPickerCard extends StatelessWidget {
+class LocationPickerCard extends StatefulWidget {
   const LocationPickerCard({
     super.key,
     required this.selectedState,
@@ -34,12 +34,39 @@ class LocationPickerCard extends StatelessWidget {
   final VoidCallback? onRetry;
 
   @override
+  State<LocationPickerCard> createState() => _LocationPickerCardState();
+}
+
+class _LocationPickerCardState extends State<LocationPickerCard> {
+  final TextEditingController _searchController = TextEditingController();
+  String _filterQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final states = availableStates ?? AppConstants.allStates;
-    final cities = availableCities ??
-        (selectedState == null
+    final rawStates = widget.availableStates ?? AppConstants.allStates;
+    final sortedStates = List<String>.from(rawStates)
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    final rawCities = widget.availableCities ??
+        (widget.selectedState == null
             ? const <String>[]
-            : (AppConstants.citiesByState[selectedState] ?? const <String>[]));
+            : (AppConstants.citiesByState[widget.selectedState] ?? const <String>[]));
+    final sortedCities = List<String>.from(rawCities)
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    final q = _filterQuery.trim().toLowerCase();
+    final filteredStates = q.isEmpty
+        ? sortedStates
+        : sortedStates.where((s) => s.toLowerCase().contains(q)).toList();
+    final filteredCities = q.isEmpty
+        ? sortedCities
+        : sortedCities.where((c) => c.toLowerCase().contains(q)).toList();
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -62,10 +89,10 @@ class LocationPickerCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
-                button: onDetectLocation != null,
-                label: onDetectLocation != null ? 'Use my current location' : null,
+                button: widget.onDetectLocation != null,
+                label: widget.onDetectLocation != null ? 'Use my current location' : null,
                 child: InkWell(
-                  onTap: onDetectLocation,
+                  onTap: widget.onDetectLocation,
                   borderRadius: BorderRadius.circular(24),
                   child: Container(
                     width: 44,
@@ -93,7 +120,7 @@ class LocationPickerCard extends StatelessWidget {
               ),
             ],
           ),
-          if (errorMessage != null && cities.isEmpty) ...[
+          if (widget.errorMessage != null && sortedCities.isEmpty) ...[
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -108,14 +135,14 @@ class LocationPickerCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      errorMessage!,
+                      widget.errorMessage!,
                       style: const TextStyle(fontSize: 12, color: Color(0xFF991B1B)),
                     ),
                   ),
-                  if (onRetry != null) ...[
+                  if (widget.onRetry != null) ...[
                     const SizedBox(width: 6),
                     TextButton(
-                      onPressed: onRetry,
+                      onPressed: widget.onRetry,
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         minimumSize: Size.zero,
@@ -129,25 +156,90 @@ class LocationPickerCard extends StatelessWidget {
               ),
             ),
           ],
-          if (isLoading) ...[
+          if (widget.isLoading) ...[
             const SizedBox(height: 10),
             const LinearProgressIndicator(color: AppTheme.primaryColor, minHeight: 2),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+          // Searchable typing input to find location quickly
+          TextField(
+            controller: _searchController,
+            onChanged: (val) {
+              setState(() {
+                _filterQuery = val;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: widget.selectedState == null
+                  ? 'Type to search state (e.g. Telangana, Maharashtra)...'
+                  : 'Type to search city in ${widget.selectedState}...',
+              hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8)),
+              prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+              suffixIcon: _filterQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _filterQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              isDense: true,
+              filled: true,
+              fillColor: const Color(0xFFF8FAFC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+              ),
+            ),
+            style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
+          ),
+          const SizedBox(height: 12),
           _Dropdown(
-            hint: 'Select State',
-            value: selectedState,
-            items: states,
-            onChanged: onStateChanged,
+            hint: 'Select State (A → Z)',
+            value: filteredStates.contains(widget.selectedState) ? widget.selectedState : null,
+            items: filteredStates,
+            onChanged: (val) {
+              widget.onStateChanged(val);
+              if (_filterQuery.isNotEmpty) {
+                _searchController.clear();
+                setState(() {
+                  _filterQuery = '';
+                });
+              }
+            },
           ),
           const SizedBox(height: 10),
           _Dropdown(
-            hint: selectedState == null ? 'Select City' : (isLoading ? 'Loading cities...' : 'Select City'),
-            value: selectedCity,
-            items: cities,
-            onChanged: (selectedState == null || isLoading) ? null : onCityChanged,
+            hint: widget.selectedState == null
+                ? 'Select City'
+                : (widget.isLoading ? 'Loading cities...' : 'Select City (A → Z)'),
+            value: filteredCities.contains(widget.selectedCity) ? widget.selectedCity : null,
+            items: filteredCities,
+            onChanged: (widget.selectedState == null || widget.isLoading)
+                ? null
+                : (val) {
+                    widget.onCityChanged(val);
+                    if (_filterQuery.isNotEmpty) {
+                      _searchController.clear();
+                      setState(() {
+                        _filterQuery = '';
+                      });
+                    }
+                  },
           ),
-          if (selectedState != null && cities.isNotEmpty) ...[
+          if (widget.selectedState != null && filteredCities.isNotEmpty) ...[
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.all(12),
@@ -180,7 +272,7 @@ class LocationPickerCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Tap your city in $selectedState:',
+                          'Tap your city in ${widget.selectedState} (A → Z):',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -194,10 +286,10 @@ class LocationPickerCard extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: cities.map((city) {
-                      final isSelected = selectedCity == city;
+                    children: filteredCities.map((city) {
+                      final isSelected = widget.selectedCity == city;
                       return InkWell(
-                        onTap: () => onCityChanged(city),
+                        onTap: () => widget.onCityChanged(city),
                         borderRadius: BorderRadius.circular(10),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -243,15 +335,15 @@ class LocationPickerCard extends StatelessWidget {
               ),
             ),
           ],
-          if (selectedCity != null && onExploreDeals != null) ...[
+          if (widget.selectedCity != null && widget.onExploreDeals != null) ...[
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: onExploreDeals,
+                onPressed: widget.onExploreDeals,
                 icon: const Icon(Icons.explore_outlined, size: 18),
                 label: Text(
-                  'Explore $selectedCity Deals',
+                  'Explore ${widget.selectedCity} Deals',
                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(

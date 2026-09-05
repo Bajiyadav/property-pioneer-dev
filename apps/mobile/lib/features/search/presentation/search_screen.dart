@@ -227,212 +227,257 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Consumer(
-          builder: (sheetCtx, ref, _) {
-            final localitiesAsync = ref.watch(locationApiLocalitiesProvider(cityNode.id));
+        String query = '';
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return Consumer(
+              builder: (sheetCtx, ref, _) {
+                final localitiesAsync = ref.watch(locationApiLocalitiesProvider(cityNode.id));
 
-            return Container(
-              padding: EdgeInsets.fromLTRB(
-                  20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(sheetCtx).size.height * 0.75,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                return Container(
+                  padding: EdgeInsets.fromLTRB(
+                      20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(sheetCtx).size.height * 0.85,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Localities in ${cityNode.name}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            Text(
-                              'Authoritative coverage for ${cityNode.name}, $state',
-                              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                            ),
-                          ],
+                      Center(
+                        child: Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
-                        onPressed: () => Navigator.pop(sheetCtx),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Localities in ${cityNode.name} (A → Z)',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  'Authoritative coverage for ${cityNode.name}, $state',
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                            onPressed: () => Navigator.pop(sheetCtx),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                  const SizedBox(height: 8),
+                      const SizedBox(height: 12),
+                      TextField(
+                        onChanged: (val) {
+                          setSheetState(() {
+                            query = val.trim().toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Type locality or PIN code (e.g. Gachibowli, 500032)...',
+                          hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8)),
+                          prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          isDense: true,
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      const SizedBox(height: 8),
 
-                  // Option 1: Entire City
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEFF6FF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.location_city_rounded, size: 20, color: Color(0xFF2563EB)),
-                    ),
-                    title: Text(
-                      'All of ${cityNode.name}',
-                      style: const TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Browse all verified properties across ${cityNode.name}',
-                      style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
-                    onTap: () {
-                      ref.read(locationStateProvider.notifier).setLocation(
-                            SelectedLocation(
-                              formattedAddress: '${cityNode.name}, $state',
-                              city: cityNode.name,
-                              locality: '',
-                              state: state,
-                              country: 'India',
-                              latitude: cityNode.latitude,
-                              longitude: cityNode.longitude,
-                              cityId: cityNode.id,
-                              stateId: cityNode.stateCode,
-                              districtId: cityNode.parentId,
-                              localityId: null,
-                              isValidated: true,
+                      if (query.isEmpty) ...[
+                        // Option 1: Entire City
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEFF6FF),
+                              shape: BoxShape.circle,
                             ),
-                          );
-                      Navigator.pop(sheetCtx);
-                      _executeSearch();
-                    },
-                  ),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                  const SizedBox(height: 6),
+                            child: const Icon(Icons.location_city_rounded, size: 20, color: Color(0xFF2563EB)),
+                          ),
+                          title: Text(
+                            'All of ${cityNode.name}',
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Browse all verified properties across ${cityNode.name}',
+                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
+                          onTap: () {
+                            ref.read(locationStateProvider.notifier).setLocation(
+                                  SelectedLocation(
+                                    formattedAddress: '${cityNode.name}, $state',
+                                    city: cityNode.name,
+                                    locality: '',
+                                    state: state,
+                                    country: 'India',
+                                    latitude: cityNode.latitude,
+                                    longitude: cityNode.longitude,
+                                    cityId: cityNode.id,
+                                    stateId: cityNode.stateCode,
+                                    districtId: cityNode.parentId,
+                                    localityId: null,
+                                    isValidated: true,
+                                  ),
+                                );
+                            Navigator.pop(sheetCtx);
+                            _executeSearch();
+                          },
+                        ),
+                        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        const SizedBox(height: 6),
+                      ],
 
-                  // Localities from Java API
-                  Flexible(
-                    child: localitiesAsync.when(
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (err, _) => Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Location data is temporarily unavailable. Please try again.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () => ref.refresh(locationApiLocalitiesProvider(cityNode.id)),
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      data: (localities) {
-                        if (localities.isEmpty) {
-                          return const Center(
+                      // Localities from Java API
+                      Flexible(
+                        child: localitiesAsync.when(
+                          loading: () => const Center(
                             child: Padding(
-                              padding: EdgeInsets.all(24),
-                              child: Text(
-                                'No specific sub-localities listed. Use "All of city" above.',
-                                style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                              ),
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
                             ),
-                          );
-                        }
+                          ),
+                          error: (err, _) => Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Location data is temporarily unavailable. Please try again.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () => ref.refresh(locationApiLocalitiesProvider(cityNode.id)),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          data: (localities) {
+                            final filteredLocalities = query.isEmpty
+                                ? localities
+                                : localities.where((l) =>
+                                    l.name.toLowerCase().contains(query) ||
+                                    l.pincode.contains(query)).toList();
 
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: localities.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          itemBuilder: (context, index) {
-                            final loc = localities[index];
-                            return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
+                            if (filteredLocalities.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    query.isEmpty
+                                        ? 'No specific sub-localities listed. Use "All of city" above.'
+                                        : 'No localities matching "$query".',
+                                    style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.place_rounded,
-                                  size: 18,
-                                  color: Color(0xFF475569),
-                                ),
-                              ),
-                              title: Text(
-                                loc.name,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                              subtitle: loc.pincode.isNotEmpty
-                                  ? Text('PIN: ${loc.pincode}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)))
-                                  : null,
-                              trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
-                              onTap: () {
-                                ref.read(locationStateProvider.notifier).setLocation(
-                                      SelectedLocation(
-                                        formattedAddress: '${loc.name}, ${cityNode.name}, $state',
-                                        city: cityNode.name,
-                                        locality: loc.name,
-                                        state: state,
-                                        country: 'India',
-                                        latitude: loc.latitude,
-                                        longitude: loc.longitude,
-                                        cityId: cityNode.id,
-                                        stateId: cityNode.stateCode,
-                                        districtId: cityNode.parentId,
-                                        localityId: loc.id,
-                                        isValidated: true,
-                                      ),
-                                    );
-                                Navigator.pop(sheetCtx);
-                                _executeSearch();
+                              );
+                            }
+
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: filteredLocalities.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                              itemBuilder: (context, index) {
+                                final loc = filteredLocalities[index];
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFF1F5F9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.place_rounded,
+                                      size: 18,
+                                      color: Color(0xFF475569),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    loc.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  subtitle: loc.pincode.isNotEmpty
+                                      ? Text('PIN: ${loc.pincode}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)))
+                                      : null,
+                                  trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
+                                  onTap: () {
+                                    ref.read(locationStateProvider.notifier).setLocation(
+                                          SelectedLocation(
+                                            formattedAddress: '${loc.name}, ${cityNode.name}, $state',
+                                            city: cityNode.name,
+                                            locality: loc.name,
+                                            state: state,
+                                            country: 'India',
+                                            latitude: loc.latitude,
+                                            longitude: loc.longitude,
+                                            cityId: cityNode.id,
+                                            stateId: cityNode.stateCode,
+                                            districtId: cityNode.parentId,
+                                            localityId: loc.id,
+                                            isValidated: true,
+                                          ),
+                                        );
+                                    Navigator.pop(sheetCtx);
+                                    _executeSearch();
+                                  },
+                                );
                               },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -455,187 +500,226 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Consumer(
-          builder: (sheetCtx, ref, _) {
-            final citiesAsync = ref.watch(locationApiCitiesByStateProvider(stateId ?? state));
+        String query = '';
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return Consumer(
+              builder: (sheetCtx, ref, _) {
+                final citiesAsync = ref.watch(locationApiCitiesByStateProvider(stateId ?? state));
 
-            return Container(
-              padding: EdgeInsets.fromLTRB(
-                  20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(sheetCtx).size.height * 0.75,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                return Container(
+                  padding: EdgeInsets.fromLTRB(
+                      20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(sheetCtx).size.height * 0.85,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Choose Your City',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            citiesAsync.when(
-                              data: (cities) => Text(
-                                'Authoritative locations in $state (${cities.length} cities/towns)',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                              ),
-                              loading: () => Text(
-                                'Loading locations in $state...',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                              ),
-                              error: (_, __) => Text(
-                                'Operating in $state',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                              ),
-                            ),
-                          ],
+                      Center(
+                        child: Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
-                        onPressed: () => Navigator.pop(sheetCtx),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                  const SizedBox(height: 10),
-                  Flexible(
-                    child: citiesAsync.when(
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (err, _) => Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Location data is temporarily unavailable. Please try again.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Choose Your City (A → Z)',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                citiesAsync.when(
+                                  data: (cities) => Text(
+                                    'Alphabetical list in $state (${cities.length} cities/towns)',
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                  ),
+                                  loading: () => Text(
+                                    'Loading locations in $state...',
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                  ),
+                                  error: (_, __) => Text(
+                                    'Operating in $state',
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () => ref.refresh(locationApiCitiesByStateProvider(stateId ?? state)),
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                            onPressed: () => Navigator.pop(sheetCtx),
+                          ),
+                        ],
                       ),
-                      data: (cities) {
-                        if (cities.isEmpty) {
-                          return Center(
+                      const SizedBox(height: 12),
+                      TextField(
+                        onChanged: (val) {
+                          setSheetState(() {
+                            query = val.trim().toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Type to search city in $state...',
+                          hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8)),
+                          prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          isDense: true,
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      const SizedBox(height: 8),
+                      Flexible(
+                        child: citiesAsync.when(
+                          loading: () => const Center(
                             child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                'No cities found for $state.',
-                                style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                              ),
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
                             ),
-                          );
-                        }
+                          ),
+                          error: (err, _) => Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Location data is temporarily unavailable. Please try again.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () => ref.refresh(locationApiCitiesByStateProvider(stateId ?? state)),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          data: (cities) {
+                            final filteredCities = query.isEmpty
+                                ? cities
+                                : cities.where((c) => c.name.toLowerCase().contains(query)).toList();
 
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: cities.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          itemBuilder: (context, index) {
-                            final cityNode = cities[index];
-                            final isSelected = cityNode.name.toLowerCase() == currentCity?.toLowerCase();
+                            if (filteredCities.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    query.isEmpty ? 'No cities found for $state.' : 'No cities matching "$query"',
+                                    style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                  ),
+                                ),
+                              );
+                            }
 
-                            return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFDCFCE7)
-                                      : const Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.location_city_rounded,
-                                  size: 20,
-                                  color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF475569),
-                                ),
-                              ),
-                              title: Text(
-                                cityNode.name,
-                                style: TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                  color: isSelected ? const Color(0xFF15803D) : const Color(0xFF0F172A),
-                                ),
-                              ),
-                              subtitle: Text(
-                                cityNode.childCount != null && cityNode.childCount! > 0
-                                    ? '${cityNode.childCount} localities covered'
-                                    : 'Authoritative ${cityNode.type.toLowerCase()}',
-                                style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              trailing: isSelected
-                                  ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
-                                  : const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
-                              onTap: () {
-                                Navigator.pop(sheetCtx);
-                                if (cityNode.childCount != null && cityNode.childCount! > 0) {
-                                  _showLocalityPickerSheet(context, cityNode, state);
-                                } else {
-                                  ref.read(locationStateProvider.notifier).setLocation(
-                                        SelectedLocation(
-                                          formattedAddress: '${cityNode.name}, $state',
-                                          city: cityNode.name,
-                                          locality: '',
-                                          state: state,
-                                          country: 'India',
-                                          latitude: cityNode.latitude,
-                                          longitude: cityNode.longitude,
-                                          cityId: cityNode.id,
-                                          stateId: cityNode.stateCode ?? stateId,
-                                          districtId: cityNode.parentId,
-                                          localityId: null,
-                                          isValidated: true,
-                                        ),
-                                      );
-                                  _executeSearch();
-                                }
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: filteredCities.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                              itemBuilder: (context, index) {
+                                final cityNode = filteredCities[index];
+                                final isSelected = cityNode.name.toLowerCase() == currentCity?.toLowerCase();
+
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? const Color(0xFFDCFCE7)
+                                          : const Color(0xFFF1F5F9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.location_city_rounded,
+                                      size: 20,
+                                      color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF475569),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    cityNode.name,
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                                      color: isSelected ? const Color(0xFF15803D) : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    cityNode.childCount != null && cityNode.childCount! > 0
+                                        ? '${cityNode.childCount} localities covered'
+                                        : 'Authoritative ${cityNode.type.toLowerCase()}',
+                                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
+                                      : const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
+                                  onTap: () {
+                                    Navigator.pop(sheetCtx);
+                                    if (cityNode.childCount != null && cityNode.childCount! > 0) {
+                                      _showLocalityPickerSheet(context, cityNode, state);
+                                    } else {
+                                      ref.read(locationStateProvider.notifier).setLocation(
+                                            SelectedLocation(
+                                              formattedAddress: '${cityNode.name}, $state',
+                                              city: cityNode.name,
+                                              locality: '',
+                                              state: state,
+                                              country: 'India',
+                                              latitude: cityNode.latitude,
+                                              longitude: cityNode.longitude,
+                                              cityId: cityNode.id,
+                                              stateId: cityNode.stateCode ?? stateId,
+                                              districtId: cityNode.parentId,
+                                              localityId: null,
+                                              isValidated: true,
+                                            ),
+                                          );
+                                      _executeSearch();
+                                    }
+                                  },
+                                );
                               },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -652,144 +736,195 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Consumer(
-          builder: (sheetCtx, ref, _) {
-            final statesAsync = ref.watch(locationApiStatesProvider);
+        String query = '';
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return Consumer(
+              builder: (sheetCtx, ref, _) {
+                final statesAsync = ref.watch(locationApiStatesProvider);
 
-            return Container(
-              padding: EdgeInsets.fromLTRB(
-                  20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(sheetCtx).size.height * 0.8,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 44,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                return Container(
+                  padding: EdgeInsets.fromLTRB(
+                      20, 16, 20, MediaQuery.of(sheetCtx).padding.bottom + 20),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(sheetCtx).size.height * 0.85,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Select State / UT',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF0F172A),
-                              ),
-                            ),
-                            Text(
-                              'All 28 States & 8 Union Territories',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                            ),
-                          ],
+                      Center(
+                        child: Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
-                        onPressed: () => Navigator.pop(sheetCtx),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                  const SizedBox(height: 10),
-                  Flexible(
-                    child: statesAsync.when(
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (err, _) => Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Location data is temporarily unavailable. Please try again.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Select State / UT (A → Z)',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  'All 28 States & 8 Union Territories in Alphabetical Order',
+                                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () => ref.refresh(locationApiStatesProvider),
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                            onPressed: () => Navigator.pop(sheetCtx),
+                          ),
+                        ],
                       ),
-                      data: (states) {
-                        return ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: states.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
-                          itemBuilder: (context, index) {
-                            final stateNode = states[index];
-                            final isSelected = stateNode.name.toLowerCase() == _selectedStateName?.toLowerCase();
+                      const SizedBox(height: 12),
+                      TextField(
+                        onChanged: (val) {
+                          setSheetState(() {
+                            query = val.trim().toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Type to search state or UT...',
+                          hintStyle: const TextStyle(fontSize: 13.5, color: Color(0xFF94A3B8)),
+                          prefixIcon: const Icon(Icons.search_rounded, size: 20, color: Color(0xFF64748B)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          isDense: true,
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Color(0xFF0F766E), width: 1.5),
+                          ),
+                        ),
+                        style: const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      const SizedBox(height: 8),
+                      Flexible(
+                        child: statesAsync.when(
+                          loading: () => const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          error: (err, _) => Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.cloud_off_rounded, color: Color(0xFFEF4444), size: 36),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Location data is temporarily unavailable. Please try again.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () => ref.refresh(locationApiStatesProvider),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          data: (states) {
+                            final filteredStates = query.isEmpty
+                                ? states
+                                : states.where((s) => s.name.toLowerCase().contains(query)).toList();
 
-                            return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFDCFCE7)
-                                      : const Color(0xFFF1F5F9),
-                                  shape: BoxShape.circle,
+                            if (filteredStates.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Text(
+                                    'No states matching "$query"',
+                                    style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.map_rounded,
-                                  size: 20,
-                                  color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF475569),
-                                ),
-                              ),
-                              title: Text(
-                                stateNode.name,
-                                style: TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                  color: isSelected ? const Color(0xFF15803D) : const Color(0xFF0F172A),
-                                ),
-                              ),
-                              subtitle: Text(
-                                stateNode.childCount != null && stateNode.childCount! > 0
-                                    ? '${stateNode.childCount} administrative units'
-                                    : (stateNode.type == 'UNION_TERRITORY' ? 'Union Territory' : 'State'),
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                              ),
-                              trailing: isSelected
-                                  ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
-                                  : const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
-                              onTap: () {
-                                Navigator.pop(sheetCtx);
-                                _onStateSelected(stateNode.name);
-                                _showCityPickerSheet(context, stateNode.name, stateId: stateNode.id);
+                              );
+                            }
+
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: filteredStates.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                              itemBuilder: (context, index) {
+                                final stateNode = filteredStates[index];
+                                final isSelected = stateNode.name.toLowerCase() == _selectedStateName?.toLowerCase();
+
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? const Color(0xFFDCFCE7)
+                                          : const Color(0xFFF1F5F9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.map_rounded,
+                                      size: 20,
+                                      color: isSelected ? const Color(0xFF16A34A) : const Color(0xFF475569),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    stateNode.name,
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                                      color: isSelected ? const Color(0xFF15803D) : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    stateNode.childCount != null && stateNode.childCount! > 0
+                                        ? '${stateNode.childCount} administrative units'
+                                        : (stateNode.type == 'UNION_TERRITORY' ? 'Union Territory' : 'State'),
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 20)
+                                      : const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1), size: 18),
+                                  onTap: () {
+                                    Navigator.pop(sheetCtx);
+                                    _onStateSelected(stateNode.name);
+                                    _showCityPickerSheet(context, stateNode.name, stateId: stateNode.id);
+                                  },
+                                );
                               },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );

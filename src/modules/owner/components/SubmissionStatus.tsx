@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/navigation/BackLink";
 import { deriveStage, type ListingStage } from "./listingStage";
+import { RequestPropertyManagementDialog } from "./RequestPropertyManagementDialog";
 
 /**
  * Step 8 — what the owner sees after submitting.
@@ -235,6 +236,56 @@ export function SubmissionStatus({ propertyId }: { propertyId: string }) {
                 <Sparkles className="mr-2 h-4 w-4" /> Fast-Track My Listing (₹499)
               </Link>
             </Button>
+          </div>
+        </div>
+
+        {/* Seedha Property & Rental Management CTA Card */}
+        <div className="mt-5 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-background p-5 sm:p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-4 w-4" /> End-to-End Rental Management
+              </span>
+              <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+                Want Seedha to manage this property for you?
+              </h3>
+            </div>
+            <span className="self-start sm:self-auto text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-primary/20 text-primary border border-primary/30">
+              Zero Tenant Hassles
+            </span>
+          </div>
+
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Turn your asset into completely passive income. Our certified property managers screen
+            tenants with police verification, collect rent on-time, perform scheduled physical
+            inspections, and resolve 100% of maintenance requests.
+          </p>
+
+          <div className="grid grid-cols-2 gap-2 text-[11px] font-medium text-foreground sm:grid-cols-4">
+            <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
+              <span className="text-primary font-bold">✓</span> Police Verified
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
+              <span className="text-primary font-bold">✓</span> On-Time Payouts
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
+              <span className="text-primary font-bold">✓</span> Video Audits
+            </div>
+            <div className="flex items-center gap-1.5 rounded-lg bg-muted/60 px-2.5 py-1.5">
+              <span className="text-primary font-bold">✓</span> 24/7 Repairs
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <RequestPropertyManagementDialog
+              propertyId={data.id}
+              propertyTitle={data.title || "Your Property"}
+              triggerButton={
+                <Button className="w-full sm:w-auto rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-md">
+                  <ShieldCheck className="mr-2 h-4 w-4" /> Request Property Management
+                </Button>
+              }
+            />
           </div>
         </div>
 

@@ -574,11 +574,78 @@ class NativeApiClient {
       final uri = Uri.parse('$_baseUrl/api/v2/locations/search').replace(queryParameters: params);
       final response = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 12));
       final list = _unwrapListData(response);
-      return list.map((e) => LocationItem.fromJson(e as Map<String, dynamic>)).toList();
+      final items = list.map((e) => LocationItem.fromJson(e as Map<String, dynamic>)).toList();
+      items.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      return items;
     } on LocationApiException {
       rethrow;
     } catch (e) {
       throw const LocationApiException('Location data is temporarily unavailable. Please try again.');
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // PROPERTY MANAGEMENT & RENTAL MANAGEMENT
+  // ---------------------------------------------------------------------------
+
+  /// Submit a new Property Management request
+  Future<Map<String, dynamic>> createPropertyManagementRequest({
+    required String propertyId,
+    required String ownerContactPhone,
+    List<String>? servicesRequested,
+    double? monthlyRentTarget,
+    String? availableFromDate,
+    String? ownerNotes,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/property-management'),
+      headers: _headers,
+      body: jsonEncode({
+        'propertyId': propertyId,
+        'ownerContactPhone': ownerContactPhone,
+        if (servicesRequested != null) 'servicesRequested': servicesRequested,
+        if (monthlyRentTarget != null) 'monthlyRentTarget': monthlyRentTarget,
+        if (availableFromDate != null) 'availableFromDate': availableFromDate,
+        if (ownerNotes != null && ownerNotes.isNotEmpty) 'ownerNotes': ownerNotes,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 400) {
+      throw Exception(data['error'] ?? 'Failed to submit property management request');
+    }
+    return data;
+  }
+
+  /// Fetch active and historical property management requests for current owner
+  Future<List<Map<String, dynamic>>> getMyPropertyManagementRequests() async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/v2/property-management/my'),
+      headers: _headers,
+    ).timeout(const Duration(seconds: 15));
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 400) {
+      throw Exception(data['error'] ?? 'Failed to fetch management requests');
+    }
+    final rawList = data['data'] as List<dynamic>? ?? [];
+    return rawList.map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  /// Cancel an existing property management request
+  Future<Map<String, dynamic>> cancelPropertyManagementRequest(String id, {String? reason}) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v2/property-management/$id/cancel'),
+      headers: _headers,
+      body: jsonEncode({
+        if (reason != null) 'reason': reason,
+      }),
+    ).timeout(const Duration(seconds: 15));
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode >= 400) {
+      throw Exception(data['error'] ?? 'Failed to cancel request');
+    }
+    return data;
   }
 }
