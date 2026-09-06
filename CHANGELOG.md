@@ -1,3 +1,8 @@
+## v0.170.0 — 2026-09-06
+
+### Features
+- feat(infra): add GCP terraform modules, cleanup mock assets, and stabilize tests (61620c6)
+
 ## v0.169.0 — 2026-09-05
 
 ### Features
