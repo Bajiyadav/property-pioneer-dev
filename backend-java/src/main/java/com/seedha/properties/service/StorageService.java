@@ -28,6 +28,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import jakarta.annotation.PreDestroy;
+import java.net.URI;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -38,10 +39,12 @@ public class StorageService {
 
     private static final Logger log = LoggerFactory.getLogger(StorageService.class);
 
+    private final String provider;
+    private final String storageEndpoint;
     private final String publicBucket;
     private final String privateBucket;
-    private final String awsRegion;
-    private final String cloudfrontDomain;
+    private final String region;
+    private final String cdnDomain;
 
     private final FileSecurityValidator fileValidator;
     private final StoredFileRepository storedFileRepository;
@@ -58,19 +61,23 @@ public class StorageService {
     private static final long RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000L;
 
     public StorageService(
-            @Value("${seedha.aws.public-bucket:seedha-properties-public-media-staging}") String publicBucket,
-            @Value("${seedha.aws.private-bucket:seedha-properties-private-docs-staging}") String privateBucket,
-            @Value("${seedha.aws.region:ap-south-1}") String awsRegion,
-            @Value("${seedha.aws.cloudfront-domain:}") String cloudfrontDomain,
+            @Value("${seedha.storage.provider:${seedha.aws.provider:aws}}") String provider,
+            @Value("${seedha.storage.endpoint:}") String storageEndpoint,
+            @Value("${seedha.storage.public-bucket:${seedha.aws.public-bucket:seedha-properties-public-media-staging}}") String publicBucket,
+            @Value("${seedha.storage.private-bucket:${seedha.aws.private-bucket:seedha-properties-private-docs-staging}}") String privateBucket,
+            @Value("${seedha.storage.region:${seedha.aws.region:ap-south-1}}") String region,
+            @Value("${seedha.storage.cdn-domain:${seedha.aws.cloudfront-domain:}}") String cdnDomain,
             FileSecurityValidator fileValidator,
             StoredFileRepository storedFileRepository,
             PropertyRepository propertyRepository,
             RentalAgreementRepository rentalAgreementRepository,
             SecurityAuditService auditService) {
+        this.provider = provider;
+        this.storageEndpoint = storageEndpoint;
         this.publicBucket = publicBucket;
         this.privateBucket = privateBucket;
-        this.awsRegion = awsRegion;
-        this.cloudfrontDomain = cloudfrontDomain;
+        this.region = region;
+        this.cdnDomain = cdnDomain;
         this.fileValidator = fileValidator;
         this.storedFileRepository = storedFileRepository;
         this.propertyRepository = propertyRepository;
@@ -79,8 +86,8 @@ public class StorageService {
 
         S3Presigner built = null;
         try {
-            // Default credential chain: the ECS task role in staging/production,
-            // ambient credentials locally, falling back to basic signing credentials for offline/test execution.
+            // Default credential chain: the task role/ambient credentials in staging/production,
+            // falling back to basic signing credentials for offline/test execution.
             AwsCredentialsProvider credentialsProvider = AwsCredentialsProviderChain.builder()
                     .credentialsProviders(
                             DefaultCredentialsProvider.create(),
@@ -90,12 +97,23 @@ public class StorageService {
                             ))
                     )
                     .build();
-            built = S3Presigner.builder()
-                    .region(Region.of(awsRegion))
-                    .credentialsProvider(credentialsProvider)
-                    .build();
+
+            // Translate GCP region to closest S3-interoperability region if needed
+            String s3Region = region.equalsIgnoreCase("asia-south1") ? "ap-south-1" : region;
+            S3Presigner.Builder presignerBuilder = S3Presigner.builder()
+                    .region(Region.of(s3Region))
+                    .credentialsProvider(credentialsProvider);
+
+            // Configure endpoint override for GCP Google Cloud Storage (S3-compatible interoperability)
+            if (storageEndpoint != null && !storageEndpoint.isBlank()) {
+                presignerBuilder.endpointOverride(URI.create(storageEndpoint));
+            } else if ("gcp".equalsIgnoreCase(provider)) {
+                presignerBuilder.endpointOverride(URI.create("https://storage.googleapis.com"));
+            }
+
+            built = presignerBuilder.build();
         } catch (RuntimeException ex) {
-            log.warn("S3 presigner unavailable; media endpoints refuse until AWS credentials are configured", ex);
+            log.warn("Object storage presigner unavailable; media endpoints refuse until credentials are configured", ex);
         }
         this.presigner = built;
     }
@@ -178,10 +196,12 @@ public class StorageService {
         // 6. Public URL (strictly omitted for private documents)
         String publicUrl = null;
         if (!isPrivate) {
-            if (cloudfrontDomain != null && !cloudfrontDomain.isBlank()) {
-                publicUrl = String.format("https://%s/%s", cloudfrontDomain, objectKey);
+            if (cdnDomain != null && !cdnDomain.isBlank()) {
+                publicUrl = String.format("https://%s/%s", cdnDomain, objectKey);
+            } else if ("gcp".equalsIgnoreCase(provider) || (storageEndpoint != null && storageEndpoint.contains("googleapis.com"))) {
+                publicUrl = String.format("https://storage.googleapis.com/%s/%s", targetBucket, objectKey);
             } else {
-                publicUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", targetBucket, awsRegion, objectKey);
+                publicUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", targetBucket, region, objectKey);
             }
         }
 
@@ -252,10 +272,12 @@ public class StorageService {
 
         // If folder is public, return public URL directly
         if (rule != null && !rule.isPrivate()) {
-            if (cloudfrontDomain != null && !cloudfrontDomain.isBlank()) {
-                return String.format("https://%s/%s", cloudfrontDomain, objectKey);
+            if (cdnDomain != null && !cdnDomain.isBlank()) {
+                return String.format("https://%s/%s", cdnDomain, objectKey);
+            } else if ("gcp".equalsIgnoreCase(provider) || (storageEndpoint != null && storageEndpoint.contains("googleapis.com"))) {
+                return String.format("https://storage.googleapis.com/%s/%s", publicBucket, objectKey);
             }
-            return String.format("https://%s.s3.%s.amazonaws.com/%s", publicBucket, awsRegion, objectKey);
+            return String.format("https://%s.s3.%s.amazonaws.com/%s", publicBucket, region, objectKey);
         }
 
         // 2. Authorization Verification for Private Document

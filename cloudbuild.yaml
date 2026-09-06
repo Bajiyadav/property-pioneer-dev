@@ -1,0 +1,67 @@
+# ==============================================================================
+# Seedha Properties — Automated Google Cloud Build Pipeline
+# Region: asia-south1 (Mumbai)
+# Stages: Test ➔ Container Build & Cache ➔ Push to Artifact Registry ➔ Deploy Cloud Run
+# ==============================================================================
+
+steps:
+  # 1. Run Staging Automated Test Suite
+  - name: "maven:3.9.8-eclipse-temurin-21-alpine"
+    entrypoint: "mvn"
+    args:
+      - "test"
+      - "-Dspring.profiles.active=staging"
+      - "--batch-mode"
+    dir: "backend-java"
+    id: "run-staging-tests"
+
+  # 2. Build Container Image using Kaniko with Layer Caching
+  - name: "gcr.io/kaniko-project/executor:latest"
+    args:
+      - "--destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_NAME:$COMMIT_SHA"
+      - "--destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_NAME:latest"
+      - "--destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_NAME:staging"
+      - "--cache=true"
+      - "--cache-ttl=48h"
+      - "--context=dir://backend-java"
+      - "--dockerfile=backend-java/Dockerfile"
+    id: "build-and-push-image"
+    waitFor: ["run-staging-tests"]
+
+  # 3. Deploy to Google Cloud Run (Rolling Zero-Downtime Deployment)
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "$_SERVICE_NAME"
+      - "--image=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_NAME:$COMMIT_SHA"
+      - "--region=$_REGION"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+      - "--min-instances=$_MIN_INSTANCES"
+      - "--max-instances=$_MAX_INSTANCES"
+      - "--cpu=$_CPU"
+      - "--memory=$_MEMORY"
+      - "--vpc-connector=$_VPC_CONNECTOR"
+      - "--vpc-egress=private-ranges-only"
+      - "--set-env-vars=SPRING_PROFILES_ACTIVE=staging,PORT=8080,STORAGE_PROVIDER=gcp"
+    id: "deploy-cloud-run"
+    waitFor: ["build-and-push-image"]
+
+substitutions:
+  _REGION: "asia-south1"
+  _APP_NAME: "seedha-backend"
+  _SERVICE_NAME: "seedha-backend-staging"
+  _REPO_NAME: "seedha-docker-repo"
+  _VPC_CONNECTOR: "seedha-vpc-conn-staging"
+  _MIN_INSTANCES: "1"
+  _MAX_INSTANCES: "10"
+  _CPU: "1"
+  _MEMORY: "1Gi"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  dynamic_substitutions: true
+
+timeout: "1800s"

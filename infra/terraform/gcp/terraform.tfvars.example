@@ -1,0 +1,21 @@
+# ==============================================================================
+# Seedha Properties — Terraform Variables Example (Staging)
+# ==============================================================================
+
+project_id  = "seedha-properties-staging"
+region      = "asia-south1"
+environment = "staging"
+
+db_tier         = "db-custom-1-3840"
+db_disk_size_gb = 10
+
+cloud_run_min_instances = 1
+cloud_run_max_instances = 5
+cloud_run_cpu           = "1000m"
+cloud_run_memory        = "1Gi"
+
+cors_allowed_origins = [
+  "https://staging.seedhaproperties.com",
+  "http://localhost:5173",
+  "http://localhost:3000"
+]

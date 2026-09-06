@@ -60,6 +60,13 @@ seedha:
       host: ${CLAMAV_HOST:localhost}
       port: ${CLAMAV_PORT:3310}
       timeout-ms: ${CLAMAV_TIMEOUT_MS:10000}
+  storage:
+    provider: ${STORAGE_PROVIDER:aws}
+    endpoint: ${STORAGE_ENDPOINT:}
+    public-bucket: ${GCS_PUBLIC_BUCKET:${S3_PUBLIC_MEDIA_BUCKET:seedha-properties-public-media-staging}}
+    private-bucket: ${GCS_PRIVATE_DOCS_BUCKET:${S3_PRIVATE_DOCS_BUCKET:seedha-properties-private-docs-staging}}
+    region: ${STORAGE_REGION:${AWS_REGION:asia-south1}}
+    cdn-domain: ${CDN_DOMAIN:${CLOUDFRONT_DOMAIN:}}
   aws:
     region: ${AWS_REGION:ap-south-1}
     public-bucket: ${S3_PUBLIC_MEDIA_BUCKET:seedha-properties-public-media-staging}

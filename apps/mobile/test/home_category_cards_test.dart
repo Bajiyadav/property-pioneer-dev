@@ -48,7 +48,10 @@ void main() {
           .last;
       final offered = city.items!.map((i) => i.value).toList();
 
-      expect(offered, equals(AppConstants.citiesByState['Telangana']));
+      final expectedCities =
+          List<String>.from(AppConstants.citiesByState['Telangana']!)
+            ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      expect(offered, equals(expectedCities));
       // A city from another state must never be selectable here.
       expect(offered, isNot(contains('Mumbai')));
       expect(offered, isNot(contains('Bengaluru')));
@@ -67,10 +70,10 @@ void main() {
 
       await tester.tap(find.byType(DropdownButton<String>).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Karnataka').last);
+      await tester.tap(find.text('Andhra Pradesh').last);
       await tester.pumpAndSettle();
 
-      expect(changedTo, 'Karnataka');
+      expect(changedTo, 'Andhra Pradesh');
     });
 
     testWidgets('every offered state can actually be completed', (tester) async {

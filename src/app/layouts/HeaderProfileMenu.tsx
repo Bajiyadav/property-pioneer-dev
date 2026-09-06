@@ -257,21 +257,16 @@ export function HeaderProfileMenu() {
   );
 }
 
-function MenuItem({
-  to,
-  search,
-  icon: Icon,
-  label,
-  onClick,
-  highlight = false,
-}: {
-  to: string;
-  search?: Record<string, string>;
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
-  highlight?: boolean;
-}) {
+interface MenuItemProps {
+  readonly to: string;
+  readonly search?: Record<string, string>;
+  readonly icon: React.ElementType;
+  readonly label: string;
+  readonly onClick: () => void;
+  readonly highlight?: boolean;
+}
+
+function MenuItem({ to, search, icon: Icon, label, onClick, highlight = false }: MenuItemProps) {
   return (
     <Link
       to={to}

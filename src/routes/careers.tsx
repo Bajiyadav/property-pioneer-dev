@@ -15,7 +15,6 @@ import {
   X,
   FileText,
 } from "lucide-react";
-import founderImg from "@/assets/founder.png";
 import { toast } from "sonner";
 import { saveJobApplication } from "@/modules/admin/services/adminFunctions";
 import {
@@ -186,15 +185,15 @@ function CareersPage() {
         </div>
       </section>
 
-      {/* 2. Meet Our Founder Feature Section */}
+      {/* 2. Founding Vision & Leadership Section */}
       <section className="py-20 sm:py-24 border-b border-border/60 bg-card">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-muted-foreground border border-border/50 mb-3">
               <span>Leadership &amp; Vision</span>
             </div>
-            <h2 className="font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-5xl tracking-tight">
-              Meet Our Founder
+            <h2 className="font-[family-name:var(--font-display)] text-3xl font-extrabold text-foreground sm:text-4xl tracking-tight">
+              Our Founding Vision
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
               Driven by transparency, financial discipline, and a deep commitment to hassle-free
@@ -202,56 +201,31 @@ function CareersPage() {
             </p>
           </div>
 
-          <div className="grid gap-12 lg:grid-cols-12 items-center bg-gradient-to-br from-secondary/40 via-card to-secondary/20 rounded-3xl border border-border/80 p-8 sm:p-12 shadow-[var(--shadow-card)]">
-            {/* Left: Founder Portrait */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative group">
-                <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-primary/30 to-accent/30 opacity-70 blur-xl transition-all duration-500 group-hover:opacity-100" />
-                <div className="relative overflow-hidden rounded-2xl border-2 border-border/80 bg-card shadow-xl max-w-sm">
-                  <img
-                    src={founderImg}
-                    alt="Srinivasa Rao - Founder & CEO of SEEDHA Properties"
-                    className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 text-white text-center">
-                    <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                      Founder &amp; CEO
-                    </span>
-                    <p className="text-sm font-extrabold">Srinivasa Rao</p>
-                  </div>
-                </div>
-              </div>
+          <div className="bg-gradient-to-br from-secondary/40 via-card to-secondary/20 rounded-3xl border border-border/80 p-8 sm:p-12 shadow-[var(--shadow-card)] space-y-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                PropTech Leadership &amp; Governance
+              </span>
+              <h3 className="text-2xl font-bold text-foreground mt-1">Srinivasa Rao</h3>
+              <p className="text-xs text-muted-foreground font-semibold">
+                Founder &amp; Chief Executive Officer
+              </p>
             </div>
 
-            {/* Right: Founder Story & Credentials */}
-            <div className="lg:col-span-7 flex flex-col justify-center space-y-5">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  PropTech Entrepreneur &amp; CA
-                </span>
-                <h3 className="text-2xl font-bold text-foreground mt-1">Srinivasa Rao</h3>
-                <p className="text-xs text-muted-foreground font-semibold">
-                  Founder &amp; Chief Executive Officer
-                </p>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              With extensive experience in financial architecture, governance, and consumer
+              technology, Srinivasa Rao founded SEEDHA Properties to solve a fundamental problem
+              facing urban housing: unjustified brokerage fees and dishonest property information.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3.5">
+                <span className="text-xs font-bold text-primary block">0% Brokerage</span>
+                <span className="text-[11px] text-muted-foreground">Direct Owner Connect</span>
               </div>
-
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                With extensive experience in financial architecture, governance, and consumer
-                technology, Srinivasa Rao founded SEEDHA Properties to solve a fundamental problem
-                facing urban housing: unjustified brokerage fees and dishonest property information.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="rounded-xl border border-border/60 bg-background/60 p-3.5">
-                  <span className="text-xs font-bold text-primary block">0% Brokerage</span>
-                  <span className="text-[11px] text-muted-foreground">Direct Owner Connect</span>
-                </div>
-                <div className="rounded-xl border border-border/60 bg-background/60 p-3.5">
-                  <span className="text-xs font-bold text-emerald-600 block">
-                    Verified Listings
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">Field Audit Passed</span>
-                </div>
+              <div className="rounded-xl border border-border/60 bg-background/60 p-3.5">
+                <span className="text-xs font-bold text-emerald-600 block">Verified Listings</span>
+                <span className="text-[11px] text-muted-foreground">Field Audit Passed</span>
               </div>
             </div>
           </div>
