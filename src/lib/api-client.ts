@@ -155,19 +155,58 @@ class NativeApiClient {
   properties = {
     list: async (
       params: {
+        q?: string;
         city?: string;
+        locality?: string;
         listingType?: string;
         propertyType?: string;
+        furnishing?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        bedrooms?: number;
+        bathrooms?: number;
+        minArea?: number;
+        maxArea?: number;
+        sort?: string;
+        lat?: number;
+        lng?: number;
+        radiusKm?: number;
+        page?: number;
         limit?: number;
         offset?: number;
       } = {},
     ) => {
       const query = new URLSearchParams();
+      if (params.q) query.set("q", params.q);
       if (params.city) query.set("city", params.city);
+      if (params.locality) query.set("locality", params.locality);
       if (params.listingType) query.set("listingType", params.listingType);
       if (params.propertyType) query.set("propertyType", params.propertyType);
+      if (params.furnishing) query.set("furnishing", params.furnishing);
+      if (params.minPrice) query.set("minPrice", params.minPrice.toString());
+      if (params.maxPrice) query.set("maxPrice", params.maxPrice.toString());
+      if (params.bedrooms) query.set("bedrooms", params.bedrooms.toString());
+      if (params.bathrooms) query.set("bathrooms", params.bathrooms.toString());
+      if (params.minArea) query.set("minArea", params.minArea.toString());
+      if (params.maxArea) query.set("maxArea", params.maxArea.toString());
+      if (params.sort) query.set("sort", params.sort);
+      if (params.lat) query.set("lat", params.lat.toString());
+      if (params.lng) query.set("lng", params.lng.toString());
+      if (params.radiusKm) query.set("radius_km", params.radiusKm.toString());
+      if (params.page) query.set("page", params.page.toString());
       if (params.limit) query.set("limit", params.limit.toString());
-      if (params.offset) query.set("offset", params.offset.toString());
+      if (params.offset !== undefined) query.set("offset", params.offset.toString());
+
+      const res = await fetch(`${BASE_API_URL}/api/v2/properties?${query.toString()}`, {
+        headers: this.getHeaders(),
+      });
+      return res.json();
+    },
+
+    suggest: async (params: { city?: string; q?: string }) => {
+      const query = new URLSearchParams({ suggest: "true" });
+      if (params.city) query.set("city", params.city);
+      if (params.q) query.set("q", params.q);
 
       const res = await fetch(`${BASE_API_URL}/api/v2/properties?${query.toString()}`, {
         headers: this.getHeaders(),
