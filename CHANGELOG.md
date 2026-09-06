@@ -1,3 +1,8 @@
+## v0.171.0 — 2026-09-06
+
+### Features
+- feat(mobile): configure Google Play .aab release signing and iOS App Store readiness (e99df97)
+
 ## v0.170.0 — 2026-09-06
 
 ### Features
