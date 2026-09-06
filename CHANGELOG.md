@@ -1,3 +1,8 @@
+## v0.172.0 — 2026-09-06
+
+### Features
+- feat(search): enhance Node.js search with fuzzy queries and suggestions (ea84347)
+
 ## v0.171.0 — 2026-09-06
 
 ### Features
