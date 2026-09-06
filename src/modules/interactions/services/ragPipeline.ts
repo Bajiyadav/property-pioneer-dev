@@ -33,19 +33,21 @@ export interface RAGStageLatencies {
   totalMs?: number;
 }
 
+export interface RAGProperty {
+  id: string;
+  title: string;
+  locality?: string;
+  city?: string;
+  price?: number;
+  bedrooms?: number;
+  property_type?: string;
+  image_urls?: string[];
+}
+
 export interface RAGRetrievalResult {
   intent: AIIntent;
   filters: ExtractedPropertyFilters;
-  properties: Array<{
-    id: string;
-    title: string;
-    locality?: string;
-    city?: string;
-    price?: number;
-    bedrooms?: number;
-    property_type?: string;
-    image_urls?: string[];
-  }>;
+  properties: RAGProperty[];
   knowledgeDocs: KnowledgeChunk[];
   groundedContextText: string;
   queryLatencyMs: number;
@@ -60,7 +62,7 @@ export interface RAGResponse {
   totalLatencyMs: number;
 }
 
-type RetrievedProperty = RAGRetrievalResult["properties"][number];
+type RetrievedProperty = RAGProperty;
 
 /**
  * Lightweight stage timing diagnostic. Emits ONLY numeric latencies — no query
@@ -224,7 +226,7 @@ export async function executeRAGRetrieval(
 export async function runRAGPipeline(
   userQuery: string,
   callProxyFn: (
-    contents: Array<{ role: string; parts: Array<{ text: string }> }>,
+    contents: { role: string; parts: { text: string }[] }[],
     onToken?: (accumulated: string) => void,
   ) => Promise<string | null>,
   onToken?: (accumulated: string) => void,
