@@ -1,3 +1,8 @@
+## v0.172.1 — 2026-09-06
+
+### Fixes
+- fix(rag): replace generic Array type with RAGProperty bracket array (de63572)
+
 ## v0.172.0 — 2026-09-06
 
 ### Features
