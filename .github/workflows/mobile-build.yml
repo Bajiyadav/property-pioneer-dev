@@ -66,7 +66,33 @@ jobs:
         working-directory: apps/mobile
         run: flutter test
 
-      - name: Build Android Release APK
+      - name: Setup Keystore (if secret provided)
+        working-directory: apps/mobile
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "Decoding release upload keystore..."
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+            cat <<EOF > android/key.properties
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'seedha-upload' }}
+          storeFile=upload-keystore.jks
+          EOF
+            echo "Keystore configured successfully."
+          else
+            echo "Notice: ANDROID_KEYSTORE_BASE64 secret not found. Building with debug signing fallback."
+          fi
+
+      - name: Build Android App Bundle (.aab) for Google Play
+        working-directory: apps/mobile
+        run: |
+          flutter build appbundle --release --no-tree-shake-icons \
+            --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
+            --dart-define=API_BASE_URL=https://seedhaproperties.com/api \
+            --dart-define=GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
+
+      - name: Build Android APK
         working-directory: apps/mobile
         run: |
           flutter build apk --release --no-tree-shake-icons \
@@ -75,16 +101,29 @@ jobs:
             --dart-define=API_BASE_URL=https://seedhaproperties.com/api \
             --dart-define=GEOAPIFY_API_KEY=${{ secrets.GEOAPIFY_API_KEY }}
 
-      - name: Verify Generated APK File
+      - name: Verify Generated Artifacts
         working-directory: apps/mobile
         run: |
+          AAB_PATH="build/app/outputs/bundle/release/app-release.aab"
           APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          if [ ! -f "$AAB_PATH" ]; then
+            echo "ERROR: AAB file not found at $AAB_PATH"
+            exit 1
+          fi
           if [ ! -f "$APK_PATH" ]; then
             echo "ERROR: APK file not found at $APK_PATH"
             exit 1
           fi
-          FILE_SIZE=$(ls -lh "$APK_PATH" | awk '{print $5}')
-          echo "SUCCESS: Found $APK_PATH (Size: $FILE_SIZE)"
+          echo "SUCCESS: Found $AAB_PATH (Size: $(ls -lh "$AAB_PATH" | awk '{print $5}'))"
+          echo "SUCCESS: Found $APK_PATH (Size: $(ls -lh "$APK_PATH" | awk '{print $5}'))"
+
+      - name: Upload Android App Bundle (AAB) Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: seedha-properties-release-aab
+          path: apps/mobile/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v7
@@ -95,4 +134,4 @@ jobs:
           retention-days: 30
 
       - name: Pipeline Completed Successfully
-        run: echo "🎉 Seedha Properties Mobile APK Build & Test Pipeline completed successfully!"
+        run: echo "🎉 Seedha Properties Mobile AAB & APK Build Pipeline completed successfully!"

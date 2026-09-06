@@ -1,0 +1,16 @@
+# ==============================================================================
+# SEEDHA PROPERTIES - ANDROID PRODUCTION RELEASE KEYSTORE
+# ==============================================================================
+# Instructions:
+# 1. Generate your upload keystore:
+#    keytool -genkey -v -keystore upload-keystore.jks -alias seedha-upload -keyalg RSA -keysize 2048 -validity 10000
+# 2. Copy this template:
+#    cp key.properties.example key.properties
+# 3. Fill in your actual keystore passwords below.
+# 4. NEVER commit key.properties or upload-keystore.jks to git (already gitignored).
+# ==============================================================================
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=seedha-upload
+storeFile=upload-keystore.jks
