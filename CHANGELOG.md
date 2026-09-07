@@ -1,3 +1,11 @@
+## v0.172.2 — 2026-09-07
+
+### Fixes
+- fix(security): remove committed secret defaults from staging config and sanitize scripts (cda0c4a)
+
+### Documentation
+- docs(github): upgrade PR template with architectural guardrails and multi-tier testing (b976bcd)
+
 ## v0.172.1 — 2026-09-06
 
 ### Fixes
