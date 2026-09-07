@@ -30,9 +30,9 @@ if [ ! -f "android/key.properties" ]; then
 fi
 
 flutter build appbundle --release --no-tree-shake-icons \
-    --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
-    --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
-    --dart-define=API_BASE_URL=https://seedhaproperties.com/api
+    --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://iyttetfaavokzyexvqam.supabase.co}" \
+    --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-${VITE_SUPABASE_PUBLISHABLE_KEY:-}}" \
+    --dart-define=API_BASE_URL="${API_BASE_URL:-https://seedhaproperties.com/api}"
 
 AAB_OUTPUT="build/app/outputs/bundle/release/app-release.aab"
 if [ -f "$AAB_OUTPUT" ]; then
@@ -50,9 +50,9 @@ if [[ "$OSTYPE" == "darwin"* ]] && command -v xcodebuild &>/dev/null; then
     fi
     flutter build ipa --release \
         --export-options-plist="$EXPORT_PLIST" \
-        --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
-        --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
-        --dart-define=API_BASE_URL=https://seedhaproperties.com/api || {
+        --dart-define=SUPABASE_URL="${SUPABASE_URL:-https://iyttetfaavokzyexvqam.supabase.co}" \
+        --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-${VITE_SUPABASE_PUBLISHABLE_KEY:-}}" \
+        --dart-define=API_BASE_URL="${API_BASE_URL:-https://seedhaproperties.com/api}" || {
         echo "⚠️ iOS IPA export requires configured Apple Team ID in ios/ExportOptions.plist."
         echo "   You can build Runner.xcworkspace directly in Xcode once your Apple Developer Account is linked."
     }

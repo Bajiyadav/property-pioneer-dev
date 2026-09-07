@@ -39,7 +39,7 @@ Or directly with Flutter:
 ```bash
 flutter build appbundle --release --no-tree-shake-icons \
   --dart-define=SUPABASE_URL=https://iyttetfaavokzyexvqam.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=sb_publishable_gcIp8Q5STuoIZf-d7pJnGA_CuqPEo2x \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY \
   --dart-define=API_BASE_URL=https://api.seedhaproperties.com
 ```
 

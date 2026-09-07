@@ -1,0 +1,15 @@
+# Gitleaks Configuration for Seedha Properties
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for templates, sample configs, documentation, and test mocks"
+paths = [
+  '''\.env\.example$''',
+  '''\.example$''',
+  '''key\.properties\.example$''',
+  '''apps/mobile/android/key\.properties\.example$''',
+  '''docs/.*''',
+  '''tests/.*''',
+  '''apps/mobile/test/.*'''
+]
