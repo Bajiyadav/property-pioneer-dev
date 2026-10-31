@@ -169,8 +169,8 @@ function HelpPage() {
             {
               icon: Phone,
               label: "Call Us",
-              desc: "+91 98765 43210  ·  Mon–Sat 9–6 PM",
-              href: "tel:+919876543210",
+              desc: "+91 99663 33974  ·  Mon–Sat 9–6 PM",
+              href: "tel:+919966333974",
               color: "text-blue-500 bg-blue-500/10",
             },
             {

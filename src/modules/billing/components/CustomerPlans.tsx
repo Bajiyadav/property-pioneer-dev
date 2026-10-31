@@ -288,11 +288,11 @@ export function CustomerPlans() {
         </div>
         <div className="mt-4 sm:mt-0">
           <a
-            href="tel:+918905552222"
+            href="tel:+919966333974"
             className="inline-flex items-center gap-2 rounded-xl border border-teal-600/30 bg-card px-4 py-2 text-xs font-bold text-teal-700 dark:text-teal-300 shadow-sm transition hover:bg-teal-500/10"
           >
             <PhoneCall className="h-4 w-4 text-teal-600" />
-            <span>Assistance: +91-89-055-522-22</span>
+            <span>Assistance: +91 99663 33974</span>
           </a>
         </div>
       </div>
@@ -414,7 +414,7 @@ export function CustomerPlans() {
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <a
-              href="https://wa.me/918905552222?text=Hi%20Natasha,%20I%20need%20assistance%20choosing%20a%20Seedha%20Properties%20plan."
+              href="https://wa.me/919966333974?text=Hi%2C%20I%20need%20assistance%20choosing%20a%20Seedha%20Properties%20plan."
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-xs font-bold text-white shadow-lg hover:bg-emerald-600 transition"
@@ -423,11 +423,11 @@ export function CustomerPlans() {
               <span>Start Chat on WhatsApp</span>
             </a>
             <a
-              href="tel:+918905552222"
+              href="tel:+919966333974"
               className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white hover:bg-white/20 transition"
             >
               <PhoneCall className="h-4 w-4" />
-              <span>Call +91-89-055-522-22</span>
+              <span>Call +91 99663 33974</span>
             </a>
           </div>
         </div>

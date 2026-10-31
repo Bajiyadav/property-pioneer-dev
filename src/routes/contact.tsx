@@ -23,7 +23,7 @@ export const Route = createFileRoute("/contact")({
       { title: `Contact Us — ${APP_NAME}` },
       {
         name: "description",
-        content: `Get in touch with ${APP_NAME} customer support, real estate team, or territory area agents in Hyderabad. Phone: +91 98765 43210.`,
+        content: `Get in touch with ${APP_NAME} customer support, real estate team, or territory area agents in Hyderabad. Phone: +91 99663 33974.`,
       },
     ],
   }),
@@ -112,8 +112,8 @@ function ContactPage() {
                   </div>
                   <div>
                     <strong className="text-foreground block text-xs">Helpline Phone</strong>
-                    <a href="tel:+919876543210" className="text-primary font-bold hover:underline">
-                      +91 98765 43210 / +91 040 4567 8900
+                    <a href="tel:+919966333974" className="text-primary font-bold hover:underline">
+                      +91 99663 33974
                     </a>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ function ContactPage() {
               {/* WhatsApp Quick Trigger */}
               <div className="pt-2 border-t border-border/50">
                 <a
-                  href="https://wa.me/919876543210?text=Hi%2C%20I%20have%20an%20inquiry%20regarding%20a%20property%20listing."
+                  href="https://wa.me/919966333974?text=Hi%2C%20I%20have%20an%20inquiry%20regarding%20a%20property%20listing."
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 w-full rounded-2xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white shadow hover:bg-emerald-500 transition cursor-pointer"

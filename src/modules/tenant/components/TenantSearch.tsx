@@ -119,7 +119,7 @@ export function TenantSearch({ initialProfile }: { initialProfile?: Partial<Tena
     const text = encodeURIComponent(
       `Hello! I saw your direct-owner listing on Seedha Properties for ${property.title} in ${property.locality}, ${property.city} (Rent: ₹${property.price.toLocaleString("en-IN")}/mo). I'd like to schedule a visit!`,
     );
-    window.open(`https://wa.me/918905552222?text=${text}`, "_blank");
+    window.open(`https://wa.me/919966333974?text=${text}`, "_blank");
   };
 
   return (

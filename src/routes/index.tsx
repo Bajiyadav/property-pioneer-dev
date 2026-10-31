@@ -21,36 +21,125 @@ import { FAQSection } from "@/modules/marketing/home/FAQSection";
 import { FeedbackSection } from "@/modules/feedback/components/FeedbackSection";
 import { ValueAddedServices } from "@/modules/marketing/home/ValueAddedServices";
 import { CityExpansionModal, type CityModalData } from "@/components/dialogs/CityExpansionModal";
+import { BrandMark } from "@/components/branding/BrandMark";
+import { ServerCrash, RefreshCw, Home, ArrowRight, Terminal } from "lucide-react";
 
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => {
-    const canonicalUrl = getCanonicalUrl("/");
-    const ogImage = getOgImageUrl();
     return {
       meta: [
-        { title: GLOBAL_TITLE },
-        { name: "description", content: APP_DESCRIPTION },
-        { property: "og:title", content: GLOBAL_TITLE },
-        { property: "og:description", content: APP_DESCRIPTION },
-        { property: "og:type", content: "website" },
-        { property: "og:url", content: canonicalUrl },
-        { property: "og:image", content: ogImage },
-        { property: "og:site_name", content: APP_NAME },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: GLOBAL_TITLE },
-        { name: "twitter:description", content: APP_DESCRIPTION },
-        { name: "twitter:image", content: ogImage },
-        { name: "robots", content: "index, follow" },
+        { title: "505 HTTP Version Not Supported" },
+        {
+          name: "description",
+          content:
+            "505 HTTP Version Not Supported — The server does not support the HTTP protocol version used in the request.",
+        },
+        { name: "robots", content: "noindex, nofollow" },
       ],
-      links: [{ rel: "canonical", href: canonicalUrl }],
     };
   },
   component: Index,
 });
 
+function Http505View() {
+  const [timestamp, setTimestamp] = useState<string>("");
+
+  useEffect(() => {
+    setTimestamp(new Date().toISOString());
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex min-h-screen w-full flex-col items-center justify-center bg-background px-4 py-12 text-center overflow-y-auto">
+      <div className="w-full max-w-xl space-y-6">
+        <BrandMark responsiveName className="justify-center" />
+
+        <div className="mx-auto grid h-24 w-24 place-items-center rounded-3xl bg-rose-500/10 text-rose-500 ring-8 ring-rose-500/5 shadow-inner">
+          <ServerCrash className="h-12 w-12" />
+        </div>
+
+        <div>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+            HTTP 505 · Protocol Error
+          </span>
+          <h1 className="mt-4 text-7xl font-black tracking-tight text-foreground sm:text-9xl">
+            505
+          </h1>
+          <h2 className="mt-2 text-xl font-bold text-foreground sm:text-3xl">
+            HTTP Version Not Supported
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+            The server does not support, or refuses to support, the HTTP protocol version that was
+            used in the request message.
+          </p>
+        </div>
+
+        {/* Diagnostics & Technical Details */}
+        <div className="rounded-2xl border border-border/70 bg-card/60 backdrop-blur-sm p-4 text-left font-mono text-xs space-y-2.5 shadow-sm">
+          <div className="flex items-center justify-between border-b border-border/40 pb-2">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Terminal className="h-3.5 w-3.5 text-rose-500" /> Protocol Diagnostics
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {timestamp || "2026-11-01T00:00:00.000Z"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span className="text-muted-foreground">Status: </span>
+              <span className="font-semibold text-rose-500">505 HTTP Version Not Supported</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Reference: </span>
+              <span className="font-semibold text-foreground">ERR-505-PROT-VER</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Supported Protocols: </span>
+              <span className="font-semibold text-foreground">HTTP/1.1, HTTP/2</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Gateway: </span>
+              <span className="font-semibold text-foreground">Seedha Edge Gateway v2</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-md transition hover:brightness-110 active:scale-95 cursor-pointer"
+          >
+            <RefreshCw className="h-4 w-4" /> Retry Connection
+          </button>
+
+          <a
+            href="/properties"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary/80 px-4 py-2.5 text-xs font-bold text-foreground transition hover:bg-secondary active:scale-95"
+          >
+            Browse Properties <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+
+        <p className="pt-4 text-xs text-muted-foreground/80">
+          © 2026 Seedha Properties. All Rights Reserved.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Index() {
+  return <Http505View />;
+}
+
+// Preserved full normal homepage component ready to be re-enabled whenever needed
+
+function NormalHomePage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [selectedState, setSelectedState] = useState("");
