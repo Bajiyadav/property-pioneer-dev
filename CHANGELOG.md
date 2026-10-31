@@ -1,3 +1,11 @@
+## v0.173.0 — 2026-10-31
+
+### Features
+- feat(web): render HTTP 505 error screen on front page (48f90bf)
+
+### Documentation
+- docs: add enterprise documentation for Flutter mobile app and Java 21 Spring Boot backend (cdea1ea)
+
 ## v0.172.2 — 2026-09-07
 
 ### Fixes
