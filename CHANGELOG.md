@@ -1,3 +1,8 @@
+## v0.173.1 — 2026-11-01
+
+### Fixes
+- fix(web): isolate 505 front page from root headers and footers (8f4041b)
+
 ## v0.173.0 — 2026-10-31
 
 ### Features
