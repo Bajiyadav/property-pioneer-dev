@@ -172,6 +172,7 @@ function RootComponent() {
   useVisitorTracking();
 
   const isWizardRoute = router.state.location.pathname.startsWith("/list-property/wizard");
+  const isHome505 = router.state.location.pathname === "/";
 
   return (
     <I18nextProvider i18n={i18n}>
@@ -179,16 +180,16 @@ function RootComponent() {
         <AuthProvider>
           <OfflineBanner />
           <div className="flex min-h-screen flex-col pb-16 md:pb-0">
-            {!isWizardRoute && <SiteHeader />}
+            {!isWizardRoute && !isHome505 && <SiteHeader />}
             <main className="flex-1">
               <Outlet />
             </main>
-            {!isWizardRoute && <SiteFooter />}
-            {!isWizardRoute && <MobileBottomNav />}
+            {!isWizardRoute && !isHome505 && <SiteFooter />}
+            {!isWizardRoute && !isHome505 && <MobileBottomNav />}
           </div>
-          <SeedhaAIAssistant />
+          {!isHome505 && <SeedhaAIAssistant />}
           <Toaster position="top-center" richColors />
-          <ConsentBanner />
+          {!isHome505 && <ConsentBanner />}
         </AuthProvider>
       </QueryClientProvider>
     </I18nextProvider>

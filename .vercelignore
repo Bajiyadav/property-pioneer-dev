@@ -1,0 +1,17 @@
+.git
+node_modules
+apps
+backend-java
+coverage
+docs
+scripts
+tests
+scratch
+.gradle
+.idea
+*.zip
+*.sql
+*.apk
+build-artifacts
+.claude-code-history
+.output
