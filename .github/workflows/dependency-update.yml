@@ -43,7 +43,7 @@ jobs:
         run: |
           npm run lint && npm run typecheck && npm run test && npm run build
 
-      - uses: peter-evans/create-pull-request@v6
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/weekly-dependency-update
           base: develop
