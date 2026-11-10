@@ -1,3 +1,8 @@
+## v0.174.0 — 2026-11-10
+
+### Features
+- feat: add location stats api endpoint and generate route tree (2573557)
+
 ## v0.173.1 — 2026-11-01
 
 ### Fixes
