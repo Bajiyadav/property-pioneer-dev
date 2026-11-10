@@ -3,6 +3,7 @@
  * Authoritative server-side statistics scoped strictly to State -> City.
  */
 
+import { createFileRoute } from "@tanstack/react-router";
 import { sql } from "@/server/db";
 import { createSanitizedResponse } from "@/server/security-middleware";
 
@@ -89,3 +90,11 @@ export async function handleLocationStats(request: Request): Promise<Response> {
     );
   }
 }
+
+export const Route = createFileRoute("/api/v2/stats/location")({
+  server: {
+    handlers: {
+      GET: async ({ request }) => handleLocationStats(request),
+    },
+  },
+});
